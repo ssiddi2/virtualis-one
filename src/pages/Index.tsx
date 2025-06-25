@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
-import HospitalSelector from "@/components/dashboard/HospitalSelector";
+import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import PatientChart from "@/components/patient/PatientChart";
 import AdmissionForm from "@/components/patient/AdmissionForm";
 import CopilotComposer from "@/components/patient/CopilotComposer";
@@ -51,7 +51,7 @@ const Index = () => {
       <div className="min-h-screen flex items-center justify-center bg-virtualis-navy">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-virtualis-gold mx-auto mb-4"></div>
-          <p className="text-white font-semibold">Loading Virtualis One™...</p>
+          <p className="text-white font-semibold tech-font">Initializing Virtualis One™ Neural Core...</p>
         </div>
       </div>
     );
@@ -61,17 +61,20 @@ const Index = () => {
     return <Login onLogin={login} />;
   }
 
-  // If no hospital selected, show hospital selector
+  // Show EMR Dashboard for hospital selection
   if (!selectedHospital) {
     return (
       <div className="min-h-screen bg-virtualis-navy">
-        <HospitalSelector onSelectHospital={(hospitalId) => {
-          setSelectedHospital(hospitalId);
-          toast({
-            title: "Hospital Selected",
-            description: "Connected to hospital EMR system",
-          });
-        }} />
+        <EMRDashboard 
+          user={user}
+          onSelectHospital={(hospitalId) => {
+            setSelectedHospital(hospitalId);
+            toast({
+              title: "Neural Link Established",
+              description: "Connected to hospital EMR quantum network",
+            });
+          }} 
+        />
       </div>
     );
   }

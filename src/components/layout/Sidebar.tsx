@@ -15,7 +15,8 @@ import {
   Brain,
   TestTube,
   Pill,
-  DollarSign
+  DollarSign,
+  Database
 } from "lucide-react";
 
 interface SidebarProps {
@@ -28,6 +29,7 @@ interface SidebarProps {
 const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/", roles: ["physician", "nurse", "admin", "biller"] },
+    { icon: Database, label: "EMR Systems", path: "/emr", roles: ["admin"] },
     { icon: Plus, label: "Admit Patient", path: "/admit", roles: ["physician", "nurse"] },
     { icon: Users, label: "Patient Tracker", path: "/tracker", roles: ["physician", "nurse", "admin"] },
     { icon: Brain, label: "AI Copilot", path: "/copilot", roles: ["physician", "nurse"] },
