@@ -53,7 +53,7 @@ const Login = ({ onLogin }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-virtualis-navy flex items-center justify-center p-6 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-virtualis-gold/10 rounded-full blur-3xl animate-float"></div>
@@ -69,13 +69,13 @@ const Login = ({ onLogin }: LoginProps) => {
               <img 
                 src="/lovable-uploads/2fea59fe-0e40-4076-8aa6-9578a98e3170.png" 
                 alt="Virtualis One" 
-                className="h-24 w-24 animate-float pulse-glow rounded-xl"
+                className="h-40 w-40 animate-float pulse-glow rounded-xl"
               />
             </div>
           </div>
           
           <div>
-            <h1 className="text-6xl lg:text-7xl font-bold text-white mb-6 brand-font gradient-text tech-glow">
+            <h1 className="text-7xl lg:text-8xl font-bold text-white mb-6 brand-font gradient-text tech-glow">
               Virtualis One™
             </h1>
             <p className="text-white/90 font-medium text-2xl mb-4 tech-font">
