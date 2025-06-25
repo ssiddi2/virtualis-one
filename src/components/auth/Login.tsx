@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +38,7 @@ const Login = ({ onLogin }: LoginProps) => {
       onLogin(email, password, role);
       toast({
         title: "Access Granted",
-        description: `Welcome to Virtualis One™`,
+        description: `Welcome to Universal EMR`,
       });
     } catch (error) {
       toast({
@@ -61,24 +60,27 @@ const Login = ({ onLogin }: LoginProps) => {
       </div>
 
       <div className="w-full max-w-5xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        {/* Left Side - Logo and Simple Info */}
+        {/* Left Side - Logo and Info */}
         <div className="text-center lg:text-left space-y-8">
           <div className="flex items-center justify-center lg:justify-start mb-8">
             <div className="relative">
               <img 
                 src="/lovable-uploads/2fea59fe-0e40-4076-8aa6-9578a98e3170.png" 
-                alt="Virtualis One" 
+                alt="Universal EMR" 
                 className="h-80 w-80 animate-float pulse-glow rounded-xl"
               />
             </div>
           </div>
           
           <div className="space-y-6">
+            <h1 className="text-4xl font-bold gradient-text tech-font">
+              Universal EMR
+            </h1>
             <p className="text-white/90 font-medium text-xl tech-font">
               AI-Powered Clinical Platform
             </p>
             <p className="text-white/70 text-lg tech-font max-w-2xl">
-              Advanced EMR Integration for Healthcare Professionals
+              Advanced Healthcare Management System
             </p>
           </div>
 
