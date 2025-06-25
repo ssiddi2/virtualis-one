@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Hospital, Settings, Wifi, WifiOff, AlertTriangle, Clock, Search, Filter, Database, Zap, Shield } from "lucide-react";
+import { Hospital, Settings, Wifi, WifiOff, AlertTriangle, Clock, Search, Database, Zap, Shield } from "lucide-react";
 import EMRIntegrationPanel from "./EMRIntegrationPanel";
 
 interface Hospital {
@@ -170,44 +169,35 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
   }
 
   return (
-    <div className="p-8 space-y-8 min-h-screen relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-virtualis-gold/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-virtualis-gold/5 rounded-full blur-2xl animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-blue-500/5 rounded-full blur-xl animate-float" style={{animationDelay: '4s'}}></div>
-      </div>
-
-      {/* Header Section with Logo */}
-      <div className="relative z-10">
+    <div className="p-8 space-y-8 min-h-screen">
+      {/* Header Section with New Logo */}
+      <div className="text-center space-y-6">
         <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center gap-6">
-            <img 
-              src="/lovable-uploads/df5dcf9a-ad8b-4c98-8d23-2f516a5550cf.png" 
-              alt="Virtualis One™" 
-              className="h-24 w-auto animate-float pulse-glow"
-            />
-          </div>
+          <img 
+            src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
+            alt="Virtualis One™" 
+            className="h-20 w-auto"
+          />
         </div>
         
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl font-bold gradient-text tech-font">
+        <div className="space-y-4">
+          <h1 className="text-4xl font-bold gradient-text tech-font">
             UNIVERSAL EMR COMMAND CENTER
           </h1>
-          <p className="text-white/80 text-xl tech-font">
-            Intelligent Healthcare Network Management Platform
+          <p className="text-white/80 text-lg tech-font">
+            Healthcare Network Management Platform
           </p>
           <div className="flex items-center justify-center gap-6 mt-6">
             <div className="glass-badge primary flex items-center gap-2">
               <Shield className="h-4 w-4" />
-              <span className="tech-font">HIPAA COMPLIANT</span>
+              <span className="tech-font">SECURE</span>
             </div>
             <div className="glass-badge success flex items-center gap-2">
               <Database className="h-4 w-4" />
-              <span className="tech-font">{connectedCount}/{hospitals.length} SYSTEMS ONLINE</span>
+              <span className="tech-font">{connectedCount}/{hospitals.length} CONNECTED</span>
             </div>
             {totalAlerts > 0 && (
-              <div className="glass-badge error pulse-glow flex items-center gap-2">
+              <div className="glass-badge error flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
                 <span className="tech-font">{totalAlerts} ALERTS</span>
               </div>
@@ -216,81 +206,74 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
         </div>
       </div>
 
-      {/* Enhanced Search and Filters */}
-      <div className="relative z-10">
-        <Card className="floating-glass scan-line">
-          <CardHeader>
-            <CardTitle className="text-white tech-font flex items-center gap-3">
-              <Search className="h-6 w-6 text-virtualis-gold pulse-glow" />
-              SYSTEM DISCOVERY INTERFACE
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-virtualis-gold/60" />
-                <Input
-                  placeholder="Search healthcare facilities..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 glass-input tech-font h-12 text-white"
-                />
-              </div>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="glass-input tech-font h-12">
-                  <SelectValue placeholder="Connection Status" />
-                </SelectTrigger>
-                <SelectContent className="glass-card border-white/20">
-                  <SelectItem value="all" className="text-white tech-font">All Status</SelectItem>
-                  <SelectItem value="connected" className="text-white tech-font">Connected</SelectItem>
-                  <SelectItem value="syncing" className="text-white tech-font">Syncing</SelectItem>
-                  <SelectItem value="disconnected" className="text-white tech-font">Disconnected</SelectItem>
-                  <SelectItem value="error" className="text-white tech-font">Error</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={emrFilter} onValueChange={setEmrFilter}>
-                <SelectTrigger className="glass-input tech-font h-12">
-                  <SelectValue placeholder="EMR Platform" />
-                </SelectTrigger>
-                <SelectContent className="glass-card border-white/20">
-                  <SelectItem value="all" className="text-white tech-font">All Platforms</SelectItem>
-                  <SelectItem value="Epic" className="text-white tech-font">Epic</SelectItem>
-                  <SelectItem value="Cerner" className="text-white tech-font">Cerner</SelectItem>
-                  <SelectItem value="Meditech" className="text-white tech-font">Meditech</SelectItem>
-                  <SelectItem value="Allscripts" className="text-white tech-font">Allscripts</SelectItem>
-                  <SelectItem value="VistA" className="text-white tech-font">VistA</SelectItem>
-                  <SelectItem value="FHIR API" className="text-white tech-font">FHIR API</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <div className="text-center p-3 glass-nav-item">
-                <div className="text-virtualis-gold text-lg font-bold tech-font">LIVE</div>
-                <div className="text-white/70 text-sm tech-font">Data Sync</div>
-              </div>
+      {/* Simplified Search and Filters */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-white tech-font flex items-center gap-3">
+            <Search className="h-5 w-5 text-virtualis-gold" />
+            Search Healthcare Facilities
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-virtualis-gold/60" />
+              <Input
+                placeholder="Search facilities..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 glass-input tech-font"
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="glass-input tech-font">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="glass-card border-white/20">
+                <SelectItem value="all" className="text-white tech-font">All Status</SelectItem>
+                <SelectItem value="connected" className="text-white tech-font">Connected</SelectItem>
+                <SelectItem value="syncing" className="text-white tech-font">Syncing</SelectItem>
+                <SelectItem value="disconnected" className="text-white tech-font">Disconnected</SelectItem>
+                <SelectItem value="error" className="text-white tech-font">Error</SelectItem>
+              </SelectContent>
+            </Select>
 
-      {/* Hospital Grid */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Select value={emrFilter} onValueChange={setEmrFilter}>
+              <SelectTrigger className="glass-input tech-font">
+                <SelectValue placeholder="EMR Type" />
+              </SelectTrigger>
+              <SelectContent className="glass-card border-white/20">
+                <SelectItem value="all" className="text-white tech-font">All Types</SelectItem>
+                <SelectItem value="Epic" className="text-white tech-font">Epic</SelectItem>
+                <SelectItem value="Cerner" className="text-white tech-font">Cerner</SelectItem>
+                <SelectItem value="Meditech" className="text-white tech-font">Meditech</SelectItem>
+                <SelectItem value="Allscripts" className="text-white tech-font">Allscripts</SelectItem>
+                <SelectItem value="VistA" className="text-white tech-font">VistA</SelectItem>
+                <SelectItem value="FHIR API" className="text-white tech-font">FHIR API</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Simplified Hospital Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredHospitals.map((hospital) => (
-          <Card key={hospital.id} className="floating-glass hover:scale-105 transition-all duration-500 scan-line group">
+          <Card key={hospital.id} className="glass-card hover:scale-105 transition-all duration-300">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-virtualis-gold to-orange-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-                    <Hospital className="h-8 w-8 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-virtualis-gold to-orange-500 rounded-xl flex items-center justify-center">
+                    <Hospital className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-white text-xl tech-font">{hospital.name}</CardTitle>
+                    <CardTitle className="text-white text-lg tech-font">{hospital.name}</CardTitle>
                     <p className="text-white/60 text-sm tech-font">{hospital.location}</p>
                   </div>
                 </div>
                 {hospital.alerts_count > 0 && (
-                  <Badge className="glass-badge error pulse-glow">
+                  <Badge className="glass-badge error">
                     {hospital.alerts_count}
                   </Badge>
                 )}
@@ -301,20 +284,20 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
               </div>
             </CardHeader>
             
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-3 text-sm glass-nav-item p-3">
-                <Clock className="h-5 w-5 text-virtualis-gold" />
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2 text-sm glass-nav-item p-2">
+                <Clock className="h-4 w-4 text-virtualis-gold" />
                 <span className="text-white tech-font">Last Sync: {hospital.last_sync}</span>
               </div>
               
-              <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-2">
                 <Button 
                   onClick={() => onSelectHospital(hospital.id)}
-                  className="glass-button tech-font h-12 flex items-center gap-3"
+                  className="w-full glass-button tech-font flex items-center gap-2"
                   disabled={!hospital.is_connected}
                 >
-                  <Zap className="h-5 w-5" />
-                  {hospital.is_connected ? 'CONNECT TO SYSTEM' : 'CONNECTION REQUIRED'}
+                  <Zap className="h-4 w-4" />
+                  {hospital.is_connected ? 'CONNECT' : 'OFFLINE'}
                 </Button>
                 
                 {user.role === 'admin' && (
@@ -324,10 +307,10 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
                       setShowIntegrationPanel(true);
                     }}
                     variant="outline"
-                    className="glass-nav-item border-white/20 hover:border-virtualis-gold/50 text-white hover:text-virtualis-gold transition-all duration-300 tech-font h-12"
+                    className="w-full glass-nav-item border-white/20 hover:border-virtualis-gold/50 text-white hover:text-virtualis-gold transition-all duration-300 tech-font"
                   >
-                    <Settings className="h-5 w-5 mr-2" />
-                    CONFIGURE SYSTEM
+                    <Settings className="h-4 w-4 mr-2" />
+                    CONFIGURE
                   </Button>
                 )}
               </div>
@@ -337,11 +320,11 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
       </div>
 
       {filteredHospitals.length === 0 && (
-        <div className="relative z-10 text-center py-16">
-          <div className="floating-glass p-12 max-w-md mx-auto">
-            <Hospital className="h-20 w-20 text-virtualis-gold/60 mx-auto mb-6" />
-            <h3 className="text-2xl font-semibold text-white mb-4 tech-font">NO FACILITIES FOUND</h3>
-            <p className="text-white/60 tech-font">Adjust search parameters to discover healthcare facilities</p>
+        <div className="text-center py-16">
+          <div className="glass-card p-12 max-w-md mx-auto">
+            <Hospital className="h-16 w-16 text-virtualis-gold/60 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2 tech-font">NO FACILITIES FOUND</h3>
+            <p className="text-white/60 tech-font">Adjust search parameters</p>
           </div>
         </div>
       )}
