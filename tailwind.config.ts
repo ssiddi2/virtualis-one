@@ -26,7 +26,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#050a15',
+					DEFAULT: '#0a1628',
 					foreground: '#ffffff'
 				},
 				secondary: {
@@ -64,24 +64,21 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Virtualis One™ AI Colors
+				// Virtualis One™ Exact Brand Colors
 				virtualis: {
-					dark: '#050a15',
-					navy: '#0c1d38',
+					navy: '#0a1628',
+					'deep-navy': '#0f2337',
 					gold: '#f59e0b',
-					'gold-hover': '#d97706',
-					'ai-blue': '#3b82f6',
-					'ai-cyan': '#06b6d4',
-					'ai-purple': '#8b5cf6',
-					'alert-red': '#ef4444',
-					'alert-yellow': '#facc15',
-					'alert-green': '#22c55e',
-					'neural': '#1e293b'
+					'gold-light': '#fbbf24',
+					'gold-dark': '#d97706',
+					glass: 'rgba(255, 255, 255, 0.1)',
+					'glass-border': 'rgba(255, 255, 255, 0.2)',
 				}
 			},
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
-				tech: ['Orbitron', 'Inter', 'monospace'],
+				tech: ['Inter', 'system-ui', 'sans-serif'],
+				brand: ['Inter', 'system-ui', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -105,20 +102,12 @@ export default {
 						height: '0'
 					}
 				},
-				'ai-pulse': {
+				'pulse-glow': {
 					'0%, 100%': {
-						boxShadow: '0 0 0 0 rgba(245, 158, 11, 0.4)'
+						boxShadow: '0 0 20px rgba(245, 158, 11, 0.4)'
 					},
 					'50%': {
-						boxShadow: '0 0 0 10px rgba(245, 158, 11, 0)'
-					}
-				},
-				'ai-float': {
-					'0%, 100%': {
-						transform: 'translateY(0px)'
-					},
-					'50%': {
-						transform: 'translateY(-5px)'
+						boxShadow: '0 0 30px rgba(245, 158, 11, 0.8), 0 0 60px rgba(245, 158, 11, 0.3)'
 					}
 				},
 				'scan': {
@@ -128,14 +117,25 @@ export default {
 					'100%': {
 						left: '100%'
 					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0px)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'ai-pulse': 'ai-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-				'ai-float': 'ai-float 3s ease-in-out infinite',
-				'scan': 'scan 2s linear infinite'
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite alternate',
+				'scan': 'scan 3s linear infinite',
+				'float': 'float 6s ease-in-out infinite'
+			},
+			backdropBlur: {
+				xs: '2px',
 			}
 		}
 	},

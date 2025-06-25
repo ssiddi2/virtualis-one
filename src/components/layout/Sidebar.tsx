@@ -46,20 +46,20 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
   );
 
   return (
-    <div className={`fixed inset-y-0 left-0 z-50 bg-slate-900/95 backdrop-blur-sm border-r border-slate-700 shadow-xl transition-all duration-300 ${
+    <div className={`fixed inset-y-0 left-0 z-50 glass-sidebar transition-all duration-300 ${
       isOpen ? 'w-64' : 'w-16'
     }`}>
       <div className="flex h-full flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
           {isOpen && (
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-virtualis-gold rounded-lg flex items-center justify-center">
-                <Hospital className="h-4 w-4 text-white" />
+              <div className="w-10 h-10 bg-virtualis-gold rounded-xl flex items-center justify-center pulse-glow">
+                <Hospital className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-white">Virtualis One™</h1>
-                <p className="text-xs text-virtualis-gold">EMR Command Center</p>
+                <h1 className="text-lg font-bold text-white brand-font gradient-text">Virtualis One™</h1>
+                <p className="text-xs text-virtualis-gold tech-font">Clinical OS</p>
               </div>
             </div>
           )}
@@ -67,7 +67,7 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={onToggle}
-            className="p-2 text-white hover:bg-slate-800"
+            className="p-2 text-white hover:bg-white/10 glass-nav-item"
           >
             <Menu className="h-4 w-4" />
           </Button>
@@ -81,10 +81,10 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 hover:bg-virtualis-gold/10 hover:text-virtualis-gold ${
+                    `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 tech-font ${
                       isActive 
-                        ? 'bg-virtualis-gold/20 text-virtualis-gold border border-virtualis-gold/30' 
-                        : 'text-slate-300 hover:text-white'
+                        ? 'glass-nav-item active text-virtualis-gold' 
+                        : 'glass-nav-item text-white/80 hover:text-white'
                     }`
                   }
                 >
@@ -97,15 +97,15 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
         </nav>
 
         {/* User Info */}
-        <div className="border-t border-slate-700 p-4">
-          <div className={`flex items-center gap-3 mb-3 ${!isOpen && 'justify-center'}`}>
-            <div className="h-8 w-8 rounded-full bg-virtualis-gold flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
+        <div className="border-t border-white/10 p-4">
+          <div className={`flex items-center gap-3 mb-4 ${!isOpen && 'justify-center'}`}>
+            <div className="h-10 w-10 rounded-full bg-virtualis-gold flex items-center justify-center pulse-glow">
+              <User className="h-5 w-5 text-white" />
             </div>
             {isOpen && (
               <div>
-                <p className="text-sm font-semibold text-white">{user.name}</p>
-                <p className="text-xs text-virtualis-gold capitalize">{user.role}</p>
+                <p className="text-sm font-semibold text-white tech-font">{user.name}</p>
+                <p className="text-xs text-virtualis-gold capitalize tech-font">{user.role}</p>
               </div>
             )}
           </div>
@@ -113,12 +113,12 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={onLogout}
-            className={`w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20 ${
+            className={`w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20 glass-nav-item tech-font ${
               !isOpen && 'px-0 justify-center'
             }`}
           >
             <LogOut className="h-4 w-4" />
-            {isOpen && <span className="ml-2">Logout</span>}
+            {isOpen && <span className="ml-2">Sign Out</span>}
           </Button>
         </div>
       </div>
