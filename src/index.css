@@ -3,28 +3,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Virtualis One™ Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Virtualis One™ Futuristic AI Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
 @layer base {
   :root {
-    --background: 210 24% 16%;
+    --background: 210 24% 8%;
     --foreground: 0 0% 100%;
 
-    --card: 215 25% 20%;
+    --card: 215 25% 12%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 215 25% 20%;
+    --popover: 215 25% 12%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 210 100% 14%;
+    --primary: 210 100% 10%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 25%;
+    --secondary: 215 20% 18%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 215 20% 25%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 215 20% 18%;
+    --muted-foreground: 215 20% 70%;
 
     --accent: 38 92% 50%;
     --accent-foreground: 0 0% 100%;
@@ -32,19 +32,19 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 30%;
-    --input: 215 20% 30%;
+    --border: 215 20% 20%;
+    --input: 215 20% 20%;
     --ring: 38 92% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 210 24% 16%;
+    --sidebar-background: 210 24% 8%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 38 92% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 20% 25%;
+    --sidebar-accent: 215 20% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 20% 30%;
+    --sidebar-border: 215 20% 20%;
     --sidebar-ring: 38 92% 50%;
   }
 }
@@ -55,31 +55,125 @@
   }
 
   body {
-    @apply bg-virtualis-navy text-white font-sans;
-    background: linear-gradient(135deg, #0c1d38 0%, #1e293b 100%);
+    @apply bg-virtualis-dark text-white font-sans;
+    background: radial-gradient(ellipse at top, #0c1d38 0%, #050a15 50%, #000000 100%);
     min-height: 100vh;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
   }
 }
 
-/* Virtualis One™ Custom Components */
+/* Virtualis One™ AI Components */
 @layer components {
-  .virtualis-card {
-    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200;
+  .ai-card {
+    @apply bg-gradient-to-br from-slate-900/80 to-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl hover:shadow-virtualis-gold/20 transition-all duration-300;
+    background-image: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
   }
   
-  .virtualis-button {
-    @apply bg-virtualis-gold hover:bg-virtualis-gold-hover text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200;
+  .ai-button {
+    @apply bg-gradient-to-r from-virtualis-gold to-orange-500 hover:from-virtualis-gold-hover hover:to-orange-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:shadow-virtualis-gold/30 transition-all duration-300 transform hover:scale-105;
+  }
+
+  .ai-button-secondary {
+    @apply bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium px-4 py-2 rounded-lg border border-slate-500/50 hover:border-virtualis-gold/50 transition-all duration-300;
   }
   
+  .ai-glow {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3), 0 0 40px rgba(245, 158, 11, 0.1);
+  }
+
+  .ai-text-glow {
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  }
+
+  .neural-pattern {
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+  }
+
+  .ai-pulse {
+    animation: ai-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .ai-float {
+    animation: ai-float 3s ease-in-out infinite;
+  }
+
+  .ai-scan-line {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-scan-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+    animation: scan 2s linear infinite;
+  }
+
+  @keyframes ai-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+  }
+
+  @keyframes ai-float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  @keyframes scan {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
   .acuity-high {
-    @apply bg-virtualis-alert-red/20 border-virtualis-alert-red text-virtualis-alert-red;
+    @apply bg-red-500/20 border-red-500 text-red-400 ai-pulse;
   }
   
   .acuity-medium {
-    @apply bg-virtualis-alert-yellow/20 border-virtualis-alert-yellow text-virtualis-alert-yellow;
+    @apply bg-yellow-500/20 border-yellow-500 text-yellow-400;
   }
   
   .acuity-low {
-    @apply bg-virtualis-alert-green/20 border-virtualis-alert-green text-virtualis-alert-green;
+    @apply bg-green-500/20 border-green-500 text-green-400;
+  }
+
+  .ai-input {
+    @apply bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-virtualis-gold focus:ring-virtualis-gold/20 backdrop-blur-sm;
+  }
+
+  .tech-font {
+    font-family: 'Orbitron', 'Inter', monospace;
   }
 }
