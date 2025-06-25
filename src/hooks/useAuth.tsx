@@ -80,56 +80,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Fetching user profile for:', authUser.email);
       
-      const { data: profile, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user profile:', error);
-        setLoading(false);
-        return;
-      }
-
-      if (profile) {
-        console.log('User profile found:', profile);
-        setUser({
-          id: authUser.id,
-          email: authUser.email!,
-          role: profile.role,
-          name: profile.full_name,
-          hospital_id: profile.hospital_id
-        });
-      } else {
-        console.log('Creating new user profile for:', authUser.email);
-        // Create profile if it doesn't exist
-        const { data: newProfile, error: createError } = await supabase
-          .from('user_profiles')
-          .insert([
-            {
-              id: authUser.id,
-              email: authUser.email!,
-              full_name: authUser.email!.split('@')[0],
-              role: 'staff'
-            }
-          ])
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating user profile:', createError);
-        } else {
-          console.log('New user profile created:', newProfile);
-          setUser({
-            id: authUser.id,
-            email: authUser.email!,
-            role: newProfile.role,
-            name: newProfile.full_name,
-            hospital_id: newProfile.hospital_id
-          });
-        }
-      }
+      // For now, just create a basic user without trying to fetch from user_profiles table
+      // This allows the app to work without the database setup
+      console.log('Creating basic user profile from auth user');
+      setUser({
+        id: authUser.id,
+        email: authUser.email!,
+        role: 'staff', // Default role
+        name: authUser.email!.split('@')[0], // Use email prefix as name
+        hospital_id: undefined
+      });
+      
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
     } finally {
