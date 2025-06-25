@@ -57,11 +57,16 @@ const Index = () => {
     );
   }
 
+  // Show login page as the main landing page
   if (!user) {
-    return <Login onLogin={login} />;
+    return (
+      <Routes>
+        <Route path="*" element={<Login onLogin={login} />} />
+      </Routes>
+    );
   }
 
-  // Show EMR Dashboard for hospital selection
+  // Show EMR Dashboard for hospital selection after login
   if (!selectedHospital) {
     return (
       <div className="min-h-screen bg-[#0a1628]">
