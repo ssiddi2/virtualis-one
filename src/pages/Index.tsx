@@ -48,7 +48,7 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-virtualis-navy">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-virtualis-gold mx-auto mb-4"></div>
           <p className="text-white font-semibold tech-font">Initializing Virtualis One™ Clinical Platform...</p>
@@ -64,7 +64,7 @@ const Index = () => {
   // Show EMR Dashboard for hospital selection
   if (!selectedHospital) {
     return (
-      <div className="min-h-screen bg-virtualis-navy">
+      <div className="min-h-screen bg-[#0a1628]">
         <EMRDashboard 
           user={user}
           onSelectHospital={(hospitalId) => {
@@ -80,7 +80,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-virtualis-navy flex w-full">
+    <div className="min-h-screen bg-[#0a1628] flex w-full">
       <Sidebar 
         user={user} 
         onLogout={() => {

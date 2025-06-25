@@ -55,8 +55,8 @@
   }
 
   body {
-    @apply bg-virtualis-navy text-white font-sans;
-    background: linear-gradient(135deg, #0a1628 0%, #0f2337 25%, #1a365d 50%, #0a1628 75%, #000000 100%);
+    @apply bg-[#0a1628] text-white font-sans;
+    background: #0a1628;
     min-height: 100vh;
     position: relative;
   }
