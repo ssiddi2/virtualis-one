@@ -13,10 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 // Mock authentication state
 const useAuth = () => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false to show login immediately
 
   useEffect(() => {
-    // Check for existing user in localStorage
+    // Check for existing user in localStorage immediately
     const checkAuth = () => {
       try {
         const mockUser = localStorage.getItem('mockUser');
@@ -27,13 +27,10 @@ const useAuth = () => {
       } catch (error) {
         console.error('Error checking auth:', error);
         localStorage.removeItem('mockUser'); // Clear invalid data
-      } finally {
-        setLoading(false);
       }
     };
 
-    // Add a small delay to simulate auth check
-    setTimeout(checkAuth, 500);
+    checkAuth(); // Run immediately, no delay
   }, []);
 
   const login = (email: string, password: string, role: string) => {
@@ -58,19 +55,7 @@ const Index = () => {
   const { toast } = useToast();
   const location = useLocation();
 
-  // Show loading screen while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-virtualis-gold mx-auto mb-4"></div>
-          <p className="text-white font-semibold tech-font">Initializing Universal EMR...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Redirect to login if no user is authenticated
+  // Don't show loading screen, go straight to login if no user
   if (!user) {
     return <Login onLogin={login} />;
   }
