@@ -170,13 +170,13 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
 
   return (
     <div className="p-8 space-y-8 min-h-screen">
-      {/* Header Section with New Logo */}
+      {/* Header Section with Bigger Logo */}
       <div className="text-center space-y-6">
         <div className="flex items-center justify-center mb-8">
           <img 
             src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
             alt="Virtualis One™" 
-            className="h-20 w-auto"
+            className="h-32 w-auto"
           />
         </div>
         
