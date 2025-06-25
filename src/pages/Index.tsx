@@ -1,20 +1,21 @@
 
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
+import HospitalSelector from "@/components/dashboard/HospitalSelector";
 import PatientChart from "@/components/patient/PatientChart";
 import AdmissionForm from "@/components/patient/AdmissionForm";
+import CopilotComposer from "@/components/patient/CopilotComposer";
 import Login from "@/components/auth/Login";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock authentication state - in real app this would connect to Supabase
+// Mock authentication state
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate checking auth state
     setTimeout(() => {
       const mockUser = localStorage.getItem('mockUser');
       if (mockUser) {
@@ -42,12 +43,16 @@ const useAuth = () => {
 const Index = () => {
   const { user, loading, login, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedHospital, setSelectedHospital] = useState(null);
   const { toast } = useToast();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-virtualis-navy">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-virtualis-gold mx-auto mb-4"></div>
+          <p className="text-white font-semibold">Loading Virtualis One™...</p>
+        </div>
       </div>
     );
   }
@@ -56,11 +61,29 @@ const Index = () => {
     return <Login onLogin={login} />;
   }
 
+  // If no hospital selected, show hospital selector
+  if (!selectedHospital) {
+    return (
+      <div className="min-h-screen bg-virtualis-navy">
+        <HospitalSelector onSelectHospital={(hospitalId) => {
+          setSelectedHospital(hospitalId);
+          toast({
+            title: "Hospital Selected",
+            description: "Connected to hospital EMR system",
+          });
+        }} />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex w-full">
+    <div className="min-h-screen bg-virtualis-navy flex w-full">
       <Sidebar 
         user={user} 
-        onLogout={logout} 
+        onLogout={() => {
+          logout();
+          setSelectedHospital(null);
+        }}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
@@ -69,6 +92,7 @@ const Index = () => {
           <Route path="/" element={<Dashboard user={user} />} />
           <Route path="/patient/:id" element={<PatientChart />} />
           <Route path="/admit" element={<AdmissionForm />} />
+          <Route path="/copilot" element={<CopilotComposer />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
