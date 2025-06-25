@@ -35,20 +35,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserProfile(session.user);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Listen for auth changes
+    console.log('AuthProvider: Setting up auth state listener');
+    
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
+        
         if (session?.user) {
           await fetchUserProfile(session.user);
         } else {
@@ -58,11 +52,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Initial session check:', session?.user?.email);
+      setSession(session);
+      
+      if (session?.user) {
+        fetchUserProfile(session.user);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      console.log('AuthProvider: Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (authUser: User) => {
     try {
+      console.log('Fetching user profile for:', authUser.email);
+      
       const { data: profile, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -76,6 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (profile) {
+        console.log('User profile found:', profile);
         setUser({
           id: authUser.id,
           email: authUser.email!,
@@ -84,6 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           hospital_id: profile.hospital_id
         });
       } else {
+        console.log('Creating new user profile for:', authUser.email);
         // Create profile if it doesn't exist
         const { data: newProfile, error: createError } = await supabase
           .from('user_profiles')
@@ -101,6 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (createError) {
           console.error('Error creating user profile:', createError);
         } else {
+          console.log('New user profile created:', newProfile);
           setUser({
             id: authUser.id,
             email: authUser.email!,
@@ -113,21 +133,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
 
   const login = async (email: string, password: string): Promise<AuthUser> => {
+    console.log('Attempting login for:', email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
+      console.error('Login error:', error);
       throw error;
     }
 
     if (data.user) {
+      console.log('Login successful for:', email);
       await fetchUserProfile(data.user);
       return user!;
     }
@@ -136,6 +160,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
+    console.log('Logging out user');
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
@@ -148,6 +173,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     logout,
     session
   };
+
+  console.log('AuthProvider render - loading:', loading, 'user:', user?.email);
 
   return (
     <AuthContext.Provider value={value}>
