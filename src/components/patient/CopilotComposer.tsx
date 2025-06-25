@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { generateClinicalNote } from "@/services/openaiService";
+import { supabase } from "@/lib/supabase";
 import { Brain, FileText, Loader2, Save, ArrowLeft, Zap, Stethoscope, Users, Database } from "lucide-react";
 
 const CopilotComposer = ({ patientId }: { patientId?: string }) => {
@@ -40,91 +42,23 @@ const CopilotComposer = ({ patientId }: { patientId?: string }) => {
     setIsGenerating(true);
     
     try {
-      // Simulate AI processing with realistic delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      const generatedContent = await generateClinicalNote({
+        noteType,
+        summary,
+        patientData: patientId ? { patientId } : undefined
+      });
       
-      // Mock generated clinical note with more realistic content
-      const noteTypeData = noteTypes.find(t => t.value === noteType);
-      const mockNote = `${noteTypeData?.label || "Clinical Documentation"}
-Generated: ${new Date().toLocaleString()}
-Provider: Dr. Sarah Smith, MD
-
-═══════════════════════════════════════════════════════════
-
-CLINICAL SUMMARY: ${summary}
-
-DETAILED ASSESSMENT:
-
-SUBJECTIVE:
-Patient presents with ${summary.toLowerCase()}. Reports onset approximately [timeframe] ago. 
-Pain/symptoms described as [character]. Associated symptoms include [review of systems].
-Current medications and allergies reviewed. No acute distress noted at time of examination.
-
-OBJECTIVE:
-Vital Signs: 
-- Temperature: 98.6°F (37.0°C)
-- Blood Pressure: 120/80 mmHg  
-- Heart Rate: 78 bpm, regular
-- Respiratory Rate: 16/min
-- Oxygen Saturation: 98% on room air
-
-Physical Examination:
-- General: Alert, oriented x3, cooperative
-- HEENT: Normocephalic, atraumatic
-- Cardiovascular: Regular rate and rhythm, no murmurs
-- Pulmonary: Clear to auscultation bilaterally
-- Abdomen: Soft, non-tender, non-distended
-- Extremities: No edema, distal pulses intact
-- Neurological: Grossly intact, no focal deficits
-
-ASSESSMENT & PLAN:
-
-Primary Diagnosis: ${summary}
-
-1. IMMEDIATE MANAGEMENT:
-   • Continued monitoring of vital signs
-   • Pain management as appropriate
-   • Laboratory studies as clinically indicated
-   • Imaging studies if warranted
-
-2. ONGOING CARE:
-   • Regular reassessment of symptoms
-   • Medication reconciliation and optimization
-   • Patient education regarding condition
-   • Coordination with specialist consultants as needed
-
-3. DISCHARGE PLANNING:
-   • Anticipated discharge when clinically stable
-   • Follow-up appointments scheduled
-   • Home care instructions provided
-   • Emergency precautions discussed
-
-CLINICAL IMPRESSION:
-Patient's condition appears ${summary.includes('stable') ? 'stable' : 'requiring ongoing assessment'} 
-with appropriate response to current treatment regimen.
-
-═══════════════════════════════════════════════════════════
-
-Documentation completed using Virtualis One™ AI Clinical Assistant
-Electronic signature pending provider review and attestation
-
-This note was generated with artificial intelligence assistance and requires 
-provider validation before inclusion in the official medical record.
-
-AI Confidence Score: 94.7%
-Clinical Decision Support: Active
-Quality Assurance: Passed automated checks`;
-
-      setGeneratedNote(mockNote);
+      setGeneratedNote(generatedContent);
       
       toast({
         title: "Clinical Documentation Generated",
         description: "AI-assisted note ready for provider review and electronic signature",
       });
     } catch (error) {
+      console.error('Error generating note:', error);
       toast({
         title: "Generation Error",
-        description: "Unable to generate documentation. Please check network connection and retry.",
+        description: error instanceof Error ? error.message : "Unable to generate documentation. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -145,8 +79,27 @@ Quality Assurance: Passed automated checks`;
     setIsSaving(true);
     
     try {
-      // Simulate EMR integration delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase
+        .from('clinical_notes')
+        .insert([
+          {
+            patient_id: patientId || 'demo-patient',
+            note_type: noteType,
+            content: generatedNote,
+            created_by: user.id,
+            is_ai_generated: true
+          }
+        ]);
+
+      if (error) {
+        throw error;
+      }
       
       toast({
         title: "Documentation Saved Successfully",
@@ -158,6 +111,7 @@ Quality Assurance: Passed automated checks`;
       setSummary("");
       setGeneratedNote("");
     } catch (error) {
+      console.error('Error saving note:', error);
       toast({
         title: "EMR Integration Error",
         description: "Unable to save to electronic medical record. Please contact IT support.",
@@ -279,7 +233,7 @@ Quality Assurance: Passed automated checks`;
               <div className="space-y-2">
                 <Label className="text-white font-medium tech-font">Patient Context</Label>
                 <div className="glass-input flex items-center">
-                  <span className="text-white/80">{patientId || "Active Patient: Sarah Johnson (ID: 12847)"}</span>
+                  <span className="text-white/80">{patientId || "Active Patient: Real Patient Data"}</span>
                 </div>
               </div>
             </div>
