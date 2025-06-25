@@ -16,13 +16,24 @@ const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
-      const mockUser = localStorage.getItem('mockUser');
-      if (mockUser) {
-        setUser(JSON.parse(mockUser));
+    // Check for existing user in localStorage
+    const checkAuth = () => {
+      try {
+        const mockUser = localStorage.getItem('mockUser');
+        if (mockUser) {
+          const userData = JSON.parse(mockUser);
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        localStorage.removeItem('mockUser'); // Clear invalid data
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }, 1000);
+    };
+
+    // Add a small delay to simulate auth check
+    setTimeout(checkAuth, 500);
   }, []);
 
   const login = (email: string, password: string, role: string) => {
@@ -47,18 +58,19 @@ const Index = () => {
   const { toast } = useToast();
   const location = useLocation();
 
+  // Show loading screen while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-virtualis-gold mx-auto mb-4"></div>
-          <p className="text-white font-semibold tech-font">Initializing Virtualis One™ Clinical Platform...</p>
+          <p className="text-white font-semibold tech-font">Initializing Universal EMR...</p>
         </div>
       </div>
     );
   }
 
-  // Always redirect to login if no user is authenticated
+  // Redirect to login if no user is authenticated
   if (!user) {
     return <Login onLogin={login} />;
   }
