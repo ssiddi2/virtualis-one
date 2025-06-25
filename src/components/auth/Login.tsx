@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, Shield, Lock, Zap, Cpu, Network, Eye } from "lucide-react";
+import { Brain, Shield, Lock, Zap, Cpu, Network, Eye, Building2, Users, FileText } from "lucide-react";
 
 interface LoginProps {
   onLogin: (email: string, password: string, role: string) => void;
@@ -61,30 +61,52 @@ const Login = ({ onLogin }: LoginProps) => {
         <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-virtualis-gold/15 rounded-full blur-xl animate-float" style={{animationDelay: '4s'}}></div>
       </div>
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Logo Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-8">
+      <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        {/* Left Side - Hero Section */}
+        <div className="text-center lg:text-left space-y-8">
+          <div className="flex items-center justify-center lg:justify-start mb-8">
             <div className="relative">
               <img 
                 src="/lovable-uploads/2fea59fe-0e40-4076-8aa6-9578a98e3170.png" 
                 alt="Virtualis One" 
-                className="h-20 w-20 animate-float pulse-glow rounded-xl"
+                className="h-24 w-24 animate-float pulse-glow rounded-xl"
               />
             </div>
           </div>
-          <h1 className="text-5xl font-bold text-white mb-4 brand-font gradient-text tech-glow">
-            Virtualis One™
-          </h1>
-          <p className="text-white/80 font-medium text-xl mb-3 tech-font">
-            Next-Generation AI-Powered Clinical OS
-          </p>
-          <p className="text-white/60 text-sm mb-6 tech-font">
-            HIPAA-Compliant Multi-Hospital EMR Command Center
-          </p>
           
+          <div>
+            <h1 className="text-6xl lg:text-7xl font-bold text-white mb-6 brand-font gradient-text tech-glow">
+              Virtualis One™
+            </h1>
+            <p className="text-white/90 font-medium text-2xl mb-4 tech-font">
+              Next-Generation AI-Powered Clinical OS
+            </p>
+            <p className="text-white/70 text-lg mb-8 tech-font max-w-2xl">
+              Unified Multi-Hospital EMR Command Center with Advanced Neural Intelligence for Healthcare Professionals
+            </p>
+          </div>
+
+          {/* Feature Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
+              <Building2 className="h-8 w-8 text-virtualis-gold mx-auto mb-3" />
+              <h3 className="text-white font-semibold tech-font mb-2">Multi-Hospital</h3>
+              <p className="text-white/60 text-sm tech-font">Connect to any EMR system</p>
+            </div>
+            <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
+              <Brain className="h-8 w-8 text-virtualis-gold mx-auto mb-3 pulse-glow" />
+              <h3 className="text-white font-semibold tech-font mb-2">AI Copilot</h3>
+              <p className="text-white/60 text-sm tech-font">Intelligent documentation</p>
+            </div>
+            <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
+              <Shield className="h-8 w-8 text-virtualis-gold mx-auto mb-3" />
+              <h3 className="text-white font-semibold tech-font mb-2">HIPAA Secure</h3>
+              <p className="text-white/60 text-sm tech-font">Enterprise-grade security</p>
+            </div>
+          </div>
+
           {/* AI Status Indicators */}
-          <div className="flex items-center justify-center gap-6 mb-8">
+          <div className="flex items-center justify-center lg:justify-start gap-6 mt-8">
             <div className="flex items-center gap-2 glass-badge success">
               <div className="w-2 h-2 bg-green-400 rounded-full pulse-glow"></div>
               <span className="tech-font text-xs">SECURE</span>
@@ -100,15 +122,15 @@ const Login = ({ onLogin }: LoginProps) => {
           </div>
         </div>
 
-        {/* Login Card */}
-        <div className="floating-glass p-8 scan-line">
+        {/* Right Side - Login Form */}
+        <div className="floating-glass p-8 scan-line max-w-md mx-auto w-full">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Shield className="h-6 w-6 text-virtualis-gold" />
               <h2 className="text-2xl font-bold text-white tech-font">Secure Access Portal</h2>
             </div>
             <p className="text-white/70 text-sm tech-font">
-              Authorized Personnel Only
+              Authorized Healthcare Personnel Only
             </p>
           </div>
 
@@ -201,7 +223,7 @@ const Login = ({ onLogin }: LoginProps) => {
               <span className="tech-font text-xs">256-BIT ENCRYPTED • HIPAA COMPLIANT</span>
             </div>
             <div className="text-xs text-white/50 tech-font">
-              <p className="mb-2">Show Debug Tools</p>
+              <p className="mb-2">Trusted by Healthcare Professionals Worldwide</p>
               <p>Authorized access monitored and logged</p>
             </div>
           </div>

@@ -16,7 +16,8 @@ import {
   TestTube,
   Pill,
   DollarSign,
-  Database
+  Database,
+  ArrowLeft
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,8 +28,14 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
+  const handleBackToEMR = () => {
+    // Reset to EMR selection
+    window.location.href = '/';
+  };
+
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/", roles: ["physician", "nurse", "admin", "biller"] },
+    { icon: ArrowLeft, label: "Back to EMR Center", action: handleBackToEMR, roles: ["physician", "nurse", "admin", "biller"] },
     { icon: Database, label: "EMR Systems", path: "/emr", roles: ["admin"] },
     { icon: Plus, label: "Admit Patient", path: "/admit", roles: ["physician", "nurse"] },
     { icon: Users, label: "Patient Tracker", path: "/tracker", roles: ["physician", "nurse", "admin"] },
@@ -76,21 +83,31 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">
-            {filteredMenuItems.map((item) => (
-              <li key={item.path}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 tech-font ${
-                      isActive 
-                        ? 'glass-nav-item active text-virtualis-gold' 
-                        : 'glass-nav-item text-white/80 hover:text-white'
-                    }`
-                  }
-                >
-                  <item.icon className="h-4 w-4 flex-shrink-0" />
-                  {isOpen && <span className="font-medium">{item.label}</span>}
-                </NavLink>
+            {filteredMenuItems.map((item, index) => (
+              <li key={item.path || index}>
+                {item.action ? (
+                  <button
+                    onClick={item.action}
+                    className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 tech-font glass-nav-item text-white/80 hover:text-white w-full text-left"
+                  >
+                    <item.icon className="h-4 w-4 flex-shrink-0" />
+                    {isOpen && <span className="font-medium">{item.label}</span>}
+                  </button>
+                ) : (
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 tech-font ${
+                        isActive 
+                          ? 'glass-nav-item active text-virtualis-gold' 
+                          : 'glass-nav-item text-white/80 hover:text-white'
+                      }`
+                    }
+                  >
+                    <item.icon className="h-4 w-4 flex-shrink-0" />
+                    {isOpen && <span className="font-medium">{item.label}</span>}
+                  </NavLink>
+                )}
               </li>
             ))}
           </ul>
