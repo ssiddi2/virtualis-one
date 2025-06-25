@@ -30,8 +30,8 @@ const PatientChart = () => {
 
   // State for orders
   const [orders, setOrders] = useState([
-    { id: 1, type: 'ECG - 12 Lead', status: 'Pending', priority: 'STAT', time: '10:30 AM' },
-    { id: 2, type: 'Troponin I', status: 'Pending', priority: 'STAT', time: '10:30 AM' }
+    { id: 1, type: 'ECG - 12 Lead', status: 'Pending', priority: 'STAT', time: '10:30 AM', instructions: 'Obtain baseline ECG for chest pain evaluation' },
+    { id: 2, type: 'Troponin I', status: 'Pending', priority: 'STAT', time: '10:30 AM', instructions: 'Serial troponins q6h x3' }
   ]);
   const [newOrder, setNewOrder] = useState({
     type: '',
