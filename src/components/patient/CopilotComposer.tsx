@@ -119,115 +119,128 @@ Generated: ${new Date().toLocaleString()}`;
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="virtualis-card">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Brain className="h-5 w-5 text-virtualis-gold" />
-            Virtualis Copilot Note Composer
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-white font-medium">Note Type</Label>
-              <Select value={noteType} onValueChange={setNoteType}>
-                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
-                  <SelectValue placeholder="Select note type" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
-                  {noteTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <div className="min-h-screen bg-virtualis-navy p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="glass-card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Brain className="h-8 w-8 text-virtualis-gold pulse-glow" />
+            <h1 className="text-3xl font-bold text-white brand-font gradient-text">
+              Virtualis One™ Copilot
+            </h1>
+          </div>
+          <p className="text-white/70 tech-font text-lg">
+            AI-Powered Clinical Documentation Assistant
+          </p>
+        </div>
+
+        <div className="glass-card">
+          <div className="p-6 border-b border-white/10">
+            <h2 className="text-xl font-semibold text-white tech-font flex items-center gap-2">
+              <Brain className="h-5 w-5 text-virtualis-gold" />
+              Note Composer
+            </h2>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white font-medium tech-font">Note Type</Label>
+                <Select value={noteType} onValueChange={setNoteType}>
+                  <SelectTrigger className="glass-input">
+                    <SelectValue placeholder="Select note type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-virtualis-navy border-white/20">
+                    {noteTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value} className="text-white hover:bg-white/10">
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-white font-medium tech-font">Patient ID</Label>
+                <div className="glass-input flex items-center">
+                  <span className="text-white/60">{patientId || "Select patient"}</span>
+                </div>
+              </div>
             </div>
-            
+
             <div className="space-y-2">
-              <Label className="text-white font-medium">Patient ID</Label>
-              <div className="h-10 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md flex items-center">
-                <span className="text-slate-400">{patientId || "Select patient"}</span>
+              <Label className="text-white font-medium tech-font">What happened? (Chief Complaint/Summary)</Label>
+              <Textarea
+                placeholder="Describe the patient's condition, symptoms, or reason for visit..."
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                className="glass-input min-h-[100px]"
+              />
+            </div>
+
+            <Button
+              onClick={generateNote}
+              disabled={isGenerating || !noteType || !summary.trim()}
+              className="glass-button w-full md:w-auto"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Note...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  Generate Note
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {generatedNote && (
+          <div className="glass-card">
+            <div className="p-6 border-b border-white/10">
+              <h3 className="text-xl font-semibold text-white tech-font flex items-center gap-2">
+                <FileText className="h-5 w-5 text-virtualis-gold" />
+                Generated Note Preview
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <Textarea
+                value={generatedNote}
+                onChange={(e) => setGeneratedNote(e.target.value)}
+                className="glass-input min-h-[300px] font-mono text-sm"
+              />
+              
+              <div className="flex gap-2">
+                <Button
+                  onClick={saveNote}
+                  disabled={isSaving}
+                  className="glass-button"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save to Chart
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  onClick={() => setGeneratedNote("")}
+                  className="glass-nav-item text-white hover:bg-white/10"
+                >
+                  Discard
+                </Button>
               </div>
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label className="text-white font-medium">What happened? (Chief Complaint/Summary)</Label>
-            <Textarea
-              placeholder="Describe the patient's condition, symptoms, or reason for visit..."
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 min-h-[100px]"
-            />
-          </div>
-
-          <Button
-            onClick={generateNote}
-            disabled={isGenerating || !noteType || !summary.trim()}
-            className="virtualis-button w-full md:w-auto"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Generating Note...
-              </>
-            ) : (
-              <>
-                <Brain className="h-4 w-4 mr-2" />
-                Generate Note
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {generatedNote && (
-        <Card className="virtualis-card">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <FileText className="h-5 w-5 text-virtualis-gold" />
-              Generated Note Preview
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              value={generatedNote}
-              onChange={(e) => setGeneratedNote(e.target.value)}
-              className="bg-slate-700/50 border-slate-600 text-white min-h-[300px] font-mono text-sm"
-            />
-            
-            <div className="flex gap-2">
-              <Button
-                onClick={saveNote}
-                disabled={isSaving}
-                className="virtualis-button"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save to Chart
-                  </>
-                )}
-              </Button>
-              
-              <Button
-                onClick={() => setGeneratedNote("")}
-                variant="outline"
-                className="border-slate-600 text-white hover:bg-slate-700"
-              >
-                Discard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+        )}
+      </div>
     </div>
   );
 };
