@@ -25,8 +25,8 @@ const Login = ({ onLogin }: LoginProps) => {
     
     if (!email || !password || !role) {
       toast({
-        title: "Authentication Error",
-        description: "Please complete all security fields",
+        title: "Authentication Required",
+        description: "Please complete all required credentials",
         variant: "destructive",
       });
       return;
@@ -38,13 +38,13 @@ const Login = ({ onLogin }: LoginProps) => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       onLogin(email, password, role);
       toast({
-        title: "Neural Network Connected",
-        description: `Clinical OS activated for ${role}`,
+        title: "Clinical System Access Granted",
+        description: `Virtualis One™ activated for ${role}`,
       });
     } catch (error) {
       toast({
         title: "Authentication Failed",
-        description: "Secure access denied",
+        description: "Access denied - Please verify credentials",
         variant: "destructive",
       });
     } finally {
@@ -79,10 +79,10 @@ const Login = ({ onLogin }: LoginProps) => {
               Virtualis One™
             </h1>
             <p className="text-white/90 font-medium text-2xl mb-4 tech-font">
-              Next-Generation AI-Powered Clinical OS
+              Advanced Clinical Intelligence Platform
             </p>
             <p className="text-white/70 text-lg mb-8 tech-font max-w-2xl">
-              Unified Multi-Hospital EMR Command Center with Advanced Neural Intelligence for Healthcare Professionals
+              Unified Multi-Facility EMR Integration with AI-Powered Clinical Decision Support for Healthcare Providers
             </p>
           </div>
 
@@ -90,22 +90,22 @@ const Login = ({ onLogin }: LoginProps) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
             <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
               <Building2 className="h-8 w-8 text-virtualis-gold mx-auto mb-3" />
-              <h3 className="text-white font-semibold tech-font mb-2">Multi-Hospital</h3>
-              <p className="text-white/60 text-sm tech-font">Connect to any EMR system</p>
+              <h3 className="text-white font-semibold tech-font mb-2">Multi-Facility</h3>
+              <p className="text-white/60 text-sm tech-font">Seamless EMR integration</p>
             </div>
             <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
               <Brain className="h-8 w-8 text-virtualis-gold mx-auto mb-3 pulse-glow" />
-              <h3 className="text-white font-semibold tech-font mb-2">AI Copilot</h3>
+              <h3 className="text-white font-semibold tech-font mb-2">Clinical AI</h3>
               <p className="text-white/60 text-sm tech-font">Intelligent documentation</p>
             </div>
             <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
               <Shield className="h-8 w-8 text-virtualis-gold mx-auto mb-3" />
-              <h3 className="text-white font-semibold tech-font mb-2">HIPAA Secure</h3>
-              <p className="text-white/60 text-sm tech-font">Enterprise-grade security</p>
+              <h3 className="text-white font-semibold tech-font mb-2">HIPAA Compliant</h3>
+              <p className="text-white/60 text-sm tech-font">Enterprise security</p>
             </div>
           </div>
 
-          {/* AI Status Indicators */}
+          {/* System Status Indicators */}
           <div className="flex items-center justify-center lg:justify-start gap-6 mt-8">
             <div className="flex items-center gap-2 glass-badge success">
               <div className="w-2 h-2 bg-green-400 rounded-full pulse-glow"></div>
@@ -113,11 +113,11 @@ const Login = ({ onLogin }: LoginProps) => {
             </div>
             <div className="flex items-center gap-2 glass-badge primary">
               <Brain className="h-3 w-3" />
-              <span className="tech-font text-xs">AI READY</span>
+              <span className="tech-font text-xs">AI ACTIVE</span>
             </div>
             <div className="flex items-center gap-2 glass-badge success">
               <Network className="h-3 w-3" />
-              <span className="tech-font text-xs">ONLINE</span>
+              <span className="tech-font text-xs">CONNECTED</span>
             </div>
           </div>
         </div>
@@ -127,20 +127,20 @@ const Login = ({ onLogin }: LoginProps) => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Shield className="h-6 w-6 text-virtualis-gold" />
-              <h2 className="text-2xl font-bold text-white tech-font">Secure Access Portal</h2>
+              <h2 className="text-2xl font-bold text-white tech-font">Clinical Access Portal</h2>
             </div>
             <p className="text-white/70 text-sm tech-font">
-              Authorized Healthcare Personnel Only
+              Licensed Healthcare Professionals Only
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/90 font-medium tech-font">Authorized Email Address</Label>
+              <Label htmlFor="email" className="text-white/90 font-medium tech-font">Professional Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Dr.siddiqi@livemedhealth.com"
+                placeholder="physician@hospital.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="glass-input tech-font h-12"
@@ -149,7 +149,7 @@ const Login = ({ onLogin }: LoginProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/90 font-medium tech-font">Secure Password</Label>
+              <Label htmlFor="password" className="text-white/90 font-medium tech-font">Secure Credentials</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -171,16 +171,16 @@ const Login = ({ onLogin }: LoginProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="role" className="text-white/90 font-medium tech-font">Access Level</Label>
+              <Label htmlFor="role" className="text-white/90 font-medium tech-font">Professional Role</Label>
               <Select value={role} onValueChange={setRole} required>
                 <SelectTrigger className="glass-input tech-font h-12">
-                  <SelectValue placeholder="Select authorization level" />
+                  <SelectValue placeholder="Select professional role" />
                 </SelectTrigger>
                 <SelectContent className="glass-card border-white/20">
-                  <SelectItem value="physician" className="tech-font text-white hover:bg-white/10">🧠 Physician</SelectItem>
-                  <SelectItem value="nurse" className="tech-font text-white hover:bg-white/10">⚡ Nurse</SelectItem>
-                  <SelectItem value="biller" className="tech-font text-white hover:bg-white/10">💳 Biller</SelectItem>
-                  <SelectItem value="admin" className="tech-font text-white hover:bg-white/10">🔧 Administrator</SelectItem>
+                  <SelectItem value="physician" className="tech-font text-white hover:bg-white/10">🩺 Physician</SelectItem>
+                  <SelectItem value="nurse" className="tech-font text-white hover:bg-white/10">👩‍⚕️ Registered Nurse</SelectItem>
+                  <SelectItem value="biller" className="tech-font text-white hover:bg-white/10">💼 Revenue Cycle Manager</SelectItem>
+                  <SelectItem value="admin" className="tech-font text-white hover:bg-white/10">⚙️ System Administrator</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -194,7 +194,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 className="w-4 h-4 text-virtualis-gold bg-white/10 border-white/30 rounded focus:ring-virtualis-gold focus:ring-2"
               />
               <Label htmlFor="stayLoggedIn" className="text-white/80 tech-font">
-                Keep me signed in
+                Maintain session
               </Label>
             </div>
 
@@ -206,12 +206,12 @@ const Login = ({ onLogin }: LoginProps) => {
               {loading ? (
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Accessing Clinical OS...
+                  Authenticating Clinical Access...
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
                   <Zap className="h-5 w-5" />
-                  Access Clinical OS
+                  Access Clinical Platform
                 </div>
               )}
             </Button>
@@ -223,8 +223,8 @@ const Login = ({ onLogin }: LoginProps) => {
               <span className="tech-font text-xs">256-BIT ENCRYPTED • HIPAA COMPLIANT</span>
             </div>
             <div className="text-xs text-white/50 tech-font">
-              <p className="mb-2">Trusted by Healthcare Professionals Worldwide</p>
-              <p>Authorized access monitored and logged</p>
+              <p className="mb-2">Trusted by Healthcare Institutions Globally</p>
+              <p>All clinical access monitored and audited</p>
             </div>
           </div>
         </div>

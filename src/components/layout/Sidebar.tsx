@@ -34,18 +34,18 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
   };
 
   const menuItems = [
-    { icon: Home, label: "Dashboard", path: "/", roles: ["physician", "nurse", "admin", "biller"] },
-    { icon: ArrowLeft, label: "Back to EMR Center", action: handleBackToEMR, roles: ["physician", "nurse", "admin", "biller"] },
-    { icon: Database, label: "EMR Systems", path: "/emr", roles: ["admin"] },
-    { icon: Plus, label: "Admit Patient", path: "/admit", roles: ["physician", "nurse"] },
-    { icon: Users, label: "Patient Tracker", path: "/tracker", roles: ["physician", "nurse", "admin"] },
-    { icon: Brain, label: "AI Copilot", path: "/copilot", roles: ["physician", "nurse"] },
-    { icon: FileText, label: "Notes", path: "/notes", roles: ["physician", "nurse"] },
-    { icon: TestTube, label: "Orders & Results", path: "/orders", roles: ["physician", "nurse"] },
-    { icon: Pill, label: "MAR", path: "/mar", roles: ["nurse"] },
-    { icon: DollarSign, label: "RCM & Charges", path: "/rcm", roles: ["biller", "admin"] },
-    { icon: Calendar, label: "Schedule", path: "/schedule", roles: ["physician", "nurse"] },
-    { icon: Settings, label: "Admin Panel", path: "/admin", roles: ["admin"] },
+    { icon: Home, label: "Clinical Dashboard", path: "/", roles: ["physician", "nurse", "admin", "biller"] },
+    { icon: ArrowLeft, label: "EMR Selection", action: handleBackToEMR, roles: ["physician", "nurse", "admin", "biller"] },
+    { icon: Database, label: "EMR Integration", path: "/emr", roles: ["admin"] },
+    { icon: Plus, label: "Patient Admission", path: "/admit", roles: ["physician", "nurse"] },
+    { icon: Users, label: "Patient Census", path: "/tracker", roles: ["physician", "nurse", "admin"] },
+    { icon: Brain, label: "Clinical AI Assistant", path: "/copilot", roles: ["physician", "nurse"] },
+    { icon: FileText, label: "Clinical Notes", path: "/notes", roles: ["physician", "nurse"] },
+    { icon: TestTube, label: "Orders & Lab Results", path: "/orders", roles: ["physician", "nurse"] },
+    { icon: Pill, label: "Medication Administration", path: "/mar", roles: ["nurse"] },
+    { icon: DollarSign, label: "Revenue Cycle", path: "/rcm", roles: ["biller", "admin"] },
+    { icon: Calendar, label: "Provider Schedule", path: "/schedule", roles: ["physician", "nurse"] },
+    { icon: Settings, label: "System Administration", path: "/admin", roles: ["admin"] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => 
@@ -66,7 +66,7 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-white brand-font gradient-text">Virtualis One™</h1>
-                <p className="text-xs text-virtualis-gold tech-font">Clinical OS</p>
+                <p className="text-xs text-virtualis-gold tech-font">Clinical Platform</p>
               </div>
             </div>
           )}
@@ -135,7 +135,7 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
             }`}
           >
             <LogOut className="h-4 w-4" />
-            {isOpen && <span className="ml-2">Sign Out</span>}
+            {isOpen && <span className="ml-2">End Session</span>}
           </Button>
         </div>
       </div>

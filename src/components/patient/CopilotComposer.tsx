@@ -17,19 +17,19 @@ const CopilotComposer = ({ patientId }: { patientId?: string }) => {
   const { toast } = useToast();
 
   const noteTypes = [
-    { value: "hp", label: "History & Physical" },
+    { value: "hp", label: "History & Physical Examination" },
     { value: "progress", label: "Progress Note" },
     { value: "discharge", label: "Discharge Summary" },
-    { value: "consult", label: "Consultation Note" },
-    { value: "procedure", label: "Procedure Note" },
-    { value: "admission", label: "Admission Note" }
+    { value: "consult", label: "Consultation Report" },
+    { value: "procedure", label: "Procedure Documentation" },
+    { value: "admission", label: "Admission Assessment" }
   ];
 
   const generateNote = async () => {
     if (!noteType || !summary.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please select a note type and provide a summary",
+        title: "Required Information Missing",
+        description: "Please select documentation type and provide clinical summary",
         variant: "destructive",
       });
       return;
@@ -38,43 +38,48 @@ const CopilotComposer = ({ patientId }: { patientId?: string }) => {
     setIsGenerating(true);
     
     try {
-      // Simulate API call to OpenAI
+      // Simulate AI processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Mock generated note
-      const mockNote = `${noteTypes.find(t => t.value === noteType)?.label || "Note"}
+      // Mock generated clinical note
+      const mockNote = `${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"}
 
 CHIEF COMPLAINT: ${summary}
 
 HISTORY OF PRESENT ILLNESS:
-The patient presents with ${summary.toLowerCase()}. Detailed assessment reveals...
+Patient presents with ${summary.toLowerCase()}. Clinical assessment demonstrates...
 
 PHYSICAL EXAMINATION:
-Vital Signs: Stable
-General: Alert and oriented x3
-[AI-generated content based on chief complaint]
+Vital Signs: Within normal limits
+General Appearance: Alert, oriented, cooperative
+Systematic examination findings documented below...
 
-ASSESSMENT AND PLAN:
+ASSESSMENT & CLINICAL IMPRESSION:
+Primary diagnosis consistent with presenting symptoms and examination findings.
+
+TREATMENT PLAN:
 1. ${summary}
-   - Continue monitoring
-   - Follow up as needed
-   - Patient education provided
+   - Continue current therapeutic regimen
+   - Monitor clinical response
+   - Follow-up care as clinically indicated
+   - Patient counseled regarding condition and treatment
 
-Plan reviewed with patient. Will monitor closely and adjust treatment as indicated.
+Clinical documentation completed using Virtualis One™ AI Assistant
+Provider review and attestation required per institutional policy
 
-Electronically signed by Virtualis One™ Copilot
-Generated: ${new Date().toLocaleString()}`;
+Generated: ${new Date().toLocaleString()}
+Status: Pending Provider Review`;
 
       setGeneratedNote(mockNote);
       
       toast({
-        title: "Note Generated",
-        description: "AI has generated your note. Please review and edit as needed.",
+        title: "Clinical Documentation Generated",
+        description: "AI-assisted note ready for provider review and attestation",
       });
     } catch (error) {
       toast({
-        title: "Generation Failed",
-        description: "Unable to generate note. Please try again.",
+        title: "Generation Error",
+        description: "Unable to generate documentation. Please retry.",
         variant: "destructive",
       });
     } finally {
@@ -85,8 +90,8 @@ Generated: ${new Date().toLocaleString()}`;
   const saveNote = async () => {
     if (!generatedNote.trim()) {
       toast({
-        title: "No Note to Save",
-        description: "Please generate a note first",
+        title: "No Documentation Available",
+        description: "Please generate clinical documentation first",
         variant: "destructive",
       });
       return;
@@ -95,12 +100,12 @@ Generated: ${new Date().toLocaleString()}`;
     setIsSaving(true);
     
     try {
-      // Simulate API call to save note
+      // Simulate EMR integration
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
-        title: "Note Saved",
-        description: "Note has been saved to the patient chart",
+        title: "Documentation Saved",
+        description: "Clinical note integrated into patient medical record",
       });
       
       // Clear form
@@ -109,8 +114,8 @@ Generated: ${new Date().toLocaleString()}`;
       setGeneratedNote("");
     } catch (error) {
       toast({
-        title: "Save Failed",
-        description: "Unable to save note. Please try again.",
+        title: "Integration Error",
+        description: "Unable to save to EMR. Please contact IT support.",
         variant: "destructive",
       });
     } finally {
@@ -125,11 +130,11 @@ Generated: ${new Date().toLocaleString()}`;
           <div className="flex items-center gap-3 mb-6">
             <Brain className="h-8 w-8 text-virtualis-gold pulse-glow" />
             <h1 className="text-3xl font-bold text-white brand-font gradient-text">
-              Virtualis One™ Copilot
+              Clinical AI Assistant
             </h1>
           </div>
           <p className="text-white/70 tech-font text-lg">
-            AI-Powered Clinical Documentation Assistant
+            AI-Powered Clinical Documentation Support System
           </p>
         </div>
 
@@ -137,16 +142,16 @@ Generated: ${new Date().toLocaleString()}`;
           <div className="p-6 border-b border-white/10">
             <h2 className="text-xl font-semibold text-white tech-font flex items-center gap-2">
               <Brain className="h-5 w-5 text-virtualis-gold" />
-              Note Composer
+              Documentation Assistant
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white font-medium tech-font">Note Type</Label>
+                <Label className="text-white font-medium tech-font">Documentation Type</Label>
                 <Select value={noteType} onValueChange={setNoteType}>
                   <SelectTrigger className="glass-input">
-                    <SelectValue placeholder="Select note type" />
+                    <SelectValue placeholder="Select documentation type" />
                   </SelectTrigger>
                   <SelectContent className="bg-virtualis-navy border-white/20">
                     {noteTypes.map((type) => (
@@ -159,17 +164,17 @@ Generated: ${new Date().toLocaleString()}`;
               </div>
               
               <div className="space-y-2">
-                <Label className="text-white font-medium tech-font">Patient ID</Label>
+                <Label className="text-white font-medium tech-font">Patient Identifier</Label>
                 <div className="glass-input flex items-center">
-                  <span className="text-white/60">{patientId || "Select patient"}</span>
+                  <span className="text-white/60">{patientId || "Select active patient"}</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white font-medium tech-font">What happened? (Chief Complaint/Summary)</Label>
+              <Label className="text-white font-medium tech-font">Clinical Summary (Chief Complaint/Assessment)</Label>
               <Textarea
-                placeholder="Describe the patient's condition, symptoms, or reason for visit..."
+                placeholder="Describe patient's presenting condition, symptoms, or clinical findings..."
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
                 className="glass-input min-h-[100px]"
@@ -184,12 +189,12 @@ Generated: ${new Date().toLocaleString()}`;
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating Note...
+                  Generating Clinical Documentation...
                 </>
               ) : (
                 <>
                   <Brain className="h-4 w-4 mr-2" />
-                  Generate Note
+                  Generate Documentation
                 </>
               )}
             </Button>
@@ -201,7 +206,7 @@ Generated: ${new Date().toLocaleString()}`;
             <div className="p-6 border-b border-white/10">
               <h3 className="text-xl font-semibold text-white tech-font flex items-center gap-2">
                 <FileText className="h-5 w-5 text-virtualis-gold" />
-                Generated Note Preview
+                Clinical Documentation Preview
               </h3>
             </div>
             <div className="p-6 space-y-4">
@@ -220,12 +225,12 @@ Generated: ${new Date().toLocaleString()}`;
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      Integrating with EMR...
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                      Save to Chart
+                      Save to Medical Record
                     </>
                   )}
                 </Button>
@@ -234,7 +239,7 @@ Generated: ${new Date().toLocaleString()}`;
                   onClick={() => setGeneratedNote("")}
                   className="glass-nav-item text-white hover:bg-white/10"
                 >
-                  Discard
+                  Discard Draft
                 </Button>
               </div>
             </div>

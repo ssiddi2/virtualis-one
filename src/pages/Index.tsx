@@ -51,7 +51,7 @@ const Index = () => {
       <div className="min-h-screen flex items-center justify-center bg-virtualis-navy">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-virtualis-gold mx-auto mb-4"></div>
-          <p className="text-white font-semibold tech-font">Initializing Virtualis One™ Neural Core...</p>
+          <p className="text-white font-semibold tech-font">Initializing Virtualis One™ Clinical Platform...</p>
         </div>
       </div>
     );
@@ -70,8 +70,8 @@ const Index = () => {
           onSelectHospital={(hospitalId) => {
             setSelectedHospital(hospitalId);
             toast({
-              title: "Neural Link Established",
-              description: "Connected to hospital EMR quantum network",
+              title: "EMR Integration Established",
+              description: "Connected to healthcare facility network",
             });
           }} 
         />
