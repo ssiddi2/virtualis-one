@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, login, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedHospital, setSelectedHospital] = useState(null);
   const { toast } = useToast();
@@ -31,7 +31,7 @@ const Index = () => {
 
   // Always redirect to login if no user is authenticated
   if (!user) {
-    return <Login />;
+    return <Login onLogin={login} />;
   }
 
   // Show EMR Dashboard for hospital selection after login
