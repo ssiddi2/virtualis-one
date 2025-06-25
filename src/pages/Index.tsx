@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
@@ -45,11 +46,6 @@ const Index = () => {
   const [selectedHospital, setSelectedHospital] = useState(null);
   const { toast } = useToast();
 
-  const handleLogout = () => {
-    logout();
-    setSelectedHospital(null);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
@@ -87,13 +83,16 @@ const Index = () => {
     <div className="min-h-screen bg-[#0a1628] flex w-full">
       <Sidebar 
         user={user} 
-        onLogout={handleLogout}
+        onLogout={() => {
+          logout();
+          setSelectedHospital(null);
+        }}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
       <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
         <Routes>
-          <Route path="/" element={<Dashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/" element={<Dashboard user={user} />} />
           <Route path="/patient/:id" element={<PatientChart />} />
           <Route path="/admit" element={<AdmissionForm />} />
           <Route path="/copilot" element={<CopilotComposer />} />

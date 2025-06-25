@@ -3,29 +3,18 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Users, Calendar, FileText, Activity, Stethoscope, Database, Zap, LogOut } from "lucide-react";
+import { Brain, Users, Calendar, FileText, Activity, Stethoscope, Database, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DashboardProps {
   user: any;
-  onLogout?: () => void;
 }
 
-const Dashboard = ({ user, onLogout }: DashboardProps) => {
+const Dashboard = ({ user }: DashboardProps) => {
   const { toast } = useToast();
   const [activePatients] = useState(127);
   const [todayAppointments] = useState(23);
   const [pendingReports] = useState(8);
-
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-      toast({
-        title: "Session Ended",
-        description: "You have been successfully logged out",
-      });
-    }
-  };
 
   return (
     <div className="p-6 space-y-8 bg-[#0a1628] min-h-screen">
@@ -51,20 +40,10 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
               Clinical Dashboard - {new Date().toLocaleDateString()}
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <Badge className="glass-badge primary">
-              <Brain className="h-3 w-3 mr-1" />
-              AI Assistant Active
-            </Badge>
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              className="glass-button text-red-400 hover:text-red-300 hover:bg-red-900/20"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              End Session
-            </Button>
-          </div>
+          <Badge className="glass-badge primary">
+            <Brain className="h-3 w-3 mr-1" />
+            AI Assistant Active
+          </Badge>
         </div>
       </div>
 
