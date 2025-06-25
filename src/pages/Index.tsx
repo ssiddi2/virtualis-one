@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
@@ -8,8 +8,37 @@ import PatientChart from "@/components/patient/PatientChart";
 import AdmissionForm from "@/components/patient/AdmissionForm";
 import CopilotComposer from "@/components/patient/CopilotComposer";
 import Login from "@/components/auth/Login";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+
+// Mock authentication state
+const useAuth = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const mockUser = localStorage.getItem('mockUser');
+      if (mockUser) {
+        setUser(JSON.parse(mockUser));
+      }
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  const login = (email: string, password: string, role: string) => {
+    const userData = { id: '1', email, role, name: email.split('@')[0] };
+    localStorage.setItem('mockUser', JSON.stringify(userData));
+    setUser(userData);
+    return userData;
+  };
+
+  const logout = () => {
+    localStorage.removeItem('mockUser');
+    setUser(null);
+  };
+
+  return { user, loading, login, logout };
+};
 
 const Index = () => {
   const { user, loading, login, logout } = useAuth();
