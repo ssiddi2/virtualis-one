@@ -59,11 +59,7 @@ const Index = () => {
 
   // Show login page as the main landing page
   if (!user) {
-    return (
-      <Routes>
-        <Route path="*" element={<Login onLogin={login} />} />
-      </Routes>
-    );
+    return <Login onLogin={login} />;
   }
 
   // Show EMR Dashboard for hospital selection after login
