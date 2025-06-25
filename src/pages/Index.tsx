@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
@@ -45,6 +45,7 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedHospital, setSelectedHospital] = useState(null);
   const { toast } = useToast();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -57,7 +58,7 @@ const Index = () => {
     );
   }
 
-  // Show login page as the main landing page
+  // Always redirect to login if no user is authenticated
   if (!user) {
     return <Login onLogin={login} />;
   }
