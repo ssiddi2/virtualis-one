@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +20,7 @@ interface HospitalWithStatus {
   emr_type: string;
   license_number: string;
   location: string; // Make location required instead of optional
-  is_connected?: boolean;
+  is_connected: boolean; // Make is_connected required instead of optional
   last_sync?: string;
   status?: 'connected' | 'disconnected' | 'error' | 'syncing';
   alerts_count?: number;
