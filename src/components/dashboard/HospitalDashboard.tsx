@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Activity, FileText, TestTube, Camera, Pills, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Users, Activity, FileText, TestTube, Camera, Pill, AlertTriangle } from "lucide-react";
 import { useHospital } from "@/hooks/useHospitals";
 import { usePatients } from "@/hooks/usePatients";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords";
