@@ -28,9 +28,11 @@ export const usePatients = (hospitalId?: string) => {
       }
       
       console.log(`Found ${data?.length || 0} patients`);
-      return data;
+      return data || [];
     },
     enabled: true,
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 

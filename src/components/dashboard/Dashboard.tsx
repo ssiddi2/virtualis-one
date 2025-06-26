@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Users, Brain, FileText } from "lucide-react";
 import PatientTracker from "./PatientTracker";
 import AITestComponent from "../debug/AITestComponent";
+import PatientDataDebug from "../debug/PatientDataDebug";
 
 const Dashboard = () => {
   return (
@@ -56,10 +57,13 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* AI Test Component - Temporary for debugging */}
+      {/* Debug Tools - Temporary for troubleshooting */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="text-lg font-semibold mb-4 text-yellow-800">AI Assistant Debug Tool</h3>
-        <AITestComponent />
+        <h3 className="text-lg font-semibold mb-4 text-yellow-800">Debug Tools</h3>
+        <div className="space-y-4">
+          <PatientDataDebug />
+          <AITestComponent />
+        </div>
       </div>
 
       {/* Patient Tracker */}

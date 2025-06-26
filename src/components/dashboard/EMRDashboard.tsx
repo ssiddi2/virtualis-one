@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, Activity, Clock, ChevronRight } from "lucide-react";
+import { Building2, Users, Activity, Clock, ChevronRight, AlertCircle } from "lucide-react";
 import { useHospitals } from "@/hooks/useHospitals";
 import { usePatients } from "@/hooks/usePatients";
 
@@ -12,13 +12,34 @@ interface EMRDashboardProps {
 }
 
 const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
-  const { data: hospitals, isLoading: hospitalsLoading } = useHospitals();
-  const { data: allPatients } = usePatients();
+  const { data: hospitals, isLoading: hospitalsLoading, error: hospitalsError } = useHospitals();
+  const { data: allPatients, isLoading: patientsLoading, error: patientsError } = usePatients();
 
-  if (hospitalsLoading) {
+  console.log('EMR Dashboard Data:', { hospitals, allPatients, hospitalsLoading, patientsLoading });
+
+  if (hospitalsLoading || patientsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading hospitals...</div>
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+        <div className="text-white">Loading data...</div>
+      </div>
+    );
+  }
+
+  if (hospitalsError || patientsError) {
+    return (
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="h-16 w-16 mx-auto mb-4 text-red-400" />
+            <h3 className="text-xl font-semibold mb-2">Error Loading Data</h3>
+            <p className="text-white/70 mb-4">
+              {hospitalsError?.message || patientsError?.message || 'Failed to load data'}
+            </p>
+            <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -113,52 +134,59 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
-              {hospitals?.map((hospital) => (
-                <Card 
-                  key={hospital.id} 
-                  className="bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
-                  onClick={() => onSelectHospital(hospital.id)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-white">{hospital.name}</h3>
-                          <Badge 
-                            className={`${getEmrTypeColor(hospital.emr_type)} text-white border-0`}
-                          >
-                            {hospital.emr_type}
-                          </Badge>
+            {hospitals && hospitals.length > 0 ? (
+              <div className="grid gap-4">
+                {hospitals.map((hospital) => (
+                  <Card 
+                    key={hospital.id} 
+                    className="bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
+                    onClick={() => onSelectHospital(hospital.id)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-white">{hospital.name}</h3>
+                            <Badge 
+                              className={`${getEmrTypeColor(hospital.emr_type)} text-white border-0`}
+                            >
+                              {hospital.emr_type}
+                            </Badge>
+                          </div>
+                          <p className="text-white/70 text-sm mb-2">
+                            {hospital.address}, {hospital.city}, {hospital.state} {hospital.zip_code}
+                          </p>
+                          <div className="flex items-center gap-4 text-sm text-white/60">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              {getPatientCount(hospital.id)} patients
+                            </span>
+                            <span>{hospital.phone}</span>
+                            {hospital.email && <span>{hospital.email}</span>}
+                          </div>
                         </div>
-                        <p className="text-white/70 text-sm mb-2">
-                          {hospital.address}, {hospital.city}, {hospital.state} {hospital.zip_code}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-white/60">
-                          <span className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            {getPatientCount(hospital.id)} patients
-                          </span>
-                          <span>{hospital.phone}</span>
-                          {hospital.email && <span>{hospital.email}</span>}
-                        </div>
+                        <Button 
+                          size="sm" 
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectHospital(hospital.id);
+                          }}
+                        >
+                          Access EMR
+                          <ChevronRight className="h-4 w-4 ml-2" />
+                        </Button>
                       </div>
-                      <Button 
-                        size="sm" 
-                        className="bg-blue-600 hover:bg-blue-700"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectHospital(hospital.id);
-                        }}
-                      >
-                        Access EMR
-                        <ChevronRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-white/60">
+                <Building2 className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <p>No hospitals found. Check your database connection.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
