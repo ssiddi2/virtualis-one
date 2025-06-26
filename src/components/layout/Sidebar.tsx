@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -141,9 +142,11 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Zap className="h-5 w-5 text-white" />
-              </div>
+              <img 
+                src="/lovable-uploads/d05aa5d2-561a-436f-ae8c-de68ab1b3e88.png" 
+                alt="Virtualis" 
+                className="w-8 h-8 rounded-lg"
+              />
               <div>
                 <h1 className="text-white font-bold text-lg">Virtualis</h1>
                 <p className="text-xs text-white/60">Healthcare AI Platform</p>
