@@ -15,6 +15,17 @@ import Login from "@/components/auth/Login";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user] = useState({
+    id: '1',
+    name: 'Dr. Sarah Johnson',
+    email: 'dr.johnson@virtualisemr.com',
+    role: 'admin'
+  });
+
+  const handleSelectHospital = (hospitalId: string) => {
+    console.log('Selected hospital:', hospitalId);
+    // Navigate to the selected hospital's dashboard or perform other actions
+  };
 
   if (!isAuthenticated) {
     return <Login onLogin={() => setIsAuthenticated(true)} />;
@@ -26,8 +37,8 @@ const Index = () => {
       <main className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/emr" element={<EMRDashboard />} />
+          <Route path="/dashboard" element={<Dashboard user={user} />} />
+          <Route path="/emr" element={<EMRDashboard user={user} onSelectHospital={handleSelectHospital} />} />
           <Route path="/patients" element={<PatientChart />} />
           <Route path="/admission" element={<AdmissionForm />} />
           <Route path="/billing" element={<BillingDashboard />} />
