@@ -729,7 +729,7 @@ export type Database = {
           impression: string | null
           modality: string
           ordered_at: string | null
-          ordered_by: string
+          ordered_by: string | null
           patient_id: string
           performed_at: string | null
           priority: string | null
@@ -751,7 +751,7 @@ export type Database = {
           impression?: string | null
           modality: string
           ordered_at?: string | null
-          ordered_by: string
+          ordered_by?: string | null
           patient_id: string
           performed_at?: string | null
           priority?: string | null
@@ -773,7 +773,7 @@ export type Database = {
           impression?: string | null
           modality?: string
           ordered_at?: string | null
-          ordered_by?: string
+          ordered_by?: string | null
           patient_id?: string
           performed_at?: string | null
           priority?: string | null
