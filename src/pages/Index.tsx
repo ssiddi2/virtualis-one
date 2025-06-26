@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -15,6 +16,7 @@ import LiveRadManager from "@/components/radiology/LiveRadManager";
 import CMSReporting from "@/components/reporting/CMSReporting";
 import CopilotComposer from "@/components/patient/CopilotComposer";
 import AIDashboard from "@/components/dashboard/AIDashboard";
+import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -46,7 +48,7 @@ const Index = () => {
       <Sidebar selectedHospitalId={selectedHospitalId} />
       <main className="flex-1 overflow-auto">
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/emr" replace />} />
           <Route path="/dashboard" element={<Dashboard user={profile || user} />} />
           <Route path="/ai-dashboard" element={<AIDashboard user={profile || user} />} />
           <Route path="/emr" element={
@@ -61,6 +63,7 @@ const Index = () => {
             )
           } />
           <Route path="/patients" element={<PatientChart />} />
+          <Route path="/patient-tracker" element={<ERPatientTracker />} />
           <Route path="/admission" element={<AdmissionForm />} />
           <Route path="/billing" element={<BillingDashboard />} />
           <Route path="/coding" element={<CodingDashboard />} />
@@ -70,7 +73,7 @@ const Index = () => {
           <Route path="/liverad" element={<LiveRadManager />} />
           <Route path="/reporting" element={<CMSReporting />} />
           <Route path="/ai-assistant" element={<CopilotComposer hospitalId={selectedHospitalId} />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/emr" replace />} />
         </Routes>
       </main>
     </div>
