@@ -597,7 +597,7 @@ const TechnicalDiagrams = () => {
                       <h5 className="text-virtualis-gold tech-font mb-2">QUALITY MEASURES</h5>
                       <div className="space-y-1">
                         <div className="text-slate-300 text-sm">• 99.9% system uptime</div>
-                        <div className="text-slate-300 text-sm">• <100ms response time</div>
+                        <div className="text-slate-300 text-sm">• Less than 100ms response time</div>
                         <div className="text-slate-300 text-sm">• 95% user satisfaction</div>
                       </div>
                     </div>
