@@ -79,13 +79,6 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
           <p className="text-white/70">
             Connect to hospital systems and access patient data across multiple EMR platforms
           </p>
-
-          {/* Debug Info */}
-          <div className="mt-4 p-3 bg-blue-900/30 rounded border border-blue-700/50">
-            <p className="text-blue-300 text-sm">
-              Debug: {hospitals?.length || 0} hospitals loaded, {allPatients?.length || 0} patients total
-            </p>
-          </div>
         </div>
 
         {/* Stats Overview */}
@@ -199,7 +192,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
             ) : (
               <div className="text-center py-8 text-white/60">
                 <Building2 className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p>No hospitals found. Check your database connection.</p>
+                <p>No hospitals found. You may need to add hospital data to your database.</p>
                 <Button onClick={() => {
                   refetchHospitals();
                   refetchPatients();

@@ -2,7 +2,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Users, Brain, FileText } from "lucide-react";
 import PatientTracker from "./PatientTracker";
-import DataStatusDebug from "../debug/DataStatusDebug";
 
 const Dashboard = () => {
   return (
@@ -55,9 +54,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Data Status Debug */}
-      <DataStatusDebug />
 
       {/* Patient Tracker */}
       <PatientTracker />
