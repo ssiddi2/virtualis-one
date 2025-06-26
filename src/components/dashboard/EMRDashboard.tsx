@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import EMRIntegrationPanel from "./EMRIntegrationPanel";
 
-interface Hospital {
+interface HospitalWithStatus {
   id: string;
   name: string;
   address: string;
@@ -32,13 +32,13 @@ interface EMRDashboardProps {
 }
 
 const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [emrFilter, setEmrFilter] = useState("all");
   const [showIntegrationPanel, setShowIntegrationPanel] = useState(false);
-  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
+  const [selectedHospital, setSelectedHospital] = useState<HospitalWithStatus | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,7 +65,6 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
       // Add mock status data for display
       const hospitalsWithStatus = data.map(hospital => ({
         ...hospital,
-        location: `${hospital.city}, ${hospital.state}`,
         is_connected: Math.random() > 0.3, // 70% connected for demo
         last_sync: ['2 minutes ago', '15 minutes ago', '1 hour ago', '2 hours ago'][Math.floor(Math.random() * 4)],
         status: ['connected', 'syncing', 'disconnected'][Math.floor(Math.random() * 3)] as 'connected' | 'syncing' | 'disconnected',
@@ -267,7 +266,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
                   </div>
                   <div>
                     <CardTitle className="text-white text-lg tech-font">{hospital.name}</CardTitle>
-                    <p className="text-white/60 text-sm tech-font">{hospital.location}</p>
+                    <p className="text-white/60 text-sm tech-font">{hospital.city}, {hospital.state}</p>
                   </div>
                 </div>
                 {hospital.alerts_count > 0 && (
