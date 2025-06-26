@@ -20,14 +20,19 @@ import {
   Shield,
   Settings,
   Bot,
-  Zap
+  Zap,
+  ArrowLeft
 } from "lucide-react";
 
-const Sidebar = () => {
+interface SidebarProps {
+  selectedHospitalId?: string | null;
+}
+
+const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
 
-  const menuItems = [
+  const baseMenuItems = [
     {
       title: "Dashboard",
       icon: LayoutDashboard,
@@ -38,8 +43,11 @@ const Sidebar = () => {
       title: "EMR System",
       icon: Stethoscope,
       href: "/emr",
-      badge: "Smart"
-    },
+      badge: selectedHospitalId ? "Connected" : "Smart"
+    }
+  ];
+
+  const hospitalMenuItems = selectedHospitalId ? [
     {
       title: "Patient Management",
       icon: Users,
@@ -51,6 +59,12 @@ const Sidebar = () => {
       icon: UserPlus,
       href: "/admission",
       badge: null
+    },
+    {
+      title: "AI Clinical Assistant",
+      icon: Brain,
+      href: "/ai-assistant",
+      badge: "Smart"
     },
     {
       title: "Revenue Cycle",
@@ -82,7 +96,9 @@ const Sidebar = () => {
       href: "/reporting",
       badge: "State"
     }
-  ];
+  ] : [];
+
+  const menuItems = [...baseMenuItems, ...hospitalMenuItems];
 
   const isActive = (href: string) => {
     if (href === "/liverad") {
@@ -105,7 +121,9 @@ const Sidebar = () => {
                 <Hospital className="h-6 w-6 text-virtualis-gold" />
                 Virtualis EMR
               </h1>
-              <p className="text-xs text-virtualis-gold/60 tech-font mt-1">Healthcare AI Platform</p>
+              <p className="text-xs text-virtualis-gold/60 tech-font mt-1">
+                {selectedHospitalId ? "Hospital Connected" : "Healthcare AI Platform"}
+              </p>
             </div>
           )}
           <button
@@ -127,13 +145,10 @@ const Sidebar = () => {
           const Icon = item.icon;
           const active = isActive(item.href);
           
-          // Use liverad route for both pacs and radiology
-          const linkHref = item.href === "/liverad" ? "/liverad" : item.href;
-          
           return (
             <Link
               key={item.href}
-              to={linkHref}
+              to={item.href}
               className={cn(
                 "flex items-center px-3 py-2 rounded-lg transition-all duration-200 group relative",
                 active 
@@ -184,7 +199,9 @@ const Sidebar = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-white/60 text-sm">
               <Activity className="h-4 w-4 text-green-400" />
-              <span className="tech-font">System Online</span>
+              <span className="tech-font">
+                {selectedHospitalId ? "Hospital Online" : "System Online"}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-white/60 text-sm">
               <Shield className="h-4 w-4 text-blue-400" />

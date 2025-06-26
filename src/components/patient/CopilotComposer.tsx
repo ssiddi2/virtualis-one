@@ -7,9 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Brain, FileText, Loader2, Save, ArrowLeft, Zap, Stethoscope, Users, Database } from "lucide-react";
+import { Brain, FileText, Loader2, Save, ArrowLeft, Zap, Stethoscope, Users, Database, Hospital } from "lucide-react";
 
-const CopilotComposer = ({ patientId }: { patientId?: string }) => {
+interface CopilotComposerProps {
+  patientId?: string;
+  hospitalId?: string | null;
+}
+
+const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
   const navigate = useNavigate();
   const [noteType, setNoteType] = useState("");
   const [summary, setSummary] = useState("");
@@ -27,6 +32,12 @@ const CopilotComposer = ({ patientId }: { patientId?: string }) => {
     { value: "admission", label: "Admission Assessment", icon: "🏥" }
   ];
 
+  const mockHospitalNames = {
+    '1': 'St. Mary\'s General Hospital',
+    '2': 'Regional Medical Center',
+    '3': 'Children\'s Hospital Network'
+  };
+
   const generateNote = async () => {
     if (!noteType || !summary.trim()) {
       toast({
@@ -40,14 +51,16 @@ const CopilotComposer = ({ patientId }: { patientId?: string }) => {
     setIsGenerating(true);
     
     try {
-      // Simulate AI processing with realistic delay
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Mock generated clinical note with more realistic content
       const noteTypeData = noteTypes.find(t => t.value === noteType);
+      const hospitalName = hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Current Hospital";
+      
       const mockNote = `${noteTypeData?.label || "Clinical Documentation"}
 Generated: ${new Date().toLocaleString()}
 Provider: Dr. Sarah Smith, MD
+Facility: ${hospitalName}
+Patient: ${patientId || "Current Patient (ID: 12847)"}
 
 ═══════════════════════════════════════════════════════════
 
@@ -106,6 +119,7 @@ with appropriate response to current treatment regimen.
 ═══════════════════════════════════════════════════════════
 
 Documentation completed using Virtualis One™ AI Clinical Assistant
+Facility: ${hospitalName}
 Electronic signature pending provider review and attestation
 
 This note was generated with artificial intelligence assistance and requires 
@@ -119,7 +133,7 @@ Quality Assurance: Passed automated checks`;
       
       toast({
         title: "Clinical Documentation Generated",
-        description: "AI-assisted note ready for provider review and electronic signature",
+        description: `AI-assisted note ready for ${hospitalName} EMR integration`,
       });
     } catch (error) {
       toast({
@@ -145,15 +159,15 @@ Quality Assurance: Passed automated checks`;
     setIsSaving(true);
     
     try {
-      // Simulate EMR integration delay
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const hospitalName = hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital";
       
       toast({
         title: "Documentation Saved Successfully",
-        description: "Clinical note integrated into patient medical record system",
+        description: `Clinical note integrated into ${hospitalName} EMR system`,
       });
       
-      // Clear form after successful save
       setNoteType("");
       setSummary("");
       setGeneratedNote("");
@@ -176,12 +190,12 @@ Quality Assurance: Passed automated checks`;
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
-                onClick={() => navigate("/")}
+                onClick={() => navigate(hospitalId ? "/emr" : "/")}
                 variant="outline"
                 className="glass-nav-item border-white/20 hover:border-virtualis-gold/50"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                {hospitalId ? "Back to Hospital Dashboard" : "Back to Dashboard"}
               </Button>
               <div className="flex items-center gap-3">
                 <Brain className="h-10 w-10 text-virtualis-gold pulse-glow" />
@@ -192,6 +206,11 @@ Quality Assurance: Passed automated checks`;
                   <p className="text-white/80 tech-font text-lg">
                     Advanced Documentation & Decision Support Platform
                   </p>
+                  {hospitalId && (
+                    <p className="text-virtualis-gold tech-font text-sm mt-1">
+                      Connected to: {mockHospitalNames[hospitalId as keyof typeof mockHospitalNames]}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -201,8 +220,17 @@ Quality Assurance: Passed automated checks`;
                 <span className="tech-font">AI ACTIVE</span>
               </div>
               <div className="glass-badge primary flex items-center gap-2">
-                <Database className="h-4 w-4" />
-                <span className="tech-font">EMR CONNECTED</span>
+                {hospitalId ? (
+                  <>
+                    <Hospital className="h-4 w-4" />
+                    <span className="tech-font">HOSPITAL CONNECTED</span>
+                  </>
+                ) : (
+                  <>
+                    <Database className="h-4 w-4" />
+                    <span className="tech-font">EMR READY</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -279,7 +307,10 @@ Quality Assurance: Passed automated checks`;
               <div className="space-y-2">
                 <Label className="text-white font-medium tech-font">Patient Context</Label>
                 <div className="glass-input flex items-center">
-                  <span className="text-white/80">{patientId || "Active Patient: Sarah Johnson (ID: 12847)"}</span>
+                  <span className="text-white/80">
+                    {patientId ? `Patient ID: ${patientId}` : "Active Patient: Sarah Johnson (ID: 12847)"}
+                    {hospitalId && ` • ${mockHospitalNames[hospitalId as keyof typeof mockHospitalNames]}`}
+                  </span>
                 </div>
               </div>
             </div>
@@ -360,7 +391,7 @@ Quality Assurance: Passed automated checks`;
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Integrating with EMR System...
+                      Integrating with {hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"} EMR...
                     </>
                   ) : (
                     <>
