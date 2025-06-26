@@ -12,10 +12,7 @@ export const useMedicalRecords = (patientId?: string) => {
     queryFn: async () => {
       let query = supabase
         .from('medical_records')
-        .select(`
-          *,
-          provider:profiles!medical_records_provider_id_fkey(first_name, last_name, role)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
       
       if (patientId) {
@@ -25,8 +22,9 @@ export const useMedicalRecords = (patientId?: string) => {
       const { data, error } = await query;
       
       if (error) throw error;
-      return data;
+      return data as MedicalRecord[];
     },
+    enabled: !!patientId,
   });
 };
 

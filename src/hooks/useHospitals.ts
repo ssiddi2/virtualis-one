@@ -12,27 +12,10 @@ export const useHospitals = () => {
       const { data, error } = await supabase
         .from('hospitals')
         .select('*')
-        .order('name');
+        .order('name', { ascending: true });
       
       if (error) throw error;
       return data as Hospital[];
     },
-  });
-};
-
-export const useHospital = (hospitalId: string) => {
-  return useQuery({
-    queryKey: ['hospital', hospitalId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('hospitals')
-        .select('*')
-        .eq('id', hospitalId)
-        .single();
-      
-      if (error) throw error;
-      return data as Hospital;
-    },
-    enabled: !!hospitalId,
   });
 };

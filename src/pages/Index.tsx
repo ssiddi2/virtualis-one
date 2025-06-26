@@ -62,7 +62,7 @@ const Index = () => {
               <EMRDashboard user={profile || user} onSelectHospital={handleSelectHospital} />
             )
           } />
-          <Route path="/patients" element={<PatientChart />} />
+          <Route path="/patient/:patientId" element={<PatientChart />} />
           <Route path="/patient-tracker" element={
             <ERPatientTracker hospitalId={selectedHospitalId} />
           } />
