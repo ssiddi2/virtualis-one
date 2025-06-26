@@ -17,7 +17,11 @@ import {
   Pill,
   DollarSign,
   Database,
-  ArrowLeft
+  ArrowLeft,
+  FileSearch,
+  Microscope,
+  Monitor,
+  BarChart3
 } from "lucide-react";
 
 interface SidebarProps {
@@ -41,15 +45,18 @@ const Sidebar = ({ user, onLogout, isOpen, onToggle }: SidebarProps) => {
     { icon: Users, label: "Patient Census", path: "/tracker", roles: ["physician", "nurse", "admin"] },
     { icon: Brain, label: "Clinical AI Assistant", path: "/copilot", roles: ["physician", "nurse"] },
     { icon: FileText, label: "Clinical Notes", path: "/notes", roles: ["physician", "nurse"] },
-    { icon: TestTube, label: "Orders & Lab Results", path: "/orders", roles: ["physician", "nurse"] },
+    { icon: TestTube, label: "Laboratory (LIS)", path: "/lis", roles: ["physician", "nurse", "lab"] },
+    { icon: Monitor, label: "Radiology (PACS)", path: "/pacs", roles: ["physician", "radiologist"] },
     { icon: Pill, label: "Medication Administration", path: "/mar", roles: ["nurse"] },
-    { icon: DollarSign, label: "Revenue Cycle", path: "/rcm", roles: ["biller", "admin"] },
+    { icon: DollarSign, label: "Revenue Cycle (RCM)", path: "/billing", roles: ["biller", "admin"] },
+    { icon: FileSearch, label: "3M Coding & CDI", path: "/coding", roles: ["coder", "admin"] },
+    { icon: BarChart3, label: "CMS Quality Reporting", path: "/cms-reporting", roles: ["admin", "quality"] },
     { icon: Calendar, label: "Provider Schedule", path: "/schedule", roles: ["physician", "nurse"] },
     { icon: Settings, label: "System Administration", path: "/admin", roles: ["admin"] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => 
-    item.roles.includes(user.role)
+    item.roles.includes(user.role) || user.role === "admin"
   );
 
   return (

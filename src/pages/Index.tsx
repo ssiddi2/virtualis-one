@@ -7,6 +7,11 @@ import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import PatientChart from "@/components/patient/PatientChart";
 import AdmissionForm from "@/components/patient/AdmissionForm";
 import CopilotComposer from "@/components/patient/CopilotComposer";
+import BillingDashboard from "@/components/billing/BillingDashboard";
+import CodingDashboard from "@/components/coding/CodingDashboard";
+import LISDashboard from "@/components/laboratory/LISDashboard";
+import PACSManager from "@/components/radiology/PACSManager";
+import CMSReporting from "@/components/reporting/CMSReporting";
 import Login from "@/components/auth/Login";
 import { useToast } from "@/hooks/use-toast";
 
@@ -95,6 +100,11 @@ const Index = () => {
           <Route path="/patient/:id" element={<PatientChart />} />
           <Route path="/admit" element={<AdmissionForm />} />
           <Route path="/copilot" element={<CopilotComposer />} />
+          <Route path="/billing" element={<BillingDashboard />} />
+          <Route path="/coding" element={<CodingDashboard />} />
+          <Route path="/lis" element={<LISDashboard />} />
+          <Route path="/pacs" element={<PACSManager />} />
+          <Route path="/cms-reporting" element={<CMSReporting />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
