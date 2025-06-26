@@ -52,7 +52,24 @@ const Index = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/emr" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/ai-dashboard" element={<AIDashboard user={profile || user} />} />
+          <Route path="/ai-dashboard" element={
+            selectedHospitalId ? (
+              <AIDashboard 
+                user={profile || user} 
+                hospitalId={selectedHospitalId}
+              />
+            ) : (
+              <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h2 className="text-2xl font-bold mb-4">Select a Hospital</h2>
+                  <p className="text-white/70 mb-4">Please select a hospital from the EMR dashboard to view AI insights.</p>
+                  <Button onClick={() => navigate('/emr')} className="bg-blue-600 hover:bg-blue-700">
+                    Go to EMR Dashboard
+                  </Button>
+                </div>
+              </div>
+            )
+          } />
           <Route path="/emr" element={
             selectedHospitalId ? (
               <HospitalDashboard 

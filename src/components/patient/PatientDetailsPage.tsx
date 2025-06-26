@@ -3,36 +3,22 @@ import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   User, 
   Calendar, 
   Phone, 
   Mail, 
   MapPin, 
-  Heart,
-  Activity,
-  FileText,
-  TestTube,
-  Scan,
   ArrowLeft
 } from 'lucide-react';
 import { usePatients } from '@/hooks/usePatients';
-import { useMedicalRecords } from '@/hooks/useMedicalRecords';
-import { useLabOrders } from '@/hooks/useLabOrders';
-import { useRadiologyOrders } from '@/hooks/useRadiologyOrders';
-import { useMedications } from '@/hooks/useMedications';
-import PatientActionsPanel from './PatientActionsPanel';
+import PatientClinicalWorkflow from './PatientClinicalWorkflow';
 import { useNavigate } from 'react-router-dom';
 
 const PatientDetailsPage = () => {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
   const { data: patients } = usePatients();
-  const { data: medicalRecords } = useMedicalRecords(patientId);
-  const { data: labOrders } = useLabOrders(patientId);
-  const { data: radiologyOrders } = useRadiologyOrders(patientId);
-  const { data: medications } = useMedications(patientId);
 
   const patient = patients?.find(p => p.id === patientId);
 
@@ -88,8 +74,7 @@ const PatientDetailsPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Patient Info Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Basic Info */}
+          <div className="lg:col-span-1">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -130,253 +115,50 @@ const PatientDetailsPage = () => {
                     {patient.bed_number && <span>Bed: {patient.bed_number}</span>}
                   </div>
                 )}
+
+                {/* Allergies & Conditions */}
+                <div className="pt-4 border-t space-y-3">
+                  <div>
+                    <h4 className="font-medium text-sm mb-2">Allergies</h4>
+                    {patient.allergies && patient.allergies.length > 0 ? (
+                      <div className="space-y-1">
+                        {patient.allergies.map((allergy, index) => (
+                          <Badge key={index} variant="destructive" className="text-xs">
+                            {allergy}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-xs">No known allergies</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-sm mb-2">Medical Conditions</h4>
+                    {patient.medical_conditions && patient.medical_conditions.length > 0 ? (
+                      <div className="space-y-1">
+                        {patient.medical_conditions.map((condition, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {condition}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-xs">No documented conditions</p>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
+          </div>
 
-            {/* Quick Actions */}
-            <PatientActionsPanel 
+          {/* Main Clinical Workflow */}
+          <div className="lg:col-span-3">
+            <PatientClinicalWorkflow 
               patientId={patient.id}
               hospitalId={patient.hospital_id}
               patientName={`${patient.first_name} ${patient.last_name}`}
             />
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="notes">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Notes ({medicalRecords?.length || 0})
-                </TabsTrigger>
-                <TabsTrigger value="labs">
-                  <TestTube className="h-4 w-4 mr-2" />
-                  Labs ({labOrders?.length || 0})
-                </TabsTrigger>
-                <TabsTrigger value="imaging">
-                  <Scan className="h-4 w-4 mr-2" />
-                  Imaging ({radiologyOrders?.length || 0})
-                </TabsTrigger>
-                <TabsTrigger value="medications">
-                  <Heart className="h-4 w-4 mr-2" />
-                  Meds ({medications?.length || 0})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base">Recent Notes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-blue-600 mb-1">
-                        {medicalRecords?.length || 0}
-                      </div>
-                      <p className="text-sm text-gray-600">Medical records</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base">Active Orders</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-green-600 mb-1">
-                        {(labOrders?.length || 0) + (radiologyOrders?.length || 0)}
-                      </div>
-                      <p className="text-sm text-gray-600">Lab & imaging orders</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base">Medications</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-purple-600 mb-1">
-                        {medications?.length || 0}
-                      </div>
-                      <p className="text-sm text-gray-600">Active prescriptions</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Allergies & Conditions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Allergies</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {patient.allergies && patient.allergies.length > 0 ? (
-                        <div className="space-y-2">
-                          {patient.allergies.map((allergy, index) => (
-                            <Badge key={index} variant="destructive">
-                              {allergy}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">No known allergies</p>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Medical Conditions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {patient.medical_conditions && patient.medical_conditions.length > 0 ? (
-                        <div className="space-y-2">
-                          {patient.medical_conditions.map((condition, index) => (
-                            <Badge key={index} variant="secondary">
-                              {condition}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">No documented conditions</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="notes">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Medical Records</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {medicalRecords && medicalRecords.length > 0 ? (
-                      <div className="space-y-4">
-                        {medicalRecords.map((record) => (
-                          <div key={record.id} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-medium">{record.encounter_type}</h3>
-                              <span className="text-sm text-gray-500">
-                                {new Date(record.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                            {record.chief_complaint && (
-                              <p><strong>Chief Complaint:</strong> {record.chief_complaint}</p>
-                            )}
-                            {record.assessment && (
-                              <p><strong>Assessment:</strong> {record.assessment}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">No medical records found</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="labs">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Laboratory Orders</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {labOrders && labOrders.length > 0 ? (
-                      <div className="space-y-4">
-                        {labOrders.map((order) => (
-                          <div key={order.id} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-medium">{order.test_name}</h3>
-                              <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
-                                {order.status}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              Ordered: {new Date(order.ordered_at).toLocaleDateString()}
-                            </p>
-                            {order.notes && <p className="text-sm mt-2">{order.notes}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">No lab orders found</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="imaging">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Radiology Orders</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {radiologyOrders && radiologyOrders.length > 0 ? (
-                      <div className="space-y-4">
-                        {radiologyOrders.map((order) => (
-                          <div key={order.id} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-medium">{order.study_type} - {order.body_part}</h3>
-                              <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
-                                {order.status}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              {order.modality} • Ordered: {new Date(order.ordered_at).toLocaleDateString()}
-                            </p>
-                            {order.clinical_indication && (
-                              <p className="text-sm mt-2"><strong>Indication:</strong> {order.clinical_indication}</p>
-                            )}
-                            {order.findings && (
-                              <p className="text-sm mt-2"><strong>Findings:</strong> {order.findings}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">No radiology orders found</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="medications">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Medications</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {medications && medications.length > 0 ? (
-                      <div className="space-y-4">
-                        {medications.map((medication) => (
-                          <div key={medication.id} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-medium">{medication.medication_name}</h3>
-                              <Badge variant={medication.status === 'active' ? 'default' : 'secondary'}>
-                                {medication.status}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              {medication.dosage} • {medication.frequency} • {medication.route}
-                            </p>
-                            {medication.indication && (
-                              <p className="text-sm mt-2"><strong>Indication:</strong> {medication.indication}</p>
-                            )}
-                            {medication.instructions && (
-                              <p className="text-sm mt-2"><strong>Instructions:</strong> {medication.instructions}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">No medications found</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
           </div>
         </div>
       </div>

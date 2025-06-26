@@ -7,13 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Users, FileText, Code, Stethoscope, DollarSign, Shield, Activity } from 'lucide-react';
 import MedicalCodingAssistant from '@/components/ai/MedicalCodingAssistant';
 import DiagnosisSupport from '@/components/ai/DiagnosisSupport';
+import AIInsightsDashboard from '@/components/ai/AIInsightsDashboard';
+import { useHospitals } from '@/hooks/useHospitals';
 
 interface AIDashboardProps {
   user: any;
+  hospitalId?: string;
 }
 
-const AIDashboard = ({ user }: AIDashboardProps) => {
-  const [activeTab, setActiveTab] = useState('clinical');
+const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
+  const [activeTab, setActiveTab] = useState('insights');
+  const { data: hospitals } = useHospitals();
+  
+  const selectedHospital = hospitalId ? hospitals?.find(h => h.id === hospitalId) : null;
 
   const aiFeatures = {
     clinical: [
@@ -27,18 +33,6 @@ const AIDashboard = ({ user }: AIDashboardProps) => {
       { name: 'CPT Coding', icon: DollarSign, description: 'Procedure code recommendations' },
       { name: 'Claims Review', icon: FileText, description: 'Pre-submission claim validation' },
       { name: 'Audit Preparation', icon: Shield, description: 'Compliance and quality checks' }
-    ],
-    nursing: [
-      { name: 'Nursing Assessment', icon: Users, description: 'AI-assisted patient assessments' },
-      { name: 'Care Plans', icon: Activity, description: 'NANDA-based nursing diagnoses' },
-      { name: 'Risk Assessment', icon: Shield, description: 'Fall risk and safety evaluations' },
-      { name: 'Medication Admin', icon: FileText, description: 'Double-check protocols and alerts' }
-    ],
-    administrative: [
-      { name: 'Resource Planning', icon: Users, description: 'Staff scheduling optimization' },
-      { name: 'Quality Metrics', icon: Activity, description: 'Performance analytics and insights' },
-      { name: 'Compliance Monitor', icon: Shield, description: 'Regulatory requirement tracking' },
-      { name: 'Financial Analytics', icon: DollarSign, description: 'Revenue cycle optimization' }
     ]
   };
 
@@ -53,7 +47,7 @@ const AIDashboard = ({ user }: AIDashboardProps) => {
               AI Healthcare Assistant
             </h1>
             <p className="text-white/80 text-lg tech-font">
-              Intelligent Clinical Support for Every Healthcare Role
+              {selectedHospital ? `${selectedHospital.name} - Clinical AI Intelligence` : 'Intelligent Clinical Support'}
             </p>
           </div>
         </div>
@@ -71,29 +65,41 @@ const AIDashboard = ({ user }: AIDashboardProps) => {
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
+          {selectedHospital && (
+            <Badge className="glass-badge info">
+              {selectedHospital.emr_type} Integration
+            </Badge>
+          )}
         </div>
       </div>
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 glass-card">
+          <TabsTrigger value="insights" className="text-white">
+            <Brain className="h-4 w-4 mr-2" />
+            AI Insights
+          </TabsTrigger>
           <TabsTrigger value="clinical" className="text-white">
             <Stethoscope className="h-4 w-4 mr-2" />
-            Clinical
+            Clinical AI
           </TabsTrigger>
           <TabsTrigger value="coding" className="text-white">
             <Code className="h-4 w-4 mr-2" />
             Coding & Billing
           </TabsTrigger>
-          <TabsTrigger value="nursing" className="text-white">
-            <Users className="h-4 w-4 mr-2" />
-            Nursing
-          </TabsTrigger>
-          <TabsTrigger value="administrative" className="text-white">
+          <TabsTrigger value="tools" className="text-white">
             <Activity className="h-4 w-4 mr-2" />
-            Administrative
+            AI Tools
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="insights" className="space-y-6">
+          <AIInsightsDashboard 
+            hospitalId={hospitalId} 
+            hospitalName={selectedHospital?.name}
+          />
+        </TabsContent>
 
         <TabsContent value="clinical" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -159,104 +165,58 @@ const AIDashboard = ({ user }: AIDashboardProps) => {
           </div>
         </TabsContent>
 
-        <TabsContent value="nursing" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="tools" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Users className="h-5 w-5 text-purple-400" />
-                  Nursing Care AI
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-white/70">
-                  AI-powered nursing assessments, care plans, and safety protocols.
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  {aiFeatures.nursing.map((feature) => (
-                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg">
-                      <feature.icon className="h-5 w-5 text-virtualis-gold mb-2" />
-                      <h4 className="text-white font-medium text-sm">{feature.name}</h4>
-                      <p className="text-white/60 text-xs">{feature.description}</p>
-                    </div>
-                  ))}
-                </div>
-                <Button className="w-full glass-button">
-                  <Activity className="h-4 w-4 mr-2" />
-                  Access Nursing AI Tools
-                </Button>
-              </CardContent>
-            </Card>
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-white">Patient Safety AI</CardTitle>
+                <CardTitle className="text-white">Clinical Decision Support</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center p-4 glass-nav-item">
                     <div className="text-green-400 text-2xl font-bold">98.7%</div>
-                    <div className="text-white/70 text-sm">Safety Score</div>
+                    <div className="text-white/70 text-sm">Accuracy Rate</div>
                   </div>
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-yellow-400 text-2xl font-bold">23</div>
-                    <div className="text-white/70 text-sm">Risk Alerts Today</div>
-                  </div>
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-purple-400 text-2xl font-bold">156</div>
-                    <div className="text-white/70 text-sm">Care Plans Generated</div>
-                  </div>
+                  <Button className="w-full glass-button">
+                    <Brain className="h-4 w-4 mr-2" />
+                    Launch Assistant
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
 
-        <TabsContent value="administrative" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-orange-400" />
-                  Administrative AI
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-white/70">
-                  Optimize operations, compliance, and resource management with AI insights.
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  {aiFeatures.administrative.map((feature) => (
-                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg">
-                      <feature.icon className="h-5 w-5 text-virtualis-gold mb-2" />
-                      <h4 className="text-white font-medium text-sm">{feature.name}</h4>
-                      <p className="text-white/60 text-xs">{feature.description}</p>
-                    </div>
-                  ))}
-                </div>
-                <Button className="w-full glass-button">
-                  <Brain className="h-4 w-4 mr-2" />
-                  Launch Admin AI Suite
-                </Button>
-              </CardContent>
-            </Card>
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-white">Performance Metrics</CardTitle>
+                <CardTitle className="text-white">Drug Safety</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center p-4 glass-nav-item">
-                    <div className="text-green-400 text-2xl font-bold">87%</div>
-                    <div className="text-white/70 text-sm">Efficiency Gain</div>
+                    <div className="text-yellow-400 text-2xl font-bold">23</div>
+                    <div className="text-white/70 text-sm">Alerts Today</div>
                   </div>
+                  <Button className="w-full glass-button">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Check Interactions
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-white">Quality Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
                   <div className="text-center p-4 glass-nav-item">
-                    <div className="text-blue-400 text-2xl font-bold">$2.4M</div>
-                    <div className="text-white/70 text-sm">Cost Savings</div>
+                    <div className="text-blue-400 text-2xl font-bold">94%</div>
+                    <div className="text-white/70 text-sm">Compliance Score</div>
                   </div>
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-virtualis-gold text-2xl font-bold">99.1%</div>
-                    <div className="text-white/70 text-sm">Compliance Rate</div>
-                  </div>
+                  <Button className="w-full glass-button">
+                    <Activity className="h-4 w-4 mr-2" />
+                    View Metrics
+                  </Button>
                 </div>
               </CardContent>
             </Card>
