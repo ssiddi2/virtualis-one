@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "@/components/auth/AuthProvider";
+import AuthForm from "@/components/auth/AuthForm";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
@@ -13,17 +15,10 @@ import EnhancedLISDashboard from "@/components/laboratory/EnhancedLISDashboard";
 import LiveRadManager from "@/components/radiology/LiveRadManager";
 import CMSReporting from "@/components/reporting/CMSReporting";
 import CopilotComposer from "@/components/patient/CopilotComposer";
-import Login from "@/components/auth/Login";
 
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, profile, loading } = useAuth();
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
-  const [user] = useState({
-    id: '1',
-    name: 'Dr. Sarah Johnson',
-    email: 'dr.johnson@virtualisemr.com',
-    role: 'admin'
-  });
 
   const handleSelectHospital = (hospitalId: string) => {
     console.log('Selected hospital:', hospitalId);
@@ -34,8 +29,16 @@ const Index = () => {
     setSelectedHospitalId(null);
   };
 
-  if (!isAuthenticated) {
-    return <Login onLogin={() => setIsAuthenticated(true)} />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthForm />;
   }
 
   return (
@@ -44,16 +47,16 @@ const Index = () => {
       <main className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard user={user} />} />
+          <Route path="/dashboard" element={<Dashboard user={profile || user} />} />
           <Route path="/emr" element={
             selectedHospitalId ? (
               <HospitalDashboard 
                 hospitalId={selectedHospitalId} 
-                user={user} 
+                user={profile || user} 
                 onBack={handleBackToEMR}
               />
             ) : (
-              <EMRDashboard user={user} onSelectHospital={handleSelectHospital} />
+              <EMRDashboard user={profile || user} onSelectHospital={handleSelectHospital} />
             )
           } />
           <Route path="/patients" element={<PatientChart />} />

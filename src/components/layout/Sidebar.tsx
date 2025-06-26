@@ -1,27 +1,24 @@
 
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
-  UserPlus, 
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/components/auth/AuthProvider";
+import {
+  LayoutDashboard,
+  Hospital,
+  Users,
+  FileText,
   DollarSign,
   Code,
   TestTube,
+  Zap,
+  FileSpreadsheet,
   Brain,
-  BarChart3,
   ChevronLeft,
   ChevronRight,
-  Hospital,
-  Stethoscope,
-  Activity,
-  Shield,
-  Settings,
-  Bot,
-  Zap,
-  ArrowLeft
+  LogOut,
+  User
 } from "lucide-react";
 
 interface SidebarProps {
@@ -30,195 +27,168 @@ interface SidebarProps {
 
 const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { signOut, profile, user } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const baseMenuItems = [
+  const menuItems = [
     {
-      title: "Dashboard",
       icon: LayoutDashboard,
-      href: "/dashboard",
+      label: "Dashboard",
+      path: "/dashboard",
       badge: null
     },
     {
-      title: "EMR System",
-      icon: Stethoscope,
-      href: "/emr",
-      badge: selectedHospitalId ? "Connected" : "Smart"
+      icon: Hospital,
+      label: "EMR Systems",
+      path: "/emr",
+      badge: selectedHospitalId ? "CONNECTED" : null
+    },
+    {
+      icon: Users,
+      label: "Patients",
+      path: "/patients",
+      badge: null
+    },
+    {
+      icon: FileText,
+      label: "Admissions",
+      path: "/admission",
+      badge: null
+    },
+    {
+      icon: DollarSign,
+      label: "Billing",
+      path: "/billing",
+      badge: null
+    },
+    {
+      icon: Code,
+      label: "Coding",
+      path: "/coding",
+      badge: null
+    },
+    {
+      icon: TestTube,
+      label: "Laboratory",
+      path: "/laboratory",
+      badge: null
+    },
+    {
+      icon: Zap,
+      label: "Radiology",
+      path: "/radiology",
+      badge: null
+    },
+    {
+      icon: FileSpreadsheet,
+      label: "Reporting",
+      path: "/reporting",
+      badge: null
+    },
+    {
+      icon: Brain,
+      label: "AI Assistant",
+      path: "/ai-assistant",
+      badge: "AI"
     }
   ];
 
-  const hospitalMenuItems = selectedHospitalId ? [
-    {
-      title: "Patient Management",
-      icon: Users,
-      href: "/patients",
-      badge: null
-    },
-    {
-      title: "Patient Admission",
-      icon: UserPlus,
-      href: "/admission",
-      badge: null
-    },
-    {
-      title: "AI Clinical Assistant",
-      icon: Brain,
-      href: "/ai-assistant",
-      badge: "Smart"
-    },
-    {
-      title: "Revenue Cycle",
-      icon: DollarSign,
-      href: "/billing",
-      badge: "RCM"
-    },
-    {
-      title: "3M Coding & CDI",
-      icon: Code,
-      href: "/coding",
-      badge: "CAC"
-    },
-    {
-      title: "Enhanced LIS",
-      icon: TestTube,
-      href: "/laboratory",
-      badge: "AI Lab"
-    },
-    {
-      title: "LiveRad AI",
-      icon: Brain,
-      href: "/liverad",
-      badge: "Smart"
-    },
-    {
-      title: "CMS Reporting",
-      icon: BarChart3,
-      href: "/reporting",
-      badge: "State"
-    }
-  ] : [];
-
-  const menuItems = [...baseMenuItems, ...hospitalMenuItems];
-
-  const isActive = (href: string) => {
-    if (href === "/liverad") {
-      return location.pathname === "/liverad" || location.pathname === "/pacs" || location.pathname === "/radiology";
-    }
-    return location.pathname === href;
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
-    <div className={cn(
-      "h-full bg-gradient-to-b from-virtualis-dark via-black to-virtualis-dark border-r border-virtualis-gold/20 transition-all duration-300 flex flex-col",
-      isCollapsed ? "w-16" : "w-64"
-    )}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 glass-sidebar border-r border-white/10 flex flex-col`}>
       {/* Header */}
-      <div className="p-4 border-b border-virtualis-gold/20">
+      <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
-            <div>
-              <h1 className="text-xl font-bold text-white brand-font gradient-text flex items-center gap-2">
-                <Hospital className="h-6 w-6 text-virtualis-gold" />
-                Virtualis EMR
-              </h1>
-              <p className="text-xs text-virtualis-gold/60 tech-font mt-1">
-                {selectedHospitalId ? "Hospital Connected" : "Healthcare AI Platform"}
-              </p>
+            <div className="flex items-center gap-3">
+              <img 
+                src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
+                alt="Virtualis One™" 
+                className="h-8 w-auto"
+              />
+              <div className="text-white">
+                <div className="text-sm font-bold tech-font">VIRTUALIS ONE™</div>
+                <div className="text-xs text-white/60 tech-font">Healthcare AI</div>
+              </div>
             </div>
           )}
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="glass-button p-2 hover:bg-white/10 transition-colors"
+            className="text-white/60 hover:text-white hover:bg-white/10"
           >
-            {isCollapsed ? (
-              <ChevronRight className="h-4 w-4 text-white" />
-            ) : (
-              <ChevronLeft className="h-4 w-4 text-white" />
-            )}
-          </button>
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
+
+      {/* User Profile */}
+      {!isCollapsed && (
+        <div className="p-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-virtualis-gold to-orange-500 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="text-white text-sm font-medium tech-font">
+                {profile?.first_name || user?.email} {profile?.last_name}
+              </div>
+              <div className="text-white/60 text-xs tech-font capitalize">
+                {profile?.role || 'Healthcare Provider'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const active = isActive(item.href);
+          const isActive = location.pathname === item.path;
           
           return (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "flex items-center px-3 py-2 rounded-lg transition-all duration-200 group relative",
-                active 
-                  ? "bg-virtualis-gold/20 text-virtualis-gold border border-virtualis-gold/30" 
-                  : "text-white/70 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10"
-              )}
+            <Button
+              key={item.path}
+              variant="ghost"
+              className={`w-full justify-start glass-nav-item ${
+                isActive ? 'bg-virtualis-gold/20 text-virtualis-gold border-virtualis-gold/30' : 'text-white/80 hover:text-white'
+              } ${isCollapsed ? 'px-2' : 'px-4'} tech-font`}
+              onClick={() => navigate(item.path)}
             >
-              <Icon className={cn(
-                "h-5 w-5 transition-colors",
-                active ? "text-virtualis-gold" : "text-white/70 group-hover:text-white"
-              )} />
-              
+              <Icon className="h-4 w-4" />
               {!isCollapsed && (
                 <>
-                  <span className="ml-3 tech-font font-medium">{item.title}</span>
+                  <span className="ml-3">{item.label}</span>
                   {item.badge && (
-                    <span className={cn(
-                      "ml-auto px-2 py-1 text-xs rounded-full font-medium",
-                      active 
-                        ? "bg-virtualis-gold/30 text-virtualis-gold" 
-                        : "bg-white/10 text-white/60"
-                    )}>
+                    <Badge className="ml-auto glass-badge primary">
                       {item.badge}
-                    </span>
+                    </Badge>
                   )}
                 </>
               )}
-              
-              {/* Tooltip for collapsed state */}
-              {isCollapsed && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-black/90 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                  {item.title}
-                  {item.badge && (
-                    <span className="ml-2 px-1.5 py-0.5 bg-virtualis-gold/20 text-virtualis-gold text-xs rounded">
-                      {item.badge}
-                    </span>
-                  )}
-                </div>
-              )}
-            </Link>
+            </Button>
           );
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-virtualis-gold/20">
-        {!isCollapsed ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              <Activity className="h-4 w-4 text-green-400" />
-              <span className="tech-font">
-                {selectedHospitalId ? "Hospital Online" : "System Online"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              <Shield className="h-4 w-4 text-blue-400" />
-              <span className="tech-font">HIPAA Compliant</span>
-            </div>
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              <Bot className="h-4 w-4 text-virtualis-gold" />
-              <span className="tech-font">AI Enhanced</span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2 items-center">
-            <Activity className="h-4 w-4 text-green-400" />
-            <Shield className="h-4 w-4 text-blue-400" />
-            <Bot className="h-4 w-4 text-virtualis-gold" />
-          </div>
-        )}
+      {/* Sign Out */}
+      <div className="p-4 border-t border-white/10">
+        <Button
+          variant="ghost"
+          onClick={handleSignOut}
+          className={`w-full justify-start text-white/60 hover:text-white hover:bg-red-500/20 ${
+            isCollapsed ? 'px-2' : 'px-4'
+          } tech-font`}
+        >
+          <LogOut className="h-4 w-4" />
+          {!isCollapsed && <span className="ml-3">Sign Out</span>}
+        </Button>
       </div>
     </div>
   );

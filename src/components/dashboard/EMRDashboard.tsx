@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,82 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Hospital, Settings, Wifi, WifiOff, AlertTriangle, Clock, Search, Database, Zap, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import EMRIntegrationPanel from "./EMRIntegrationPanel";
 
 interface Hospital {
   id: string;
   name: string;
-  location: string;
+  address: string;
+  city: string;
+  state: string;
+  phone: string;
+  email: string;
   emr_type: string;
-  is_connected: boolean;
-  last_sync: string;
-  logo_url?: string;
-  status: 'connected' | 'disconnected' | 'error' | 'syncing';
+  license_number: string;
+  is_connected?: boolean;
+  last_sync?: string;
+  status?: 'connected' | 'disconnected' | 'error' | 'syncing';
   alerts_count?: number;
 }
-
-const mockHospitals: Hospital[] = [
-  {
-    id: '1',
-    name: 'St. Mary\'s General Hospital',
-    location: 'San Francisco, CA',
-    emr_type: 'Epic',
-    is_connected: true,
-    last_sync: '2 minutes ago',
-    status: 'connected',
-    alerts_count: 0
-  },
-  {
-    id: '2',
-    name: 'Regional Medical Center',
-    location: 'Los Angeles, CA',
-    emr_type: 'Cerner',
-    is_connected: true,
-    last_sync: '15 minutes ago',
-    status: 'syncing',
-    alerts_count: 2
-  },
-  {
-    id: '3',
-    name: 'Children\'s Hospital Network',
-    location: 'San Diego, CA',
-    emr_type: 'Meditech',
-    is_connected: false,
-    last_sync: '2 hours ago',
-    status: 'disconnected',
-    alerts_count: 5
-  },
-  {
-    id: '4',
-    name: 'University Medical',
-    location: 'Sacramento, CA',
-    emr_type: 'Allscripts',
-    is_connected: false,
-    last_sync: 'Never',
-    status: 'error',
-    alerts_count: 1
-  },
-  {
-    id: '5',
-    name: 'Veterans Affairs Medical',
-    location: 'Oakland, CA',
-    emr_type: 'VistA',
-    is_connected: true,
-    last_sync: '5 minutes ago',
-    status: 'connected',
-    alerts_count: 0
-  },
-  {
-    id: '6',
-    name: 'Community Health Network',
-    location: 'Fresno, CA',
-    emr_type: 'FHIR API',
-    is_connected: true,
-    last_sync: '1 minute ago',
-    status: 'connected',
-    alerts_count: 0
-  }
-];
 
 interface EMRDashboardProps {
   user: any;
@@ -88,12 +32,58 @@ interface EMRDashboardProps {
 }
 
 const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
-  const [hospitals, setHospitals] = useState<Hospital[]>(mockHospitals);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [emrFilter, setEmrFilter] = useState("all");
   const [showIntegrationPanel, setShowIntegrationPanel] = useState(false);
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchHospitals();
+  }, []);
+
+  const fetchHospitals = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('hospitals')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching hospitals:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load hospitals",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Add mock status data for display
+      const hospitalsWithStatus = data.map(hospital => ({
+        ...hospital,
+        location: `${hospital.city}, ${hospital.state}`,
+        is_connected: Math.random() > 0.3, // 70% connected for demo
+        last_sync: ['2 minutes ago', '15 minutes ago', '1 hour ago', '2 hours ago'][Math.floor(Math.random() * 4)],
+        status: ['connected', 'syncing', 'disconnected'][Math.floor(Math.random() * 3)] as 'connected' | 'syncing' | 'disconnected',
+        alerts_count: Math.floor(Math.random() * 6)
+      }));
+
+      setHospitals(hospitalsWithStatus);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load hospitals",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusBadge = (status: string, alertsCount?: number) => {
     const baseClasses = "font-semibold tech-font";
@@ -140,7 +130,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
 
   const filteredHospitals = hospitals.filter(hospital => {
     const matchesSearch = hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hospital.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         hospital.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          hospital.emr_type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || hospital.status === statusFilter;
     const matchesEmr = emrFilter === "all" || hospital.emr_type === emrFilter;
@@ -168,9 +158,17 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="p-8 min-h-screen flex items-center justify-center">
+        <div className="text-white tech-font">Loading hospitals...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 space-y-8 min-h-screen">
-      {/* Header Section with Bigger Logo */}
+      {/* Header Section */}
       <div className="text-center space-y-6">
         <div className="flex items-center justify-center mb-8">
           <img 
@@ -206,7 +204,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
         </div>
       </div>
 
-      {/* Simplified Search and Filters */}
+      {/* Search and Filters */}
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-white tech-font flex items-center gap-3">
@@ -257,7 +255,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
         </CardContent>
       </Card>
 
-      {/* Simplified Hospital Grid */}
+      {/* Hospital Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredHospitals.map((hospital) => (
           <Card key={hospital.id} className="glass-card hover:scale-105 transition-all duration-300">
