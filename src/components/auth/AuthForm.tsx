@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -72,14 +73,14 @@ const AuthForm = () => {
         {/* Logo and Messaging Section */}
         <div className="flex flex-col items-center text-center space-y-8">
           <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 lg:gap-8">
+            <div className="flex flex-col items-center gap-6">
               <img 
                 src="/lovable-uploads/2f7fb8f1-6592-4169-9278-f93a9417e1e8.png" 
                 alt="Healthcare Platform Logo" 
-                className="h-32 lg:h-48 xl:h-64 w-auto animate-float pulse-glow"
+                className="h-40 lg:h-56 xl:h-72 w-auto animate-float pulse-glow"
               />
-              <div className="text-center lg:text-left">
-                <p className="text-lg lg:text-xl text-white/70 tech-font max-w-lg">
+              <div className="text-center max-w-2xl">
+                <p className="text-lg lg:text-xl xl:text-2xl text-white/70 tech-font leading-relaxed">
                   Revolutionary healthcare intelligence platform connecting hospitals, 
                   patients, and providers in real-time.
                 </p>
