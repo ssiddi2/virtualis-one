@@ -1,3 +1,5 @@
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -312,7 +314,7 @@ const IntegrationGuide = () => {
                       </div>
                       <div className="flex items-center gap-3">
                         <Badge className="bg-yellow-600/20 text-yellow-300 border-yellow-600/30">PUT</Badge>
-                        <code className="text-blue-300 bg-slate-800 px-2 py-1 rounded">/api/v1/patients/{id}</code>
+                        <code className="text-blue-300 bg-slate-800 px-2 py-1 rounded">/api/v1/patients/patientId</code>
                         <span className="text-slate-300 text-sm">Update patient information</span>
                       </div>
                     </div>
