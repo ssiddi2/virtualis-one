@@ -6,7 +6,14 @@ import PatientTracker from "./PatientTracker";
 const Dashboard = () => {
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Healthcare Dashboard</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <img 
+          src="/lovable-uploads/d05aa5d2-561a-436f-ae8c-de68ab1b3e88.png" 
+          alt="Virtualis" 
+          className="h-12 w-auto"
+        />
+        <h1 className="text-3xl font-bold">Healthcare Dashboard</h1>
+      </div>
       
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
