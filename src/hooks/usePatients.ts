@@ -1,49 +1,57 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Tables, TablesInsert } from '@/integrations/supabase/types';
-
-type Patient = Tables<'patients'>;
-type PatientInsert = TablesInsert<'patients'>;
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const usePatients = (hospitalId?: string) => {
   return useQuery({
     queryKey: ['patients', hospitalId],
     queryFn: async () => {
+      console.log('Fetching patients for hospital:', hospitalId);
+      
       let query = supabase
         .from('patients')
         .select('*')
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
       
-      // Filter by hospital if hospitalId is provided
       if (hospitalId) {
         query = query.eq('hospital_id', hospitalId);
       }
       
       const { data, error } = await query;
       
-      if (error) throw error;
-      return data as Patient[];
+      console.log('Patients query result:', { data, error, hospitalId });
+      
+      if (error) {
+        console.error('Error fetching patients:', error);
+        throw error;
+      }
+      
+      console.log(`Found ${data?.length || 0} patients`);
+      return data;
     },
+    enabled: true,
   });
 };
 
 export const useCreatePatient = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (patient: PatientInsert) => {
+  return {
+    mutateAsync: async (patientData: any) => {
+      console.log('Creating patient:', patientData);
+      
       const { data, error } = await supabase
         .from('patients')
-        .insert(patient)
+        .insert([patientData])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating patient:', error);
+        throw error;
+      }
+      
+      console.log('Patient created:', data);
       return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['patients'] });
-    },
-  });
+    }
+  };
 };

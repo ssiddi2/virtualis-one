@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { useCreateMedicalRecord } from '@/hooks/useMedicalRecords';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';
-import { Brain, Plus, Loader2, Sparkles } from 'lucide-react';
+import { Brain, Plus, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 
 interface AIEnhancedNoteDialogProps {
   patientId: string;
@@ -32,7 +31,7 @@ const AIEnhancedNoteDialog = ({ patientId, hospitalId }: AIEnhancedNoteDialogPro
 
   const { user } = useAuth();
   const createMedicalRecord = useCreateMedicalRecord();
-  const { callAI, isLoading: aiLoading } = useAIAssistant();
+  const { callAI, isLoading: aiLoading, error: aiError } = useAIAssistant();
 
   const generateWithAI = async () => {
     if (!aiPrompt.trim()) {
@@ -40,46 +39,55 @@ const AIEnhancedNoteDialog = ({ patientId, hospitalId }: AIEnhancedNoteDialogPro
       return;
     }
 
+    console.log('Starting AI generation with prompt:', aiPrompt);
+
     try {
+      toast.info('Generating AI clinical note...', { duration: 2000 });
+      
       const result = await callAI({
         type: 'clinical_note',
         data: { summary: aiPrompt },
-        context: `${formData.encounter_type} encounter`
+        context: `${formData.encounter_type} encounter for patient ${patientId}`
       });
+
+      console.log('AI generation successful:', result);
 
       // Parse AI response and populate form fields
       const sections = result.split('\n\n');
       let newFormData = { ...formData };
 
       sections.forEach((section: string) => {
-        if (section.includes('Chief Complaint:') || section.includes('CC:')) {
-          const cc = section.replace(/.*(?:Chief Complaint:|CC:)\s*/i, '').trim();
-          if (cc) newFormData.chief_complaint = cc;
+        const lowerSection = section.toLowerCase();
+        if (lowerSection.includes('chief complaint:') || lowerSection.includes('cc:')) {
+          const cc = section.replace(/.*(?:chief complaint:|cc:)\s*/i, '').trim();
+          if (cc && cc.length > 5) newFormData.chief_complaint = cc;
         }
-        if (section.includes('History of Present Illness:') || section.includes('HPI:')) {
-          const hpi = section.replace(/.*(?:History of Present Illness:|HPI:)\s*/i, '').trim();
-          if (hpi) newFormData.history_present_illness = hpi;
+        if (lowerSection.includes('history of present illness:') || lowerSection.includes('hpi:')) {
+          const hpi = section.replace(/.*(?:history of present illness:|hpi:)\s*/i, '').trim();
+          if (hpi && hpi.length > 10) newFormData.history_present_illness = hpi;
         }
-        if (section.includes('Physical Examination:') || section.includes('PE:')) {
-          const pe = section.replace(/.*(?:Physical Examination:|PE:)\s*/i, '').trim();
-          if (pe) newFormData.physical_examination = pe;
+        if (lowerSection.includes('physical examination:') || lowerSection.includes('pe:')) {
+          const pe = section.replace(/.*(?:physical examination:|pe:)\s*/i, '').trim();
+          if (pe && pe.length > 10) newFormData.physical_examination = pe;
         }
-        if (section.includes('Assessment:') || section.includes('A:')) {
-          const assessment = section.replace(/.*(?:Assessment:|A:)\s*/i, '').trim();
-          if (assessment) newFormData.assessment = assessment;
+        if (lowerSection.includes('assessment:') || lowerSection.includes('a:')) {
+          const assessment = section.replace(/.*(?:assessment:|a:)\s*/i, '').trim();
+          if (assessment && assessment.length > 5) newFormData.assessment = assessment;
         }
-        if (section.includes('Plan:') || section.includes('P:')) {
-          const plan = section.replace(/.*(?:Plan:|P:)\s*/i, '').trim();
-          if (plan) newFormData.plan = plan;
+        if (lowerSection.includes('plan:') || lowerSection.includes('p:')) {
+          const plan = section.replace(/.*(?:plan:|p:)\s*/i, '').trim();
+          if (plan && plan.length > 5) newFormData.plan = plan;
         }
       });
 
       setFormData(newFormData);
       toast.success('AI-generated clinical note created! Please review and edit as needed.');
       setIsAIMode(false);
+      setAiPrompt('');
     } catch (error) {
       console.error('AI generation error:', error);
-      toast.error('Failed to generate AI note. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to generate AI note: ${errorMessage}`);
     }
   };
 
@@ -91,7 +99,14 @@ const AIEnhancedNoteDialog = ({ patientId, hospitalId }: AIEnhancedNoteDialogPro
       return;
     }
 
+    if (!formData.chief_complaint.trim()) {
+      toast.error('Please provide a chief complaint');
+      return;
+    }
+
     try {
+      console.log('Saving medical record:', { patientId, hospitalId, formData });
+      
       await createMedicalRecord.mutateAsync({
         patient_id: patientId,
         hospital_id: hospitalId,
@@ -112,7 +127,8 @@ const AIEnhancedNoteDialog = ({ patientId, hospitalId }: AIEnhancedNoteDialogPro
       setAiPrompt('');
     } catch (error) {
       console.error('Error saving medical note:', error);
-      toast.error('Failed to save medical note');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save medical note';
+      toast.error(errorMessage);
     }
   };
 
@@ -131,6 +147,14 @@ const AIEnhancedNoteDialog = ({ patientId, hospitalId }: AIEnhancedNoteDialogPro
             AI-Enhanced Clinical Documentation
           </DialogTitle>
         </DialogHeader>
+
+        {/* AI Error Display */}
+        {aiError && (
+          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm">{aiError}</span>
+          </div>
+        )}
 
         {!isAIMode ? (
           <div className="space-y-4 mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
