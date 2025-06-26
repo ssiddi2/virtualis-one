@@ -89,12 +89,10 @@ const PatientActionsPanel = ({ patientId, hospitalId, patientName }: PatientActi
             
             <NewLabOrderDialog 
               patientId={patientId}
-              hospitalId={hospitalId}
             />
             
             <NewRadiologyOrderDialog 
               patientId={patientId}
-              hospitalId={hospitalId}  
             />
 
             {quickActions.map((action) => (
