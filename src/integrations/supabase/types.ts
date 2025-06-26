@@ -231,6 +231,59 @@ export type Database = {
           },
         ]
       }
+      cms_quality_measures: {
+        Row: {
+          benchmark_rate: number | null
+          denominator: number | null
+          hospital_id: string
+          id: string
+          improvement_target: number | null
+          last_updated: string | null
+          measure_id: string
+          measure_name: string
+          numerator: number | null
+          performance_rate: number | null
+          reporting_period: string
+          status: string | null
+        }
+        Insert: {
+          benchmark_rate?: number | null
+          denominator?: number | null
+          hospital_id: string
+          id?: string
+          improvement_target?: number | null
+          last_updated?: string | null
+          measure_id: string
+          measure_name: string
+          numerator?: number | null
+          performance_rate?: number | null
+          reporting_period: string
+          status?: string | null
+        }
+        Update: {
+          benchmark_rate?: number | null
+          denominator?: number | null
+          hospital_id?: string
+          id?: string
+          improvement_target?: number | null
+          last_updated?: string | null
+          measure_id?: string
+          measure_name?: string
+          numerator?: number | null
+          performance_rate?: number | null
+          reporting_period?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_quality_measures_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospitals: {
         Row: {
           address: string
