@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, Activity, Clock, ChevronRight, AlertCircle } from "lucide-react";
+import { Building2, Users, Activity, Clock, ChevronRight, AlertCircle, RefreshCw } from "lucide-react";
 import { useHospitals } from "@/hooks/useHospitals";
 import { usePatients } from "@/hooks/usePatients";
 
@@ -12,15 +12,18 @@ interface EMRDashboardProps {
 }
 
 const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
-  const { data: hospitals, isLoading: hospitalsLoading, error: hospitalsError } = useHospitals();
-  const { data: allPatients, isLoading: patientsLoading, error: patientsError } = usePatients();
+  const { data: hospitals, isLoading: hospitalsLoading, error: hospitalsError, refetch: refetchHospitals } = useHospitals();
+  const { data: allPatients, isLoading: patientsLoading, error: patientsError, refetch: refetchPatients } = usePatients();
 
-  console.log('EMR Dashboard Data:', { hospitals, allPatients, hospitalsLoading, patientsLoading });
+  console.log('EMR Dashboard Data:', { hospitals, allPatients, hospitalsLoading, patientsLoading, hospitalsError, patientsError });
 
   if (hospitalsLoading || patientsLoading) {
     return (
       <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
-        <div className="text-white">Loading data...</div>
+        <div className="text-white flex items-center gap-2">
+          <RefreshCw className="h-5 w-5 animate-spin" />
+          Loading data...
+        </div>
       </div>
     );
   }
@@ -28,16 +31,21 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
   if (hospitalsError || patientsError) {
     return (
       <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+        <Card className="bg-[#1a2332] border-[#2a3441] text-white max-w-md">
           <CardContent className="p-8 text-center">
             <AlertCircle className="h-16 w-16 mx-auto mb-4 text-red-400" />
             <h3 className="text-xl font-semibold mb-2">Error Loading Data</h3>
             <p className="text-white/70 mb-4">
               {hospitalsError?.message || patientsError?.message || 'Failed to load data'}
             </p>
-            <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
-              Retry
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => refetchHospitals()} className="bg-blue-600 hover:bg-blue-700">
+                Retry Hospitals
+              </Button>
+              <Button onClick={() => refetchPatients()} className="bg-green-600 hover:bg-green-700">
+                Retry Patients
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -71,6 +79,13 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
           <p className="text-white/70">
             Connect to hospital systems and access patient data across multiple EMR platforms
           </p>
+
+          {/* Debug Info */}
+          <div className="mt-4 p-3 bg-blue-900/30 rounded border border-blue-700/50">
+            <p className="text-blue-300 text-sm">
+              Debug: {hospitals?.length || 0} hospitals loaded, {allPatients?.length || 0} patients total
+            </p>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -185,6 +200,13 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
               <div className="text-center py-8 text-white/60">
                 <Building2 className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p>No hospitals found. Check your database connection.</p>
+                <Button onClick={() => {
+                  refetchHospitals();
+                  refetchPatients();
+                }} className="mt-4 bg-blue-600 hover:bg-blue-700">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry Loading Data
+                </Button>
               </div>
             )}
           </CardContent>
