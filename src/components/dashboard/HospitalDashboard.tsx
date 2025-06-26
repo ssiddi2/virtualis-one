@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +11,7 @@ import { useMedications } from "@/hooks/useMedications";
 import NewNoteDialog from "@/components/forms/NewNoteDialog";
 import NewLabOrderDialog from "@/components/forms/NewLabOrderDialog";
 import NewRadiologyOrderDialog from "@/components/forms/NewRadiologyOrderDialog";
+import AIEnhancedNoteDialog from "@/components/forms/AIEnhancedNoteDialog";
 
 interface HospitalDashboardProps {
   hospitalId: string;
@@ -164,6 +164,7 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <AIEnhancedNoteDialog patientId={patient.id} hospitalId={hospitalId} />
                       <NewNoteDialog patientId={patient.id} hospitalId={hospitalId} />
                       <NewLabOrderDialog patientId={patient.id} />
                       <NewRadiologyOrderDialog patientId={patient.id} />

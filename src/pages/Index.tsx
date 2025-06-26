@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -15,6 +14,7 @@ import EnhancedLISDashboard from "@/components/laboratory/EnhancedLISDashboard";
 import LiveRadManager from "@/components/radiology/LiveRadManager";
 import CMSReporting from "@/components/reporting/CMSReporting";
 import CopilotComposer from "@/components/patient/CopilotComposer";
+import AIDashboard from "@/components/dashboard/AIDashboard";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -48,6 +48,7 @@ const Index = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard user={profile || user} />} />
+          <Route path="/ai-dashboard" element={<AIDashboard user={profile || user} />} />
           <Route path="/emr" element={
             selectedHospitalId ? (
               <HospitalDashboard 
