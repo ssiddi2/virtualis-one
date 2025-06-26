@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -26,7 +25,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
-  Presentation
+  Presentation,
+  BarChart3,
+  Building2,
+  CreditCard,
+  Monitor,
+  MessageSquare
 } from "lucide-react";
 
 interface SidebarProps {
@@ -39,21 +43,82 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
   const { user, profile, signOut } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const navItems = [
-    { icon: Home, label: "Dashboard", path: "/dashboard" },
-    { icon: Building, label: "EMR Systems", path: "/emr" },
-    { icon: Brain, label: "AI Dashboard", path: "/ai-dashboard" },
-    ...(selectedHospitalId ? [
-      { icon: Activity, label: "ER Patient Tracker", path: "/patient-tracker" },
-      { icon: DollarSign, label: "Billing & RCM", path: "/billing" },
-      { icon: Code, label: "Coding & CDI", path: "/coding" },
-    ] : []),
-    { icon: TestTube, label: "Laboratory (LIS)", path: "/laboratory" },
-    { icon: Scan, label: "Radiology & PACS", path: "/radiology" },
-    { icon: BarChart, label: "CMS Reporting", path: "/reporting" },
-    { icon: UserPlus, label: "Patient Admission", path: "/admission" },
-    { icon: Bot, label: "AI Assistant", path: "/ai-assistant" },
-    { icon: Presentation, label: "Demo Resources", path: "/demo" },
+  const menuItems = [
+    { 
+      name: "Dashboard", 
+      href: "/dashboard", 
+      icon: BarChart3,
+      description: "System overview and analytics"
+    },
+    { 
+      name: "AI Dashboard", 
+      href: "/ai-dashboard", 
+      icon: Brain,
+      description: "Artificial intelligence insights",
+      badge: "AI"
+    },
+    { 
+      name: "EMR Systems", 
+      href: "/emr", 
+      icon: Building2,
+      description: "Electronic medical records"
+    },
+    { 
+      name: "Patient Tracker", 
+      href: "/patient-tracker", 
+      icon: Activity,
+      description: "Emergency department tracking"
+    },
+    { 
+      name: "Laboratory", 
+      href: "/laboratory", 
+      icon: TestTube,
+      description: "Lab information system"
+    },
+    { 
+      name: "Radiology", 
+      href: "/radiology", 
+      icon: Scan,
+      description: "Medical imaging and PACS"
+    },
+    { 
+      name: "Billing", 
+      href: "/billing", 
+      icon: CreditCard,
+      description: "Revenue cycle management"
+    },
+    { 
+      name: "Coding", 
+      href: "/coding", 
+      icon: Code,
+      description: "Medical coding assistance"
+    },
+    { 
+      name: "AI Assistant", 
+      href: "/ai-assistant", 
+      icon: Stethoscope,
+      description: "Clinical AI copilot",
+      badge: "AI"
+    },
+    { 
+      name: "Virtualis Chat", 
+      href: "/virtualis-chat", 
+      icon: MessageSquare,
+      description: "AI-powered clinical communication",
+      badge: "NEW"
+    },
+    { 
+      name: "Reporting", 
+      href: "/reporting", 
+      icon: FileText,
+      description: "CMS and compliance reports"
+    },
+    { 
+      name: "Demo & Integration", 
+      href: "/demo", 
+      icon: Monitor,
+      description: "Technical documentation"
+    }
   ];
 
   const isActive = (path: string) => {
@@ -115,17 +180,17 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-1">
-        {navItems.map((item) => (
+        {menuItems.map((item) => (
           <Button
-            key={item.path}
-            variant={isActive(item.path) ? "secondary" : "ghost"}
+            key={item.href}
+            variant={isActive(item.href) ? "secondary" : "ghost"}
             className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start'} text-white hover:bg-white/10 ${
-              isActive(item.path) ? 'bg-white/20 text-white' : ''
+              isActive(item.href) ? 'bg-white/20 text-white' : ''
             }`}
-            onClick={() => navigate(item.path)}
+            onClick={() => navigate(item.href)}
           >
             <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'}`} />
-            {!isCollapsed && <span>{item.label}</span>}
+            {!isCollapsed && <span>{item.name}</span>}
           </Button>
         ))}
       </nav>

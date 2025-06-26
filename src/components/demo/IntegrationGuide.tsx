@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +14,139 @@ import {
 } from "lucide-react";
 
 const IntegrationGuide = () => {
+  const [activeSection, setActiveSection] = useState('overview');
+  const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
+
+  const integrationSteps = [
+    {
+      title: "Discovery & Assessment",
+      duration: "2-4 weeks",
+      description: "Technical assessment and interface mapping",
+      tasks: [
+        "Current system inventory and API documentation review",
+        "Data flow mapping and integration point identification",
+        "Security and compliance requirements assessment",
+        "Custom interface specification development"
+      ]
+    },
+    {
+      title: "Design & Development",
+      duration: "4-6 weeks",
+      description: "Development of integration components and API endpoints",
+      tasks: [
+        "API endpoint design and implementation",
+        "Data mapping and transformation",
+        "Authentication and authorization setup",
+        "Integration testing and validation"
+      ]
+    },
+    {
+      title: "Testing & Validation",
+      duration: "2-4 weeks",
+      description: "Testing and validation of integration components",
+      tasks: [
+        "End-to-end data flow validation",
+        "API response time testing",
+        "Error handling verification",
+        "Load testing with sample data",
+        "Authentication flow validation",
+        "Role-based access verification",
+        "Data encryption validation",
+        "Penetration testing"
+      ]
+    },
+    {
+      title: "Deployment & Maintenance",
+      duration: "1-2 weeks",
+      description: "Deployment of integration components and ongoing maintenance",
+      tasks: [
+        "Integration component deployment",
+        "Monitoring and logging setup",
+        "Regular updates and bug fixes"
+      ]
+    }
+  ];
+
+  const apiEndpoints = [
+    {
+      method: "GET",
+      endpoint: "/api/v1/patients",
+      description: "Retrieve patient demographics and basic information",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "POST",
+      endpoint: "/api/v1/patients",
+      description: "Create new patient record",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "PUT",
+      endpoint: "/api/v1/patients/{id}",
+      description: "Update patient information",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "GET",
+      endpoint: "/api/v1/encounters",
+      description: "Retrieve encounter data",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "GET",
+      endpoint: "/api/v1/observations",
+      description: "Get lab results and vitals",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "POST",
+      endpoint: "/api/v1/orders",
+      description: "Submit new orders",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "POST",
+      endpoint: "/api/v1/ai/clinical-notes",
+      description: "Generate clinical documentation",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "POST",
+      endpoint: "/api/v1/ai/diagnosis-support",
+      description: "AI-powered diagnosis assistance",
+      authentication: "Bearer Token + API Key"
+    },
+    {
+      method: "POST",
+      endpoint: "/api/v1/ai/medical-coding",
+      description: "Automated medical coding",
+      authentication: "Bearer Token + API Key"
+    }
+  ];
+
+  const securityFeatures = [
+    {
+      feature: "End-to-End Encryption",
+      description: "AES-256 encryption for data in transit and at rest",
+      compliance: "HIPAA, HITECH"
+    },
+    {
+      feature: "Role-Based Access Control",
+      description: "Fine-grained access control based on user roles",
+      compliance: "HIPAA, HITECH"
+    },
+    {
+      feature: "Data Masking",
+      description: "Data masking to protect sensitive information",
+      compliance: "HIPAA, HITECH"
+    },
+    {
+      feature: "Audit Logging",
+      description: "Real-time logging of all system activities",
+      compliance: "HIPAA, HITECH"
+    }
+  ];
+
   const downloadSpecification = (type: string) => {
     // Simulate downloading technical specifications
     console.log(`Downloading ${type} specification...`);

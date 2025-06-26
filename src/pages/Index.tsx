@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -18,6 +17,7 @@ import CopilotComposer from "@/components/patient/CopilotComposer";
 import AIDashboard from "@/components/dashboard/AIDashboard";
 import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
 import Demo from "@/pages/Demo";
+import VirtualisChatPage from "@/pages/VirtualisChat";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -76,6 +76,7 @@ const Index = () => {
           <Route path="/liverad" element={<LiveRadManager />} />
           <Route path="/reporting" element={<CMSReporting />} />
           <Route path="/ai-assistant" element={<CopilotComposer hospitalId={selectedHospitalId} />} />
+          <Route path="/virtualis-chat" element={<VirtualisChatPage />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="*" element={<Navigate to="/emr" replace />} />
         </Routes>
