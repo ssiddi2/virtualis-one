@@ -74,7 +74,7 @@ const AuthForm = () => {
           <img 
             src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
             alt="Virtualis One™" 
-            className="h-20 w-auto mx-auto mb-6"
+            className="h-20 w-auto mx-auto mb-6 animate-float pulse-glow"
           />
           <h1 className="text-3xl font-bold gradient-text tech-font">
             VIRTUALIS ONE™
