@@ -19,6 +19,7 @@ interface HospitalWithStatus {
   email: string;
   emr_type: string;
   license_number: string;
+  location?: string; // Add optional location property
   is_connected?: boolean;
   last_sync?: string;
   status?: 'connected' | 'disconnected' | 'error' | 'syncing';
@@ -69,9 +70,10 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
         city: hospital.city,
         state: hospital.state,
         phone: hospital.phone,
-        email: hospital.email,
+        email: hospital.email || '',
         emr_type: hospital.emr_type,
-        license_number: hospital.license_number,
+        license_number: hospital.license_number || '',
+        location: `${hospital.city}, ${hospital.state}`, // Create location from city and state
         is_connected: Math.random() > 0.3, // 70% connected for demo
         last_sync: ['2 minutes ago', '15 minutes ago', '1 hour ago', '2 hours ago'][Math.floor(Math.random() * 4)],
         status: ['connected', 'syncing', 'disconnected'][Math.floor(Math.random() * 3)] as 'connected' | 'syncing' | 'disconnected',
@@ -180,7 +182,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
           <img 
             src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
             alt="Virtualis One™" 
-            className="h-40 w-auto"
+            className="h-40 w-auto animate-float pulse-glow"
           />
         </div>
         
@@ -276,14 +278,14 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
                     <p className="text-white/60 text-sm tech-font">{hospital.city}, {hospital.state}</p>
                   </div>
                 </div>
-                {hospital.alerts_count > 0 && (
+                {hospital.alerts_count && hospital.alerts_count > 0 && (
                   <Badge className="glass-badge error">
                     {hospital.alerts_count}
                   </Badge>
                 )}
               </div>
               <div className="flex justify-between items-center gap-3">
-                {getStatusBadge(hospital.status, hospital.alerts_count)}
+                {getStatusBadge(hospital.status || 'disconnected', hospital.alerts_count)}
                 {getEmrBadge(hospital.emr_type)}
               </div>
             </CardHeader>
