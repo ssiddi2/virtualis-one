@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,7 +62,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
       }
 
       // Add mock status data for display
-      const hospitalsWithStatus = data.map(hospital => ({
+      const hospitalsWithStatus: HospitalWithStatus[] = data.map(hospital => ({
         ...hospital,
         is_connected: Math.random() > 0.3, // 70% connected for demo
         last_sync: ['2 minutes ago', '15 minutes ago', '1 hour ago', '2 hours ago'][Math.floor(Math.random() * 4)],
