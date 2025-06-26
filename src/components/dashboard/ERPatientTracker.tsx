@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import {
   Send
 } from 'lucide-react';
 
-interface ERPatientTrackerProps {
+export interface ERPatientTrackerProps {
   hospitalId?: string | null;
 }
 
