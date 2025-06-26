@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -50,7 +51,7 @@ const Index = () => {
       <main className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Navigate to="/emr" replace />} />
-          <Route path="/dashboard" element={<Dashboard user={profile || user} />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/ai-dashboard" element={<AIDashboard user={profile || user} />} />
           <Route path="/emr" element={
             selectedHospitalId ? (
