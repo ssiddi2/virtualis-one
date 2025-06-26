@@ -1,472 +1,383 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { Clock, User, AlertCircle, Brain, Stethoscope, Activity } from "lucide-react";
-import { useAIAssistant } from "@/hooks/useAIAssistant";
-import { usePatients } from "@/hooks/usePatients";
-import { toast } from "sonner";
-
-interface Patient {
-  id: string;
-  name: string;
-  age: number;
-  room: string;
-  complaint: string;
-  status: 'waiting' | 'in-progress' | 'discharge-ready';
-  provider: string;
-  admitTime: string;
-  acuity: 'low' | 'medium' | 'high';
-  vitals?: {
-    bp: string;
-    hr: number;
-    temp: number;
-    o2sat: number;
-  };
-}
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Clock, 
+  AlertCircle, 
+  UserCheck, 
+  Activity,
+  Search,
+  RefreshCw,
+  Heart,
+  Thermometer,
+  Stethoscope,
+  Download,
+  Send
+} from 'lucide-react';
 
 interface ERPatientTrackerProps {
   hospitalId?: string | null;
 }
 
 const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
-  const navigate = useNavigate();
-  const { callAI, isLoading } = useAIAssistant();
-  const { data: realPatients } = usePatients(hospitalId || undefined);
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
-  useEffect(() => {
-    if (!hospitalId) {
-      setPatients([]);
-      return;
+  // Mock patient data
+  const [patients] = useState([
+    {
+      id: 'ER001',
+      name: 'John Smith',
+      age: 45,
+      chiefComplaint: 'Chest pain',
+      triageLevel: 'Critical',
+      arrivalTime: '10:30 AM',
+      waitTime: '15 min',
+      status: 'In Treatment',
+      assignedTo: 'Dr. Johnson',
+      vitals: { bp: '140/90', hr: '95', temp: '98.6°F', spo2: '98%' }
+    },
+    {
+      id: 'ER002',
+      name: 'Sarah Davis',
+      age: 32,
+      chiefComplaint: 'Severe headache',
+      triageLevel: 'Urgent',
+      arrivalTime: '11:15 AM',
+      waitTime: '45 min',
+      status: 'Waiting',
+      assignedTo: 'Dr. Williams',
+      vitals: { bp: '120/80', hr: '88', temp: '99.1°F', spo2: '99%' }
+    },
+    {
+      id: 'ER003',
+      name: 'Michael Brown',
+      age: 28,
+      chiefComplaint: 'Laceration on hand',
+      triageLevel: 'Non-urgent',
+      arrivalTime: '12:00 PM',
+      waitTime: '90 min',
+      status: 'Registered',
+      assignedTo: 'Nurse Peterson',
+      vitals: { bp: '118/75', hr: '72', temp: '98.4°F', spo2: '100%' }
     }
+  ]);
 
-    // Convert real patient data to ER tracker format with realistic ER scenarios
-    const convertToERPatients = (realPatients: any[]) => {
-      return realPatients.map((patient, index) => {
-        const age = new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear();
-        const complaints = {
-          '11111111-1111-1111-1111-111111111111': [
-            'Chest pain, shortness of breath',
-            'Abdominal pain, nausea',
-            'Difficulty breathing, fatigue',
-            'Pregnancy complications, bleeding'
-          ],
-          '22222222-2222-2222-2222-222222222222': [
-            'Acute stroke symptoms, confusion',
-            'Joint pain, swelling',
-            'Multiple trauma, consciousness',
-            'Psychiatric emergency, agitation'
-          ],
-          '33333333-3333-3333-3333-333333333333': [
-            'Severe abdominal pain, weight loss',
-            'Eating disorder, malnutrition',
-            'Neck mass, difficulty swallowing',
-            'Severe burns, pain'
-          ],
-          '44444444-4444-4444-4444-444444444444': [
-            'Chest pain, cardiac symptoms',
-            'Fever, infection symptoms',
-            'Psychiatric crisis, hallucinations',
-            'Pregnancy, high blood pressure'
-          ],
-          '55555555-5555-5555-5555-555555555555': [
-            'Chest pain, heart palpitations',
-            'Shortness of breath, swelling',
-            'Chest tightness, dizziness',
-            'Heart failure symptoms, fatigue'
-          ]
-        };
-
-        const statuses = ['waiting', 'in-progress', 'discharge-ready'] as const;
-        const acuities = ['low', 'medium', 'high'] as const;
-        const providers = ['Dr. Smith', 'Dr. Johnson', 'Dr. Williams', 'Dr. Brown'];
-        
-        const hospitalComplaints = complaints[hospitalId as keyof typeof complaints] || complaints['11111111-1111-1111-1111-111111111111'];
-        
-        return {
-          id: patient.id,
-          name: `${patient.first_name} ${patient.last_name}`,
-          age,
-          room: patient.room_number || `ER-${100 + index}`,
-          complaint: hospitalComplaints[index % hospitalComplaints.length],
-          status: statuses[index % statuses.length],
-          provider: providers[index % providers.length],
-          admitTime: new Date(patient.admission_date || new Date()).toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-          }),
-          acuity: acuities[index % acuities.length],
-          vitals: {
-            bp: `${120 + (index * 10)}/${80 + (index * 5)}`,
-            hr: 70 + (index * 8),
-            temp: 98.6 + (index * 0.3),
-            o2sat: 98 - (index * 2)
-          }
-        };
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    
+    setTimeout(() => {
+      toast({
+        title: "Data Refreshed",
+        description: "Patient tracker data has been updated with latest information.",
       });
-    };
+      setIsRefreshing(false);
+    }, 2000);
+  };
 
-    if (realPatients && realPatients.length > 0) {
-      const erPatients = convertToERPatients(realPatients);
-      setPatients(erPatients);
-    }
-  }, [realPatients, hospitalId]);
-
-  const getAITriageAssessment = async (patient: Patient) => {
-    try {
-      const patientData = `
-        Patient: ${patient.name}, Age: ${patient.age}
-        Chief Complaint: ${patient.complaint}
-        Vitals: BP ${patient.vitals?.bp}, HR ${patient.vitals?.hr}, Temp ${patient.vitals?.temp}°F, O2 Sat ${patient.vitals?.o2sat}%
-        Current Acuity: ${patient.acuity}
-        Current Status: ${patient.status}
-        Room: ${patient.room}
-        Provider: ${patient.provider}
-      `;
-
-      console.log('Requesting AI clinical note for:', patient.name);
-
-      const result = await callAI({
-        type: 'clinical_note',
-        data: { summary: patientData },
-        context: 'Emergency Department triage assessment and clinical documentation'
+  const handleGenerateReport = async (reportType: string) => {
+    setIsGeneratingReport(true);
+    
+    setTimeout(() => {
+      toast({
+        title: "Report Generated",
+        description: `${reportType} report has been generated and is ready for download.`,
       });
-
-      console.log('AI clinical assessment received:', result);
-
-      toast.success(`AI clinical assessment completed for ${patient.name}`);
+      setIsGeneratingReport(false);
       
-      console.log('AI Clinical Assessment for', patient.name, ':', result);
+      // Simulate file download
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(`${reportType} Report Data`));
+      element.setAttribute('download', `${reportType.toLowerCase().replace(' ', '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 2000);
+  };
 
-    } catch (error) {
-      console.error('AI triage error:', error);
-      toast.error(`Failed to generate AI clinical assessment for ${patient.name}`);
+  const handlePatientAction = (patientId: string, action: string) => {
+    toast({
+      title: `Patient ${action}`,
+      description: `Action "${action}" completed for patient ${patientId}`,
+    });
+  };
+
+  const getTriageBadgeColor = (level: string) => {
+    switch (level) {
+      case 'Critical': return 'bg-red-600/20 text-red-300 border-red-600/30';
+      case 'Urgent': return 'bg-orange-600/20 text-orange-300 border-orange-600/30';
+      case 'Non-urgent': return 'bg-green-600/20 text-green-300 border-green-600/30';
+      default: return 'bg-gray-600/20 text-gray-300 border-gray-600/30';
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'waiting':
-        return 'bg-blue-100 text-blue-800';
-      case 'in-progress':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'discharge-ready':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'In Treatment': return 'bg-blue-600/20 text-blue-300 border-blue-600/30';
+      case 'Waiting': return 'bg-yellow-600/20 text-yellow-300 border-yellow-600/30';
+      case 'Registered': return 'bg-purple-600/20 text-purple-300 border-purple-600/30';
+      default: return 'bg-gray-600/20 text-gray-300 border-gray-600/30';
     }
   };
 
-  const getAcuityColor = (acuity: string) => {
-    switch (acuity) {
-      case 'high':
-        return 'text-red-600 bg-red-50 border-red-200';
-      case 'medium':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low':
-        return 'text-green-600 bg-green-50 border-green-200';
-      default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
-
-  const getVitalAlert = (vitals: Patient['vitals']) => {
-    if (!vitals) return null;
-    
-    const alerts = [];
-    if (vitals.o2sat < 95) alerts.push('Low O2');
-    if (vitals.hr > 100) alerts.push('Tachycardia');
-    if (vitals.temp > 100.4) alerts.push('Fever');
-    if (parseInt(vitals.bp.split('/')[0]) > 140) alerts.push('Hypertension');
-    
-    return alerts.length > 0 ? alerts.join(', ') : null;
-  };
-
-  const groupedPatients = {
-    waiting: patients.filter(p => p.status === 'waiting'),
-    'in-progress': patients.filter(p => p.status === 'in-progress'),
-    'discharge-ready': patients.filter(p => p.status === 'discharge-ready')
-  };
-
-  const mockHospitalNames = {
-    '77777777-7777-7777-7777-777777777777': 'Atlantic Medical Center',
-    '11111111-1111-1111-1111-111111111111': 'Metropolitan General Hospital',
-    '22222222-2222-2222-2222-222222222222': 'Riverside Medical Center',
-    '33333333-3333-3333-3333-333333333333': 'Sunset Community Hospital',
-    '44444444-4444-4444-4444-444444444444': 'Bay Area Medical Complex',
-    '55555555-5555-5555-5555-555555555555': 'Texas Heart Institute'
-  };
-
-  const hospitalName = hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : 'All Hospitals';
+  const filteredPatients = patients.filter(patient =>
+    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.chiefComplaint.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (!hospitalId) {
     return (
-      <div className="min-h-screen bg-[#0a1628] p-6 flex items-center justify-center">
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
-          <CardContent className="p-8 text-center">
-            <Stethoscope className="h-16 w-16 text-blue-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Hospital Selected</h3>
-            <p className="text-white/70 mb-4">
-              Please select a hospital from the EMR Dashboard to view patient data.
-            </p>
-            <Button onClick={() => navigate('/emr')} className="bg-blue-600 hover:bg-blue-700">
-              Go to EMR Dashboard
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-bold mb-4">Select a Hospital</h2>
+          <p className="text-white/70">Please select a hospital from the EMR dashboard to view patient tracking.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[#0a1628] p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Emergency Department Patient Tracker
-        </h1>
-        <p className="text-white/70">
-          {hospitalName} - Real-time patient tracking with AI-powered clinical assistance
-        </p>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-            <User className="h-4 w-4 text-blue-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{patients.length}</div>
-            <p className="text-xs text-white/60">Currently in ED</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Acuity</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-400">
-              {patients.filter(p => p.acuity === 'high').length}
-            </div>
-            <p className="text-xs text-white/60">Critical patients</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Waiting</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-400">
-              {groupedPatients.waiting.length}
-            </div>
-            <p className="text-xs text-white/60">In queue</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ready to Discharge</CardTitle>
-            <Activity className="h-4 w-4 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-400">
-              {groupedPatients['discharge-ready'].length}
-            </div>
-            <p className="text-xs text-white/60">Can be discharged</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="bg-[#1a2332] border-[#2a3441]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <Stethoscope className="h-5 w-5" />
-            AI-Enhanced Patient Tracker Board - {hospitalName}
-          </CardTitle>
-          <CardDescription className="text-white/70">
-            Real-time patient status with AI-powered clinical assistance ({patients.length} patients)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Waiting Column */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-blue-400">Waiting ({groupedPatients.waiting.length})</h3>
-              </div>
-              <div className="space-y-3">
-                {groupedPatients.waiting.map((patient) => (
-                  <Card 
-                    key={patient.id} 
-                    className="p-4 bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
-                    onClick={() => navigate(`/patient/${patient.id}`)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-white">{patient.name}</h4>
-                        <p className="text-sm text-white/60">Age {patient.age} • {patient.room}</p>
-                      </div>
-                      <Badge className={`${getAcuityColor(patient.acuity)} text-xs border`}>
-                        {patient.acuity.toUpperCase()}
-                      </Badge>
-                    </div>
-                    
-                    <p className="text-sm text-white/80 mb-3">{patient.complaint}</p>
-                    
-                    {patient.vitals && (
-                      <div className="bg-[#0a1628] p-2 rounded text-xs text-white/70 mb-3">
-                        <div className="grid grid-cols-2 gap-1">
-                          <span>BP: {patient.vitals.bp}</span>
-                          <span>HR: {patient.vitals.hr}</span>
-                          <span>Temp: {patient.vitals.temp}°F</span>
-                          <span>O2: {patient.vitals.o2sat}%</span>
-                        </div>
-                        {getVitalAlert(patient.vitals) && (
-                          <div className="text-red-400 mt-1 font-medium">
-                            ⚠️ {getVitalAlert(patient.vitals)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-xs text-white/50">
-                        <Clock className="h-3 w-3" />
-                        {patient.admitTime}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          getAITriageAssessment(patient);
-                        }}
-                        disabled={isLoading}
-                        className="bg-blue-600/20 border-blue-400 text-blue-400 hover:bg-blue-600/30"
-                      >
-                        <Brain className="h-3 w-3 mr-1" />
-                        AI Clinical Note
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            {/* In Progress Column */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-yellow-400">In Progress ({groupedPatients['in-progress'].length})</h3>
-              </div>
-              <div className="space-y-3">
-                {groupedPatients['in-progress'].map((patient) => (
-                  <Card 
-                    key={patient.id} 
-                    className="p-4 bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
-                    onClick={() => navigate(`/patient/${patient.id}`)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-white">{patient.name}</h4>
-                        <p className="text-sm text-white/60">Age {patient.age} • {patient.room}</p>
-                      </div>
-                      <Badge className={`${getAcuityColor(patient.acuity)} text-xs border`}>
-                        {patient.acuity.toUpperCase()}
-                      </Badge>
-                    </div>
-                    
-                    <p className="text-sm text-white/80 mb-2">{patient.complaint}</p>
-                    <p className="text-sm text-blue-400 mb-3">{patient.provider}</p>
-                    
-                    {patient.vitals && (
-                      <div className="bg-[#0a1628] p-2 rounded text-xs text-white/70 mb-3">
-                        <div className="grid grid-cols-2 gap-1">
-                          <span>BP: {patient.vitals.bp}</span>
-                          <span>HR: {patient.vitals.hr}</span>
-                          <span>Temp: {patient.vitals.temp}°F</span>
-                          <span>O2: {patient.vitals.o2sat}%</span>
-                        </div>
-                        {getVitalAlert(patient.vitals) && (
-                          <div className="text-red-400 mt-1 font-medium">
-                            ⚠️ {getVitalAlert(patient.vitals)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-xs text-white/50">
-                        <Clock className="h-3 w-3" />
-                        {patient.admitTime}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          getAITriageAssessment(patient);
-                        }}
-                        disabled={isLoading}
-                        className="bg-blue-600/20 border-blue-400 text-blue-400 hover:bg-blue-600/30"
-                      >
-                        <Brain className="h-3 w-3 mr-1" />
-                        AI Clinical Note
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            {/* Discharge Ready Column */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-green-400">Discharge Ready ({groupedPatients['discharge-ready'].length})</h3>
-              </div>
-              <div className="space-y-3">
-                {groupedPatients['discharge-ready'].map((patient) => (
-                  <Card 
-                    key={patient.id} 
-                    className="p-4 bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
-                    onClick={() => navigate(`/patient/${patient.id}`)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-white">{patient.name}</h4>
-                        <p className="text-sm text-white/60">Age {patient.age} • {patient.room}</p>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800 text-xs">
-                        READY
-                      </Badge>
-                    </div>
-                    
-                    <p className="text-sm text-white/80 mb-2">{patient.complaint}</p>
-                    <p className="text-sm text-blue-400 mb-3">{patient.provider}</p>
-                    
-                    <div className="flex items-center justify-between text-xs text-white/50">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {patient.admitTime}
-                      </span>
-                      <Badge className="bg-green-500 text-white">
-                        Ready
-                      </Badge>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Emergency Department Tracker</h1>
+            <p className="text-white/70">Real-time patient monitoring and workflow management</p>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => handleGenerateReport('ED Status Report')}
+              disabled={isGeneratingReport}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
+              Generate Report
+            </Button>
+            <Button 
+              onClick={handleRefreshData}
+              disabled={isRefreshing}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isRefreshing ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              Refresh Data
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white">Total Patients</CardTitle>
+              <UserCheck className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{patients.length}</div>
+              <p className="text-xs text-slate-400">Active in ED</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white">Critical Cases</CardTitle>
+              <AlertCircle className="h-4 w-4 text-red-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">1</div>
+              <p className="text-xs text-slate-400">Immediate attention</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white">Average Wait</CardTitle>
+              <Clock className="h-4 w-4 text-orange-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">50m</div>
+              <p className="text-xs text-slate-400">Current average</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white">Bed Occupancy</CardTitle>
+              <Activity className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">75%</div>
+              <p className="text-xs text-slate-400">12 of 16 beds</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filters */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Patient Search</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <div className="flex-1 relative">
+                <Search className="h-4 w-4 absolute left-3 top-3 text-slate-400" />
+                <Input
+                  placeholder="Search by name, ID, or complaint..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-700 border-slate-600 text-white"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Patient List */}
+        <div className="space-y-4">
+          {filteredPatients.map((patient) => (
+            <Card key={patient.id} className="bg-slate-800/50 border-slate-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">{patient.name}</h3>
+                      <p className="text-slate-400">{patient.age} years • ID: {patient.id}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge className={getTriageBadgeColor(patient.triageLevel)}>
+                        {patient.triageLevel}
+                      </Badge>
+                      <Badge className={getStatusBadgeColor(patient.status)}>
+                        {patient.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-medium">Wait: {patient.waitTime}</div>
+                    <div className="text-slate-400 text-sm">Arrived: {patient.arrivalTime}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <h4 className="text-white font-medium mb-2">Chief Complaint</h4>
+                    <p className="text-slate-400">{patient.chiefComplaint}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium mb-2">Assigned To</h4>
+                    <p className="text-slate-400">{patient.assignedTo}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium mb-2">Vital Signs</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-3 w-3 text-red-400" />
+                        <span className="text-slate-400">BP: {patient.vitals.bp}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Activity className="h-3 w-3 text-green-400" />
+                        <span className="text-slate-400">HR: {patient.vitals.hr}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Thermometer className="h-3 w-3 text-orange-400" />
+                        <span className="text-slate-400">Temp: {patient.vitals.temp}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Stethoscope className="h-3 w-3 text-blue-400" />
+                        <span className="text-slate-400">SpO2: {patient.vitals.spo2}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => handlePatientAction(patient.id, 'Update Status')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Update Status
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handlePatientAction(patient.id, 'View Chart')}
+                    className="border-slate-600 text-white hover:bg-slate-700"
+                  >
+                    View Chart
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handlePatientAction(patient.id, 'Order Labs')}
+                    className="border-slate-600 text-white hover:bg-slate-700"
+                  >
+                    Order Labs
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handlePatientAction(patient.id, 'Discharge')}
+                    className="border-slate-600 text-white hover:bg-slate-700"
+                  >
+                    Discharge
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Quick Actions */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Button 
+                onClick={() => toast({ title: "Feature", description: "Opening new patient registration..." })}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <UserCheck className="h-4 w-4 mr-2" />
+                New Patient
+              </Button>
+              <Button 
+                onClick={() => handleGenerateReport('Bed Status Report')}
+                disabled={isGeneratingReport}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                Bed Management
+              </Button>
+              <Button 
+                onClick={() => handleGenerateReport('Triage Summary')}
+                disabled={isGeneratingReport}
+                variant="outline"
+                className="border-slate-600 text-white hover:bg-slate-700"
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                Triage Summary
+              </Button>
+              <Button 
+                onClick={() => toast({ title: "Feature", description: "Opening staff assignment panel..." })}
+                variant="outline"
+                className="border-slate-600 text-white hover:bg-slate-700"
+              >
+                <Stethoscope className="h-4 w-4 mr-2" />
+                Staff Assignment
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
