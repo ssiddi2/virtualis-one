@@ -69,174 +69,203 @@ const AuthForm = () => {
 
   return (
     <div className="min-h-screen bg-[#0a1628] flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <img 
-            src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
-            alt="Virtualis One™" 
-            className="h-20 w-auto mx-auto mb-6 animate-float pulse-glow"
-          />
-          <h1 className="text-3xl font-bold gradient-text tech-font">
-            VIRTUALIS ONE™
-          </h1>
-          <p className="text-white/80 text-lg tech-font mt-2">
-            Healthcare Intelligence Platform
-          </p>
+      <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+        {/* Logo and Messaging Section */}
+        <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-8">
+          <div className="space-y-6">
+            <img 
+              src="/lovable-uploads/2f7fb8f1-6592-4169-9278-f93a9417e1e8.png" 
+              alt="Healthcare Platform Logo" 
+              className="h-32 lg:h-48 xl:h-64 w-auto mx-auto lg:mx-0 animate-float pulse-glow"
+            />
+            <div className="space-y-4">
+              <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold gradient-text tech-font leading-tight">
+                TRANSFORM
+                <br />
+                HEALTHCARE
+              </h1>
+              <p className="text-xl lg:text-2xl xl:text-3xl text-white/90 tech-font font-medium">
+                One System, Smarter Care
+              </p>
+              <p className="text-lg lg:text-xl text-white/70 tech-font max-w-lg">
+                Revolutionary healthcare intelligence platform connecting hospitals, 
+                patients, and providers in real-time.
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl">
+            <div className="glass-badge primary flex items-center justify-center gap-2 p-4">
+              <Shield className="h-5 w-5" />
+              <span className="tech-font font-semibold">HIPAA SECURE</span>
+            </div>
+            <div className="glass-badge success flex items-center justify-center gap-2 p-4">
+              <Stethoscope className="h-5 w-5" />
+              <span className="tech-font font-semibold">AI-POWERED</span>
+            </div>
+            <div className="glass-badge flex items-center justify-center gap-2 p-4">
+              <Shield className="h-5 w-5" />
+              <span className="tech-font font-semibold">SOC 2 CERTIFIED</span>
+            </div>
+          </div>
         </div>
 
-        <Card className="glass-card">
-          <CardHeader className="space-y-1">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="h-5 w-5 text-virtualis-gold" />
-              <CardTitle className="text-white tech-font">Secure Access</CardTitle>
-            </div>
-            <CardDescription className="text-white/70">
-              Sign in to access your healthcare management system
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 glass-nav-item">
-                <TabsTrigger value="signin" className="tech-font">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="tech-font">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Sign Up
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-white tech-font">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={signInData.email}
-                      onChange={(e) => setSignInData({...signInData, email: e.target.value})}
-                      className="glass-input tech-font"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-white tech-font">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={signInData.password}
-                      onChange={(e) => setSignInData({...signInData, password: e.target.value})}
-                      className="glass-input tech-font"
-                      required
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full glass-button tech-font"
-                    disabled={isSubmitting}
-                  >
-                    <Stethoscope className="h-4 w-4 mr-2" />
-                    {isSubmitting ? 'Signing In...' : 'Sign In'}
-                  </Button>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-white tech-font">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={signUpData.firstName}
-                        onChange={(e) => setSignUpData({...signUpData, firstName: e.target.value})}
-                        className="glass-input tech-font"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-white tech-font">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={signUpData.lastName}
-                        onChange={(e) => setSignUpData({...signUpData, lastName: e.target.value})}
-                        className="glass-input tech-font"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="role" className="text-white tech-font">Role</Label>
-                    <Select value={signUpData.role} onValueChange={(value) => setSignUpData({...signUpData, role: value})}>
-                      <SelectTrigger className="glass-input tech-font">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="glass-card border-white/20">
-                        <SelectItem value="doctor" className="text-white tech-font">Doctor</SelectItem>
-                        <SelectItem value="nurse" className="text-white tech-font">Nurse</SelectItem>
-                        <SelectItem value="technician" className="text-white tech-font">Technician</SelectItem>
-                        <SelectItem value="pharmacist" className="text-white tech-font">Pharmacist</SelectItem>
-                        <SelectItem value="receptionist" className="text-white tech-font">Receptionist</SelectItem>
-                        <SelectItem value="admin" className="text-white tech-font">Administrator</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signupEmail" className="text-white tech-font">Email</Label>
-                    <Input
-                      id="signupEmail"
-                      type="email"
-                      value={signUpData.email}
-                      onChange={(e) => setSignUpData({...signUpData, email: e.target.value})}
-                      className="glass-input tech-font"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signupPassword" className="text-white tech-font">Password</Label>
-                    <Input
-                      id="signupPassword"
-                      type="password"
-                      value={signUpData.password}
-                      onChange={(e) => setSignUpData({...signUpData, password: e.target.value})}
-                      className="glass-input tech-font"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-white tech-font">Confirm Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={signUpData.confirmPassword}
-                      onChange={(e) => setSignUpData({...signUpData, confirmPassword: e.target.value})}
-                      className="glass-input tech-font"
-                      required
-                    />
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full glass-button tech-font"
-                    disabled={isSubmitting}
-                  >
+        {/* Authentication Form Section */}
+        <div className="w-full max-w-md mx-auto lg:mx-0 space-y-6">
+          <Card className="glass-card">
+            <CardHeader className="space-y-1">
+              <div className="flex items-center gap-2 mb-4">
+                <Shield className="h-5 w-5 text-virtualis-gold" />
+                <CardTitle className="text-white tech-font">Secure Access</CardTitle>
+              </div>
+              <CardDescription className="text-white/70">
+                Sign in to access your healthcare management system
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 glass-nav-item">
+                  <TabsTrigger value="signin" className="tech-font">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </TabsTrigger>
+                  <TabsTrigger value="signup" className="tech-font">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    {isSubmitting ? 'Creating Account...' : 'Create Account'}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-        
-        <div className="text-center text-white/60 text-sm tech-font">
-          <p>🔒 HIPAA Compliant • SOC 2 Certified • 256-bit Encryption</p>
+                    Sign Up
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-white tech-font">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={signInData.email}
+                        onChange={(e) => setSignInData({...signInData, email: e.target.value})}
+                        className="glass-input tech-font"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-white tech-font">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={signInData.password}
+                        onChange={(e) => setSignInData({...signInData, password: e.target.value})}
+                        className="glass-input tech-font"
+                        required
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full glass-button tech-font"
+                      disabled={isSubmitting}
+                    >
+                      <Stethoscope className="h-4 w-4 mr-2" />
+                      {isSubmitting ? 'Signing In...' : 'Sign In'}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName" className="text-white tech-font">First Name</Label>
+                        <Input
+                          id="firstName"
+                          value={signUpData.firstName}
+                          onChange={(e) => setSignUpData({...signUpData, firstName: e.target.value})}
+                          className="glass-input tech-font"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName" className="text-white tech-font">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          value={signUpData.lastName}
+                          onChange={(e) => setSignUpData({...signUpData, lastName: e.target.value})}
+                          className="glass-input tech-font"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="role" className="text-white tech-font">Role</Label>
+                      <Select value={signUpData.role} onValueChange={(value) => setSignUpData({...signUpData, role: value})}>
+                        <SelectTrigger className="glass-input tech-font">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="glass-card border-white/20">
+                          <SelectItem value="doctor" className="text-white tech-font">Doctor</SelectItem>
+                          <SelectItem value="nurse" className="text-white tech-font">Nurse</SelectItem>
+                          <SelectItem value="technician" className="text-white tech-font">Technician</SelectItem>
+                          <SelectItem value="pharmacist" className="text-white tech-font">Pharmacist</SelectItem>
+                          <SelectItem value="receptionist" className="text-white tech-font">Receptionist</SelectItem>
+                          <SelectItem value="admin" className="text-white tech-font">Administrator</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signupEmail" className="text-white tech-font">Email</Label>
+                      <Input
+                        id="signupEmail"
+                        type="email"
+                        value={signUpData.email}
+                        onChange={(e) => setSignUpData({...signUpData, email: e.target.value})}
+                        className="glass-input tech-font"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signupPassword" className="text-white tech-font">Password</Label>
+                      <Input
+                        id="signupPassword"
+                        type="password"
+                        value={signUpData.password}
+                        onChange={(e) => setSignUpData({...signUpData, password: e.target.value})}
+                        className="glass-input tech-font"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-white tech-font">Confirm Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={signUpData.confirmPassword}
+                        onChange={(e) => setSignUpData({...signUpData, confirmPassword: e.target.value})}
+                        className="glass-input tech-font"
+                        required
+                      />
+                    </div>
+                    
+                    <Button
+                      type="submit"
+                      className="w-full glass-button tech-font"
+                      disabled={isSubmitting}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      {isSubmitting ? 'Creating Account...' : 'Create Account'}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+          
+          <div className="text-center text-white/60 text-sm tech-font">
+            <p>🔒 256-bit Encryption • Real-time Monitoring • 99.9% Uptime</p>
+          </div>
         </div>
       </div>
     </div>
