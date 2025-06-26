@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Clock, User, AlertCircle, Brain, Stethoscope, Activity } from "lucide-react";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
+import { usePatients } from "@/hooks/usePatients";
 import { toast } from "sonner";
 
 interface Patient {
@@ -26,99 +27,93 @@ interface Patient {
 }
 
 interface ERPatientTrackerProps {
-  hospitalId?: string;
+  hospitalId?: string | null;
 }
 
 const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
   const navigate = useNavigate();
   const { callAI, isLoading } = useAIAssistant();
+  const { data: realPatients } = usePatients(hospitalId || undefined);
   const [patients, setPatients] = useState<Patient[]>([]);
 
   useEffect(() => {
-    // In a real implementation, this would filter patients by hospitalId
-    // For now, showing mock data that would come from the specific hospital's EMR
-    const mockHospitalNames = {
-      '77777777-7777-7777-7777-777777777777': 'Atlantic Medical Center',
-      '11111111-1111-1111-1111-111111111111': 'Metropolitan General Hospital',
-      '22222222-2222-2222-2222-222222222222': 'Riverside Medical Center'
+    if (!hospitalId) {
+      setPatients([]);
+      return;
+    }
+
+    // Convert real patient data to ER tracker format with realistic ER scenarios
+    const convertToERPatients = (realPatients: any[]) => {
+      return realPatients.map((patient, index) => {
+        const age = new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear();
+        const complaints = {
+          '11111111-1111-1111-1111-111111111111': [
+            'Chest pain, shortness of breath',
+            'Abdominal pain, nausea',
+            'Difficulty breathing, fatigue',
+            'Pregnancy complications, bleeding'
+          ],
+          '22222222-2222-2222-2222-222222222222': [
+            'Acute stroke symptoms, confusion',
+            'Joint pain, swelling',
+            'Multiple trauma, consciousness',
+            'Psychiatric emergency, agitation'
+          ],
+          '33333333-3333-3333-3333-333333333333': [
+            'Severe abdominal pain, weight loss',
+            'Eating disorder, malnutrition',
+            'Neck mass, difficulty swallowing',
+            'Severe burns, pain'
+          ],
+          '44444444-4444-4444-4444-444444444444': [
+            'Chest pain, cardiac symptoms',
+            'Fever, infection symptoms',
+            'Psychiatric crisis, hallucinations',
+            'Pregnancy, high blood pressure'
+          ],
+          '55555555-5555-5555-5555-555555555555': [
+            'Chest pain, heart palpitations',
+            'Shortness of breath, swelling',
+            'Chest tightness, dizziness',
+            'Heart failure symptoms, fatigue'
+          ]
+        };
+
+        const statuses = ['waiting', 'in-progress', 'discharge-ready'] as const;
+        const acuities = ['low', 'medium', 'high'] as const;
+        const providers = ['Dr. Smith', 'Dr. Johnson', 'Dr. Williams', 'Dr. Brown'];
+        
+        const hospitalComplaints = complaints[hospitalId as keyof typeof complaints] || complaints['11111111-1111-1111-1111-111111111111'];
+        
+        return {
+          id: patient.id,
+          name: `${patient.first_name} ${patient.last_name}`,
+          age,
+          room: patient.room_number || `ER-${100 + index}`,
+          complaint: hospitalComplaints[index % hospitalComplaints.length],
+          status: statuses[index % statuses.length],
+          provider: providers[index % providers.length],
+          admitTime: new Date(patient.admission_date || new Date()).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          }),
+          acuity: acuities[index % acuities.length],
+          vitals: {
+            bp: `${120 + (index * 10)}/${80 + (index * 5)}`,
+            hr: 70 + (index * 8),
+            temp: 98.6 + (index * 0.3),
+            o2sat: 98 - (index * 2)
+          }
+        };
+      });
     };
 
-    // Mock patient data filtered by hospital
-    const allPatients = [
-      {
-        id: "1",
-        name: "Sarah Johnson",
-        age: 45,
-        room: "ER-101",
-        complaint: "Chest pain, shortness of breath",
-        status: "in-progress" as const,
-        provider: "Dr. Smith",
-        admitTime: "09:30 AM",
-        acuity: "high" as const,
-        vitals: { bp: "160/95", hr: 102, temp: 99.2, o2sat: 94 },
-        hospitalId: "77777777-7777-7777-7777-777777777777"
-      },
-      {
-        id: "2", 
-        name: "Michael Brown",
-        age: 32,
-        room: "ER-102",
-        complaint: "Ankle injury from sports",
-        status: "waiting" as const,
-        provider: "Dr. Johnson",
-        admitTime: "10:15 AM",
-        acuity: "low" as const,
-        vitals: { bp: "120/80", hr: 75, temp: 98.6, o2sat: 99 },
-        hospitalId: "77777777-7777-7777-7777-777777777777"
-      },
-      {
-        id: "3",
-        name: "Emily Davis",
-        age: 28,
-        room: "ER-103",
-        complaint: "Severe headache, photophobia",
-        status: "discharge-ready" as const,
-        provider: "Dr. Smith",
-        admitTime: "08:45 AM",
-        acuity: "medium" as const,
-        vitals: { bp: "135/85", hr: 88, temp: 100.1, o2sat: 98 },
-        hospitalId: "11111111-1111-1111-1111-111111111111"
-      },
-      {
-        id: "4",
-        name: "Robert Wilson",
-        age: 67,
-        room: "ER-104",
-        complaint: "Shortness of breath, chest tightness",
-        status: "in-progress" as const,
-        provider: "Dr. Johnson",
-        admitTime: "11:00 AM",
-        acuity: "high" as const,
-        vitals: { bp: "180/100", hr: 110, temp: 98.8, o2sat: 91 },
-        hospitalId: "22222222-2222-2222-2222-222222222222"
-      },
-      {
-        id: "5",
-        name: "Lisa Garcia",
-        age: 34,
-        room: "Triage",
-        complaint: "Abdominal pain, nausea",
-        status: "waiting" as const,
-        provider: "Unassigned",
-        admitTime: "11:30 AM",
-        acuity: "medium" as const,
-        vitals: { bp: "125/82", hr: 92, temp: 99.8, o2sat: 97 },
-        hospitalId: "77777777-7777-7777-7777-777757777777"
-      }
-    ];
-
-    // Filter patients by hospital if hospitalId is provided
-    const filteredPatients = hospitalId 
-      ? allPatients.filter(p => p.hospitalId === hospitalId)
-      : allPatients;
-
-    setPatients(filteredPatients);
-  }, [hospitalId]);
+    if (realPatients && realPatients.length > 0) {
+      const erPatients = convertToERPatients(realPatients);
+      setPatients(erPatients);
+    }
+  }, [realPatients, hospitalId]);
 
   const getAITriageAssessment = async (patient: Patient) => {
     try {
@@ -128,6 +123,8 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
         Vitals: BP ${patient.vitals?.bp}, HR ${patient.vitals?.hr}, Temp ${patient.vitals?.temp}°F, O2 Sat ${patient.vitals?.o2sat}%
         Current Acuity: ${patient.acuity}
         Current Status: ${patient.status}
+        Room: ${patient.room}
+        Provider: ${patient.provider}
       `;
 
       console.log('Requesting AI clinical note for:', patient.name);
@@ -197,10 +194,32 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
   const mockHospitalNames = {
     '77777777-7777-7777-7777-777777777777': 'Atlantic Medical Center',
     '11111111-1111-1111-1111-111111111111': 'Metropolitan General Hospital',
-    '22222222-2222-2222-2222-222222222222': 'Riverside Medical Center'
+    '22222222-2222-2222-2222-222222222222': 'Riverside Medical Center',
+    '33333333-3333-3333-3333-333333333333': 'Sunset Community Hospital',
+    '44444444-4444-4444-4444-444444444444': 'Bay Area Medical Complex',
+    '55555555-5555-5555-5555-555555555555': 'Texas Heart Institute'
   };
 
   const hospitalName = hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : 'All Hospitals';
+
+  if (!hospitalId) {
+    return (
+      <div className="min-h-screen bg-[#0a1628] p-6 flex items-center justify-center">
+        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <CardContent className="p-8 text-center">
+            <Stethoscope className="h-16 w-16 text-blue-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No Hospital Selected</h3>
+            <p className="text-white/70 mb-4">
+              Please select a hospital from the EMR Dashboard to view patient data.
+            </p>
+            <Button onClick={() => navigate('/emr')} className="bg-blue-600 hover:bg-blue-700">
+              Go to EMR Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a1628] p-6">
@@ -273,7 +292,7 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
             AI-Enhanced Patient Tracker Board - {hospitalName}
           </CardTitle>
           <CardDescription className="text-white/70">
-            Real-time patient status with AI-powered clinical assistance
+            Real-time patient status with AI-powered clinical assistance ({patients.length} patients)
           </CardDescription>
         </CardHeader>
         <CardContent>
