@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -71,26 +70,20 @@ const AuthForm = () => {
     <div className="min-h-screen bg-[#0a1628] flex items-center justify-center p-4">
       <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
         {/* Logo and Messaging Section */}
-        <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-8">
+        <div className="flex flex-col items-center text-center space-y-8">
           <div className="space-y-6">
-            <img 
-              src="/lovable-uploads/2f7fb8f1-6592-4169-9278-f93a9417e1e8.png" 
-              alt="Healthcare Platform Logo" 
-              className="h-32 lg:h-48 xl:h-64 w-auto mx-auto lg:mx-0 animate-float pulse-glow"
-            />
-            <div className="space-y-4">
-              <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold gradient-text tech-font leading-tight">
-                TRANSFORM
-                <br />
-                HEALTHCARE
-              </h1>
-              <p className="text-xl lg:text-2xl xl:text-3xl text-white/90 tech-font font-medium">
-                One System, Smarter Care
-              </p>
-              <p className="text-lg lg:text-xl text-white/70 tech-font max-w-lg">
-                Revolutionary healthcare intelligence platform connecting hospitals, 
-                patients, and providers in real-time.
-              </p>
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 lg:gap-8">
+              <img 
+                src="/lovable-uploads/2f7fb8f1-6592-4169-9278-f93a9417e1e8.png" 
+                alt="Healthcare Platform Logo" 
+                className="h-32 lg:h-48 xl:h-64 w-auto animate-float pulse-glow"
+              />
+              <div className="text-center lg:text-left">
+                <p className="text-lg lg:text-xl text-white/70 tech-font max-w-lg">
+                  Revolutionary healthcare intelligence platform connecting hospitals, 
+                  patients, and providers in real-time.
+                </p>
+              </div>
             </div>
           </div>
           
