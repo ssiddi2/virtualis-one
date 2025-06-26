@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,13 +10,14 @@ import {
   Pill, 
   Activity,
   DollarSign,
-  Brain,
   Clock,
   AlertCircle
 } from 'lucide-react';
 import AIEnhancedNoteDialog from '@/components/forms/AIEnhancedNoteDialog';
 import NewLabOrderDialog from '@/components/forms/NewLabOrderDialog';
 import NewRadiologyOrderDialog from '@/components/forms/NewRadiologyOrderDialog';
+import AIClinicalAssistantDialog from '@/components/forms/AIClinicalAssistantDialog';
+import DischargePlanningDialog from '@/components/forms/DischargePlanningDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useMedicalRecords } from '@/hooks/useMedicalRecords';
 import { useLabOrders } from '@/hooks/useLabOrders';
@@ -50,20 +50,6 @@ const PatientClinicalWorkflow = ({ patientId, hospitalId, patientName }: Patient
     toast({
       title: "Vital Signs",
       description: "This would open a form to record new vital signs (BP, HR, temp, etc.).",
-    });
-  };
-
-  const handleAIAssistant = () => {
-    toast({
-      title: "AI Clinical Assistant",
-      description: "This would launch an AI-powered clinical decision support tool to help with diagnosis, treatment recommendations, and care planning.",
-    });
-  };
-
-  const handleDischarge = () => {
-    toast({
-      title: "Discharge Planning",
-      description: "This would open the discharge planning workflow including discharge summary, medications, follow-up appointments, and patient instructions.",
     });
   };
 
@@ -124,23 +110,17 @@ const PatientClinicalWorkflow = ({ patientId, hospitalId, patientName }: Patient
               New Medication
             </Button>
             
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 border-slate-600 text-white hover:bg-slate-700"
-              onClick={handleAIAssistant}
-            >
-              <Brain className="h-4 w-4" />
-              AI Assistant
-            </Button>
+            <AIClinicalAssistantDialog 
+              patientId={patientId}
+              hospitalId={hospitalId}
+              patientName={patientName}
+            />
             
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 border-slate-600 text-white hover:bg-slate-700"
-              onClick={handleDischarge}
-            >
-              <FileText className="h-4 w-4" />
-              Discharge
-            </Button>
+            <DischargePlanningDialog 
+              patientId={patientId}
+              hospitalId={hospitalId}
+              patientName={patientName}
+            />
           </div>
         </CardContent>
       </Card>
