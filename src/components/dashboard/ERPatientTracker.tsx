@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -104,21 +103,34 @@ const ERPatientTracker = () => {
         Chief Complaint: ${patient.complaint}
         Vitals: BP ${patient.vitals?.bp}, HR ${patient.vitals?.hr}, Temp ${patient.vitals?.temp}°F, O2 Sat ${patient.vitals?.o2sat}%
         Current Acuity: ${patient.acuity}
+        Current Status: ${patient.status}
       `;
 
+      console.log('Requesting AI triage assessment for:', patient.name);
+
       const result = await callAI({
-        type: 'diagnosis_support',
+        type: 'triage_assessment',
         data: { symptoms: patientData },
-        context: 'Emergency Room triage assessment'
+        context: 'Emergency Department triage assessment'
       });
 
-      toast.success(`AI triage assessment generated for ${patient.name}`);
+      console.log('AI triage assessment received:', result);
+
+      toast.success(`AI triage assessment completed for ${patient.name}`);
       
-      // Show AI assessment in a dialog or update patient data
-      console.log('AI Triage Assessment:', result);
+      // Here you could show the result in a dialog or update patient data
+      console.log('AI Triage Assessment for', patient.name, ':', result);
+
+      // You could also update the patient's record with AI recommendations
+      // setPatients(prev => prev.map(p => 
+      //   p.id === patient.id 
+      //     ? { ...p, aiAssessment: result } 
+      //     : p
+      // ));
+
     } catch (error) {
       console.error('AI triage error:', error);
-      toast.error('Failed to generate AI triage assessment');
+      toast.error(`Failed to generate AI triage assessment for ${patient.name}`);
     }
   };
 

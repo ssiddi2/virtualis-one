@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Brain, FileText, Loader2, Save, ArrowLeft, Zap, Stethoscope, Users, Database, Hospital } from "lucide-react";
+import { useAIAssistant } from "@/hooks/useAIAssistant";
 
 interface CopilotComposerProps {
   patientId?: string;
@@ -19,9 +20,9 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
   const [noteType, setNoteType] = useState("");
   const [summary, setSummary] = useState("");
   const [generatedNote, setGeneratedNote] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { callAI, isLoading } = useAIAssistant();
 
   const noteTypes = [
     { value: "hp", label: "History & Physical Examination", icon: "🩺" },
@@ -48,101 +49,29 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
       return;
     }
 
-    setIsGenerating(true);
-    
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      const noteTypeData = noteTypes.find(t => t.value === noteType);
-      const hospitalName = hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Current Hospital";
-      
-      const mockNote = `${noteTypeData?.label || "Clinical Documentation"}
-Generated: ${new Date().toLocaleString()}
-Provider: Dr. Sarah Smith, MD
-Facility: ${hospitalName}
-Patient: ${patientId || "Current Patient (ID: 12847)"}
+      console.log('Generating note with AI...', { noteType, summary });
 
-═══════════════════════════════════════════════════════════
+      const result = await callAI({
+        type: 'clinical_note',
+        data: { summary },
+        context: `${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"} for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"}`
+      });
 
-CLINICAL SUMMARY: ${summary}
-
-DETAILED ASSESSMENT:
-
-SUBJECTIVE:
-Patient presents with ${summary.toLowerCase()}. Reports onset approximately [timeframe] ago. 
-Pain/symptoms described as [character]. Associated symptoms include [review of systems].
-Current medications and allergies reviewed. No acute distress noted at time of examination.
-
-OBJECTIVE:
-Vital Signs: 
-- Temperature: 98.6°F (37.0°C)
-- Blood Pressure: 120/80 mmHg  
-- Heart Rate: 78 bpm, regular
-- Respiratory Rate: 16/min
-- Oxygen Saturation: 98% on room air
-
-Physical Examination:
-- General: Alert, oriented x3, cooperative
-- HEENT: Normocephalic, atraumatic
-- Cardiovascular: Regular rate and rhythm, no murmurs
-- Pulmonary: Clear to auscultation bilaterally
-- Abdomen: Soft, non-tender, non-distended
-- Extremities: No edema, distal pulses intact
-- Neurological: Grossly intact, no focal deficits
-
-ASSESSMENT & PLAN:
-
-Primary Diagnosis: ${summary}
-
-1. IMMEDIATE MANAGEMENT:
-   • Continued monitoring of vital signs
-   • Pain management as appropriate
-   • Laboratory studies as clinically indicated
-   • Imaging studies if warranted
-
-2. ONGOING CARE:
-   • Regular reassessment of symptoms
-   • Medication reconciliation and optimization
-   • Patient education regarding condition
-   • Coordination with specialist consultants as needed
-
-3. DISCHARGE PLANNING:
-   • Anticipated discharge when clinically stable
-   • Follow-up appointments scheduled
-   • Home care instructions provided
-   • Emergency precautions discussed
-
-CLINICAL IMPRESSION:
-Patient's condition appears ${summary.includes('stable') ? 'stable' : 'requiring ongoing assessment'} 
-with appropriate response to current treatment regimen.
-
-═══════════════════════════════════════════════════════════
-
-Documentation completed using Virtualis One™ AI Clinical Assistant
-Facility: ${hospitalName}
-Electronic signature pending provider review and attestation
-
-This note was generated with artificial intelligence assistance and requires 
-provider validation before inclusion in the official medical record.
-
-AI Confidence Score: 94.7%
-Clinical Decision Support: Active
-Quality Assurance: Passed automated checks`;
-
-      setGeneratedNote(mockNote);
+      console.log('AI result received:', result);
+      setGeneratedNote(result);
       
       toast({
         title: "Clinical Documentation Generated",
-        description: `AI-assisted note ready for ${hospitalName} EMR integration`,
+        description: `AI-assisted note ready for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"} EMR integration`,
       });
     } catch (error) {
+      console.error('AI generation error:', error);
       toast({
         title: "Generation Error",
-        description: "Unable to generate documentation. Please check network connection and retry.",
+        description: "Unable to generate documentation. Please check your connection and try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -331,10 +260,10 @@ Quality Assurance: Passed automated checks`;
             <div className="flex gap-3">
               <Button
                 onClick={generateNote}
-                disabled={isGenerating || !noteType || !summary.trim()}
+                disabled={isLoading || !noteType || !summary.trim()}
                 className="glass-button flex-1 md:flex-none"
               >
-                {isGenerating ? (
+                {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     AI Processing Clinical Data...
