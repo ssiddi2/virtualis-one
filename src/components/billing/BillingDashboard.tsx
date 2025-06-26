@@ -17,13 +17,13 @@ import {
 } from "lucide-react";
 
 const BillingDashboard = () => {
-  const [selectedClaims, setSelectedClaims] = useState([]);
+  const [selectedClaims, setSelectedClaims] = useState<string[]>([]);
 
   const billingMetrics = {
     totalRevenue: "$2,847,392",
     pendingClaims: 127,
     deniedClaims: 23,
-    approvedClaims: 1,248,
+    approvedClaims: 1248,
     collectionRate: "94.2%",
     avgDaysInAR: 28
   };
