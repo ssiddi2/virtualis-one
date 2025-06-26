@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AuthForm from "@/components/auth/AuthForm";
 import Sidebar from "@/components/layout/Sidebar";
@@ -8,6 +9,7 @@ import Dashboard from "@/components/dashboard/Dashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
 import PatientChart from "@/components/patient/PatientChart";
+import PatientDetailsPage from "@/components/patient/PatientDetailsPage";
 import AdmissionForm from "@/components/patient/AdmissionForm";
 import BillingDashboard from "@/components/billing/BillingDashboard";
 import CodingDashboard from "@/components/coding/CodingDashboard";
@@ -22,6 +24,7 @@ import VirtualisChatPage from "@/pages/VirtualisChat";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
 
   const handleSelectHospital = (hospitalId: string) => {
@@ -81,7 +84,7 @@ const Index = () => {
               <EMRDashboard user={profile || user} onSelectHospital={handleSelectHospital} />
             )
           } />
-          <Route path="/patient/:patientId" element={<PatientChart />} />
+          <Route path="/patient/:patientId" element={<PatientDetailsPage />} />
           <Route path="/patient-tracker" element={
             <ERPatientTracker hospitalId={selectedHospitalId} />
           } />
