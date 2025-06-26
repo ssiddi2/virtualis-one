@@ -25,7 +25,8 @@ import {
   Bot,
   ChevronLeft,
   ChevronRight,
-  Zap
+  Zap,
+  Presentation
 } from "lucide-react";
 
 interface SidebarProps {
@@ -52,6 +53,7 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
     { icon: BarChart, label: "CMS Reporting", path: "/reporting" },
     { icon: UserPlus, label: "Patient Admission", path: "/admission" },
     { icon: Bot, label: "AI Assistant", path: "/ai-assistant" },
+    { icon: Presentation, label: "Demo Resources", path: "/demo" },
   ];
 
   const isActive = (path: string) => {

@@ -17,6 +17,7 @@ import CMSReporting from "@/components/reporting/CMSReporting";
 import CopilotComposer from "@/components/patient/CopilotComposer";
 import AIDashboard from "@/components/dashboard/AIDashboard";
 import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
+import Demo from "@/pages/Demo";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -75,6 +76,7 @@ const Index = () => {
           <Route path="/liverad" element={<LiveRadManager />} />
           <Route path="/reporting" element={<CMSReporting />} />
           <Route path="/ai-assistant" element={<CopilotComposer hospitalId={selectedHospitalId} />} />
+          <Route path="/demo" element={<Demo />} />
           <Route path="*" element={<Navigate to="/emr" replace />} />
         </Routes>
       </main>
