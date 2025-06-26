@@ -62,8 +62,16 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
       }
 
       // Add mock status data for display
-      const hospitalsWithStatus: HospitalWithStatus[] = data.map(hospital => ({
-        ...hospital,
+      const hospitalsWithStatus: HospitalWithStatus[] = (data || []).map(hospital => ({
+        id: hospital.id,
+        name: hospital.name,
+        address: hospital.address,
+        city: hospital.city,
+        state: hospital.state,
+        phone: hospital.phone,
+        email: hospital.email,
+        emr_type: hospital.emr_type,
+        license_number: hospital.license_number,
         is_connected: Math.random() > 0.3, // 70% connected for demo
         last_sync: ['2 minutes ago', '15 minutes ago', '1 hour ago', '2 hours ago'][Math.floor(Math.random() * 4)],
         status: ['connected', 'syncing', 'disconnected'][Math.floor(Math.random() * 3)] as 'connected' | 'syncing' | 'disconnected',
@@ -167,16 +175,16 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
   return (
     <div className="p-8 space-y-8 min-h-screen">
       {/* Header Section */}
-      <div className="text-center space-y-6">
-        <div className="flex items-center justify-center mb-8">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center mb-8">
           <img 
             src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
             alt="Virtualis One™" 
-            className="h-32 w-auto"
+            className="h-40 w-auto"
           />
         </div>
         
-        <div className="space-y-4">
+        <div className="flex-1 text-center space-y-4">
           <h1 className="text-4xl font-bold gradient-text tech-font">
             UNIVERSAL EMR COMMAND CENTER
           </h1>
