@@ -1,25 +1,31 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
-import {
-  LayoutDashboard,
-  Hospital,
-  Users,
-  FileText,
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Home, 
+  Users, 
+  FileText, 
+  Calendar, 
+  Settings, 
+  LogOut, 
+  Activity,
+  Brain,
+  Stethoscope,
+  Building,
+  UserPlus,
   DollarSign,
   Code,
   TestTube,
-  Zap,
-  FileSpreadsheet,
-  Brain,
+  Scan,
+  BarChart,
+  Bot,
   ChevronLeft,
   ChevronRight,
-  LogOut,
-  User,
-  Activity
+  Zap
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,116 +33,53 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const { signOut, profile, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, profile, signOut } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const menuItems = [
-    {
-      icon: LayoutDashboard,
-      label: "Dashboard",
-      path: "/dashboard",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: Hospital,
-      label: "EMR Systems",
-      path: "/emr",
-      badge: selectedHospitalId ? "CONNECTED" : null,
-      showAlways: true
-    },
-    {
-      icon: Activity,
-      label: "ER Patient Tracker",
-      path: "/patient-tracker",
-      badge: selectedHospitalId ? "LIVE" : null,
-      showAlways: false,
-      hospitalOnly: true
-    },
-    {
-      icon: Users,
-      label: "Patients",
-      path: "/patients",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: FileText,
-      label: "Admissions",
-      path: "/admission",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: DollarSign,
-      label: "Billing",
-      path: "/billing",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: Code,
-      label: "Coding",
-      path: "/coding",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: TestTube,
-      label: "Laboratory",
-      path: "/laboratory",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: Zap,
-      label: "Radiology",
-      path: "/radiology",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: FileSpreadsheet,
-      label: "Reporting",
-      path: "/reporting",
-      badge: null,
-      showAlways: true
-    },
-    {
-      icon: Brain,
-      label: "AI Assistant",
-      path: "/ai-assistant",
-      badge: "AI",
-      showAlways: true
-    }
+  const navItems = [
+    { icon: Home, label: "Dashboard", path: "/dashboard" },
+    { icon: Building, label: "EMR Systems", path: "/emr" },
+    { icon: Brain, label: "AI Dashboard", path: "/ai-dashboard" },
+    ...(selectedHospitalId ? [
+      { icon: Activity, label: "ER Patient Tracker", path: "/patient-tracker" },
+      { icon: DollarSign, label: "Billing & RCM", path: "/billing" },
+      { icon: Code, label: "Coding & CDI", path: "/coding" },
+    ] : []),
+    { icon: TestTube, label: "Laboratory (LIS)", path: "/laboratory" },
+    { icon: Scan, label: "Radiology & PACS", path: "/radiology" },
+    { icon: BarChart, label: "CMS Reporting", path: "/reporting" },
+    { icon: UserPlus, label: "Patient Admission", path: "/admission" },
+    { icon: Bot, label: "AI Assistant", path: "/ai-assistant" },
   ];
 
-  const handleSignOut = async () => {
-    await signOut();
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
-  // Filter menu items based on hospital connection
-  const visibleMenuItems = menuItems.filter(item => 
-    item.showAlways || (item.hospitalOnly && selectedHospitalId)
-  );
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 glass-sidebar border-r border-white/10 flex flex-col`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-[#0a1628] border-r border-[#1a2332] flex flex-col transition-all duration-300`}>
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
+      <div className="p-4 border-b border-[#1a2332]">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
-            <div className="flex items-center gap-3">
-              <img 
-                src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
-                alt="Virtualis One™" 
-                className="h-8 w-auto"
-              />
-              <div className="text-white">
-                <div className="text-sm font-bold tech-font">VIRTUALIS ONE™</div>
-                <div className="text-xs text-white/60 tech-font">Healthcare AI</div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Zap className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-white font-bold text-lg">Virtualis</h1>
+                <p className="text-xs text-white/60">Healthcare AI Platform</p>
               </div>
             </div>
           )}
@@ -144,90 +87,78 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-white/60 hover:text-white hover:bg-white/10"
+            className="text-white hover:bg-white/10 p-1 h-8 w-8"
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
       </div>
 
-      {/* User Profile */}
-      {!isCollapsed && (
-        <div className="p-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-virtualis-gold to-orange-500 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="text-white text-sm font-medium tech-font">
-                {profile?.first_name || user?.email} {profile?.last_name}
-              </div>
-              <div className="text-white/60 text-xs tech-font capitalize">
-                {profile?.role || 'Healthcare Provider'}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hospital Connection Status */}
+      {/* Hospital Selection Status */}
       {!isCollapsed && selectedHospitalId && (
-        <div className="p-4 border-b border-white/10">
-          <div className="bg-virtualis-gold/20 border border-virtualis-gold/30 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-virtualis-gold text-sm font-medium">
-              <Hospital className="h-4 w-4" />
-              <span>Connected to EMR</span>
-            </div>
-            <div className="text-white/80 text-xs mt-1">
-              Real-time hospital data access active
-            </div>
-          </div>
+        <div className="p-3 border-b border-[#1a2332]">
+          <Card className="bg-blue-900/30 border-blue-600/30">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Building className="h-4 w-4 text-blue-400" />
+                <span className="text-xs text-blue-300 font-medium">Connected Hospital</span>
+              </div>
+              <Badge className="bg-blue-600 text-white text-xs">
+                EMR System Active
+              </Badge>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {visibleMenuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          
-          return (
-            <Button
-              key={item.path}
-              variant="ghost"
-              className={`w-full justify-start glass-nav-item ${
-                isActive ? 'bg-virtualis-gold/20 text-virtualis-gold border-virtualis-gold/30' : 'text-white/80 hover:text-white'
-              } ${isCollapsed ? 'px-2' : 'px-4'} tech-font`}
-              onClick={() => navigate(item.path)}
-            >
-              <Icon className="h-4 w-4" />
-              {!isCollapsed && (
-                <>
-                  <span className="ml-3">{item.label}</span>
-                  {item.badge && (
-                    <Badge className="ml-auto glass-badge primary">
-                      {item.badge}
-                    </Badge>
-                  )}
-                </>
-              )}
-            </Button>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        {navItems.map((item) => (
+          <Button
+            key={item.path}
+            variant={isActive(item.path) ? "secondary" : "ghost"}
+            className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start'} text-white hover:bg-white/10 ${
+              isActive(item.path) ? 'bg-white/20 text-white' : ''
+            }`}
+            onClick={() => navigate(item.path)}
+          >
+            <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'}`} />
+            {!isCollapsed && <span>{item.label}</span>}
+          </Button>
+        ))}
       </nav>
 
-      {/* Sign Out */}
-      <div className="p-4 border-t border-white/10">
-        <Button
-          variant="ghost"
-          onClick={handleSignOut}
-          className={`w-full justify-start text-white/60 hover:text-white hover:bg-red-500/20 ${
-            isCollapsed ? 'px-2' : 'px-4'
-          } tech-font`}
-        >
-          <LogOut className="h-4 w-4" />
-          {!isCollapsed && <span className="ml-3">Sign Out</span>}
-        </Button>
+      {/* User Info */}
+      <div className="p-4 border-t border-[#1a2332] space-y-2">
+        {!isCollapsed && (
+          <div className="text-white">
+            <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
+            <p className="text-sm text-white/60">{profile?.role || 'Healthcare Professional'}</p>
+            <p className="text-xs text-white/50">{profile?.email}</p>
+          </div>
+        )}
+        
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/10 flex-1"
+            onClick={() => navigate('/settings')}
+          >
+            <Settings className="h-4 w-4" />
+            {!isCollapsed && <span className="ml-2">Settings</span>}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="text-red-400 hover:bg-red-500/20 flex-1"
+          >
+            <LogOut className="h-4 w-4" />
+            {!isCollapsed && <span className="ml-2">Sign Out</span>}
+          </Button>
+        </div>
       </div>
     </div>
   );

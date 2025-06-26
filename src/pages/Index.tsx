@@ -67,8 +67,8 @@ const Index = () => {
             <ERPatientTracker hospitalId={selectedHospitalId} />
           } />
           <Route path="/admission" element={<AdmissionForm />} />
-          <Route path="/billing" element={<BillingDashboard />} />
-          <Route path="/coding" element={<CodingDashboard />} />
+          <Route path="/billing" element={<BillingDashboard hospitalId={selectedHospitalId} />} />
+          <Route path="/coding" element={<CodingDashboard hospitalId={selectedHospitalId} />} />
           <Route path="/laboratory" element={<EnhancedLISDashboard />} />
           <Route path="/radiology" element={<LiveRadManager />} />
           <Route path="/pacs" element={<LiveRadManager />} />
