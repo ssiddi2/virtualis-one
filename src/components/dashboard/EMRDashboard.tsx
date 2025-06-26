@@ -1,30 +1,10 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Hospital, Settings, Wifi, WifiOff, AlertTriangle, Clock, Search, Database, Zap, Shield } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import EMRIntegrationPanel from "./EMRIntegrationPanel";
-
-interface HospitalWithStatus {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  phone: string;
-  email: string;
-  emr_type: string;
-  license_number: string;
-  location: string; // Make location required instead of optional
-  is_connected: boolean; // Make is_connected required instead of optional
-  last_sync?: string;
-  status?: 'connected' | 'disconnected' | 'error' | 'syncing';
-  alerts_count?: number;
-}
+import { Building2, Users, Activity, Clock, ChevronRight } from "lucide-react";
+import { useHospitals } from "@/hooks/useHospitals";
+import { usePatients } from "@/hooks/usePatients";
 
 interface EMRDashboardProps {
   user: any;
@@ -32,308 +12,156 @@ interface EMRDashboardProps {
 }
 
 const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
-  const [hospitals, setHospitals] = useState<HospitalWithStatus[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [emrFilter, setEmrFilter] = useState("all");
-  const [showIntegrationPanel, setShowIntegrationPanel] = useState(false);
-  const [selectedHospital, setSelectedHospital] = useState<HospitalWithStatus | null>(null);
-  const { toast } = useToast();
+  const { data: hospitals, isLoading: hospitalsLoading } = useHospitals();
+  const { data: allPatients } = usePatients();
 
-  useEffect(() => {
-    fetchHospitals();
-  }, []);
-
-  const fetchHospitals = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('hospitals')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        console.error('Error fetching hospitals:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load hospitals",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Add mock status data for display
-      const hospitalsWithStatus: HospitalWithStatus[] = (data || []).map(hospital => ({
-        id: hospital.id,
-        name: hospital.name,
-        address: hospital.address,
-        city: hospital.city,
-        state: hospital.state,
-        phone: hospital.phone,
-        email: hospital.email || '',
-        emr_type: hospital.emr_type,
-        license_number: hospital.license_number || '',
-        location: `${hospital.city}, ${hospital.state}`, // Create location from city and state
-        is_connected: Math.random() > 0.3, // 70% connected for demo
-        last_sync: ['2 minutes ago', '15 minutes ago', '1 hour ago', '2 hours ago'][Math.floor(Math.random() * 4)],
-        status: ['connected', 'syncing', 'disconnected'][Math.floor(Math.random() * 3)] as 'connected' | 'syncing' | 'disconnected',
-        alerts_count: Math.floor(Math.random() * 6)
-      }));
-
-      setHospitals(hospitalsWithStatus);
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load hospitals",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = (status: string, alertsCount?: number) => {
-    const baseClasses = "font-semibold tech-font";
-    switch (status) {
-      case 'connected':
-        return <Badge className={`${baseClasses} glass-badge success`}>
-          <Wifi className="h-3 w-3 mr-1" />
-          ACTIVE
-        </Badge>;
-      case 'syncing':
-        return <Badge className={`${baseClasses} glass-badge primary pulse-glow`}>
-          <Database className="h-3 w-3 mr-1" />
-          SYNCING
-        </Badge>;
-      case 'disconnected':
-        return <Badge className={`${baseClasses} glass-badge`}>
-          <WifiOff className="h-3 w-3 mr-1" />
-          OFFLINE
-        </Badge>;
-      case 'error':
-        return <Badge className={`${baseClasses} glass-badge error pulse-glow`}>
-          <AlertTriangle className="h-3 w-3 mr-1" />
-          ERROR
-        </Badge>;
-      default:
-        return <Badge variant="outline">UNKNOWN</Badge>;
-    }
-  };
-
-  const getEmrBadge = (emrType: string) => {
-    const colors = {
-      'Epic': 'bg-purple-500/20 text-purple-300 border-purple-400/30',
-      'Cerner': 'bg-green-500/20 text-green-300 border-green-400/30',
-      'Meditech': 'bg-orange-500/20 text-orange-300 border-orange-400/30',
-      'Allscripts': 'bg-blue-500/20 text-blue-300 border-blue-400/30',
-      'VistA': 'bg-red-500/20 text-red-300 border-red-400/30',
-      'FHIR API': 'bg-virtualis-gold/20 text-virtualis-gold border-virtualis-gold/30'
-    };
-    
-    return <Badge className={`tech-font glass-badge ${colors[emrType as keyof typeof colors] || 'glass-badge'}`}>
-      {emrType}
-    </Badge>;
-  };
-
-  const filteredHospitals = hospitals.filter(hospital => {
-    const matchesSearch = hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hospital.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hospital.emr_type.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || hospital.status === statusFilter;
-    const matchesEmr = emrFilter === "all" || hospital.emr_type === emrFilter;
-    return matchesSearch && matchesStatus && matchesEmr;
-  });
-
-  const connectedCount = hospitals.filter(h => h.is_connected).length;
-  const totalAlerts = hospitals.reduce((sum, h) => sum + (h.alerts_count || 0), 0);
-
-  if (showIntegrationPanel && selectedHospital) {
+  if (hospitalsLoading) {
     return (
-      <EMRIntegrationPanel
-        hospital={selectedHospital}
-        user={user}
-        onBack={() => {
-          setShowIntegrationPanel(false);
-          setSelectedHospital(null);
-        }}
-        onSave={(integrationData) => {
-          console.log('Saving integration:', integrationData);
-          setShowIntegrationPanel(false);
-          setSelectedHospital(null);
-        }}
-      />
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="p-8 min-h-screen flex items-center justify-center">
-        <div className="text-white tech-font">Loading hospitals...</div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-white">Loading hospitals...</div>
       </div>
     );
   }
+
+  const getPatientCount = (hospitalId: string) => {
+    return allPatients?.filter(p => p.hospital_id === hospitalId).length || 0;
+  };
+
+  const getEmrTypeColor = (emrType: string) => {
+    const colors = {
+      'Epic': 'bg-blue-500',
+      'Cerner': 'bg-green-500',
+      'Meditech': 'bg-purple-500',
+      'Allscripts': 'bg-orange-500',
+      'VistA': 'bg-red-500',
+      'FHIR API': 'bg-teal-500'
+    };
+    return colors[emrType as keyof typeof colors] || 'bg-gray-500';
+  };
 
   return (
-    <div className="p-8 space-y-8 min-h-screen">
-      {/* Header Section */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center mb-8">
-          <img 
-            src="/lovable-uploads/c61057eb-57cd-4ce6-89ca-b6ee43ac66a4.png" 
-            alt="Virtualis One™" 
-            className="h-40 w-auto animate-float pulse-glow"
-          />
-        </div>
-        
-        <div className="flex-1 text-center space-y-4">
-          <h1 className="text-4xl font-bold gradient-text tech-font">
-            UNIVERSAL EMR COMMAND CENTER
+    <div className="min-h-screen bg-[#0a1628]">
+      <div className="container mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">
+            EMR Integration Hub
           </h1>
-          <p className="text-white/80 text-lg tech-font">
-            Healthcare Network Management Platform
+          <p className="text-white/70">
+            Connect to hospital systems and access patient data across multiple EMR platforms
           </p>
-          <div className="flex items-center justify-center gap-6 mt-6">
-            <div className="glass-badge primary flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              <span className="tech-font">SECURE</span>
-            </div>
-            <div className="glass-badge success flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              <span className="tech-font">{connectedCount}/{hospitals.length} CONNECTED</span>
-            </div>
-            {totalAlerts > 0 && (
-              <div className="glass-badge error flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="tech-font">{totalAlerts} ALERTS</span>
-              </div>
-            )}
-          </div>
         </div>
-      </div>
 
-      {/* Search and Filters */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-white tech-font flex items-center gap-3">
-            <Search className="h-5 w-5 text-virtualis-gold" />
-            Search Healthcare Facilities
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-virtualis-gold/60" />
-              <Input
-                placeholder="Search facilities..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 glass-input tech-font"
-              />
-            </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="glass-input tech-font">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="glass-card border-white/20">
-                <SelectItem value="all" className="text-white tech-font">All Status</SelectItem>
-                <SelectItem value="connected" className="text-white tech-font">Connected</SelectItem>
-                <SelectItem value="syncing" className="text-white tech-font">Syncing</SelectItem>
-                <SelectItem value="disconnected" className="text-white tech-font">Disconnected</SelectItem>
-                <SelectItem value="error" className="text-white tech-font">Error</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={emrFilter} onValueChange={setEmrFilter}>
-              <SelectTrigger className="glass-input tech-font">
-                <SelectValue placeholder="EMR Type" />
-              </SelectTrigger>
-              <SelectContent className="glass-card border-white/20">
-                <SelectItem value="all" className="text-white tech-font">All Types</SelectItem>
-                <SelectItem value="Epic" className="text-white tech-font">Epic</SelectItem>
-                <SelectItem value="Cerner" className="text-white tech-font">Cerner</SelectItem>
-                <SelectItem value="Meditech" className="text-white tech-font">Meditech</SelectItem>
-                <SelectItem value="Allscripts" className="text-white tech-font">Allscripts</SelectItem>
-                <SelectItem value="VistA" className="text-white tech-font">VistA</SelectItem>
-                <SelectItem value="FHIR API" className="text-white tech-font">FHIR API</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Hospital Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredHospitals.map((hospital) => (
-          <Card key={hospital.id} className="glass-card hover:scale-105 transition-all duration-300">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-virtualis-gold to-orange-500 rounded-xl flex items-center justify-center">
-                    <Hospital className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-white text-lg tech-font">{hospital.name}</CardTitle>
-                    <p className="text-white/60 text-sm tech-font">{hospital.city}, {hospital.state}</p>
-                  </div>
-                </div>
-                {hospital.alerts_count && hospital.alerts_count > 0 && (
-                  <Badge className="glass-badge error">
-                    {hospital.alerts_count}
-                  </Badge>
-                )}
-              </div>
-              <div className="flex justify-between items-center gap-3">
-                {getStatusBadge(hospital.status || 'disconnected', hospital.alerts_count)}
-                {getEmrBadge(hospital.emr_type)}
-              </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Connected Hospitals</CardTitle>
+              <Building2 className="h-4 w-4 text-blue-400" />
             </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2 text-sm glass-nav-item p-2">
-                <Clock className="h-4 w-4 text-virtualis-gold" />
-                <span className="text-white tech-font">Last Sync: {hospital.last_sync}</span>
-              </div>
-              
-              <div className="space-y-2">
-                <Button 
-                  onClick={() => onSelectHospital(hospital.id)}
-                  className="w-full glass-button tech-font flex items-center gap-2"
-                  disabled={!hospital.is_connected}
-                >
-                  <Zap className="h-4 w-4" />
-                  {hospital.is_connected ? 'CONNECT' : 'OFFLINE'}
-                </Button>
-                
-                {user.role === 'admin' && (
-                  <Button 
-                    onClick={() => {
-                      setSelectedHospital(hospital);
-                      setShowIntegrationPanel(true);
-                    }}
-                    variant="outline"
-                    className="w-full glass-nav-item border-white/20 hover:border-virtualis-gold/50 text-white hover:text-virtualis-gold transition-all duration-300 tech-font"
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    CONFIGURE
-                  </Button>
-                )}
-              </div>
+            <CardContent>
+              <div className="text-2xl font-bold">{hospitals?.length || 0}</div>
+              <p className="text-xs text-white/60">Active integrations</p>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      {filteredHospitals.length === 0 && (
-        <div className="text-center py-16">
-          <div className="glass-card p-12 max-w-md mx-auto">
-            <Hospital className="h-16 w-16 text-virtualis-gold/60 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2 tech-font">NO FACILITIES FOUND</h3>
-            <p className="text-white/60 tech-font">Adjust search parameters</p>
-          </div>
+          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
+              <Users className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{allPatients?.length || 0}</div>
+              <p className="text-xs text-white/60">Across all systems</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Cases</CardTitle>
+              <Activity className="h-4 w-4 text-yellow-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {allPatients?.filter(p => p.status === 'active').length || 0}
+              </div>
+              <p className="text-xs text-white/60">Currently admitted</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">System Status</CardTitle>
+              <Clock className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-400">Online</div>
+              <p className="text-xs text-white/60">All systems operational</p>
+            </CardContent>
+          </Card>
         </div>
-      )}
+
+        {/* Hospital List */}
+        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Connected Hospital Systems
+            </CardTitle>
+            <CardDescription className="text-white/70">
+              Select a hospital to access its EMR system and patient data
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              {hospitals?.map((hospital) => (
+                <Card 
+                  key={hospital.id} 
+                  className="bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
+                  onClick={() => onSelectHospital(hospital.id)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold text-white">{hospital.name}</h3>
+                          <Badge 
+                            className={`${getEmrTypeColor(hospital.emr_type)} text-white border-0`}
+                          >
+                            {hospital.emr_type}
+                          </Badge>
+                        </div>
+                        <p className="text-white/70 text-sm mb-2">
+                          {hospital.address}, {hospital.city}, {hospital.state} {hospital.zip_code}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-white/60">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {getPatientCount(hospital.id)} patients
+                          </span>
+                          <span>{hospital.phone}</span>
+                          {hospital.email && <span>{hospital.email}</span>}
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectHospital(hospital.id);
+                        }}
+                      >
+                        Access EMR
+                        <ChevronRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
