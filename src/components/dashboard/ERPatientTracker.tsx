@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ export interface ERPatientTrackerProps {
   hospitalId?: string | null;
 }
 
-const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
+const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
