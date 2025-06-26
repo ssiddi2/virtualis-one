@@ -15,6 +15,7 @@ export const usePatients = (hospitalId?: string) => {
         .select('*')
         .order('created_at', { ascending: false });
       
+      // Filter by hospital if hospitalId is provided
       if (hospitalId) {
         query = query.eq('hospital_id', hospitalId);
       }

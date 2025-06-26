@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  User
+  User,
+  Activity
 } from "lucide-react";
 
 interface SidebarProps {
@@ -36,67 +37,90 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
       icon: LayoutDashboard,
       label: "Dashboard",
       path: "/dashboard",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: Hospital,
       label: "EMR Systems",
       path: "/emr",
-      badge: selectedHospitalId ? "CONNECTED" : null
+      badge: selectedHospitalId ? "CONNECTED" : null,
+      showAlways: true
+    },
+    {
+      icon: Activity,
+      label: "ER Patient Tracker",
+      path: "/patient-tracker",
+      badge: selectedHospitalId ? "LIVE" : null,
+      showAlways: false,
+      hospitalOnly: true
     },
     {
       icon: Users,
       label: "Patients",
       path: "/patients",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: FileText,
       label: "Admissions",
       path: "/admission",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: DollarSign,
       label: "Billing",
       path: "/billing",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: Code,
       label: "Coding",
       path: "/coding",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: TestTube,
       label: "Laboratory",
       path: "/laboratory",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: Zap,
       label: "Radiology",
       path: "/radiology",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: FileSpreadsheet,
       label: "Reporting",
       path: "/reporting",
-      badge: null
+      badge: null,
+      showAlways: true
     },
     {
       icon: Brain,
       label: "AI Assistant",
       path: "/ai-assistant",
-      badge: "AI"
+      badge: "AI",
+      showAlways: true
     }
   ];
 
   const handleSignOut = async () => {
     await signOut();
   };
+
+  // Filter menu items based on hospital connection
+  const visibleMenuItems = menuItems.filter(item => 
+    item.showAlways || (item.hospitalOnly && selectedHospitalId)
+  );
 
   return (
     <div className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 glass-sidebar border-r border-white/10 flex flex-col`}>
@@ -146,9 +170,24 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
         </div>
       )}
 
+      {/* Hospital Connection Status */}
+      {!isCollapsed && selectedHospitalId && (
+        <div className="p-4 border-b border-white/10">
+          <div className="bg-virtualis-gold/20 border border-virtualis-gold/30 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-virtualis-gold text-sm font-medium">
+              <Hospital className="h-4 w-4" />
+              <span>Connected to EMR</span>
+            </div>
+            <div className="text-white/80 text-xs mt-1">
+              Real-time hospital data access active
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           

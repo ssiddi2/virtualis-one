@@ -25,25 +25,38 @@ interface Patient {
   };
 }
 
-const ERPatientTracker = () => {
+interface ERPatientTrackerProps {
+  hospitalId?: string;
+}
+
+const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
   const navigate = useNavigate();
   const { callAI, isLoading } = useAIAssistant();
   const [patients, setPatients] = useState<Patient[]>([]);
 
   useEffect(() => {
-    // Mock patient data with vitals
-    setPatients([
+    // In a real implementation, this would filter patients by hospitalId
+    // For now, showing mock data that would come from the specific hospital's EMR
+    const mockHospitalNames = {
+      '77777777-7777-7777-7777-777777777777': 'Atlantic Medical Center',
+      '11111111-1111-1111-1111-111111111111': 'Metropolitan General Hospital',
+      '22222222-2222-2222-2222-222222222222': 'Riverside Medical Center'
+    };
+
+    // Mock patient data filtered by hospital
+    const allPatients = [
       {
         id: "1",
         name: "Sarah Johnson",
         age: 45,
         room: "ER-101",
         complaint: "Chest pain, shortness of breath",
-        status: "in-progress",
+        status: "in-progress" as const,
         provider: "Dr. Smith",
         admitTime: "09:30 AM",
-        acuity: "high",
-        vitals: { bp: "160/95", hr: 102, temp: 99.2, o2sat: 94 }
+        acuity: "high" as const,
+        vitals: { bp: "160/95", hr: 102, temp: 99.2, o2sat: 94 },
+        hospitalId: "77777777-7777-7777-7777-777777777777"
       },
       {
         id: "2", 
@@ -51,11 +64,12 @@ const ERPatientTracker = () => {
         age: 32,
         room: "ER-102",
         complaint: "Ankle injury from sports",
-        status: "waiting",
+        status: "waiting" as const,
         provider: "Dr. Johnson",
         admitTime: "10:15 AM",
-        acuity: "low",
-        vitals: { bp: "120/80", hr: 75, temp: 98.6, o2sat: 99 }
+        acuity: "low" as const,
+        vitals: { bp: "120/80", hr: 75, temp: 98.6, o2sat: 99 },
+        hospitalId: "77777777-7777-7777-7777-777777777777"
       },
       {
         id: "3",
@@ -63,11 +77,12 @@ const ERPatientTracker = () => {
         age: 28,
         room: "ER-103",
         complaint: "Severe headache, photophobia",
-        status: "discharge-ready",
+        status: "discharge-ready" as const,
         provider: "Dr. Smith",
         admitTime: "08:45 AM",
-        acuity: "medium",
-        vitals: { bp: "135/85", hr: 88, temp: 100.1, o2sat: 98 }
+        acuity: "medium" as const,
+        vitals: { bp: "135/85", hr: 88, temp: 100.1, o2sat: 98 },
+        hospitalId: "11111111-1111-1111-1111-111111111111"
       },
       {
         id: "4",
@@ -75,11 +90,12 @@ const ERPatientTracker = () => {
         age: 67,
         room: "ER-104",
         complaint: "Shortness of breath, chest tightness",
-        status: "in-progress",
+        status: "in-progress" as const,
         provider: "Dr. Johnson",
         admitTime: "11:00 AM",
-        acuity: "high",
-        vitals: { bp: "180/100", hr: 110, temp: 98.8, o2sat: 91 }
+        acuity: "high" as const,
+        vitals: { bp: "180/100", hr: 110, temp: 98.8, o2sat: 91 },
+        hospitalId: "22222222-2222-2222-2222-222222222222"
       },
       {
         id: "5",
@@ -87,14 +103,22 @@ const ERPatientTracker = () => {
         age: 34,
         room: "Triage",
         complaint: "Abdominal pain, nausea",
-        status: "waiting",
+        status: "waiting" as const,
         provider: "Unassigned",
         admitTime: "11:30 AM",
-        acuity: "medium",
-        vitals: { bp: "125/82", hr: 92, temp: 99.8, o2sat: 97 }
+        acuity: "medium" as const,
+        vitals: { bp: "125/82", hr: 92, temp: 99.8, o2sat: 97 },
+        hospitalId: "77777777-7777-7777-7777-777757777777"
       }
-    ]);
-  }, []);
+    ];
+
+    // Filter patients by hospital if hospitalId is provided
+    const filteredPatients = hospitalId 
+      ? allPatients.filter(p => p.hospitalId === hospitalId)
+      : allPatients;
+
+    setPatients(filteredPatients);
+  }, [hospitalId]);
 
   const getAITriageAssessment = async (patient: Patient) => {
     try {
@@ -106,31 +130,23 @@ const ERPatientTracker = () => {
         Current Status: ${patient.status}
       `;
 
-      console.log('Requesting AI triage assessment for:', patient.name);
+      console.log('Requesting AI clinical note for:', patient.name);
 
       const result = await callAI({
-        type: 'triage_assessment',
-        data: { symptoms: patientData },
-        context: 'Emergency Department triage assessment'
+        type: 'clinical_note',
+        data: { summary: patientData },
+        context: 'Emergency Department triage assessment and clinical documentation'
       });
 
-      console.log('AI triage assessment received:', result);
+      console.log('AI clinical assessment received:', result);
 
-      toast.success(`AI triage assessment completed for ${patient.name}`);
+      toast.success(`AI clinical assessment completed for ${patient.name}`);
       
-      // Here you could show the result in a dialog or update patient data
-      console.log('AI Triage Assessment for', patient.name, ':', result);
-
-      // You could also update the patient's record with AI recommendations
-      // setPatients(prev => prev.map(p => 
-      //   p.id === patient.id 
-      //     ? { ...p, aiAssessment: result } 
-      //     : p
-      // ));
+      console.log('AI Clinical Assessment for', patient.name, ':', result);
 
     } catch (error) {
       console.error('AI triage error:', error);
-      toast.error(`Failed to generate AI triage assessment for ${patient.name}`);
+      toast.error(`Failed to generate AI clinical assessment for ${patient.name}`);
     }
   };
 
@@ -178,6 +194,14 @@ const ERPatientTracker = () => {
     'discharge-ready': patients.filter(p => p.status === 'discharge-ready')
   };
 
+  const mockHospitalNames = {
+    '77777777-7777-7777-7777-777777777777': 'Atlantic Medical Center',
+    '11111111-1111-1111-1111-111111111111': 'Metropolitan General Hospital',
+    '22222222-2222-2222-2222-222222222222': 'Riverside Medical Center'
+  };
+
+  const hospitalName = hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : 'All Hospitals';
+
   return (
     <div className="min-h-screen bg-[#0a1628] p-6">
       <div className="mb-8">
@@ -185,7 +209,7 @@ const ERPatientTracker = () => {
           Emergency Department Patient Tracker
         </h1>
         <p className="text-white/70">
-          Real-time patient tracking with AI-powered triage assistance
+          {hospitalName} - Real-time patient tracking with AI-powered clinical assistance
         </p>
       </div>
 
@@ -246,10 +270,10 @@ const ERPatientTracker = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <Stethoscope className="h-5 w-5" />
-            AI-Enhanced Patient Tracker Board
+            AI-Enhanced Patient Tracker Board - {hospitalName}
           </CardTitle>
           <CardDescription className="text-white/70">
-            Real-time patient status with AI-powered triage assistance
+            Real-time patient status with AI-powered clinical assistance
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -310,7 +334,7 @@ const ERPatientTracker = () => {
                         className="bg-blue-600/20 border-blue-400 text-blue-400 hover:bg-blue-600/30"
                       >
                         <Brain className="h-3 w-3 mr-1" />
-                        AI Triage
+                        AI Clinical Note
                       </Button>
                     </div>
                   </Card>
@@ -330,7 +354,6 @@ const ERPatientTracker = () => {
                     className="p-4 bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
                     onClick={() => navigate(`/patient/${patient.id}`)}
                   >
-                    {/* Similar structure as waiting column but with different styling */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h4 className="font-medium text-white">{patient.name}</h4>
@@ -376,7 +399,7 @@ const ERPatientTracker = () => {
                         className="bg-blue-600/20 border-blue-400 text-blue-400 hover:bg-blue-600/30"
                       >
                         <Brain className="h-3 w-3 mr-1" />
-                        AI Review
+                        AI Clinical Note
                       </Button>
                     </div>
                   </Card>
@@ -396,7 +419,6 @@ const ERPatientTracker = () => {
                     className="p-4 bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
                     onClick={() => navigate(`/patient/${patient.id}`)}
                   >
-                    {/* Similar structure with green accent */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h4 className="font-medium text-white">{patient.name}</h4>
