@@ -56,15 +56,15 @@ const Index = () => {
               <EMRDashboard user={user} onSelectHospital={handleSelectHospital} />
             )
           } />
-          <Route path="/patients" element={<PatientChart hospitalId={selectedHospitalId} />} />
-          <Route path="/admission" element={<AdmissionForm hospitalId={selectedHospitalId} />} />
-          <Route path="/billing" element={<BillingDashboard hospitalId={selectedHospitalId} />} />
-          <Route path="/coding" element={<CodingDashboard hospitalId={selectedHospitalId} />} />
-          <Route path="/laboratory" element={<EnhancedLISDashboard hospitalId={selectedHospitalId} />} />
-          <Route path="/radiology" element={<LiveRadManager hospitalId={selectedHospitalId} />} />
-          <Route path="/pacs" element={<LiveRadManager hospitalId={selectedHospitalId} />} />
-          <Route path="/liverad" element={<LiveRadManager hospitalId={selectedHospitalId} />} />
-          <Route path="/reporting" element={<CMSReporting hospitalId={selectedHospitalId} />} />
+          <Route path="/patients" element={<PatientChart />} />
+          <Route path="/admission" element={<AdmissionForm />} />
+          <Route path="/billing" element={<BillingDashboard />} />
+          <Route path="/coding" element={<CodingDashboard />} />
+          <Route path="/laboratory" element={<EnhancedLISDashboard />} />
+          <Route path="/radiology" element={<LiveRadManager />} />
+          <Route path="/pacs" element={<LiveRadManager />} />
+          <Route path="/liverad" element={<LiveRadManager />} />
+          <Route path="/reporting" element={<CMSReporting />} />
           <Route path="/ai-assistant" element={<CopilotComposer hospitalId={selectedHospitalId} />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

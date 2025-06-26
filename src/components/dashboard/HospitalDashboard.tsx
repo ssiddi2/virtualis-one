@@ -63,7 +63,18 @@ const mockHospitalData = {
       pendingLabs: 18,
       completedScans: 32,
       aiAlerts: 4
-    }
+    },
+    recentActivity: [
+      { time: '1 min ago', action: 'Surgery completed', patient: 'Emma Wilson', room: 'OR-2' },
+      { time: '5 min ago', action: 'Radiology scan ready', patient: 'Robert Davis', type: 'CT Scan' },
+      { time: '12 min ago', action: 'Patient discharged', patient: 'Lisa Brown', priority: 'NORMAL' }
+    ],
+    quickStats: [
+      { label: 'Avg Wait Time', value: '15 min', trend: 'up', color: 'text-yellow-400' },
+      { label: 'Bed Occupancy', value: '92%', trend: 'up', color: 'text-red-400' },
+      { label: 'Staff Efficiency', value: '91%', trend: 'down', color: 'text-yellow-400' },
+      { label: 'Patient Satisfaction', value: '4.6/5', trend: 'up', color: 'text-green-400' }
+    ]
   }
 };
 
