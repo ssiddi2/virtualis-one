@@ -99,7 +99,7 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 p-6">
+    <div className="min-h-screen bg-sky-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

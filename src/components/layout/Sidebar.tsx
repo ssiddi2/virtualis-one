@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
+  const { theme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
@@ -137,9 +139,15 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
   };
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} glass-sidebar flex flex-col transition-all duration-300 border-r border-blue-200/60 shadow-lg`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-64'} flex flex-col transition-all duration-300 shadow-lg ${
+      theme === 'dark' 
+        ? 'glass-sidebar border-r border-blue-200/60' 
+        : 'bg-slate-900 border-r border-slate-800'
+    }`}>
       {/* Header */}
-      <div className="p-4 border-b border-blue-200/60">
+      <div className={`p-4 ${
+        theme === 'dark' ? 'border-b border-blue-200/60' : 'border-b border-slate-800'
+      }`}>
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
@@ -149,8 +157,12 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
                 className="w-8 h-8 rounded-lg"
               />
               <div>
-                <h1 className="text-slate-800 font-bold text-lg gradient-text">Virtualis</h1>
-                <p className="text-xs text-slate-600">Healthcare AI Platform</p>
+                <h1 className={`font-bold text-lg ${
+                  theme === 'dark' ? 'text-slate-800 gradient-text' : 'text-white'
+                }`}>Virtualis</h1>
+                <p className={`text-xs ${
+                  theme === 'dark' ? 'text-slate-600' : 'text-slate-400'
+                }`}>Healthcare AI Platform</p>
               </div>
             </div>
           )}
@@ -158,7 +170,11 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="glass-nav-item text-slate-700 hover:bg-blue-100/60 p-1 h-8 w-8 border-0 shadow-sm"
+            className={`p-1 h-8 w-8 border-0 shadow-sm ${
+              theme === 'dark' 
+                ? 'glass-nav-item text-slate-700 hover:bg-blue-100/60' 
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            }`}
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
@@ -167,14 +183,28 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
 
       {/* Hospital Selection Status */}
       {!isCollapsed && selectedHospitalId && (
-        <div className="p-3 border-b border-blue-200/60">
-          <Card className="glass-card bg-blue-100/60 border-blue-300/60 shadow-md">
+        <div className={`p-3 ${
+          theme === 'dark' ? 'border-b border-blue-200/60' : 'border-b border-slate-800'
+        }`}>
+          <Card className={`shadow-md ${
+            theme === 'dark' 
+              ? 'glass-card bg-blue-100/60 border-blue-300/60' 
+              : 'bg-slate-800 border-slate-700'
+          }`}>
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-2">
-                <Building className="h-4 w-4 text-blue-600" />
-                <span className="text-xs text-blue-700 font-medium">Connected Hospital</span>
+                <Building className={`h-4 w-4 ${
+                  theme === 'dark' ? 'text-blue-600' : 'text-slate-400'
+                }`} />
+                <span className={`text-xs font-medium ${
+                  theme === 'dark' ? 'text-blue-700' : 'text-slate-300'
+                }`}>Connected Hospital</span>
               </div>
-              <Badge className="glass-badge primary bg-blue-200/80 border-blue-400/60 text-blue-800">
+              <Badge className={`${
+                theme === 'dark' 
+                  ? 'glass-badge primary bg-blue-200/80 border-blue-400/60 text-blue-800' 
+                  : 'bg-slate-700 border-slate-600 text-slate-200'
+              }`}>
                 EMR System Active
               </Badge>
             </CardContent>
@@ -188,25 +218,41 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
           <div key={item.href} className="relative group">
             <Button
               variant="ghost"
-              className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start'} glass-nav-item transition-all duration-300 ${
+              className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ${
                 isActive(item.href) 
-                  ? 'glass-nav-item active bg-blue-100/80 border-blue-300/60 text-slate-800 shadow-md' 
-                  : 'text-slate-700 hover:bg-blue-50/80 border-blue-200/40'
+                  ? theme === 'dark'
+                    ? 'glass-nav-item active bg-blue-100/80 border-blue-300/60 text-slate-800 shadow-md'
+                    : 'bg-slate-800 border-slate-700 text-white shadow-md'
+                  : theme === 'dark'
+                    ? 'glass-nav-item text-slate-700 hover:bg-blue-50/80 border-blue-200/40'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white border-slate-800'
               }`}
               onClick={() => navigate(item.href)}
             >
-              <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'} ${isActive(item.href) ? 'text-blue-600' : ''}`} />
+              <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'} ${
+                isActive(item.href) ? (theme === 'dark' ? 'text-blue-600' : 'text-white') : ''
+              }`} />
               {!isCollapsed && (
                 <div className="flex-1 flex items-center justify-between">
-                  <span className={isActive(item.href) ? 'text-slate-800 font-medium' : ''}>{item.name}</span>
+                  <span className={
+                    isActive(item.href) 
+                      ? (theme === 'dark' ? 'text-slate-800 font-medium' : 'text-white font-medium')
+                      : ''
+                  }>{item.name}</span>
                   {item.badge && (
                     <Badge 
-                      className={`glass-badge ml-2 text-xs ${
+                      className={`ml-2 text-xs ${
                         item.badge === 'AI' 
-                          ? 'bg-purple-100/80 border-purple-300/60 text-purple-700' 
+                          ? theme === 'dark'
+                            ? 'glass-badge bg-purple-100/80 border-purple-300/60 text-purple-700'
+                            : 'bg-purple-900 border-purple-800 text-purple-200'
                           : item.badge === 'CORE'
-                          ? 'bg-blue-100/80 border-blue-300/60 text-blue-700'
-                          : 'bg-green-100/80 border-green-300/60 text-green-700'
+                          ? theme === 'dark'
+                            ? 'glass-badge bg-blue-100/80 border-blue-300/60 text-blue-700'
+                            : 'bg-blue-900 border-blue-800 text-blue-200'
+                          : theme === 'dark'
+                            ? 'glass-badge bg-green-100/80 border-green-300/60 text-green-700'
+                            : 'bg-green-900 border-green-800 text-green-200'
                       }`}
                     >
                       {item.badge}
@@ -218,10 +264,18 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
             
             {/* Tooltip for collapsed state */}
             {isCollapsed && (
-              <div className="absolute left-full ml-2 px-3 py-1 glass-card bg-slate-800/90 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+              <div className={`absolute left-full ml-2 px-3 py-1 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg ${
+                theme === 'dark' 
+                  ? 'glass-card bg-slate-800/90 text-white' 
+                  : 'bg-slate-800 text-white'
+              }`}>
                 {item.name}
                 {item.badge && (
-                  <Badge className="ml-2 text-xs bg-blue-100/80 border-blue-300/60 text-blue-700">
+                  <Badge className={`ml-2 text-xs ${
+                    theme === 'dark' 
+                      ? 'bg-blue-100/80 border-blue-300/60 text-blue-700' 
+                      : 'bg-blue-800 border-blue-700 text-blue-200'
+                  }`}>
                     {item.badge}
                   </Badge>
                 )}
@@ -232,13 +286,23 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
       </nav>
 
       {/* User Info */}
-      <div className="p-4 border-t border-blue-200/60 space-y-2">
+      <div className={`p-4 space-y-2 ${
+        theme === 'dark' ? 'border-t border-blue-200/60' : 'border-t border-slate-800'
+      }`}>
         {!isCollapsed && (
-          <div className="glass-card p-3 bg-white/60 border-blue-200/50 shadow-sm">
-            <div className="text-slate-800">
+          <div className={`p-3 shadow-sm ${
+            theme === 'dark' 
+              ? 'glass-card bg-white/60 border-blue-200/50' 
+              : 'bg-slate-800 border-slate-700 rounded-lg'
+          }`}>
+            <div className={theme === 'dark' ? 'text-slate-800' : 'text-white'}>
               <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
-              <p className="text-sm text-slate-600">{profile?.role || 'Healthcare Professional'}</p>
-              <p className="text-xs text-slate-500">{profile?.email}</p>
+              <p className={`text-sm ${
+                theme === 'dark' ? 'text-slate-600' : 'text-slate-400'
+              }`}>{profile?.role || 'Healthcare Professional'}</p>
+              <p className={`text-xs ${
+                theme === 'dark' ? 'text-slate-500' : 'text-slate-500'
+              }`}>{profile?.email}</p>
             </div>
           </div>
         )}
@@ -247,7 +311,11 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
           <Button
             variant="ghost"
             size="sm"
-            className="glass-nav-item text-slate-700 hover:bg-blue-50/80 flex-1 border-blue-200/40 shadow-sm"
+            className={`flex-1 shadow-sm ${
+              theme === 'dark' 
+                ? 'glass-nav-item text-slate-700 hover:bg-blue-50/80 border-blue-200/40' 
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white border-slate-800'
+            }`}
             onClick={() => navigate('/settings')}
           >
             <Settings className="h-4 w-4" />
@@ -258,7 +326,11 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={handleSignOut}
-            className="glass-nav-item text-red-600 hover:bg-red-50/80 border-red-200/60 flex-1 shadow-sm"
+            className={`flex-1 shadow-sm ${
+              theme === 'dark' 
+                ? 'glass-nav-item text-red-600 hover:bg-red-50/80 border-red-200/60' 
+                : 'text-red-400 hover:bg-red-900/20 hover:text-red-300 border-slate-800'
+            }`}
           >
             <LogOut className="h-4 w-4" />
             {!isCollapsed && <span className="ml-2">Sign Out</span>}
