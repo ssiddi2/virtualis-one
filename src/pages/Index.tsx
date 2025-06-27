@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useAuth } from "@/components/auth/AuthProvider";
 import Dashboard from "@/components/dashboard/Dashboard";
 import HospitalSelector from "@/components/dashboard/HospitalSelector";
 import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
@@ -9,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Building, Users, Activity, BarChart3 } from "lucide-react";
 
 const Index = () => {
-  const { user, profile } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<'dashboard' | 'patient-tracker'>('dashboard');
 
-  if (!user) {
+  if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
         <Card className="w-96 bg-[#1a2332] border-[#2a3441] text-white">
@@ -128,6 +127,13 @@ const Index = () => {
           <div className="flex items-center gap-2 text-white">
             <Building className="h-4 w-4 text-blue-400" />
             <span className="text-sm">Hospital ID: {selectedHospitalId}</span>
+            <Button
+              onClick={() => setIsLoggedIn(false)}
+              variant="outline"
+              className="ml-4 bg-transparent border-[#2a3441] text-white hover:bg-[#2a3441]"
+            >
+              Sign Out
+            </Button>
           </div>
         </div>
       </div>
