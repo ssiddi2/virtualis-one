@@ -284,6 +284,73 @@ export type Database = {
           },
         ]
       }
+      consultation_requests: {
+        Row: {
+          ai_recommendation: string | null
+          clinical_question: string | null
+          consulted_physician_id: string | null
+          created_at: string
+          id: string
+          message_id: string
+          patient_id: string | null
+          requested_specialty_id: string | null
+          requesting_physician_id: string | null
+          status: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          ai_recommendation?: string | null
+          clinical_question?: string | null
+          consulted_physician_id?: string | null
+          created_at?: string
+          id?: string
+          message_id: string
+          patient_id?: string | null
+          requested_specialty_id?: string | null
+          requesting_physician_id?: string | null
+          status?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          ai_recommendation?: string | null
+          clinical_question?: string | null
+          consulted_physician_id?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string
+          patient_id?: string | null
+          requested_specialty_id?: string | null
+          requesting_physician_id?: string | null
+          status?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_requests_consulted_physician_id_fkey"
+            columns: ["consulted_physician_id"]
+            isOneToOne: false
+            referencedRelation: "physicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_requests_requested_specialty_id_fkey"
+            columns: ["requested_specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_requests_requesting_physician_id_fkey"
+            columns: ["requesting_physician_id"]
+            isOneToOne: false
+            referencedRelation: "physicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospitals: {
         Row: {
           address: string
@@ -574,6 +641,51 @@ export type Database = {
           },
         ]
       }
+      on_call_schedules: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_primary: boolean | null
+          physician_id: string
+          specialty_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_primary?: boolean | null
+          physician_id: string
+          specialty_id: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_primary?: boolean | null
+          physician_id?: string
+          specialty_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "on_call_schedules_physician_id_fkey"
+            columns: ["physician_id"]
+            isOneToOne: false
+            referencedRelation: "physicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "on_call_schedules_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           address: string | null
@@ -674,6 +786,53 @@ export type Database = {
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      physicians: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          is_active: boolean | null
+          last_name: string
+          phone: string | null
+          specialty_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          is_active?: boolean | null
+          last_name: string
+          phone?: string | null
+          specialty_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          is_active?: boolean | null
+          last_name?: string
+          phone?: string | null
+          specialty_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "physicians_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
             referencedColumns: ["id"]
           },
         ]
@@ -807,6 +966,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      specialties: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       vital_signs: {
         Row: {
