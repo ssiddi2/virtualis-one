@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +58,7 @@ const Login = ({ onLogin }: LoginProps) => {
     <div className={`min-h-screen flex items-center justify-center p-6 relative overflow-hidden ${
       theme === 'dark' ? 'bg-[#0a1628]' : 'bg-gradient-to-br from-sky-300 via-sky-400 to-blue-500'
     }`}>
-      {/* Theme Toggle */}
+      {/* Theme Toggle - Positioned prominently */}
       <div className="absolute top-6 right-6 z-20">
         <ThemeToggle />
       </div>

@@ -13,6 +13,7 @@ import {
   Filter,
   Plus
 } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ERPatientTrackerProps {
   hospitalId?: string | null;
@@ -21,6 +22,7 @@ interface ERPatientTrackerProps {
 const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const { theme } = useTheme();
 
   // Mock data for ER patients
   const mockERPatients = [
@@ -99,16 +101,22 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
   });
 
   return (
-    <div className="min-h-screen bg-sky-50 p-6">
+    <div className={`min-h-screen p-6 ${
+      theme === 'dark' ? 'bg-[#0a1628]' : 'bg-sky-100'
+    }`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
+            <h1 className={`text-3xl font-bold flex items-center gap-3 ${
+              theme === 'dark' ? 'text-white' : 'text-slate-800'
+            }`}>
               <Activity className="h-8 w-8 text-red-500" />
               Emergency Department Tracker
             </h1>
-            <p className="text-slate-600 mt-2">
+            <p className={`mt-2 ${
+              theme === 'dark' ? 'text-white/70' : 'text-slate-600'
+            }`}>
               Real-time patient tracking and triage management
               {hospitalId && ` • Hospital ID: ${hospitalId}`}
             </p>
@@ -121,53 +129,79 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className={`shadow-lg hover:shadow-xl transition-shadow ${
+            theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-blue-200'
+          }`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Total Patients</CardTitle>
+              <CardTitle className={`text-sm font-medium ${
+                theme === 'dark' ? 'text-white' : 'text-slate-700'
+              }`}>Total Patients</CardTitle>
               <Users className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{mockERPatients.length}</div>
-              <p className="text-xs text-slate-500">Currently in ED</p>
+              <div className={`text-2xl font-bold ${
+                theme === 'dark' ? 'text-white' : 'text-slate-800'
+              }`}>{mockERPatients.length}</div>
+              <p className={`text-xs ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+              }`}>Currently in ED</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-red-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className={`shadow-lg hover:shadow-xl transition-shadow ${
+            theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-red-200'
+          }`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Critical Cases</CardTitle>
+              <CardTitle className={`text-sm font-medium ${
+                theme === 'dark' ? 'text-white' : 'text-slate-700'
+              }`}>Critical Cases</CardTitle>
               <AlertTriangle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
                 {mockERPatients.filter(p => p.status === 'critical').length}
               </div>
-              <p className="text-xs text-slate-500">Requires immediate attention</p>
+              <p className={`text-xs ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+              }`}>Requires immediate attention</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-amber-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className={`shadow-lg hover:shadow-xl transition-shadow ${
+            theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-amber-200'
+          }`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">In Treatment</CardTitle>
+              <CardTitle className={`text-sm font-medium ${
+                theme === 'dark' ? 'text-white' : 'text-slate-700'
+              }`}>In Treatment</CardTitle>
               <Clock className="h-4 w-4 text-amber-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-amber-600">
                 {mockERPatients.filter(p => p.status === 'in-treatment').length}
               </div>
-              <p className="text-xs text-slate-500">Currently being treated</p>
+              <p className={`text-xs ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+              }`}>Currently being treated</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className={`shadow-lg hover:shadow-xl transition-shadow ${
+            theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-blue-200'
+          }`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Waiting</CardTitle>
+              <CardTitle className={`text-sm font-medium ${
+                theme === 'dark' ? 'text-white' : 'text-slate-700'
+              }`}>Waiting</CardTitle>
               <Users className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
                 {mockERPatients.filter(p => p.status === 'waiting').length}
               </div>
-              <p className="text-xs text-slate-500">Awaiting treatment</p>
+              <p className={`text-xs ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+              }`}>Awaiting treatment</p>
             </CardContent>
           </Card>
         </div>
@@ -175,18 +209,28 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
         {/* Search and Filter */}
         <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${
+              theme === 'dark' ? 'text-slate-400' : 'text-slate-400'
+            }`} />
             <Input
               placeholder="Search patients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white border-slate-300 text-slate-800 shadow-sm"
+              className={`pl-10 shadow-sm ${
+                theme === 'dark' 
+                  ? 'bg-slate-800 border-slate-700 text-white placeholder:text-slate-400' 
+                  : 'bg-white border-slate-300 text-slate-800 placeholder:text-slate-500'
+              }`}
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 bg-white border border-slate-300 rounded-md text-slate-800 shadow-sm"
+            className={`px-4 py-2 border rounded-md shadow-sm ${
+              theme === 'dark' 
+                ? 'bg-slate-800 border-slate-700 text-white' 
+                : 'bg-white border-slate-300 text-slate-800'
+            }`}
           >
             <option value="all">All Status</option>
             <option value="critical">Critical</option>
@@ -197,29 +241,43 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
         </div>
 
         {/* Patient List */}
-        <Card className="bg-white border border-slate-200 shadow-lg">
+        <Card className={`shadow-lg ${
+          theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
+        }`}>
           <CardHeader>
-            <CardTitle className="text-slate-800">Patient Queue</CardTitle>
-            <CardDescription className="text-slate-600">
+            <CardTitle className={theme === 'dark' ? 'text-white' : 'text-slate-800'}>Patient Queue</CardTitle>
+            <CardDescription className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
               Live emergency department patient tracking
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {filteredPatients.map((patient) => (
-                <Card key={patient.id} className="p-4 bg-slate-50 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all">
+                <Card key={patient.id} className={`p-4 hover:shadow-md transition-all ${
+                  theme === 'dark' 
+                    ? 'bg-slate-700 border-slate-600 hover:border-blue-500' 
+                    : 'bg-slate-50 border-slate-200 hover:border-blue-300'
+                }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
                         <Badge className={`${getTriageColor(patient.triageLevel)} text-white`}>
                           T{patient.triageLevel}
                         </Badge>
-                        <div className="text-sm text-slate-500">{patient.arrivalTime}</div>
+                        <div className={`text-sm ${
+                          theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                        }`}>{patient.arrivalTime}</div>
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-slate-800">{patient.name}</h4>
-                        <p className="text-sm text-slate-600">Age: {patient.age} • {patient.chiefComplaint}</p>
-                        <p className="text-sm text-slate-600">
+                        <h4 className={`font-medium ${
+                          theme === 'dark' ? 'text-white' : 'text-slate-800'
+                        }`}>{patient.name}</h4>
+                        <p className={`text-sm ${
+                          theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                        }`}>Age: {patient.age} • {patient.chiefComplaint}</p>
+                        <p className={`text-sm ${
+                          theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                        }`}>
                           Bed: {patient.bedNumber} • 
                           {patient.assignedTo ? ` Assigned to: ${patient.assignedTo}` : ' Unassigned'}
                         </p>
