@@ -18,13 +18,16 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useBillingCharges } from '@/hooks/useBillingCharges';
+import BillingReportGenerator from './BillingReportGenerator';
 
-const BillingDashboard = () => {
+interface BillingDashboardProps {
+  hospitalId?: string | null;
+}
+
+const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
   const { toast } = useToast();
-  const { data: billingCharges } = useBillingCharges();
+  const { data: billingCharges } = useBillingCharges(hospitalId);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  const [selectedHospitalId, setSelectedHospitalId] = useState<string>('');
 
   const handleProcessClaims = async () => {
     setIsProcessing(true);
@@ -36,27 +39,6 @@ const BillingDashboard = () => {
       });
       setIsProcessing(false);
     }, 3000);
-  };
-
-  const handleGenerateReport = async (reportType: string) => {
-    setIsGeneratingReport(true);
-    
-    setTimeout(() => {
-      toast({
-        title: "Report Generated",
-        description: `${reportType} report has been generated and is ready for download.`,
-      });
-      setIsGeneratingReport(false);
-      
-      // Simulate file download
-      const element = document.createElement('a');
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(`${reportType} Report Data`));
-      element.setAttribute('download', `${reportType.toLowerCase().replace(' ', '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
-      element.style.display = 'none';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }, 2000);
   };
 
   const handleSubmitClaim = (claimId: string) => {
@@ -77,6 +59,8 @@ const BillingDashboard = () => {
   const totalRevenue = billingCharges?.reduce((sum, charge) => sum + (charge.amount || 0), 0) || 0;
   const outstandingAmount = billingCharges?.reduce((sum, charge) => 
     sum + (charge.balance_due || 0), 0) || 0;
+  const paidAmount = billingCharges?.reduce((sum, charge) => 
+    sum + (charge.payment_amount || 0), 0) || 0;
 
   return (
     <div className="min-h-screen bg-[#0a1628] p-6">
@@ -88,14 +72,6 @@ const BillingDashboard = () => {
             <p className="text-white/70">Comprehensive billing operations dashboard</p>
           </div>
           <div className="flex gap-3">
-            <Button 
-              onClick={() => handleGenerateReport('Revenue Summary')}
-              disabled={isGeneratingReport}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
-              Revenue Report
-            </Button>
             <Button 
               onClick={handleProcessClaims}
               disabled={isProcessing}
@@ -117,7 +93,20 @@ const BillingDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold text-white">${totalRevenue.toLocaleString()}</div>
               <p className="text-xs text-slate-400">
-                +12% from last month
+                {billingCharges?.length || 0} total charges
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white">Collected</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">${paidAmount.toLocaleString()}</div>
+              <p className="text-xs text-slate-400">
+                {totalRevenue > 0 ? `${((paidAmount / totalRevenue) * 100).toFixed(1)}% collection rate` : '0% collection rate'}
               </p>
             </CardContent>
           </Card>
@@ -137,19 +126,6 @@ const BillingDashboard = () => {
 
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Collection Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-blue-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">94.2%</div>
-              <p className="text-xs text-slate-400">
-                Above industry average
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Avg Days to Payment</CardTitle>
               <Clock className="h-4 w-4 text-purple-400" />
             </CardHeader>
@@ -162,7 +138,7 @@ const BillingDashboard = () => {
           </Card>
         </div>
 
-        {/* Claims Management */}
+        {/* Claims Management and Reports */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
@@ -181,6 +157,11 @@ const BillingDashboard = () => {
                         <div className="text-sm text-slate-400">
                           ${claim.amount} • {new Date(claim.service_date).toLocaleDateString()}
                         </div>
+                        {claim.patients && (
+                          <div className="text-xs text-slate-500">
+                            Patient: {claim.patients.first_name} {claim.patients.last_name}
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-2">
                         <Button 
@@ -216,47 +197,7 @@ const BillingDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <TrendingUp className="h-5 w-5 text-green-400" />
-                Revenue Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-300">This Month</span>
-                <span className="text-green-400 font-semibold">$245,680</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-300">Last Month</span>
-                <span className="text-slate-400">$219,450</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-300">Growth</span>
-                <Badge className="bg-green-600/20 text-green-300 border-green-600/30">+12%</Badge>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <Button 
-                  onClick={() => handleGenerateReport('Monthly Analytics')}
-                  disabled={isGeneratingReport}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Analytics Report
-                </Button>
-                <Button 
-                  onClick={() => handleGenerateReport('Claims Summary')}
-                  disabled={isGeneratingReport}
-                  variant="outline"
-                  className="border-slate-600 text-white hover:bg-slate-700"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Data
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <BillingReportGenerator hospitalId={hospitalId} />
         </div>
 
         {/* Quick Actions */}
@@ -281,21 +222,20 @@ const BillingDashboard = () => {
                 Post Payment
               </Button>
               <Button 
-                onClick={() => handleGenerateReport('Aging Report')}
-                disabled={isGeneratingReport}
-                variant="outline"
-                className="border-slate-600 text-white hover:bg-slate-700"
-              >
-                <Clock className="h-4 w-4 mr-2" />
-                Aging Report
-              </Button>
-              <Button 
                 onClick={() => toast({ title: "Feature", description: "Opening denial management workflow..." })}
                 variant="outline"
                 className="border-slate-600 text-white hover:bg-slate-700"
               >
                 <AlertCircle className="h-4 w-4 mr-2" />
                 Manage Denials
+              </Button>
+              <Button 
+                onClick={() => toast({ title: "Feature", description: "Opening insurance verification..." })}
+                variant="outline"
+                className="border-slate-600 text-white hover:bg-slate-700"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Verify Insurance
               </Button>
             </div>
           </CardContent>
