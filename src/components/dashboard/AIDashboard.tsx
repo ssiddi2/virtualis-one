@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Users, FileText, Code, Stethoscope, DollarSign, Shield, Activity } from 'lucide-react';
+import { Brain, Users, FileText, Code, Stethoscope, DollarSign, Shield, Activity, Workflow } from 'lucide-react';
 import MedicalCodingAssistant from '@/components/ai/MedicalCodingAssistant';
 import DiagnosisSupport from '@/components/ai/DiagnosisSupport';
 import AIInsightsDashboard from '@/components/ai/AIInsightsDashboard';
+import AIWorkflowDashboard from '@/components/ai/AIWorkflowDashboard';
 import { useHospitals } from '@/hooks/useHospitals';
 
 interface AIDashboardProps {
@@ -16,7 +17,7 @@ interface AIDashboardProps {
 }
 
 const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
-  const [activeTab, setActiveTab] = useState('insights');
+  const [activeTab, setActiveTab] = useState('workflow');
   const { data: hospitals } = useHospitals();
   
   const selectedHospital = hospitalId ? hospitals?.find(h => h.id === hospitalId) : null;
@@ -75,7 +76,11 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 glass-card">
+        <TabsList className="grid w-full grid-cols-5 glass-card">
+          <TabsTrigger value="workflow" className="text-white">
+            <Workflow className="h-4 w-4 mr-2" />
+            Workflow Demo
+          </TabsTrigger>
           <TabsTrigger value="insights" className="text-white">
             <Brain className="h-4 w-4 mr-2" />
             AI Insights
@@ -93,6 +98,10 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
             AI Tools
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="workflow" className="space-y-6">
+          <AIWorkflowDashboard hospitalId={hospitalId} />
+        </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">
           <AIInsightsDashboard 

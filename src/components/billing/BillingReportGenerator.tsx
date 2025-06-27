@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -163,7 +162,7 @@ Total Outstanding: $${Object.values(agingBuckets).reduce((sum, bucket) => sum + 
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(a);
+      URL.revokeObjectURL(url);
 
       setIsGenerating(false);
       toast({
