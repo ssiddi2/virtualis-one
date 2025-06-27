@@ -56,7 +56,7 @@ const Index = () => {
             </p>
           </div>
           
-          <HospitalSelector onHospitalSelect={handleHospitalSelect} />
+          <HospitalSelector onSelectHospital={handleHospitalSelect} />
           
           {/* Quick Actions */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -136,7 +136,7 @@ const Index = () => {
       {currentView === 'dashboard' ? (
         <Dashboard selectedHospitalId={selectedHospitalId} />
       ) : (
-        <ERPatientTracker />
+        <ERPatientTracker selectedHospitalId={selectedHospitalId} />
       )}
     </div>
   );
