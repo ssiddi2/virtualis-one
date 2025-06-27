@@ -21,13 +21,11 @@ import AIDashboard from "@/components/dashboard/AIDashboard";
 import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
 import Demo from "@/pages/Demo";
 import VirtualisChatPage from "@/pages/VirtualisChat";
-import { useTheme } from "@/hooks/useTheme";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
-  const { theme } = useTheme();
 
   const handleSelectHospital = (hospitalId: string) => {
     console.log('Selected hospital:', hospitalId);
@@ -40,10 +38,8 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${
-        theme === 'dark' ? 'bg-[#0a1628]' : 'bg-sky-50'
-      }`}>
-        <div className={theme === 'dark' ? 'text-white' : 'text-slate-800'}>Loading...</div>
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
       </div>
     );
   }
@@ -53,13 +49,9 @@ const Index = () => {
   }
 
   return (
-    <div className={`flex h-screen overflow-hidden ${
-      theme === 'dark' ? 'bg-[#0a1628]' : 'bg-sky-50'
-    }`}>
+    <div className="flex h-screen bg-[#0a1628] overflow-hidden">
       <Sidebar selectedHospitalId={selectedHospitalId} />
-      <main className={`flex-1 overflow-auto ${
-        theme === 'dark' ? '' : 'bg-sky-50'
-      }`}>
+      <main className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Navigate to="/emr" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -70,16 +62,10 @@ const Index = () => {
                 hospitalId={selectedHospitalId}
               />
             ) : (
-              <div className={`min-h-screen flex items-center justify-center ${
-                theme === 'dark' ? 'bg-[#0a1628]' : 'bg-sky-50'
-              }`}>
-                <div className="text-center">
-                  <h2 className={`text-2xl font-bold mb-4 ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-800'
-                  }`}>Select a Hospital</h2>
-                  <p className={`mb-4 ${
-                    theme === 'dark' ? 'text-white/70' : 'text-slate-600'
-                  }`}>Please select a hospital from the EMR dashboard to view AI insights.</p>
+              <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h2 className="text-2xl font-bold mb-4">Select a Hospital</h2>
+                  <p className="text-white/70 mb-4">Please select a hospital from the EMR dashboard to view AI insights.</p>
                   <Button onClick={() => navigate('/emr')} className="bg-blue-600 hover:bg-blue-700">
                     Go to EMR Dashboard
                   </Button>

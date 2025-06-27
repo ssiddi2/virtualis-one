@@ -83,19 +83,19 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 p-6">
+    <div className="min-h-screen bg-[#0a1628] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Hospital Dashboard</h1>
-            <p className="text-slate-600">Real-time hospital operations overview</p>
+            <h1 className="text-3xl font-bold text-white">Hospital Dashboard</h1>
+            <p className="text-white/70">Real-time hospital operations overview</p>
           </div>
           <div className="flex gap-3">
             <Button 
               onClick={() => handleGenerateReport('Daily Operations')}
               disabled={isGeneratingReport}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
               Daily Report
@@ -104,7 +104,7 @@ const Dashboard = () => {
               onClick={handleCMSUpdate}
               disabled={isUpdatingCMS}
               variant="outline"
-              className="border-green-600 text-green-700 hover:bg-green-50 shadow-md"
+              className="border-green-600 text-green-400 hover:bg-green-600/10"
             >
               {isUpdatingCMS ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
               Update CMS
@@ -114,53 +114,53 @@ const Dashboard = () => {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-white border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Active Patients</CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium text-white">Active Patients</CardTitle>
+              <Users className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">156</div>
-              <p className="text-xs text-slate-500">
+              <div className="text-2xl font-bold text-white">156</div>
+              <p className="text-xs text-slate-400">
                 +12% from last month
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-green-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Appointments Today</CardTitle>
-              <Calendar className="h-4 w-4 text-green-500" />
+              <CardTitle className="text-sm font-medium text-white">Appointments Today</CardTitle>
+              <Calendar className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">89</div>
-              <p className="text-xs text-slate-500">
+              <div className="text-2xl font-bold text-white">89</div>
+              <p className="text-xs text-slate-400">
                 23 completed, 66 scheduled
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-amber-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Revenue Today</CardTitle>
-              <DollarSign className="h-4 w-4 text-amber-500" />
+              <CardTitle className="text-sm font-medium text-white">Revenue Today</CardTitle>
+              <DollarSign className="h-4 w-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">$45,230</div>
-              <p className="text-xs text-slate-500">
+              <div className="text-2xl font-bold text-white">$45,230</div>
+              <p className="text-xs text-slate-400">
                 +8% from yesterday
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-red-200 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Bed Occupancy</CardTitle>
-              <Activity className="h-4 w-4 text-red-500" />
+              <CardTitle className="text-sm font-medium text-white">Bed Occupancy</CardTitle>
+              <Activity className="h-4 w-4 text-red-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">85%</div>
-              <p className="text-xs text-slate-500">
+              <div className="text-2xl font-bold text-white">85%</div>
+              <p className="text-xs text-slate-400">
                 127 of 150 beds occupied
               </p>
             </CardContent>
@@ -170,27 +170,27 @@ const Dashboard = () => {
         {/* Action Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Billing & Claims */}
-          <Card className="bg-white border-slate-200 shadow-lg">
+          <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-slate-800">
-                <DollarSign className="h-5 w-5 text-green-500" />
+              <CardTitle className="flex items-center gap-2 text-white">
+                <DollarSign className="h-5 w-5 text-green-400" />
                 Billing & Claims Management
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">Pending Claims</span>
-                <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-200">15</Badge>
+                <span className="text-slate-300">Pending Claims</span>
+                <Badge variant="secondary" className="bg-orange-600/20 text-orange-300">15</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">Outstanding Revenue</span>
-                <span className="text-slate-800 font-semibold">$127,450</span>
+                <span className="text-slate-300">Outstanding Revenue</span>
+                <span className="text-white font-semibold">$127,450</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   onClick={handleProcessClaims}
                   disabled={isProcessingClaims}
-                  className="bg-green-600 hover:bg-green-700 text-white shadow-md"
+                  className="bg-green-600 hover:bg-green-700"
                 >
                   {isProcessingClaims ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
                   Process Claims
@@ -198,7 +198,7 @@ const Dashboard = () => {
                 <Button 
                   onClick={() => handleExportData('Billing')}
                   variant="outline"
-                  className="border-slate-300 text-slate-700 hover:bg-slate-50 shadow-md"
+                  className="border-slate-600 text-white hover:bg-slate-700"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
@@ -208,27 +208,27 @@ const Dashboard = () => {
           </Card>
 
           {/* Quality Reporting */}
-          <Card className="bg-white border-slate-200 shadow-lg">
+          <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-slate-800">
-                <TrendingUp className="h-5 w-5 text-blue-500" />
+              <CardTitle className="flex items-center gap-2 text-white">
+                <TrendingUp className="h-5 w-5 text-blue-400" />
                 Quality & Compliance
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">Quality Score</span>
-                <Badge className="bg-green-100 text-green-700 border-green-200">94.2%</Badge>
+                <span className="text-slate-300">Quality Score</span>
+                <Badge className="bg-green-600/20 text-green-300 border-green-600/30">94.2%</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">CMS Measures</span>
-                <span className="text-slate-800 font-semibold">18/20 Met</span>
+                <span className="text-slate-300">CMS Measures</span>
+                <span className="text-white font-semibold">18/20 Met</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   onClick={() => handleGenerateReport('Quality Metrics')}
                   disabled={isGeneratingReport}
-                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
                   Generate Report
@@ -236,7 +236,7 @@ const Dashboard = () => {
                 <Button 
                   onClick={() => handleExportData('Quality')}
                   variant="outline"
-                  className="border-slate-300 text-slate-700 hover:bg-slate-50 shadow-md"
+                  className="border-slate-600 text-white hover:bg-slate-700"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export CMS
@@ -247,27 +247,27 @@ const Dashboard = () => {
         </div>
 
         {/* AI Insights */}
-        <Card className="bg-gradient-to-r from-purple-100 to-blue-100 border-purple-200 shadow-lg">
+        <Card className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-600/30">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-slate-800">
-              <Brain className="h-5 w-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Brain className="h-5 w-5 text-purple-400" />
               AI-Powered Insights
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-white/50 rounded-lg shadow-sm">
-                <h4 className="font-medium text-slate-800 mb-2">Readmission Risk Alert</h4>
-                <p className="text-sm text-slate-600 mb-3">5 patients identified with high readmission risk</p>
-                <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+              <div className="p-4 bg-slate-800/30 rounded-lg">
+                <h4 className="font-medium text-white mb-2">Readmission Risk Alert</h4>
+                <p className="text-sm text-slate-300 mb-3">5 patients identified with high readmission risk</p>
+                <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
                   <AlertCircle className="h-3 w-3 mr-2" />
                   Review Cases
                 </Button>
               </div>
-              <div className="p-4 bg-white/50 rounded-lg shadow-sm">
-                <h4 className="font-medium text-slate-800 mb-2">Cost Optimization</h4>
-                <p className="text-sm text-slate-600 mb-3">Potential savings of $15K identified</p>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+              <div className="p-4 bg-slate-800/30 rounded-lg">
+                <h4 className="font-medium text-white mb-2">Cost Optimization</h4>
+                <p className="text-sm text-slate-300 mb-3">Potential savings of $15K identified</p>
+                <Button size="sm" className="bg-green-600 hover:bg-green-700">
                   <TrendingUp className="h-3 w-3 mr-2" />
                   View Details
                 </Button>
@@ -277,30 +277,30 @@ const Dashboard = () => {
         </Card>
 
         {/* Recent Activities */}
-        <Card className="bg-white border-slate-200 shadow-lg">
+        <Card className="bg-slate-800/50 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-slate-800">Recent System Activities</CardTitle>
+            <CardTitle className="text-white">Recent System Activities</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded shadow-sm">
+              <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded">
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span className="text-slate-700">Daily backup completed successfully</span>
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  <span className="text-slate-300">Daily backup completed successfully</span>
                 </div>
                 <span className="text-xs text-slate-500">2 minutes ago</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded shadow-sm">
+              <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded">
                 <div className="flex items-center gap-3">
-                  <Upload className="h-4 w-4 text-blue-500" />
-                  <span className="text-slate-700">CMS quality measures submitted</span>
+                  <Upload className="h-4 w-4 text-blue-400" />
+                  <span className="text-slate-300">CMS quality measures submitted</span>
                 </div>
                 <span className="text-xs text-slate-500">1 hour ago</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded shadow-sm">
+              <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded">
                 <div className="flex items-center gap-3">
-                  <FileText className="h-4 w-4 text-purple-500" />
-                  <span className="text-slate-700">Monthly financial report generated</span>
+                  <FileText className="h-4 w-4 text-purple-400" />
+                  <span className="text-slate-300">Monthly financial report generated</span>
                 </div>
                 <span className="text-xs text-slate-500">3 hours ago</span>
               </div>

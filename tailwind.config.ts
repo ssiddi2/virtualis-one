@@ -26,7 +26,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#3b82f6',
+					DEFAULT: '#0a1628',
 					foreground: '#ffffff'
 				},
 				secondary: {
@@ -34,9 +34,9 @@ export default {
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				accent: {
-					DEFAULT: '#3b82f6',
+					DEFAULT: '#f59e0b',
 					foreground: '#ffffff',
-					hover: '#2563eb'
+					hover: '#d97706'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -64,15 +64,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Virtualis One™ Light Mode Brand Colors
+				// Virtualis One™ Exact Brand Colors
 				virtualis: {
-					navy: '#1e293b',
-					'deep-navy': '#0f172a',
-					blue: '#3b82f6',
-					'blue-light': '#60a5fa',
-					'blue-dark': '#2563eb',
-					glass: 'rgba(255, 255, 255, 0.8)',
-					'glass-border': 'rgba(59, 130, 246, 0.3)',
+					navy: '#0a1628',
+					'deep-navy': '#0f2337',
+					gold: '#f59e0b',
+					'gold-light': '#fbbf24',
+					'gold-dark': '#d97706',
+					glass: 'rgba(255, 255, 255, 0.1)',
+					'glass-border': 'rgba(255, 255, 255, 0.2)',
 				}
 			},
 			fontFamily: {
@@ -104,10 +104,10 @@ export default {
 				},
 				'pulse-glow': {
 					'0%, 100%': {
-						boxShadow: '0 0 20px rgba(59, 130, 246, 0.4)'
+						boxShadow: '0 0 20px rgba(245, 158, 11, 0.4)'
 					},
 					'50%': {
-						boxShadow: '0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.3)'
+						boxShadow: '0 0 30px rgba(245, 158, 11, 0.8), 0 0 60px rgba(245, 158, 11, 0.3)'
 					}
 				},
 				'scan': {
@@ -136,13 +136,6 @@ export default {
 			},
 			backdropBlur: {
 				xs: '2px',
-			},
-			boxShadow: {
-				'light-sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-				'light': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-				'light-md': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-				'light-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-				'light-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
 			}
 		}
 	},
