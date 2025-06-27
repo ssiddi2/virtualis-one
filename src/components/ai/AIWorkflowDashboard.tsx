@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -91,7 +90,7 @@ const AIWorkflowDashboard = ({ hospitalId }: AIWorkflowDashboardProps) => {
       return;
     }
 
-    const patientContext = `Patient: ${currentPatient?.first_name} ${currentPatient?.last_name}, Age: ${currentPatient ? new Date().getFullYear() - new Date(currentPatient.date_of_birth).getFullYear() : 'Unknown'}, Conditions: ${currentPatient?.medical_conditions?.join(', ') || 'None'}, Medications: ${medications?.map(m => m.medication_name).join(', ') || 'None'}`;
+    const patientContext = `Patient: ${currentPatient?.first_name} ${currentPatient?.last_name}, Age: ${currentPatient ? new Date().getFullYear() - new Date(currentPatient.date_of_birth).getFullYear() : 'Unknown'}, Conditions: ${currentPatient?.medical_conditions?.join(', ') || 'None'}, Room: ${currentPatient?.room_number || 'N/A'}`;
 
     try {
       let response = '';
@@ -100,18 +99,20 @@ const AIWorkflowDashboard = ({ hospitalId }: AIWorkflowDashboardProps) => {
         case 'Differential Diagnosis':
           const recentRecord = medicalRecords?.[0];
           if (!recentRecord?.chief_complaint) {
-            toast({
-              title: "No Clinical Data",
-              description: "No recent clinical notes found for this patient.",
-              variant: "destructive"
+            // Generate demo diagnosis based on patient conditions
+            const conditions = currentPatient?.medical_conditions || ['General examination'];
+            response = await callAI({
+              type: 'diagnosis_support',
+              data: { symptoms: conditions.join(', ') + ' - routine evaluation' },
+              context: patientContext
             });
-            return;
+          } else {
+            response = await callAI({
+              type: 'diagnosis_support',
+              data: { symptoms: recentRecord.chief_complaint },
+              context: patientContext
+            });
           }
-          response = await callAI({
-            type: 'diagnosis_support',
-            data: { symptoms: recentRecord.chief_complaint },
-            context: patientContext
-          });
           break;
 
         case 'Drug Interactions':
@@ -138,30 +139,53 @@ const AIWorkflowDashboard = ({ hospitalId }: AIWorkflowDashboardProps) => {
             type: 'care_plan',
             data: {
               condition: currentPatient?.medical_conditions?.join(', ') || 'General care',
-              assessment: medicalRecords?.[0]?.assessment || 'Standard assessment'
+              assessment: medicalRecords?.[0]?.assessment || `Patient with ${currentPatient?.medical_conditions?.join(', ') || 'general medical conditions'} requiring comprehensive care plan`
             }
           });
           break;
 
         case 'ICD-10 Coding':
-        case 'CPT Coding':
-          const recordForCoding = medicalRecords?.[0];
-          if (!recordForCoding) {
-            toast({
-              title: "No Medical Records",
-              description: "No medical records found for coding analysis.",
-              variant: "destructive"
-            });
-            return;
-          }
+          // Use patient conditions for ICD-10 coding if no medical records
+          const patientConditions = currentPatient?.medical_conditions || ['General examination'];
+          const recordForICD = medicalRecords?.[0];
+          
           response = await callAI({
             type: 'medical_coding',
             data: {
-              diagnosis: recordForCoding.assessment,
-              procedure: recordForCoding.plan,
-              context: `${recordForCoding.chief_complaint} - ${recordForCoding.physical_examination}`
+              diagnosis: recordForICD?.assessment || patientConditions.join(', '),
+              procedure: recordForICD?.plan || 'Standard medical evaluation and management',
+              context: `Patient: ${currentPatient?.first_name} ${currentPatient?.last_name} - ${patientConditions.join(', ')}`
             }
           });
+          break;
+
+        case 'CPT Coding':
+          // Use billing charges data for CPT coding analysis
+          if (!patientBilling || patientBilling.length === 0) {
+            // Generate demo CPT coding based on patient conditions and room
+            const conditions = currentPatient?.medical_conditions || ['General examination'];
+            const roomType = currentPatient?.room_number || 'General';
+            
+            response = await callAI({
+              type: 'medical_coding',
+              data: {
+                procedure: `Medical services for ${conditions.join(', ')} in ${roomType}`,
+                diagnosis: conditions.join(', '),
+                context: `Patient: ${currentPatient?.first_name} ${currentPatient?.last_name}, Room: ${roomType}, Conditions: ${conditions.join(', ')}`
+              }
+            });
+          } else {
+            // Use existing billing charges for analysis
+            const topCharge = patientBilling[0];
+            response = await callAI({
+              type: 'medical_coding',
+              data: {
+                procedure: topCharge.charge_description,
+                diagnosis: currentPatient?.medical_conditions?.join(', ') || 'Medical evaluation',
+                context: `Existing charge: ${topCharge.charge_code} - ${topCharge.charge_description}, Amount: $${topCharge.amount}, Status: ${topCharge.status}`
+              }
+            });
+          }
           break;
 
         case 'Claims Review':
@@ -178,7 +202,7 @@ const AIWorkflowDashboard = ({ hospitalId }: AIWorkflowDashboardProps) => {
             type: 'claims_review',
             data: {
               procedure: topCharge.charge_description,
-              diagnosis: medicalRecords?.[0]?.assessment || 'Not specified',
+              diagnosis: currentPatient?.medical_conditions?.join(', ') || 'Not specified',
               codes: topCharge.charge_code,
               insurance: currentPatient?.insurance_provider || 'Not specified'
             }
