@@ -3,55 +3,58 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Virtualis One™ Clean Design System */
+/* Virtualis One™ Light Mode Design System */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    --background: 210 24% 8%;
-    --foreground: 0 0% 100%;
+    /* Light Mode Color Palette */
+    --background: 212 100% 97%;
+    --foreground: 225 39% 15%;
 
-    --card: 215 25% 12%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 39% 15%;
 
-    --popover: 215 25% 12%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 39% 15%;
 
-    --primary: 210 100% 10%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 18%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 225 39% 25%;
 
-    --muted: 215 20% 18%;
-    --muted-foreground: 215 20% 70%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 38 92% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 214 32% 91%;
+    --accent-foreground: 225 39% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 20%;
-    --input: 215 20% 20%;
-    --ring: 38 92% 50%;
+    --border: 214 32% 85%;
+    --input: 214 32% 85%;
+    --ring: 217 91% 60%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 210 24% 8%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 38 92% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 225 39% 15%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 20% 18%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 20% 20%;
-    --sidebar-ring: 38 92% 50%;
+    --sidebar-accent: 214 32% 91%;
+    --sidebar-accent-foreground: 225 39% 15%;
+    --sidebar-border: 214 32% 85%;
+    --sidebar-ring: 217 91% 60%;
 
-    /* Virtualis One™ Brand Colors */
-    --virtualis-gold: 245 158 11;
-    --virtualis-alert-green: 34 197 94;
-    --virtualis-alert-red: 239 68 68;
-    --virtualis-alert-blue: 59 130 246;
+    /* Virtualis One™ Light Theme Brand Colors */
+    --virtualis-gold: 38 92% 50%;
+    --virtualis-alert-green: 142 76% 36%;
+    --virtualis-alert-red: 0 84% 60%;
+    --virtualis-alert-blue: 217 91% 60%;
+    --virtualis-primary: 217 91% 60%;
+    --virtualis-navy: 225 39% 15%;
   }
 }
 
@@ -61,77 +64,80 @@
   }
 
   body {
-    @apply bg-[#0a1628] text-white font-sans;
-    background: #0a1628;
+    @apply bg-gradient-to-br from-blue-50 to-indigo-100 text-slate-800 font-sans;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
     min-height: 100vh;
   }
 }
 
-/* Clean Glass Morphism Components */
+/* Light Mode Glass Morphism Components */
 @layer components {
   .glass-card {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-xl;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    @apply backdrop-blur-lg bg-white/70 border border-blue-200 rounded-2xl shadow-xl;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
   }
 
   .glass-card:hover {
     @apply transform scale-[1.02] transition-all duration-300;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+    box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.25);
   }
 
   .glass-input {
-    @apply backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/60;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    @apply backdrop-blur-md bg-white/80 border border-blue-200 rounded-xl px-4 py-3 text-slate-700 placeholder:text-slate-500;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
   }
 
   .glass-input:focus {
-    @apply outline-none border-virtualis-gold/50 ring-2 ring-virtualis-gold/20;
+    @apply outline-none border-blue-500 ring-2 ring-blue-500/20;
+    background: rgba(255, 255, 255, 0.9);
   }
 
   .glass-button {
-    @apply backdrop-blur-lg bg-gradient-to-r from-virtualis-gold/90 to-orange-500/90 border border-white/20 rounded-xl px-6 py-3 text-white font-semibold transition-all duration-300;
+    @apply backdrop-blur-md bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-300 rounded-xl px-6 py-3 text-white font-semibold transition-all duration-300 shadow-lg;
   }
 
   .glass-button:hover {
-    @apply transform scale-105;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 1) 0%, rgba(251, 146, 60, 1) 100%);
+    @apply transform scale-105 shadow-xl;
+    background: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(79, 70, 229) 100%);
   }
 
   .glass-sidebar {
-    @apply backdrop-blur-xl bg-black/20 border-r border-white/10;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.2) 100%);
+    @apply backdrop-blur-xl bg-white/80 border-r border-blue-200 shadow-lg;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
   }
 
   .glass-nav-item {
-    @apply backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl px-4 py-3 transition-all duration-300;
+    @apply backdrop-blur-sm bg-white/60 border border-blue-200 rounded-xl px-4 py-3 transition-all duration-300 shadow-sm;
   }
 
   .glass-nav-item:hover, .glass-nav-item.active {
-    @apply bg-virtualis-gold/20 border-virtualis-gold/30;
+    @apply bg-blue-100 border-blue-300 shadow-md;
+    background: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(191, 219, 254, 0.6) 100%);
   }
 
   .glass-badge {
-    @apply backdrop-blur-sm bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs font-medium;
+    @apply backdrop-blur-sm bg-white/80 border border-blue-200 rounded-full px-3 py-1 text-xs font-medium shadow-sm;
   }
 
   .glass-badge.success {
-    @apply bg-green-500/20 border-green-400/30 text-green-300;
+    @apply bg-green-100 border-green-300 text-green-700;
   }
 
   .glass-badge.warning {
-    @apply bg-yellow-500/20 border-yellow-400/30 text-yellow-300;
+    @apply bg-amber-100 border-amber-300 text-amber-700;
   }
 
   .glass-badge.error {
-    @apply bg-red-500/20 border-red-400/30 text-red-300;
+    @apply bg-red-100 border-red-300 text-red-700;
   }
 
   .glass-badge.primary {
-    @apply bg-virtualis-gold/20 border-virtualis-gold/30 text-virtualis-gold;
+    @apply bg-blue-100 border-blue-300 text-blue-700;
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #f59e0b 0%, #fb923c 50%, #f59e0b 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #4f46e5 50%, #3b82f6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -148,4 +154,62 @@
     font-weight: 700;
     letter-spacing: 0.05em;
   }
+
+  /* Light Mode Dashboard Cards */
+  .dashboard-card {
+    @apply bg-white/80 backdrop-blur-md border border-blue-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .dashboard-card:hover {
+    @apply transform translate-y-[-2px];
+    box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1), 0 10px 10px -5px rgba(59, 130, 246, 0.04);
+  }
+
+  /* Light Mode Button Variants */
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-blue-50 text-slate-700 border border-blue-200 shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .btn-warning {
+    @apply bg-amber-500 hover:bg-amber-600 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+}
+
+/* Light Mode Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(219, 234, 254, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+/* Light Mode Selection */
+::selection {
+  background: rgba(59, 130, 246, 0.2);
+  color: rgb(30, 58, 138);
 }

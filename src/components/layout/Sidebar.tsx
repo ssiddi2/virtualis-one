@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -136,20 +137,20 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
   };
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} glass-sidebar flex flex-col transition-all duration-300 border-r border-white/10`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-64'} glass-sidebar flex flex-col transition-all duration-300 border-r border-blue-200 bg-white/90`}>
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
+      <div className="p-4 border-b border-blue-200">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
               <img 
                 src="/lovable-uploads/d05aa5d2-561a-436f-ae8c-de68ab1b3e88.png" 
                 alt="Virtualis" 
-                className="w-8 h-8 rounded-lg"
+                className="w-8 h-8 rounded-lg shadow-md"
               />
               <div>
-                <h1 className="text-white font-bold text-lg gradient-text">Virtualis</h1>
-                <p className="text-xs text-white/60">Healthcare AI Platform</p>
+                <h1 className="text-slate-800 font-bold text-lg gradient-text">Virtualis</h1>
+                <p className="text-xs text-slate-600">Healthcare AI Platform</p>
               </div>
             </div>
           )}
@@ -157,7 +158,7 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="glass-nav-item text-white hover:bg-white/10 p-1 h-8 w-8 border-0"
+            className="glass-nav-item text-slate-700 hover:bg-blue-50 p-1 h-8 w-8 border-0"
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
@@ -166,14 +167,14 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
 
       {/* Hospital Selection Status */}
       {!isCollapsed && selectedHospitalId && (
-        <div className="p-3 border-b border-white/10">
-          <Card className="glass-card bg-blue-900/30 border-blue-600/30">
+        <div className="p-3 border-b border-blue-200">
+          <Card className="glass-card bg-blue-50 border-blue-200">
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-2">
-                <Building className="h-4 w-4 text-blue-400" />
-                <span className="text-xs text-blue-300 font-medium">Connected Hospital</span>
+                <Building className="h-4 w-4 text-blue-600" />
+                <span className="text-xs text-blue-700 font-medium">Connected Hospital</span>
               </div>
-              <Badge className="glass-badge primary bg-blue-600/30 border-blue-400/30 text-blue-300">
+              <Badge className="glass-badge primary bg-blue-100 border-blue-300 text-blue-700">
                 EMR System Active
               </Badge>
             </CardContent>
@@ -189,23 +190,23 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
               variant="ghost"
               className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start'} glass-nav-item transition-all duration-300 ${
                 isActive(item.href) 
-                  ? 'glass-nav-item active bg-virtualis-gold/20 border-virtualis-gold/30 text-white' 
-                  : 'text-white/80 hover:bg-white/10 border-white/10'
+                  ? 'glass-nav-item active bg-blue-100 border-blue-300 text-slate-800' 
+                  : 'text-slate-700 hover:bg-blue-50 border-blue-100'
               }`}
               onClick={() => navigate(item.href)}
             >
-              <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'} ${isActive(item.href) ? 'text-virtualis-gold' : ''}`} />
+              <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'} ${isActive(item.href) ? 'text-blue-600' : ''}`} />
               {!isCollapsed && (
                 <div className="flex-1 flex items-center justify-between">
-                  <span className={isActive(item.href) ? 'text-white font-medium' : ''}>{item.name}</span>
+                  <span className={isActive(item.href) ? 'text-slate-800 font-medium' : ''}>{item.name}</span>
                   {item.badge && (
                     <Badge 
                       className={`glass-badge ml-2 text-xs ${
                         item.badge === 'AI' 
-                          ? 'bg-purple-600/20 border-purple-400/30 text-purple-300' 
+                          ? 'bg-purple-100 border-purple-300 text-purple-700' 
                           : item.badge === 'CORE'
-                          ? 'bg-blue-600/20 border-blue-400/30 text-blue-300'
-                          : 'bg-green-600/20 border-green-400/30 text-green-300'
+                          ? 'bg-blue-100 border-blue-300 text-blue-700'
+                          : 'bg-green-100 border-green-300 text-green-700'
                       }`}
                     >
                       {item.badge}
@@ -217,10 +218,10 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
             
             {/* Tooltip for collapsed state */}
             {isCollapsed && (
-              <div className="absolute left-full ml-2 px-3 py-1 glass-card bg-black/80 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
+              <div className="absolute left-full ml-2 px-3 py-1 glass-card bg-white/95 text-slate-800 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-blue-200">
                 {item.name}
                 {item.badge && (
-                  <Badge className="ml-2 text-xs bg-virtualis-gold/20 border-virtualis-gold/30 text-virtualis-gold">
+                  <Badge className="ml-2 text-xs bg-blue-100 border-blue-300 text-blue-700">
                     {item.badge}
                   </Badge>
                 )}
@@ -231,13 +232,13 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
       </nav>
 
       {/* User Info */}
-      <div className="p-4 border-t border-white/10 space-y-2">
+      <div className="p-4 border-t border-blue-200 space-y-2">
         {!isCollapsed && (
-          <div className="glass-card p-3 bg-white/5 border-white/10">
-            <div className="text-white">
+          <div className="glass-card p-3 bg-blue-50 border-blue-200">
+            <div className="text-slate-800">
               <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
-              <p className="text-sm text-white/60">{profile?.role || 'Healthcare Professional'}</p>
-              <p className="text-xs text-white/50">{profile?.email}</p>
+              <p className="text-sm text-slate-600">{profile?.role || 'Healthcare Professional'}</p>
+              <p className="text-xs text-slate-500">{profile?.email}</p>
             </div>
           </div>
         )}
@@ -246,7 +247,7 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
           <Button
             variant="ghost"
             size="sm"
-            className="glass-nav-item text-white hover:bg-white/10 flex-1 border-white/10"
+            className="glass-nav-item text-slate-700 hover:bg-blue-50 flex-1 border-blue-100"
             onClick={() => navigate('/settings')}
           >
             <Settings className="h-4 w-4" />
@@ -257,7 +258,7 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={handleSignOut}
-            className="glass-nav-item text-red-400 hover:bg-red-500/20 border-red-400/30 flex-1"
+            className="glass-nav-item text-red-600 hover:bg-red-50 border-red-200 flex-1"
           >
             <LogOut className="h-4 w-4" />
             {!isCollapsed && <span className="ml-2">Sign Out</span>}
