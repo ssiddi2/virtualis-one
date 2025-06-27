@@ -134,9 +134,9 @@ const Index = () => {
 
       {/* Content */}
       {currentView === 'dashboard' ? (
-        <Dashboard selectedHospitalId={selectedHospitalId} />
+        <Dashboard />
       ) : (
-        <ERPatientTracker selectedHospitalId={selectedHospitalId} />
+        <ERPatientTracker hospitalId={selectedHospitalId} />
       )}
     </div>
   );
