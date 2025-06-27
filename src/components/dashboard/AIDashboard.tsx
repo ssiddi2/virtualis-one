@@ -37,36 +37,36 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
   };
 
   return (
-    <div className="p-6 space-y-8 bg-[#0a1628] min-h-screen">
+    <div className="p-6 space-y-8 bg-gradient-to-br from-blue-50 to-sky-100 min-h-screen">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <Brain className="h-12 w-12 text-virtualis-gold animate-pulse" />
+          <Brain className="h-12 w-12 text-blue-600 animate-pulse" />
           <div>
             <h1 className="text-4xl font-bold gradient-text tech-font">
               AI Healthcare Assistant
             </h1>
-            <p className="text-white/80 text-lg tech-font">
+            <p className="text-slate-700 text-lg tech-font">
               {selectedHospital ? `${selectedHospital.name} - Clinical AI Intelligence` : 'Intelligent Clinical Support'}
             </p>
           </div>
         </div>
         
         <div className="flex items-center justify-center gap-4">
-          <Badge className="glass-badge success">
+          <Badge className="glass-badge success bg-green-100/80 border-green-300/60 text-green-700">
             <Brain className="h-3 w-3 mr-1" />
             GPT-4 Powered
           </Badge>
-          <Badge className="glass-badge primary">
+          <Badge className="glass-badge primary bg-blue-100/80 border-blue-300/60 text-blue-700">
             <Shield className="h-3 w-3 mr-1" />
             HIPAA Compliant
           </Badge>
-          <Badge className="glass-badge warning">
+          <Badge className="glass-badge warning bg-amber-100/80 border-amber-300/60 text-amber-700">
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
           {selectedHospital && (
-            <Badge className="glass-badge info">
+            <Badge className="glass-badge bg-purple-100/80 border-purple-300/60 text-purple-700">
               {selectedHospital.emr_type} Integration
             </Badge>
           )}
@@ -75,20 +75,20 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 glass-card">
-          <TabsTrigger value="insights" className="text-white">
+        <TabsList className="grid w-full grid-cols-4 glass-card bg-white/80 border-blue-200/60 shadow-lg">
+          <TabsTrigger value="insights" className="text-slate-700 data-[state=active]:bg-blue-100/80 data-[state=active]:text-blue-700">
             <Brain className="h-4 w-4 mr-2" />
             AI Insights
           </TabsTrigger>
-          <TabsTrigger value="clinical" className="text-white">
+          <TabsTrigger value="clinical" className="text-slate-700 data-[state=active]:bg-blue-100/80 data-[state=active]:text-blue-700">
             <Stethoscope className="h-4 w-4 mr-2" />
             Clinical AI
           </TabsTrigger>
-          <TabsTrigger value="coding" className="text-white">
+          <TabsTrigger value="coding" className="text-slate-700 data-[state=active]:bg-blue-100/80 data-[state=active]:text-blue-700">
             <Code className="h-4 w-4 mr-2" />
             Coding & Billing
           </TabsTrigger>
-          <TabsTrigger value="tools" className="text-white">
+          <TabsTrigger value="tools" className="text-slate-700 data-[state=active]:bg-blue-100/80 data-[state=active]:text-blue-700">
             <Activity className="h-4 w-4 mr-2" />
             AI Tools
           </TabsTrigger>
@@ -104,27 +104,27 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="clinical" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <DiagnosisSupport />
-            <Card className="glass-card">
+            <Card className="glass-card bg-white/80 border-blue-200/60 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-400" />
+                <CardTitle className="text-slate-800 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-500" />
                   Clinical Documentation AI
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-white/70">
+                <p className="text-slate-600">
                   Generate comprehensive SOAP notes, discharge summaries, and clinical documentation using AI.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.clinical.map((feature) => (
-                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg">
-                      <feature.icon className="h-5 w-5 text-virtualis-gold mb-2" />
-                      <h4 className="text-white font-medium text-sm">{feature.name}</h4>
-                      <p className="text-white/60 text-xs">{feature.description}</p>
+                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg bg-white/50 border-blue-200/40 shadow-sm">
+                      <feature.icon className="h-5 w-5 text-blue-600 mb-2" />
+                      <h4 className="text-slate-800 font-medium text-sm">{feature.name}</h4>
+                      <p className="text-slate-600 text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full glass-button">
+                <Button className="w-full glass-button bg-blue-600 hover:bg-blue-700 text-white shadow-md">
                   <Brain className="h-4 w-4 mr-2" />
                   Access Clinical AI Tools
                 </Button>
@@ -136,27 +136,27 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="coding" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <MedicalCodingAssistant />
-            <Card className="glass-card">
+            <Card className="glass-card bg-white/80 border-blue-200/60 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-400" />
+                <CardTitle className="text-slate-800 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-500" />
                   Revenue Cycle AI
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-white/70">
+                <p className="text-slate-600">
                   Optimize coding accuracy and maximize reimbursement with AI-powered analysis.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.coding.map((feature) => (
-                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg">
-                      <feature.icon className="h-5 w-5 text-virtualis-gold mb-2" />
-                      <h4 className="text-white font-medium text-sm">{feature.name}</h4>
-                      <p className="text-white/60 text-xs">{feature.description}</p>
+                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg bg-white/50 border-blue-200/40 shadow-sm">
+                      <feature.icon className="h-5 w-5 text-blue-600 mb-2" />
+                      <h4 className="text-slate-800 font-medium text-sm">{feature.name}</h4>
+                      <p className="text-slate-600 text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full glass-button">
+                <Button className="w-full glass-button bg-blue-600 hover:bg-blue-700 text-white shadow-md">
                   <Code className="h-4 w-4 mr-2" />
                   Launch Coding Assistant
                 </Button>
@@ -167,17 +167,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
         <TabsContent value="tools" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="glass-card">
+            <Card className="glass-card bg-white/80 border-blue-200/60 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-white">Clinical Decision Support</CardTitle>
+                <CardTitle className="text-slate-800">Clinical Decision Support</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-green-400 text-2xl font-bold">98.7%</div>
-                    <div className="text-white/70 text-sm">Accuracy Rate</div>
+                  <div className="text-center p-4 glass-nav-item bg-white/50 border-blue-200/40 shadow-sm">
+                    <div className="text-green-600 text-2xl font-bold">98.7%</div>
+                    <div className="text-slate-600 text-sm">Accuracy Rate</div>
                   </div>
-                  <Button className="w-full glass-button">
+                  <Button className="w-full glass-button bg-blue-600 hover:bg-blue-700 text-white shadow-md">
                     <Brain className="h-4 w-4 mr-2" />
                     Launch Assistant
                   </Button>
@@ -185,17 +185,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="glass-card bg-white/80 border-blue-200/60 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-white">Drug Safety</CardTitle>
+                <CardTitle className="text-slate-800">Drug Safety</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-yellow-400 text-2xl font-bold">23</div>
-                    <div className="text-white/70 text-sm">Alerts Today</div>
+                  <div className="text-center p-4 glass-nav-item bg-white/50 border-blue-200/40 shadow-sm">
+                    <div className="text-amber-600 text-2xl font-bold">23</div>
+                    <div className="text-slate-600 text-sm">Alerts Today</div>
                   </div>
-                  <Button className="w-full glass-button">
+                  <Button className="w-full glass-button bg-blue-600 hover:bg-blue-700 text-white shadow-md">
                     <Shield className="h-4 w-4 mr-2" />
                     Check Interactions
                   </Button>
@@ -203,17 +203,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="glass-card bg-white/80 border-blue-200/60 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-white">Quality Metrics</CardTitle>
+                <CardTitle className="text-slate-800">Quality Metrics</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-blue-400 text-2xl font-bold">94%</div>
-                    <div className="text-white/70 text-sm">Compliance Score</div>
+                  <div className="text-center p-4 glass-nav-item bg-white/50 border-blue-200/40 shadow-sm">
+                    <div className="text-blue-600 text-2xl font-bold">94%</div>
+                    <div className="text-slate-600 text-sm">Compliance Score</div>
                   </div>
-                  <Button className="w-full glass-button">
+                  <Button className="w-full glass-button bg-blue-600 hover:bg-blue-700 text-white shadow-md">
                     <Activity className="h-4 w-4 mr-2" />
                     View Metrics
                   </Button>

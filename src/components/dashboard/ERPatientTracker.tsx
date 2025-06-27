@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -84,11 +83,11 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "critical": return "text-red-400";
-      case "in-treatment": return "text-blue-400";
-      case "waiting": return "text-yellow-400";
-      case "discharged": return "text-green-400";
-      default: return "text-gray-400";
+      case "critical": return "text-red-600";
+      case "in-treatment": return "text-blue-600";
+      case "waiting": return "text-amber-600";
+      case "discharged": return "text-green-600";
+      default: return "text-gray-600";
     }
   };
 
@@ -100,21 +99,21 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a1628] p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Activity className="h-8 w-8 text-red-400" />
+            <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
+              <Activity className="h-8 w-8 text-red-500" />
               Emergency Department Tracker
             </h1>
-            <p className="text-white/70 mt-2">
+            <p className="text-slate-600 mt-2">
               Real-time patient tracking and triage management
               {hospitalId && ` • Hospital ID: ${hospitalId}`}
             </p>
           </div>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
             <Plus className="h-4 w-4 mr-2" />
             New Patient
           </Button>
@@ -122,53 +121,53 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-              <Users className="h-4 w-4 text-blue-400" />
+              <CardTitle className="text-sm font-medium text-slate-700">Total Patients</CardTitle>
+              <Users className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockERPatients.length}</div>
-              <p className="text-xs text-white/60">Currently in ED</p>
+              <div className="text-2xl font-bold text-slate-800">{mockERPatients.length}</div>
+              <p className="text-xs text-slate-500">Currently in ED</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="bg-white border border-red-200 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Critical Cases</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-400" />
+              <CardTitle className="text-sm font-medium text-slate-700">Critical Cases</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-400">
+              <div className="text-2xl font-bold text-red-600">
                 {mockERPatients.filter(p => p.status === 'critical').length}
               </div>
-              <p className="text-xs text-white/60">Requires immediate attention</p>
+              <p className="text-xs text-slate-500">Requires immediate attention</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="bg-white border border-amber-200 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">In Treatment</CardTitle>
-              <Clock className="h-4 w-4 text-yellow-400" />
+              <CardTitle className="text-sm font-medium text-slate-700">In Treatment</CardTitle>
+              <Clock className="h-4 w-4 text-amber-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-400">
+              <div className="text-2xl font-bold text-amber-600">
                 {mockERPatients.filter(p => p.status === 'in-treatment').length}
               </div>
-              <p className="text-xs text-white/60">Currently being treated</p>
+              <p className="text-xs text-slate-500">Currently being treated</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Waiting</CardTitle>
-              <Users className="h-4 w-4 text-blue-400" />
+              <CardTitle className="text-sm font-medium text-slate-700">Waiting</CardTitle>
+              <Users className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-400">
+              <div className="text-2xl font-bold text-blue-600">
                 {mockERPatients.filter(p => p.status === 'waiting').length}
               </div>
-              <p className="text-xs text-white/60">Awaiting treatment</p>
+              <p className="text-xs text-slate-500">Awaiting treatment</p>
             </CardContent>
           </Card>
         </div>
@@ -176,18 +175,18 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
         {/* Search and Filter */}
         <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search patients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-[#1a2332] border-[#2a3441] text-white"
+              className="pl-10 bg-white border-slate-300 text-slate-800 shadow-sm"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 bg-[#1a2332] border border-[#2a3441] rounded-md text-white"
+            className="px-4 py-2 bg-white border border-slate-300 rounded-md text-slate-800 shadow-sm"
           >
             <option value="all">All Status</option>
             <option value="critical">Critical</option>
@@ -198,29 +197,29 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
         </div>
 
         {/* Patient List */}
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+        <Card className="bg-white border border-slate-200 shadow-lg">
           <CardHeader>
-            <CardTitle>Patient Queue</CardTitle>
-            <CardDescription className="text-white/70">
+            <CardTitle className="text-slate-800">Patient Queue</CardTitle>
+            <CardDescription className="text-slate-600">
               Live emergency department patient tracking
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {filteredPatients.map((patient) => (
-                <Card key={patient.id} className="p-4 bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all">
+                <Card key={patient.id} className="p-4 bg-slate-50 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
                         <Badge className={`${getTriageColor(patient.triageLevel)} text-white`}>
                           T{patient.triageLevel}
                         </Badge>
-                        <div className="text-sm text-white/60">{patient.arrivalTime}</div>
+                        <div className="text-sm text-slate-500">{patient.arrivalTime}</div>
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-white">{patient.name}</h4>
-                        <p className="text-sm text-white/60">Age: {patient.age} • {patient.chiefComplaint}</p>
-                        <p className="text-sm text-white/60">
+                        <h4 className="font-medium text-slate-800">{patient.name}</h4>
+                        <p className="text-sm text-slate-600">Age: {patient.age} • {patient.chiefComplaint}</p>
+                        <p className="text-sm text-slate-600">
                           Bed: {patient.bedNumber} • 
                           {patient.assignedTo ? ` Assigned to: ${patient.assignedTo}` : ' Unassigned'}
                         </p>
@@ -233,7 +232,7 @@ const ERPatientTracker = ({ hospitalId }: ERPatientTrackerProps) => {
                       >
                         {patient.status.toUpperCase()}
                       </Badge>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                         View Chart
                       </Button>
                     </div>
