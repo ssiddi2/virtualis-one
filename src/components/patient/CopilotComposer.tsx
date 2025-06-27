@@ -112,7 +112,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-100 p-6">
+    <div className="min-h-screen bg-[#0a1628] p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="glass-card p-6">
@@ -121,7 +121,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
               <Button
                 onClick={() => navigate(hospitalId ? "/emr" : "/")}
                 variant="outline"
-                className="bg-white/80 border-sky-300 hover:bg-white/90 text-slate-700"
+                className="glass-nav-item border-white/20 hover:border-virtualis-gold/50"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {hospitalId ? "Back to Hospital Dashboard" : "Back to Dashboard"}
@@ -129,10 +129,10 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
               <div className="flex items-center gap-3">
                 <Brain className="h-10 w-10 text-virtualis-gold pulse-glow" />
                 <div>
-                  <h1 className="text-4xl font-bold text-slate-800 tech-font">
+                  <h1 className="text-4xl font-bold gradient-text tech-font">
                     Clinical AI Assistant
                   </h1>
-                  <p className="text-slate-600 tech-font text-lg">
+                  <p className="text-white/80 tech-font text-lg">
                     Advanced Documentation & Decision Support Platform
                   </p>
                   {hospitalId && (
@@ -169,40 +169,40 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="glass-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-slate-800 tech-font flex items-center gap-2">
+              <CardTitle className="text-white tech-font flex items-center gap-2">
                 <Brain className="h-5 w-5 text-virtualis-gold" />
                 AI Performance
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">97.3%</div>
-              <p className="text-slate-600 text-sm">Accuracy Score</p>
+              <div className="text-2xl font-bold text-white">97.3%</div>
+              <p className="text-white/60 text-sm">Accuracy Score</p>
             </CardContent>
           </Card>
 
           <Card className="glass-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-slate-800 tech-font flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-white tech-font flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-400" />
                 Documentation
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">1,247</div>
-              <p className="text-slate-600 text-sm">Notes Generated Today</p>
+              <div className="text-2xl font-bold text-white">1,247</div>
+              <p className="text-white/60 text-sm">Notes Generated Today</p>
             </CardContent>
           </Card>
 
           <Card className="glass-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-slate-800 tech-font flex items-center gap-2">
-                <Users className="h-5 w-5 text-green-600" />
+              <CardTitle className="text-white tech-font flex items-center gap-2">
+                <Users className="h-5 w-5 text-green-400" />
                 Provider Efficiency
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">68%</div>
-              <p className="text-slate-600 text-sm">Time Savings</p>
+              <div className="text-2xl font-bold text-white">68%</div>
+              <p className="text-white/60 text-sm">Time Savings</p>
             </CardContent>
           </Card>
         </div>
@@ -210,22 +210,22 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
         {/* Documentation Generator */}
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle className="text-slate-800 tech-font flex items-center gap-2">
+            <CardTitle className="text-white tech-font flex items-center gap-2">
               <Stethoscope className="h-6 w-6 text-virtualis-gold" />
               Clinical Documentation Generator
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label className="text-slate-700 font-medium tech-font text-sm">Documentation Type</Label>
+              <div className="space-y-2">
+                <Label className="text-white font-medium tech-font">Documentation Type</Label>
                 <Select value={noteType} onValueChange={setNoteType}>
-                  <SelectTrigger className="glass-input h-12 text-slate-800">
+                  <SelectTrigger className="glass-input">
                     <SelectValue placeholder="Select documentation type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sky-200 shadow-xl z-50">
+                  <SelectContent className="bg-virtualis-navy border-white/20">
                     {noteTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value} className="text-slate-800 hover:bg-sky-50 focus:bg-sky-50">
+                      <SelectItem key={type.value} value={type.value} className="text-white hover:bg-white/10">
                         {type.icon} {type.label}
                       </SelectItem>
                     ))}
@@ -233,10 +233,10 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
                 </Select>
               </div>
               
-              <div className="space-y-3">
-                <Label className="text-slate-700 font-medium tech-font text-sm">Patient Context</Label>
-                <div className="glass-input h-12 flex items-center">
-                  <span className="text-slate-700">
+              <div className="space-y-2">
+                <Label className="text-white font-medium tech-font">Patient Context</Label>
+                <div className="glass-input flex items-center">
+                  <span className="text-white/80">
                     {patientId ? `Patient ID: ${patientId}` : "Active Patient: Sarah Johnson (ID: 12847)"}
                     {hospitalId && ` • ${mockHospitalNames[hospitalId as keyof typeof mockHospitalNames]}`}
                   </span>
@@ -244,24 +244,24 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-slate-700 font-medium tech-font text-sm">Clinical Summary & Key Findings</Label>
+            <div className="space-y-2">
+              <Label className="text-white font-medium tech-font">Clinical Summary & Key Findings</Label>
               <Textarea
                 placeholder="Describe patient's presenting condition, examination findings, assessment, and clinical decision-making rationale..."
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
-                className="glass-input min-h-[120px] resize-none text-slate-800 placeholder:text-slate-500"
+                className="glass-input min-h-[120px]"
               />
-              <p className="text-slate-600 text-sm tech-font">
+              <p className="text-white/60 text-sm tech-font">
                 Tip: Include chief complaint, key physical findings, diagnostic impressions, and treatment plans
               </p>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3">
               <Button
                 onClick={generateNote}
                 disabled={isLoading || !noteType || !summary.trim()}
-                className="glass-button flex-1 md:flex-none h-12 px-6"
+                className="glass-button flex-1 md:flex-none"
               >
                 {isLoading ? (
                   <>
@@ -283,7 +283,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
                     setSummary("");
                     setGeneratedNote("");
                   }}
-                  className="bg-white/80 border border-sky-300 hover:bg-white/90 text-slate-700 px-4 h-12"
+                  className="glass-nav-item border-white/20 hover:border-virtualis-gold/50 text-white"
                 >
                   Clear & Start New
                 </Button>
@@ -296,17 +296,17 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
         {generatedNote && (
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-slate-800 tech-font flex items-center gap-2">
+              <CardTitle className="text-white tech-font flex items-center gap-2">
                 <FileText className="h-6 w-6 text-virtualis-gold" />
                 Generated Clinical Documentation
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 bg-white/60 rounded-lg border border-sky-200/50">
+              <div className="p-4 bg-black/20 rounded-lg border border-white/10">
                 <Textarea
                   value={generatedNote}
                   onChange={(e) => setGeneratedNote(e.target.value)}
-                  className="glass-input min-h-[400px] font-mono text-sm text-slate-800 resize-none"
+                  className="glass-input min-h-[400px] font-mono text-sm"
                   placeholder="Generated documentation will appear here..."
                 />
               </div>
@@ -315,7 +315,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
                 <Button
                   onClick={saveNote}
                   disabled={isSaving}
-                  className="glass-button flex-1 md:flex-none h-12"
+                  className="glass-button flex-1 md:flex-none"
                 >
                   {isSaving ? (
                     <>
@@ -332,21 +332,21 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
                 
                 <Button
                   onClick={() => window.print()}
-                  className="bg-white/80 border border-sky-300 hover:bg-white/90 text-slate-700 px-4 h-12"
+                  className="glass-nav-item border-white/20 hover:border-virtualis-gold/50 text-white"
                 >
                   Print Documentation
                 </Button>
                 
                 <Button
                   onClick={() => setGeneratedNote("")}
-                  className="bg-white/80 border border-red-300 hover:bg-red-50 text-red-700 px-4 h-12"
+                  className="glass-nav-item border-white/20 hover:border-red-500/50 text-white hover:text-red-400"
                 >
                   Discard Draft
                 </Button>
               </div>
               
-              <div className="p-4 bg-orange-100/80 border border-orange-300/50 rounded-lg">
-                <p className="text-orange-800 text-sm tech-font">
+              <div className="p-3 glass-nav-item">
+                <p className="text-white/70 text-sm tech-font">
                   ⚠️ <strong>Provider Attestation Required:</strong> This AI-generated documentation must be reviewed, 
                   validated, and electronically signed by the attending provider before becoming part of the official medical record.
                 </p>
