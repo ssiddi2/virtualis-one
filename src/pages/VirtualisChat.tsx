@@ -1,12 +1,12 @@
 
-import VirtualisChatAdvanced from "@/components/clinical/VirtualisChatAdvanced";
+import VirtualisChatEnhanced from "@/components/clinical/VirtualisChatEnhanced";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 const VirtualisChatPage = () => {
   const { profile, user } = useAuth();
 
   return (
-    <VirtualisChatAdvanced 
+    <VirtualisChatEnhanced 
       currentUser={profile || user}
     />
   );
