@@ -18,7 +18,7 @@ import {
   Send
 } from 'lucide-react';
 
-export interface ERPatientTrackerProps {
+interface ERPatientTrackerProps {
   hospitalId?: string | null;
 }
 
