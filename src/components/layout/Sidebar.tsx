@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -52,17 +51,18 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
       description: "System overview and analytics"
     },
     { 
+      name: "EMR Systems", 
+      href: "/emr", 
+      icon: Building2,
+      description: "Electronic medical records management",
+      badge: "CORE"
+    },
+    { 
       name: "AI Dashboard", 
       href: "/ai-dashboard", 
       icon: Brain,
       description: "Artificial intelligence insights",
       badge: "AI"
-    },
-    { 
-      name: "EMR Systems", 
-      href: "/emr", 
-      icon: Building2,
-      description: "Electronic medical records"
     },
     { 
       name: "Patient Tracker", 
@@ -203,6 +203,8 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
                       className={`glass-badge ml-2 text-xs ${
                         item.badge === 'AI' 
                           ? 'bg-purple-600/20 border-purple-400/30 text-purple-300' 
+                          : item.badge === 'CORE'
+                          ? 'bg-blue-600/20 border-blue-400/30 text-blue-300'
                           : 'bg-green-600/20 border-green-400/30 text-green-300'
                       }`}
                     >

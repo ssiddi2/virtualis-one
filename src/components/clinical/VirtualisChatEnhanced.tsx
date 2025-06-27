@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +54,7 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
   const [selectedPatient, setSelectedPatient] = useState('');
   const [messageType, setMessageType] = useState<'routine' | 'urgent' | 'critical'>('routine');
   const [activeFilter, setActiveFilter] = useState<'all' | 'critical' | 'urgent' | 'mine'>('all');
+  const [isProcessingAI, setIsProcessingAI] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize with some sample messages
@@ -89,56 +89,92 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
   }, [messages]);
 
   const assessAcuityWithAI = async (messageContent: string): Promise<{acuity: 'critical' | 'urgent' | 'routine', analysis: any}> => {
+    console.log('Starting AI acuity assessment for message:', messageContent);
+    
     try {
       const result = await callAI({
         type: 'triage_assessment',
         data: { symptoms: messageContent },
-        context: 'Clinical message acuity assessment'
+        context: 'Clinical message acuity assessment for emergency triage. Analyze the urgency and provide priority level.'
       });
+
+      console.log('AI assessment result:', result);
 
       // Parse AI response to determine acuity
       const lowerResult = result.toLowerCase();
       let acuity: 'critical' | 'urgent' | 'routine' = 'routine';
       
-      if (lowerResult.includes('critical') || lowerResult.includes('emergency') || lowerResult.includes('immediate')) {
+      if (lowerResult.includes('critical') || lowerResult.includes('emergency') || lowerResult.includes('immediate') || lowerResult.includes('life-threatening')) {
         acuity = 'critical';
-      } else if (lowerResult.includes('urgent') || lowerResult.includes('priority')) {
+      } else if (lowerResult.includes('urgent') || lowerResult.includes('priority') || lowerResult.includes('concerning')) {
         acuity = 'urgent';
       }
+
+      // Extract keywords from the message content
+      const keywords = messageContent.toLowerCase().match(/\b(pain|distress|emergency|critical|urgent|bleeding|breathing|chest|cardiac|stroke|fever|unconscious|severe)\b/g) || [];
 
       return {
         acuity,
         analysis: {
-          priority: acuity === 'critical' ? 90 : acuity === 'urgent' ? 70 : 40,
-          keywords: messageContent.split(' ').filter(word => word.length > 4).slice(0, 3),
-          suggestedActions: ['Review patient', 'Clinical assessment', 'Monitor vital signs']
+          priority: acuity === 'critical' ? 95 : acuity === 'urgent' ? 75 : 45,
+          keywords: [...new Set(keywords)], // Remove duplicates
+          suggestedActions: acuity === 'critical' 
+            ? ['Immediate assessment', 'Consider rapid response', 'Notify attending physician']
+            : acuity === 'urgent'
+            ? ['Prompt evaluation', 'Monitor vital signs', 'Schedule follow-up']
+            : ['Routine assessment', 'Document findings', 'Standard care pathway']
         }
       };
     } catch (error) {
       console.error('AI acuity assessment failed:', error);
+      // Fallback to manual assessment based on keywords
+      const messageContentLower = messageContent.toLowerCase();
+      const criticalKeywords = ['critical', 'emergency', 'distress', 'bleeding', 'unconscious', 'cardiac arrest', 'stroke'];
+      const urgentKeywords = ['urgent', 'pain', 'difficulty breathing', 'chest pain', 'fever'];
+      
+      let fallbackAcuity: 'critical' | 'urgent' | 'routine' = 'routine';
+      
+      if (criticalKeywords.some(keyword => messageContentLower.includes(keyword))) {
+        fallbackAcuity = 'critical';
+      } else if (urgentKeywords.some(keyword => messageContentLower.includes(keyword))) {
+        fallbackAcuity = 'urgent';
+      }
+      
       return {
-        acuity: messageType,
+        acuity: fallbackAcuity,
         analysis: {
-          priority: messageType === 'critical' ? 90 : messageType === 'urgent' ? 70 : 40,
+          priority: fallbackAcuity === 'critical' ? 90 : fallbackAcuity === 'urgent' ? 70 : 40,
           keywords: ['clinical message'],
-          suggestedActions: ['Review and respond']
+          suggestedActions: ['Review and respond', 'Clinical assessment needed']
         }
       };
     }
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a message before sending.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    // Show loading state
+    console.log('Sending message:', newMessage);
+    setIsProcessingAI(true);
+    
+    // Show initial toast
     toast({
       title: "Processing Message",
-      description: "AI is assessing message acuity...",
+      description: "AI is analyzing message content and assessing clinical acuity...",
     });
 
     try {
+      console.log('Calling AI for acuity assessment...');
       // Get AI acuity assessment
       const { acuity, analysis } = await assessAcuityWithAI(newMessage);
+      console.log('AI assessment completed:', { acuity, analysis });
 
       const selectedPatientData = patients?.find(p => p.id === selectedPatient);
       
@@ -154,13 +190,15 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
         aiAnalysis: analysis
       };
 
+      console.log('Adding message to chat:', message);
       setMessages(prev => [...prev, message]);
       setNewMessage('');
       setSelectedPatient('');
       
+      // Success toast with acuity information
       toast({
-        title: "Message Sent",
-        description: `AI assessed as ${acuity.toUpperCase()} priority. Message sent successfully.`,
+        title: `Message Sent - ${acuity.toUpperCase()} Priority`,
+        description: `AI assessed the message as ${acuity} priority with ${analysis.priority}/100 urgency score.`,
         variant: acuity === 'critical' ? 'destructive' : 'default'
       });
 
@@ -168,18 +206,50 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
       if (acuity === 'critical') {
         setTimeout(() => {
           toast({
-            title: "AI Recommendation",
-            description: "Critical message detected. Consider immediate specialist consultation.",
+            title: "🚨 Critical Alert",
+            description: "Critical message detected! Consider immediate specialist consultation and escalation.",
             variant: "destructive"
           });
-        }, 1000);
+        }, 1500);
+      } else if (acuity === 'urgent') {
+        setTimeout(() => {
+          toast({
+            title: "⚡ Urgent Notice",
+            description: "Urgent priority message. Prompt clinical attention recommended.",
+          });
+        }, 1500);
       }
     } catch (error) {
+      console.error('Error processing message:', error);
       toast({
         title: "Error",
-        description: "Failed to process message. Please try again.",
+        description: "Failed to process message with AI. Please try again.",
         variant: "destructive"
       });
+      
+      // Still send the message but with default acuity
+      const message: Message = {
+        id: Date.now().toString(),
+        content: newMessage,
+        sender: currentUser?.name || currentUser?.first_name || 'Current User',
+        senderRole: currentUser?.role || 'Healthcare Provider',
+        timestamp: new Date(),
+        acuity: messageType,
+        patientId: selectedPatient || undefined,
+        patientName: patients?.find(p => p.id === selectedPatient) ? 
+          `${patients.find(p => p.id === selectedPatient)!.first_name} ${patients.find(p => p.id === selectedPatient)!.last_name}` : undefined,
+        aiAnalysis: {
+          priority: messageType === 'critical' ? 90 : messageType === 'urgent' ? 70 : 40,
+          keywords: ['manual entry'],
+          suggestedActions: ['Review and respond']
+        }
+      };
+      
+      setMessages(prev => [...prev, message]);
+      setNewMessage('');
+      setSelectedPatient('');
+    } finally {
+      setIsProcessingAI(false);
     }
   };
 
@@ -264,9 +334,11 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-white/60">AI Processing</p>
-                    <p className="text-2xl font-bold text-blue-400">{aiLoading ? 'Active' : 'Ready'}</p>
+                    <p className="text-2xl font-bold text-blue-400">
+                      {isProcessingAI || aiLoading ? 'Active' : 'Ready'}
+                    </p>
                   </div>
-                  <Brain className="h-8 w-8 text-blue-400" />
+                  <Brain className={`h-8 w-8 text-blue-400 ${(isProcessingAI || aiLoading) ? 'animate-pulse' : ''}`} />
                 </div>
               </CardContent>
             </Card>
@@ -392,7 +464,7 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
               <CardHeader>
                 <CardTitle>Send Message</CardTitle>
                 <CardDescription className="text-white/70">
-                  AI automatically assesses message acuity
+                  AI automatically assesses message acuity after typing
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -421,24 +493,24 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
                     className="bg-[#0f1922] border-[#2a3441] text-white min-h-[100px]"
                   />
                   <p className="text-xs text-white/50 mt-1">
-                    AI will automatically assess acuity based on content
+                    AI will analyze message content and determine clinical acuity after you send
                   </p>
                 </div>
 
                 <Button 
                   onClick={handleSendMessage}
                   className="w-full bg-blue-600 hover:bg-blue-700"
-                  disabled={!newMessage.trim() || aiLoading}
+                  disabled={!newMessage.trim() || isProcessingAI}
                 >
-                  {aiLoading ? (
+                  {isProcessingAI ? (
                     <>
                       <Brain className="h-4 w-4 mr-2 animate-pulse" />
-                      AI Processing...
+                      AI Analyzing...
                     </>
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      Send Message
+                      Send & Analyze with AI
                     </>
                   )}
                 </Button>
@@ -467,10 +539,10 @@ const VirtualisChatEnhanced = ({ hospitalId, currentUser }: VirtualisChatEnhance
                 <div className="p-3 bg-[#0f1922] rounded-lg border border-purple-500/20">
                   <div className="flex items-center gap-2 mb-1">
                     <Brain className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm font-medium text-purple-400">AI Acuity Assessment</span>
+                    <span className="text-sm font-medium text-purple-400">Smart Acuity Assessment</span>
                   </div>
                   <p className="text-xs text-white/70">
-                    Real-time message analysis using advanced clinical AI algorithms
+                    Real-time message analysis using advanced clinical AI - assessment happens after message submission
                   </p>
                 </div>
 
