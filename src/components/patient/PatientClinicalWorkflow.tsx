@@ -18,6 +18,7 @@ import NewLabOrderDialog from '@/components/forms/NewLabOrderDialog';
 import NewRadiologyOrderDialog from '@/components/forms/NewRadiologyOrderDialog';
 import AIClinicalAssistantDialog from '@/components/forms/AIClinicalAssistantDialog';
 import DischargePlanningDialog from '@/components/forms/DischargePlanningDialog';
+import ChargeCaptureDialog from '@/components/billing/ChargeCaptureDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useMedicalRecords } from '@/hooks/useMedicalRecords';
 import { useLabOrders } from '@/hooks/useLabOrders';
@@ -38,13 +39,6 @@ const PatientClinicalWorkflow = ({ patientId, hospitalId, patientName }: Patient
   const { data: labOrders } = useLabOrders(patientId);
   const { data: radiologyOrders } = useRadiologyOrders(patientId);
   const { data: medications } = useMedications(patientId);
-
-  const handleChargeCapture = () => {
-    toast({
-      title: "Charge Capture",
-      description: "This would open the charge capture interface for billing codes and procedures.",
-    });
-  };
 
   const handleVitalSigns = () => {
     toast({
@@ -88,13 +82,10 @@ const PatientClinicalWorkflow = ({ patientId, hospitalId, patientName }: Patient
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-            <Button
-              onClick={handleChargeCapture}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
-            >
-              <DollarSign className="h-4 w-4" />
-              Charge Capture
-            </Button>
+            <ChargeCaptureDialog 
+              patientId={patientId}
+              patientName={patientName}
+            />
             
             <Button
               variant="outline"
@@ -368,11 +359,17 @@ const PatientClinicalWorkflow = ({ patientId, hospitalId, patientName }: Patient
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Button onClick={handleChargeCapture} className="w-full bg-purple-600 hover:bg-purple-700">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Open Charge Capture Interface
-                </Button>
-                <p className="text-slate-400 text-center">Billing information will be displayed here</p>
+                <ChargeCaptureDialog 
+                  patientId={patientId}
+                  patientName={patientName}
+                  trigger={
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Open Charge Capture Interface
+                    </Button>
+                  }
+                />
+                <p className="text-slate-400 text-center">Additional billing information will be displayed here</p>
               </div>
             </CardContent>
           </Card>
