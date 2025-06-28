@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  TestTube, 
   Activity, 
   Clock, 
   CheckCircle, 
@@ -62,7 +61,6 @@ const LISDashboard = () => {
         {/* Header */}
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <TestTube className="h-12 w-12 text-sky-300 animate-pulse" />
             <div className="text-center">
               <h1 className="text-4xl font-bold text-white">
                 Laboratory Information System
@@ -180,7 +178,7 @@ const LISDashboard = () => {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                      <TestTube className="h-6 w-6 text-sky-300 mx-auto mb-2" />
+                      <Beaker className="h-6 w-6 text-sky-300 mx-auto mb-2" />
                       <div className="text-lg font-semibold text-white">98.2%</div>
                       <div className="text-xs text-white/70">Accuracy Rate</div>
                     </div>
