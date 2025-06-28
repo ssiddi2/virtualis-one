@@ -44,7 +44,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <Brain className="h-12 w-12 text-sky-300 animate-pulse" />
+          <Brain className="h-12 w-12 text-white animate-pulse" />
           <div>
             <h1 className="text-4xl font-bold text-white">
               AI Healthcare Assistant
@@ -56,20 +56,20 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         </div>
         
         <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Badge className="backdrop-blur-sm bg-blue-500/20 text-blue-200 border border-blue-400/30">
+          <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
             <Brain className="h-3 w-3 mr-1" />
             GPT-4 Powered
           </Badge>
-          <Badge className="backdrop-blur-sm bg-blue-500/20 text-blue-200 border border-blue-400/30">
+          <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
             <Shield className="h-3 w-3 mr-1" />
             HIPAA Compliant
           </Badge>
-          <Badge className="backdrop-blur-sm bg-blue-500/20 text-blue-200 border border-blue-400/30">
+          <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
           {selectedHospital && (
-            <Badge className="backdrop-blur-sm bg-sky-500/20 text-sky-200 border border-sky-400/30">
+            <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
               {selectedHospital.emr_type} Integration
             </Badge>
           )}
@@ -118,7 +118,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-sky-300" />
+                  <FileText className="h-5 w-5 text-white" />
                   Clinical Documentation AI
                 </CardTitle>
               </CardHeader>
@@ -129,7 +129,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.clinical.map((feature) => (
                     <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                      <feature.icon className="h-5 w-5 text-sky-300 mb-2" />
+                      <feature.icon className="h-5 w-5 text-white mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white/60 text-xs">{feature.description}</p>
                     </div>
@@ -150,7 +150,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-sky-300" />
+                  <DollarSign className="h-5 w-5 text-white" />
                   Revenue Cycle AI
                 </CardTitle>
               </CardHeader>
@@ -161,7 +161,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.coding.map((feature) => (
                     <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                      <feature.icon className="h-5 w-5 text-sky-300 mb-2" />
+                      <feature.icon className="h-5 w-5 text-white mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white/60 text-xs">{feature.description}</p>
                     </div>
@@ -185,7 +185,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                    <div className="text-sky-300 text-2xl font-bold">98.7%</div>
+                    <div className="text-white text-2xl font-bold">98.7%</div>
                     <div className="text-white/70 text-sm">Accuracy Rate</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
@@ -203,7 +203,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                    <div className="text-sky-300 text-2xl font-bold">23</div>
+                    <div className="text-white text-2xl font-bold">23</div>
                     <div className="text-white/70 text-sm">Alerts Today</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
@@ -221,7 +221,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                    <div className="text-sky-300 text-2xl font-bold">94%</div>
+                    <div className="text-white text-2xl font-bold">94%</div>
                     <div className="text-white/70 text-sm">Compliance Score</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
