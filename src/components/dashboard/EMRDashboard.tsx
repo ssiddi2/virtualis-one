@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,9 +21,11 @@ import { useHospitals } from '@/hooks/useHospitals';
 
 interface EMRDashboardProps {
   hospitalId?: string;
+  user?: any;
+  onSelectHospital?: (hospitalId: string) => void;
 }
 
-const EMRDashboard = ({ hospitalId }: EMRDashboardProps) => {
+const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps) => {
   const { toast } = useToast();
   const { data: hospitals } = useHospitals();
   const [isConnecting, setIsConnecting] = useState(false);

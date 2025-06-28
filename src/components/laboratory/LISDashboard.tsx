@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Flask, 
+  TestTube, 
   Activity, 
   Clock, 
   CheckCircle, 
@@ -15,7 +14,6 @@ import {
   TrendingUp,
   Users,
   Beaker,
-  TestTube,
   Shield
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -64,7 +62,7 @@ const LISDashboard = () => {
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <Flask className="h-12 w-12 text-sky-300 animate-pulse" />
+            <TestTube className="h-12 w-12 text-sky-300 animate-pulse" />
             <div>
               <h1 className="text-4xl font-bold text-white">
                 Laboratory Information System
