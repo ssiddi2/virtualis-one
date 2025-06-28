@@ -101,15 +101,15 @@ const CMSReporting = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white brand-font gradient-text">CMS Quality Reporting</h1>
-          <p className="text-white/60 tech-font">Centers for Medicare & Medicaid Services - Quarterly State Reporting</p>
+          <h1 className="text-3xl font-bold text-white">CMS Quality Reporting</h1>
+          <p className="text-white/60">Centers for Medicare & Medicaid Services - Quarterly State Reporting</p>
         </div>
         <div className="flex gap-3">
-          <Button className="glass-button">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
             <Download className="h-4 w-4" />
             Export All Reports
           </Button>
-          <Button className="glass-button">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
             <Send className="h-4 w-4" />
             Submit to CMS
           </Button>
@@ -118,9 +118,9 @@ const CMSReporting = () => {
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Q4 Submissions
             </CardTitle>
@@ -131,9 +131,9 @@ const CMSReporting = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Pending Reports
             </CardTitle>
@@ -144,9 +144,9 @@ const CMSReporting = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Compliance Score
             </CardTitle>
@@ -157,9 +157,9 @@ const CMSReporting = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Total Measures
             </CardTitle>
@@ -170,9 +170,9 @@ const CMSReporting = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font">Quality Scores</CardTitle>
+            <CardTitle className="text-white text-sm font-medium">Quality Scores</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{reportingMetrics.qualityScores}</div>
@@ -180,9 +180,9 @@ const CMSReporting = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Penalty Avoidance
             </CardTitle>
@@ -199,23 +199,23 @@ const CMSReporting = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="quarterly" className="space-y-4">
-        <TabsList className="glass-nav-item bg-black/20">
-          <TabsTrigger value="quarterly" className="text-white data-[state=active]:text-virtualis-gold">Quarterly Reports</TabsTrigger>
-          <TabsTrigger value="measures" className="text-white data-[state=active]:text-virtualis-gold">Quality Measures</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-white data-[state=active]:text-virtualis-gold">Performance Analytics</TabsTrigger>
-          <TabsTrigger value="compliance" className="text-white data-[state=active]:text-virtualis-gold">Compliance Dashboard</TabsTrigger>
+        <TabsList className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
+          <TabsTrigger value="quarterly" className="text-white data-[state=active]:bg-blue-600/30">Quarterly Reports</TabsTrigger>
+          <TabsTrigger value="measures" className="text-white data-[state=active]:bg-blue-600/30">Quality Measures</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-blue-600/30">Performance Analytics</TabsTrigger>
+          <TabsTrigger value="compliance" className="text-white data-[state=active]:bg-blue-600/30">Compliance Dashboard</TabsTrigger>
         </TabsList>
 
         <TabsContent value="quarterly" className="space-y-4">
-          <Card className="glass-card">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-white tech-font">CMS Quarterly Reporting Status</CardTitle>
+                  <CardTitle className="text-white">CMS Quarterly Reporting Status</CardTitle>
                   <CardDescription className="text-white/60">Track submission deadlines and compliance requirements</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button size="sm" className="glass-button">
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Calendar className="h-4 w-4" />
                     View Calendar
                   </Button>
@@ -226,22 +226,22 @@ const CMSReporting = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/10">
-                    <TableHead className="text-virtualis-gold tech-font">Report ID</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Report Type</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Quarter</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Measures</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Due Date</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Status</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Completion</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Responsible</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Est. Penalty</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Actions</TableHead>
+                    <TableHead className="text-white">Report ID</TableHead>
+                    <TableHead className="text-white">Report Type</TableHead>
+                    <TableHead className="text-white">Quarter</TableHead>
+                    <TableHead className="text-white">Measures</TableHead>
+                    <TableHead className="text-white">Due Date</TableHead>
+                    <TableHead className="text-white">Status</TableHead>
+                    <TableHead className="text-white">Completion</TableHead>
+                    <TableHead className="text-white">Responsible</TableHead>
+                    <TableHead className="text-white">Est. Penalty</TableHead>
+                    <TableHead className="text-white">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {quarterlyReports.map((report) => (
                     <TableRow key={report.id} className="border-white/10 hover:bg-white/5">
-                      <TableCell className="text-white tech-font font-medium text-sm">{report.id}</TableCell>
+                      <TableCell className="text-white font-medium text-sm">{report.id}</TableCell>
                       <TableCell className="text-white font-medium">{report.reportType}</TableCell>
                       <TableCell className="text-white">{report.quarter}</TableCell>
                       <TableCell className="text-white text-center">{report.measures}</TableCell>
@@ -259,7 +259,7 @@ const CMSReporting = () => {
                       <TableCell className="text-white font-mono">{report.estimatedPenalty}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button size="sm" className="glass-button text-xs">
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white text-xs">
                             Edit
                           </Button>
                           <Button size="sm" variant="ghost" className="text-white hover:bg-white/10 text-xs">
@@ -276,51 +276,51 @@ const CMSReporting = () => {
         </TabsContent>
 
         <TabsContent value="measures" className="space-y-4">
-          <Card className="glass-card">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader>
-              <CardTitle className="text-white tech-font">Quality Measures Management</CardTitle>
+              <CardTitle className="text-white">Quality Measures Management</CardTitle>
               <CardDescription className="text-white/60">Configure and monitor CMS quality measures and thresholds</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <BarChart3 className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
+                <BarChart3 className="h-12 w-12 text-white mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">Quality Measures Dashboard</h3>
                 <p className="text-white/60 mb-4">Track performance across all CMS quality domains and measures</p>
-                <Button className="glass-button">Configure Measures</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">Configure Measures</Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <Card className="glass-card">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader>
-              <CardTitle className="text-white tech-font">Performance Analytics & Benchmarking</CardTitle>
+              <CardTitle className="text-white">Performance Analytics & Benchmarking</CardTitle>
               <CardDescription className="text-white/60">Advanced analytics for quality improvement and benchmarking</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <TrendingUp className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
+                <TrendingUp className="h-12 w-12 text-white mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">Advanced Analytics Suite</h3>
                 <p className="text-white/60 mb-4">Predictive modeling, trend analysis, and peer benchmarking</p>
-                <Button className="glass-button">View Analytics</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">View Analytics</Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="compliance" className="space-y-4">
-          <Card className="glass-card">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader>
-              <CardTitle className="text-white tech-font">Compliance Management Dashboard</CardTitle>
+              <CardTitle className="text-white">Compliance Management Dashboard</CardTitle>
               <CardDescription className="text-white/60">Monitor regulatory compliance and audit readiness</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <Shield className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
+                <Shield className="h-12 w-12 text-white mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">Regulatory Compliance Center</h3>
                 <p className="text-white/60 mb-4">Automated compliance monitoring and audit trail management</p>
-                <Button className="glass-button">Check Compliance</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">Check Compliance</Button>
               </div>
             </CardContent>
           </Card>
