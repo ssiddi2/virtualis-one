@@ -3,57 +3,57 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Livemed Financials™ Design System - Proper Blue Theme from Reference */
+/* Virtualis Design System - Light Blue Glassmorphism Theme */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    /* Livemed Blue Theme - Matching Reference Image */
-    --background: 220 40% 25%;
-    --background-gradient-start: 220 45% 20%;
-    --background-gradient-end: 220 35% 30%;
-    --foreground: 0 0% 100%;
+    /* Virtualis Blue Theme - Light Blue Sky Gradient */
+    --background: 210 100% 85%;
+    --background-gradient-start: 220 100% 88%;
+    --background-gradient-end: 200 100% 82%;
+    --foreground: 220 20% 20%;
 
-    /* Livemed Card System - Light Blue Glassmorphism */
-    --card: 220 30% 40%;
-    --card-border: 220 35% 50%;
-    --card-foreground: 0 0% 100%;
+    /* Card System - Sky Blue Glassmorphism */
+    --card: 210 60% 92%;
+    --card-border: 210 40% 75%;
+    --card-foreground: 220 30% 15%;
 
-    --popover: 220 30% 40%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 210 60% 92%;
+    --popover-foreground: 220 30% 15%;
 
-    /* Livemed Primary - Yellow to Orange Gradient (Exact Match) */
-    --primary: 35 95% 58%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Sunshine Gradient */
+    --primary: 45 100% 60%;
+    --primary-foreground: 220 30% 15%;
 
-    /* Livemed Secondary - Medium Blue */
-    --secondary: 220 25% 35%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Medium Blue */
+    --secondary: 210 40% 75%;
+    --secondary-foreground: 220 30% 15%;
 
-    --muted: 220 20% 45%;
-    --muted-foreground: 220 10% 90%;
+    --muted: 210 30% 80%;
+    --muted-foreground: 220 20% 40%;
 
-    --accent: 43 100% 56%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 100% 60%;
+    --accent-foreground: 220 30% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 35% 50%;
-    --input: 220 30% 45%;
-    --ring: 43 100% 56%;
+    --border: 210 40% 75%;
+    --input: 210 50% 85%;
+    --ring: 45 100% 60%;
 
-    --radius: 12px;
+    --radius: 16px;
 
-    /* Livemed Sidebar - Medium Blue Theme */
-    --sidebar-background: 220 35% 32%;
+    /* Sidebar - Navy Blue */
+    --sidebar-background: 220 40% 25%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 43 100% 56%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 45%;
+    --sidebar-primary: 45 100% 60%;
+    --sidebar-primary-foreground: 220 30% 15%;
+    --sidebar-accent: 210 30% 35%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 35% 50%;
-    --sidebar-ring: 43 100% 56%;
+    --sidebar-border: 210 30% 45%;
+    --sidebar-ring: 45 100% 60%;
   }
 }
 
@@ -63,240 +63,150 @@
   }
 
   body {
-    @apply text-white font-sans;
-    background: linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%) !important;
+    @apply text-foreground font-sans;
+    background: linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%) !important;
     min-height: 100vh;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
   }
 
-  /* Force proper blue gradient background across all pages */
+  /* Force light blue gradient background across all pages */
   html, body, #root, .min-h-screen {
-    background: linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%) !important;
+    background: linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%) !important;
     min-height: 100vh;
-  }
-
-  /* Override any other backgrounds */
-  .bg-\[#0a1628\], .bg-slate-900, .bg-gray-900, .bg-black, .bg-background {
-    background: linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%) !important;
   }
 }
 
-/* Livemed Blue Glassmorphism Components */
+/* Virtualis Glassmorphism Components */
 @layer components {
-  .livemed-card, .glass-card {
-    @apply backdrop-blur-xl border rounded-xl shadow-2xl;
-    background: rgba(70, 130, 180, 0.25) !important;
-    border: 1px solid rgba(100, 150, 200, 0.3) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  .virtualis-card, .glass-card {
+    @apply backdrop-blur-xl border rounded-2xl shadow-lg;
+    background: rgba(173, 216, 230, 0.4) !important;
+    border: 1px solid rgba(135, 206, 235, 0.6) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
-  .livemed-card:hover, .glass-card:hover {
+  .virtualis-card:hover, .glass-card:hover {
     @apply transform transition-all duration-300;
-    background: rgba(70, 130, 180, 0.35) !important;
+    background: rgba(173, 216, 230, 0.55) !important;
     transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   }
 
-  .livemed-input, .glass-input {
-    @apply backdrop-blur-lg border rounded-lg px-4 py-3 text-white placeholder:text-gray-300 transition-all duration-200;
-    background: rgba(70, 130, 180, 0.15) !important;
-    border: 1px solid rgba(100, 150, 200, 0.4) !important;
+  .virtualis-input, .glass-input {
+    @apply backdrop-blur-lg border rounded-xl px-4 py-3 text-gray-800 placeholder:text-gray-500 transition-all duration-200;
+    background: rgba(173, 216, 230, 0.3) !important;
+    border: 1px solid rgba(135, 206, 235, 0.5) !important;
   }
 
-  .livemed-input:focus, .glass-input:focus {
+  .virtualis-input:focus, .glass-input:focus {
     @apply outline-none ring-2;
     border-color: #fbbf24 !important;
     ring-color: rgba(251, 191, 36, 0.3);
-    background: rgba(70, 130, 180, 0.25) !important;
+    background: rgba(173, 216, 230, 0.45) !important;
   }
 
-  .livemed-button, .glass-button {
-    @apply rounded-lg px-6 py-3 text-white font-semibold transition-all duration-300 transform;
-    background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%) !important;
-    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+  .virtualis-button, .glass-button {
+    @apply rounded-xl px-6 py-3 text-white font-semibold transition-all duration-300 transform;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #f97316 100%) !important;
+    box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
   }
 
-  .livemed-button:hover, .glass-button:hover {
+  .virtualis-button:hover, .glass-button:hover {
     @apply scale-105;
-    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
-    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%) !important;
+    box-shadow: 0 6px 25px rgba(251, 191, 36, 0.4);
   }
 
-  .livemed-button:active, .glass-button:active {
+  .virtualis-button:active, .glass-button:active {
     @apply scale-95;
   }
 
-  .livemed-sidebar, .glass-sidebar {
+  .virtualis-sidebar, .glass-sidebar {
     @apply backdrop-blur-xl border-r;
-    background: rgba(60, 110, 160, 0.4) !important;
-    border-right: 1px solid rgba(80, 130, 180, 0.3) !important;
+    background: rgba(25, 42, 86, 0.9) !important;
+    border-right: 1px solid rgba(135, 206, 235, 0.3) !important;
   }
 
-  .livemed-nav-item, .glass-nav-item {
-    @apply backdrop-blur-sm border rounded-lg px-4 py-3 transition-all duration-300;
-    background: rgba(70, 130, 180, 0.2) !important;
-    border: 1px solid rgba(90, 140, 190, 0.3) !important;
-  }
-
-  .livemed-nav-item:hover, .livemed-nav-item.active, .glass-nav-item:hover, .glass-nav-item.active {
-    background: rgba(251, 191, 36, 0.2) !important;
-    border-color: rgba(251, 191, 36, 0.4) !important;
-  }
-
-  .livemed-badge, .glass-badge {
-    @apply backdrop-blur-sm border rounded-full px-3 py-1 text-xs font-medium;
+  .virtualis-nav-item, .glass-nav-item {
+    @apply backdrop-blur-sm border rounded-xl px-4 py-3 transition-all duration-300;
     background: rgba(70, 130, 180, 0.3) !important;
-    border: 1px solid rgba(90, 140, 190, 0.4) !important;
+    border: 1px solid rgba(135, 206, 235, 0.4) !important;
   }
 
-  .livemed-badge.success, .glass-badge.success {
-    @apply text-green-200;
+  .virtualis-nav-item:hover, .virtualis-nav-item.active, .glass-nav-item:hover, .glass-nav-item.active {
+    background: rgba(251, 191, 36, 0.2) !important;
+    border-color: rgba(251, 191, 36, 0.5) !important;
+  }
+
+  .virtualis-badge, .glass-badge {
+    @apply backdrop-blur-sm border rounded-full px-3 py-1 text-xs font-medium;
+    background: rgba(173, 216, 230, 0.4) !important;
+    border: 1px solid rgba(135, 206, 235, 0.6) !important;
+    color: hsl(220, 30%, 15%) !important;
+  }
+
+  .virtualis-badge.success, .glass-badge.success {
+    @apply text-green-700;
     background: rgba(34, 197, 94, 0.3) !important;
     border-color: rgba(34, 197, 94, 0.5) !important;
   }
 
-  .livemed-badge.warning, .glass-badge.warning {
-    @apply text-yellow-200;
+  .virtualis-badge.warning, .glass-badge.warning {
+    @apply text-orange-700;
     background: rgba(251, 191, 36, 0.3) !important;
     border-color: rgba(251, 191, 36, 0.5) !important;
   }
 
-  .livemed-badge.error, .glass-badge.error {
-    @apply text-red-200;
+  .virtualis-badge.error, .glass-badge.error {
+    @apply text-red-700;
     background: rgba(239, 68, 68, 0.3) !important;
     border-color: rgba(239, 68, 68, 0.5) !important;
   }
 
-  .livemed-badge.primary, .glass-badge.primary {
-    @apply text-yellow-200;
+  .virtualis-badge.primary, .glass-badge.primary {
+    @apply text-orange-800;
     background: rgba(251, 191, 36, 0.3) !important;
     border-color: rgba(251, 191, 36, 0.5) !important;
   }
 
-  .livemed-gradient-text, .gradient-text {
-    background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%) !important;
+  .virtualis-gradient-text, .gradient-text {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%) !important;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .livemed-font {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 500;
-    letter-spacing: 0.025em;
-  }
-
-  .livemed-font-bold {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.025em;
-  }
-
-  /* Demo Account Styling */
-  .livemed-demo-text {
-    @apply text-gray-200 text-sm;
-    font-weight: 400;
-    opacity: 0.9;
-  }
-
-  .livemed-demo-icon {
-    @apply text-gray-300;
-    opacity: 0.8;
-  }
-
-  /* Form Styling */
-  .livemed-form-container {
-    @apply space-y-6;
-  }
-
-  .livemed-form-group {
-    @apply space-y-2;
-  }
-
-  .livemed-label {
-    @apply text-white font-medium livemed-font;
-    font-size: 14px;
-  }
-
-  /* Modal and Dialog Updates */
-  .livemed-modal {
-    @apply backdrop-blur-xl border rounded-xl shadow-2xl;
-    background: rgba(70, 130, 180, 0.25) !important;
-    border: 1px solid rgba(100, 150, 200, 0.4) !important;
-  }
-
-  /* Table Styling */
-  .livemed-table-header {
-    background: rgba(70, 130, 180, 0.2) !important;
-    border-bottom: 1px solid rgba(100, 150, 200, 0.4) !important;
-  }
-
-  .livemed-table-row {
-    @apply border-b transition-colors duration-200;
-    border-color: rgba(100, 150, 200, 0.3) !important;
-  }
-
-  .livemed-table-row:hover {
-    background: rgba(70, 130, 180, 0.2) !important;
-  }
-
-  /* Tab Styling */
-  .livemed-tabs-list {
-    background: rgba(70, 130, 180, 0.2) !important;
-    border: 1px solid rgba(100, 150, 200, 0.3) !important;
-  }
-
-  .livemed-tab-trigger {
-    @apply text-white transition-all duration-200;
-  }
-
-  .livemed-tab-trigger[data-state="active"] {
-    background: rgba(251, 191, 36, 0.3) !important;
-    color: #fbbf24 !important;
-  }
-
-  /* Dropdown and Select Styling */
-  .livemed-select-content {
-    @apply backdrop-blur-xl border rounded-lg shadow-2xl;
-    background: rgba(70, 130, 180, 0.25) !important;
-    border: 1px solid rgba(100, 150, 200, 0.4) !important;
-  }
-
-  .livemed-select-item {
-    @apply text-white transition-colors duration-200;
-  }
-
-  .livemed-select-item:hover {
-    background: rgba(251, 191, 36, 0.3) !important;
-  }
-
   /* Override shadcn components */
   .bg-card {
-    background: rgba(70, 130, 180, 0.25) !important;
-    border: 1px solid rgba(100, 150, 200, 0.3) !important;
+    background: rgba(173, 216, 230, 0.4) !important;
+    border: 1px solid rgba(135, 206, 235, 0.6) !important;
   }
 
   .bg-background {
-    background: linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%) !important;
+    background: linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%) !important;
   }
 
   .bg-primary {
-    background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%) !important;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #f97316 100%) !important;
   }
 
   .bg-secondary {
-    background: rgba(70, 130, 180, 0.25) !important;
+    background: rgba(173, 216, 230, 0.4) !important;
   }
 
-  /* Force all pages to use proper background */
-  [data-testid="page"], .page, main, .main-content {
-    background: linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%) !important;
-    min-height: 100vh;
+  /* Remove golden/yellow text colors */
+  .text-yellow-400, .text-yellow-300, .text-yellow-500 {
+    color: hsl(220, 30%, 15%) !important;
   }
 
-  /* Override any remaining dark backgrounds */
-  .bg-slate-900, .bg-gray-900, .bg-\[#0a1628\] {
-    background: linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%) !important;
+  /* Force proper text colors */
+  .text-white {
+    color: white !important;
+  }
+
+  .text-gray-800, .text-gray-700 {
+    color: hsl(220, 30%, 15%) !important;
   }
 }
 
