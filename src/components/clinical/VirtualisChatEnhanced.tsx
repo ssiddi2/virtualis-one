@@ -14,12 +14,13 @@ import {
   Send,
   Star,
   Phone,
-  ArrowRight
+  ArrowRight,
+  UserPlus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
 import { usePatients } from "@/hooks/usePatients";
-import { useSpecialties, useOnCallSchedules } from "@/hooks/usePhysicians";
+import { useSpecialties, useOnCallSchedules, usePhysicians, useCreateConsultationRequest } from "@/hooks/usePhysicians";
 import SmartRoutingDialog from "./SmartRoutingDialog";
 
 interface Message {
@@ -48,6 +49,7 @@ interface VirtualisChatEnhancedProps {
 const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
   const { toast } = useToast();
   const { callAI, isLoading: aiLoading } = useAIAssistant();
+  const { mutate: createConsultationRequest } = useCreateConsultationRequest();
   
   // Get hospital ID from URL or current user context
   const hospitalId = new URLSearchParams(window.location.search).get('hospitalId') || 
@@ -57,10 +59,16 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
   const { data: patients } = usePatients(hospitalId);
   const { data: specialties } = useSpecialties();
   const { data: onCallSchedules } = useOnCallSchedules();
+  const { data: physicians } = usePhysicians();
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [selectedPhysician, setSelectedPhysician] = useState('');
+  const [showConsultForm, setShowConsultForm] = useState(false);
+  const [consultQuestion, setConsultQuestion] = useState('');
+  const [consultUrgency, setConsultUrgency] = useState<'routine' | 'urgent' | 'critical'>('routine');
   const [activeFilter, setActiveFilter] = useState<'all' | 'critical' | 'urgent' | 'mine'>('all');
   const [smartRoutingOpen, setSmartRoutingOpen] = useState(false);
   const [selectedMessageForRouting, setSelectedMessageForRouting] = useState<Message | null>(null);
@@ -304,7 +312,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
       senderRole: currentUser?.role || 'Healthcare Provider',
       timestamp: new Date(),
       acuity: aiAnalysis.acuity,
-      patientId: selectedPatient || undefined,
+      patientId: selectedPatient !== 'no-patient' ? selectedPatient : undefined,
       patientName: selectedPatientData ? `${selectedPatientData.first_name} ${selectedPatientData.last_name}` : undefined,
       recommendedSpecialty: aiAnalysis.recommendedSpecialty,
       aiAnalysis: aiAnalysis
@@ -342,6 +350,91 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
   const handleSmartRouting = (message: Message) => {
     setSelectedMessageForRouting(message);
     setSmartRoutingOpen(true);
+  };
+
+  // Get physicians by specialty
+  const getPhysiciansBySpecialty = (specialtyId: string) => {
+    return physicians?.filter(physician => physician.specialty_id === specialtyId) || [];
+  };
+
+  // Get on-call physicians for a specialty
+  const getOnCallPhysiciansForSpecialty = (specialtyId: string) => {
+    const onCallPhysicians = onCallSchedules
+      ?.filter(schedule => schedule.specialty_id === specialtyId)
+      ?.map(schedule => schedule.physician) || [];
+    return onCallPhysicians;
+  };
+
+  const handleCreateConsultation = async () => {
+    if (!consultQuestion.trim() || !selectedSpecialty) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide a clinical question and select a specialty.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const consultationData = {
+        message_id: Date.now().toString(),
+        requesting_physician_id: currentUser?.physician_id,
+        requested_specialty_id: selectedSpecialty,
+        consulted_physician_id: selectedPhysician || undefined,
+        patient_id: selectedPatient !== 'no-patient' ? selectedPatient : undefined,
+        urgency: consultUrgency,
+        clinical_question: consultQuestion,
+        ai_recommendation: `AI-generated consultation request for ${specialties?.find(s => s.id === selectedSpecialty)?.name} specialty`
+      };
+
+      await createConsultationRequest(consultationData);
+
+      // Add consultation message to chat
+      const selectedPatientData = patients?.find(p => p.id === selectedPatient);
+      const selectedSpecialtyData = specialties?.find(s => s.id === selectedSpecialty);
+      const selectedPhysicianData = physicians?.find(p => p.id === selectedPhysician);
+
+      const consultMessage: Message = {
+        id: Date.now().toString(),
+        content: `CONSULTATION REQUEST: ${consultQuestion}`,
+        sender: currentUser?.name || 'Current User',
+        senderRole: currentUser?.role || 'Healthcare Provider',
+        timestamp: new Date(),
+        acuity: consultUrgency,
+        patientId: selectedPatient !== 'no-patient' ? selectedPatient : undefined,
+        patientName: selectedPatientData ? `${selectedPatientData.first_name} ${selectedPatientData.last_name}` : undefined,
+        recommendedSpecialty: selectedSpecialtyData?.name,
+        aiAnalysis: {
+          priority: consultUrgency === 'critical' ? 95 : consultUrgency === 'urgent' ? 75 : 50,
+          keywords: ['consultation', 'request', selectedSpecialtyData?.name?.toLowerCase() || ''],
+          suggestedActions: ['Review consultation request', 'Respond to requesting physician'],
+          recommendedSpecialty: selectedSpecialtyData?.name,
+          acuity: consultUrgency
+        }
+      };
+
+      setMessages(prev => [...prev, consultMessage]);
+
+      // Reset form
+      setConsultQuestion('');
+      setSelectedSpecialty('');
+      setSelectedPhysician('');
+      setConsultUrgency('routine');
+      setShowConsultForm(false);
+
+      toast({
+        title: "Consultation Request Created",
+        description: `Request sent to ${selectedPhysicianData ? `Dr. ${selectedPhysicianData.first_name} ${selectedPhysicianData.last_name}` : `${selectedSpecialtyData?.name} on-call team`}`,
+      });
+
+    } catch (error) {
+      console.error('Error creating consultation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create consultation request. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Get on-call physician for a specialty
@@ -387,14 +480,23 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 backdrop-blur-sm bg-blue-600/30 rounded-lg border border-blue-400/30">
-              <Brain className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 backdrop-blur-sm bg-blue-600/30 rounded-lg border border-blue-400/30">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Virtualis Chat</h1>
+                <p className="text-white/70">AI-Powered Clinical Communication with Smart Routing</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Virtualis Chat</h1>
-              <p className="text-white/70">AI-Powered Clinical Communication with Smart Routing</p>
-            </div>
+            <Button
+              onClick={() => setShowConsultForm(!showConsultForm)}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              New Consultation
+            </Button>
           </div>
 
           {/* Stats */}
@@ -597,8 +699,128 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
             </Card>
           </div>
 
-          {/* Message Composer */}
+          {/* Message Composer and Consultation Form */}
           <div className="space-y-6">
+            {/* Consultation Request Form */}
+            {showConsultForm && (
+              <Card className="backdrop-blur-xl bg-green-500/20 border border-green-300/30 rounded-xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <UserPlus className="h-5 w-5" />
+                    Create Consultation Request
+                  </CardTitle>
+                  <CardDescription className="text-white/70">
+                    Send a consultation request to a specific physician or specialty team
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm text-white/70 mb-2 block">Patient (Optional)</label>
+                    <Select value={selectedPatient} onValueChange={setSelectedPatient}>
+                      <SelectTrigger className="bg-green-600/20 border border-green-400/30 text-white">
+                        <SelectValue placeholder="Select patient..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
+                        <SelectItem value="no-patient">No specific patient</SelectItem>
+                        {patients?.map((patient) => (
+                          <SelectItem key={patient.id} value={patient.id}>
+                            {patient.first_name} {patient.last_name} - {patient.mrn}
+                            {patient.room_number && ` (Room ${patient.room_number})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-white/70 mb-2 block">Specialty *</label>
+                    <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+                      <SelectTrigger className="bg-green-600/20 border border-green-400/30 text-white">
+                        <SelectValue placeholder="Select specialty..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
+                        {specialties?.map((specialty) => (
+                          <SelectItem key={specialty.id} value={specialty.id}>
+                            {specialty.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedSpecialty && (
+                    <div>
+                      <label className="text-sm text-white/70 mb-2 block">
+                        Physician (Optional - defaults to on-call)
+                      </label>
+                      <Select value={selectedPhysician} onValueChange={setSelectedPhysician}>
+                        <SelectTrigger className="bg-green-600/20 border border-green-400/30 text-white">
+                          <SelectValue placeholder="Select physician or use on-call..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
+                          <SelectItem value="">Use on-call physician</SelectItem>
+                          {getOnCallPhysiciansForSpecialty(selectedSpecialty).map((physician) => (
+                            <SelectItem key={physician.id} value={physician.id}>
+                              Dr. {physician.first_name} {physician.last_name} (On Call)
+                            </SelectItem>
+                          ))}
+                          {getPhysiciansBySpecialty(selectedSpecialty)
+                            .filter(physician => !getOnCallPhysiciansForSpecialty(selectedSpecialty).find(onCall => onCall.id === physician.id))
+                            .map((physician) => (
+                              <SelectItem key={physician.id} value={physician.id}>
+                                Dr. {physician.first_name} {physician.last_name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-sm text-white/70 mb-2 block">Urgency</label>
+                    <Select value={consultUrgency} onValueChange={(value: 'routine' | 'urgent' | 'critical') => setConsultUrgency(value)}>
+                      <SelectTrigger className="bg-green-600/20 border border-green-400/30 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
+                        <SelectItem value="routine">Routine</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-white/70 mb-2 block">Clinical Question *</label>
+                    <Textarea
+                      value={consultQuestion}
+                      onChange={(e) => setConsultQuestion(e.target.value)}
+                      placeholder="Describe the clinical question or consultation request..."
+                      className="bg-green-600/20 border border-green-400/30 text-white placeholder:text-white/60 min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleCreateConsultation}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Consultation
+                    </Button>
+                    <Button 
+                      onClick={() => setShowConsultForm(false)}
+                      variant="outline"
+                      className="border-green-400/30 text-green-300 hover:bg-green-600/20"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Message Composer */}
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Send Message</CardTitle>
