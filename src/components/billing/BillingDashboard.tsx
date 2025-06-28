@@ -239,7 +239,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
               </Button>
             </div>
           </CardContent>
-        </div>
+        </Card>
       </div>
     </div>
   );
