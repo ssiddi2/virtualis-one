@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -91,14 +92,18 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
         <div className="text-white">Loading emergency department data...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a1628] p-6">
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -112,7 +117,7 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
           <Button 
             onClick={handleRefresh}
             disabled={refreshing}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold rounded-xl"
           >
             {refreshing ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
             Refresh
@@ -121,18 +126,18 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Total Patients</CardTitle>
               <User className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">{mockERPatients.length}</div>
-              <p className="text-xs text-slate-400">Currently in ED</p>
+              <p className="text-xs text-white/60">Currently in ED</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Critical</CardTitle>
               <AlertTriangle className="h-4 w-4 text-red-400" />
@@ -141,29 +146,29 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
               <div className="text-2xl font-bold text-white">
                 {mockERPatients.filter(p => p.acuity <= 2).length}
               </div>
-              <p className="text-xs text-slate-400">High priority cases</p>
+              <p className="text-xs text-white/60">High priority cases</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Avg Wait Time</CardTitle>
               <Clock className="h-4 w-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">45m</div>
-              <p className="text-xs text-slate-400">Current average</p>
+              <p className="text-xs text-white/60">Current average</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Bed Capacity</CardTitle>
               <Activity className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">85%</div>
-              <p className="text-xs text-slate-400">17 of 20 beds occupied</p>
+              <p className="text-xs text-white/60">17 of 20 beds occupied</p>
             </CardContent>
           </Card>
         </div>
@@ -171,7 +176,7 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
         {/* Patient List */}
         <div className="grid gap-4">
           {mockERPatients.map((patient) => (
-            <Card key={patient.id} className="bg-slate-800/50 border-slate-700">
+            <Card key={patient.id} className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-4">
