@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
+import { usePatients } from "@/hooks/usePatients";
 import SmartRoutingDialog from "./SmartRoutingDialog";
 
 interface Message {
@@ -40,6 +41,7 @@ interface Message {
     keywords: string[];
     suggestedActions: string[];
     recommendedSpecialty?: string;
+    acuity: 'critical' | 'urgent' | 'routine';
   };
 }
 
@@ -51,10 +53,10 @@ interface VirtualisChatProps {
 const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   const { toast } = useToast();
   const { callAI, isLoading: aiLoading } = useAIAssistant();
+  const { data: patients } = usePatients(hospitalId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('');
-  const [messageType, setMessageType] = useState<'routine' | 'urgent' | 'critical'>('routine');
   const [activeFilter, setActiveFilter] = useState<'all' | 'critical' | 'urgent' | 'mine'>('all');
   const [smartRoutingOpen, setSmartRoutingOpen] = useState(false);
   const [selectedMessageForRouting, setSelectedMessageForRouting] = useState<Message | null>(null);
@@ -77,7 +79,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
           priority: 95,
           keywords: ['respiratory distress', 'low oxygen saturation', 'emergency'],
           suggestedActions: ['Immediate O2 therapy', 'Chest X-ray', 'Pulmonology consult'],
-          recommendedSpecialty: 'Pulmonology'
+          recommendedSpecialty: 'Pulmonology',
+          acuity: 'critical'
         }
       },
       {
@@ -94,7 +97,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
           priority: 75,
           keywords: ['post-operative', 'surgical site pain', 'high pain score'],
           suggestedActions: ['Pain assessment', 'Wound inspection', 'Surgeon notification'],
-          recommendedSpecialty: 'Surgery'
+          recommendedSpecialty: 'Surgery',
+          acuity: 'urgent'
         }
       },
       {
@@ -109,7 +113,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         aiAnalysis: {
           priority: 30,
           keywords: ['discharge planning', 'scheduled meeting'],
-          suggestedActions: ['Confirm availability', 'Prepare discharge summary']
+          suggestedActions: ['Confirm availability', 'Prepare discharge summary'],
+          acuity: 'routine'
         }
       }
     ];
@@ -142,39 +147,94 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     }
   };
 
-  const analyzeMessageWithAI = async (content: string, acuity: string) => {
+  const analyzeMessageWithAI = async (content: string) => {
     try {
       const result = await callAI({
         type: 'triage_assessment',
         data: {
           symptoms: content
         },
-        context: `Message acuity: ${acuity}, Healthcare communication triage`
+        context: `Healthcare communication triage and specialty recommendation`
       });
 
-      // Parse AI response to extract priority and recommendations
+      // Parse AI response to extract priority, acuity, and recommendations
+      const priority = extractPriority(result);
+      const acuity = extractAcuity(result, priority);
       const aiAnalysis = {
-        priority: acuity === 'critical' ? 95 : acuity === 'urgent' ? 70 : 40,
+        priority: priority,
         keywords: extractKeywords(content),
         suggestedActions: extractSuggestedActions(result),
-        recommendedSpecialty: extractRecommendedSpecialty(result)
+        recommendedSpecialty: extractRecommendedSpecialty(result),
+        acuity: acuity as 'critical' | 'urgent' | 'routine'
       };
 
       return aiAnalysis;
     } catch (error) {
       console.error('AI analysis failed:', error);
+      // Fallback analysis based on keywords
+      const priority = determineFallbackPriority(content);
+      const acuity = priority > 80 ? 'critical' : priority > 50 ? 'urgent' : 'routine';
+      
       return {
-        priority: acuity === 'critical' ? 95 : acuity === 'urgent' ? 70 : 40,
-        keywords: ['message analysis'],
+        priority: priority,
+        keywords: extractKeywords(content),
         suggestedActions: ['Review and respond'],
-        recommendedSpecialty: undefined
+        recommendedSpecialty: undefined,
+        acuity: acuity as 'critical' | 'urgent' | 'routine'
       };
     }
   };
 
+  const extractPriority = (aiResponse: string): number => {
+    // Look for priority indicators in AI response
+    const criticalKeywords = ['emergency', 'critical', 'immediate', 'urgent', 'distress', 'crisis'];
+    const urgentKeywords = ['pain', 'concern', 'monitoring', 'follow-up', 'assessment'];
+    
+    const lowerResponse = aiResponse.toLowerCase();
+    let priority = 30; // baseline routine priority
+    
+    criticalKeywords.forEach(keyword => {
+      if (lowerResponse.includes(keyword)) priority += 30;
+    });
+    
+    urgentKeywords.forEach(keyword => {
+      if (lowerResponse.includes(keyword)) priority += 15;
+    });
+    
+    return Math.min(priority, 100);
+  };
+
+  const extractAcuity = (aiResponse: string, priority: number): string => {
+    const lowerResponse = aiResponse.toLowerCase();
+    
+    if (priority > 80 || lowerResponse.includes('critical') || lowerResponse.includes('emergency')) {
+      return 'critical';
+    } else if (priority > 50 || lowerResponse.includes('urgent') || lowerResponse.includes('immediate')) {
+      return 'urgent';
+    } else {
+      return 'routine';
+    }
+  };
+
+  const determineFallbackPriority = (content: string): number => {
+    const lowerContent = content.toLowerCase();
+    const criticalKeywords = ['emergency', 'critical', 'distress', 'dropping', 'immediate'];
+    const urgentKeywords = ['pain', 'increased', 'concern', 'monitoring'];
+    
+    let priority = 30;
+    criticalKeywords.forEach(keyword => {
+      if (lowerContent.includes(keyword)) priority += 25;
+    });
+    urgentKeywords.forEach(keyword => {
+      if (lowerContent.includes(keyword)) priority += 15;
+    });
+    
+    return Math.min(priority, 100);
+  };
+
   const extractKeywords = (content: string): string[] => {
     const keywords = [];
-    const medicalTerms = ['pain', 'distress', 'emergency', 'urgent', 'critical', 'post-op', 'surgical', 'discharge'];
+    const medicalTerms = ['pain', 'distress', 'emergency', 'urgent', 'critical', 'post-op', 'surgical', 'discharge', 'respiratory', 'oxygen', 'saturation'];
     medicalTerms.forEach(term => {
       if (content.toLowerCase().includes(term)) {
         keywords.push(term);
@@ -184,16 +244,16 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   };
 
   const extractSuggestedActions = (aiResponse: string): string[] => {
-    // Simple extraction - in reality, this would be more sophisticated
     const actions = [];
-    if (aiResponse.includes('consult')) actions.push('Request consultation');
-    if (aiResponse.includes('assessment')) actions.push('Clinical assessment');
-    if (aiResponse.includes('monitor')) actions.push('Monitor patient');
+    if (aiResponse.toLowerCase().includes('consult')) actions.push('Request consultation');
+    if (aiResponse.toLowerCase().includes('assessment')) actions.push('Clinical assessment');
+    if (aiResponse.toLowerCase().includes('monitor')) actions.push('Monitor patient');
+    if (aiResponse.toLowerCase().includes('immediate')) actions.push('Immediate intervention');
     return actions.length > 0 ? actions : ['Review and respond'];
   };
 
   const extractRecommendedSpecialty = (aiResponse: string): string | undefined => {
-    const specialties = ['Cardiology', 'Pulmonology', 'Surgery', 'Neurology', 'Emergency Medicine'];
+    const specialties = ['Cardiology', 'Pulmonology', 'Surgery', 'Neurology', 'Emergency Medicine', 'Internal Medicine', 'Orthopedics', 'Radiology'];
     for (const specialty of specialties) {
       if (aiResponse.toLowerCase().includes(specialty.toLowerCase())) {
         return specialty;
@@ -205,8 +265,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    // Get AI analysis for the new message
-    const aiAnalysis = await analyzeMessageWithAI(newMessage, messageType);
+    // Get AI analysis for the new message - AI determines acuity automatically
+    const aiAnalysis = await analyzeMessageWithAI(newMessage);
+    const selectedPatientData = patients?.find(p => p.id === selectedPatient);
 
     const message: Message = {
       id: Date.now().toString(),
@@ -214,8 +275,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
       sender: currentUser?.name || 'Current User',
       senderRole: currentUser?.role || 'Healthcare Provider',
       timestamp: new Date(),
-      acuity: messageType,
+      acuity: aiAnalysis.acuity,
       patientId: selectedPatient || undefined,
+      patientName: selectedPatientData ? `${selectedPatientData.first_name} ${selectedPatientData.last_name}` : undefined,
       recommendedSpecialty: aiAnalysis.recommendedSpecialty,
       aiAnalysis: aiAnalysis
     };
@@ -225,15 +287,15 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     
     toast({
       title: "Message Sent",
-      description: `${messageType.charAt(0).toUpperCase() + messageType.slice(1)} priority message sent with AI analysis.`,
+      description: `AI determined ${aiAnalysis.acuity} priority with ${aiAnalysis.priority}/100 urgency score.`,
     });
 
     // Auto-suggest routing for critical/urgent messages
-    if (messageType === 'critical' || messageType === 'urgent') {
+    if (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent') {
       setTimeout(() => {
         toast({
           title: "Smart Routing Available",
-          description: `AI recommends ${aiAnalysis.recommendedSpecialty || 'specialist'} consultation for this ${messageType} message.`,
+          description: `AI recommends ${aiAnalysis.recommendedSpecialty || 'specialist'} consultation for this ${aiAnalysis.acuity} message.`,
         });
       }, 2000);
     }
@@ -478,20 +540,23 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardHeader>
                 <CardTitle className="text-white">Send Message</CardTitle>
                 <CardDescription className="text-white/70">
-                  AI-powered message analysis and smart routing
+                  AI will automatically determine priority and suggest routing
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm text-white/70 mb-2 block">Message Priority</label>
-                  <Select value={messageType} onValueChange={(value: any) => setMessageType(value)}>
+                  <label className="text-sm text-white/70 mb-2 block">Select Patient (Optional)</label>
+                  <Select value={selectedPatient} onValueChange={setSelectedPatient}>
                     <SelectTrigger className="bg-blue-600/20 border border-blue-400/30 text-white">
-                      <SelectValue />
+                      <SelectValue placeholder="Choose patient..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="routine">Routine</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
-                      <SelectItem value="critical">Critical</SelectItem>
+                    <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
+                      <SelectItem value="">No specific patient</SelectItem>
+                      {patients?.map((patient) => (
+                        <SelectItem key={patient.id} value={patient.id}>
+                          {patient.first_name} {patient.last_name} - {patient.mrn}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -501,9 +566,12 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your clinical message here..."
+                    placeholder="Type your clinical message here... AI will analyze urgency and recommend appropriate specialty routing."
                     className="bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
                   />
+                  <p className="text-xs text-white/60 mt-1">
+                    AI will automatically determine message priority and suggest specialist routing
+                  </p>
                 </div>
 
                 <Button 
@@ -512,7 +580,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  {aiLoading ? 'Analyzing...' : 'Send & Analyze'}
+                  {aiLoading ? 'Analyzing with AI...' : 'Send & AI Analyze'}
                 </Button>
               </CardContent>
             </Card>
