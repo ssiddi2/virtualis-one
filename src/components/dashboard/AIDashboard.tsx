@@ -38,36 +38,38 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
   };
 
   return (
-    <div className="p-6 space-y-8 bg-[#0a1628] min-h-screen">
+    <div className="p-6 space-y-8 min-h-screen" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <Brain className="h-12 w-12 text-virtualis-gold animate-pulse" />
+          <Brain className="h-12 w-12 text-sky-300 animate-pulse" />
           <div>
-            <h1 className="text-4xl font-bold gradient-text tech-font">
+            <h1 className="text-4xl font-bold text-white">
               AI Healthcare Assistant
             </h1>
-            <p className="text-white/80 text-lg tech-font">
+            <p className="text-white/80 text-lg">
               {selectedHospital ? `${selectedHospital.name} - Clinical AI Intelligence` : 'Intelligent Clinical Support'}
             </p>
           </div>
         </div>
         
         <div className="flex items-center justify-center gap-4">
-          <Badge className="glass-badge success">
+          <Badge className="virtualis-badge success">
             <Brain className="h-3 w-3 mr-1" />
             GPT-4 Powered
           </Badge>
-          <Badge className="glass-badge primary">
+          <Badge className="virtualis-badge primary">
             <Shield className="h-3 w-3 mr-1" />
             HIPAA Compliant
           </Badge>
-          <Badge className="glass-badge warning">
+          <Badge className="virtualis-badge warning">
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
           {selectedHospital && (
-            <Badge className="glass-badge info">
+            <Badge className="virtualis-badge">
               {selectedHospital.emr_type} Integration
             </Badge>
           )}
@@ -76,24 +78,24 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 glass-card">
-          <TabsTrigger value="workflow" className="text-white">
+        <TabsList className="grid w-full grid-cols-5 virtualis-card">
+          <TabsTrigger value="workflow" className="text-white data-[state=active]:bg-white/20">
             <Workflow className="h-4 w-4 mr-2" />
             Workflow Demo
           </TabsTrigger>
-          <TabsTrigger value="insights" className="text-white">
+          <TabsTrigger value="insights" className="text-white data-[state=active]:bg-white/20">
             <Brain className="h-4 w-4 mr-2" />
             AI Insights
           </TabsTrigger>
-          <TabsTrigger value="clinical" className="text-white">
+          <TabsTrigger value="clinical" className="text-white data-[state=active]:bg-white/20">
             <Stethoscope className="h-4 w-4 mr-2" />
             Clinical AI
           </TabsTrigger>
-          <TabsTrigger value="coding" className="text-white">
+          <TabsTrigger value="coding" className="text-white data-[state=active]:bg-white/20">
             <Code className="h-4 w-4 mr-2" />
             Coding & Billing
           </TabsTrigger>
-          <TabsTrigger value="tools" className="text-white">
+          <TabsTrigger value="tools" className="text-white data-[state=active]:bg-white/20">
             <Activity className="h-4 w-4 mr-2" />
             AI Tools
           </TabsTrigger>
@@ -113,10 +115,10 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="clinical" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <DiagnosisSupport />
-            <Card className="glass-card">
+            <Card className="virtualis-card">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-400" />
+                  <FileText className="h-5 w-5 text-sky-300" />
                   Clinical Documentation AI
                 </CardTitle>
               </CardHeader>
@@ -126,14 +128,14 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.clinical.map((feature) => (
-                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg">
-                      <feature.icon className="h-5 w-5 text-virtualis-gold mb-2" />
+                    <div key={feature.name} className="p-3 virtualis-card rounded-lg">
+                      <feature.icon className="h-5 w-5 text-sky-300 mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white/60 text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full glass-button">
+                <Button className="w-full virtualis-button">
                   <Brain className="h-4 w-4 mr-2" />
                   Access Clinical AI Tools
                 </Button>
@@ -145,10 +147,10 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="coding" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <MedicalCodingAssistant />
-            <Card className="glass-card">
+            <Card className="virtualis-card">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-400" />
+                  <DollarSign className="h-5 w-5 text-green-300" />
                   Revenue Cycle AI
                 </CardTitle>
               </CardHeader>
@@ -158,14 +160,14 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.coding.map((feature) => (
-                    <div key={feature.name} className="p-3 glass-nav-item rounded-lg">
-                      <feature.icon className="h-5 w-5 text-virtualis-gold mb-2" />
+                    <div key={feature.name} className="p-3 virtualis-card rounded-lg">
+                      <feature.icon className="h-5 w-5 text-sky-300 mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white/60 text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full glass-button">
+                <Button className="w-full virtualis-button">
                   <Code className="h-4 w-4 mr-2" />
                   Launch Coding Assistant
                 </Button>
@@ -176,17 +178,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
         <TabsContent value="tools" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="glass-card">
+            <Card className="virtualis-card">
               <CardHeader>
                 <CardTitle className="text-white">Clinical Decision Support</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-green-400 text-2xl font-bold">98.7%</div>
+                  <div className="text-center p-4 virtualis-card">
+                    <div className="text-green-300 text-2xl font-bold">98.7%</div>
                     <div className="text-white/70 text-sm">Accuracy Rate</div>
                   </div>
-                  <Button className="w-full glass-button">
+                  <Button className="w-full virtualis-button">
                     <Brain className="h-4 w-4 mr-2" />
                     Launch Assistant
                   </Button>
@@ -194,17 +196,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="virtualis-card">
               <CardHeader>
                 <CardTitle className="text-white">Drug Safety</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-yellow-400 text-2xl font-bold">23</div>
+                  <div className="text-center p-4 virtualis-card">
+                    <div className="text-blue-300 text-2xl font-bold">23</div>
                     <div className="text-white/70 text-sm">Alerts Today</div>
                   </div>
-                  <Button className="w-full glass-button">
+                  <Button className="w-full virtualis-button">
                     <Shield className="h-4 w-4 mr-2" />
                     Check Interactions
                   </Button>
@@ -212,17 +214,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="virtualis-card">
               <CardHeader>
                 <CardTitle className="text-white">Quality Metrics</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 glass-nav-item">
-                    <div className="text-blue-400 text-2xl font-bold">94%</div>
+                  <div className="text-center p-4 virtualis-card">
+                    <div className="text-sky-300 text-2xl font-bold">94%</div>
                     <div className="text-white/70 text-sm">Compliance Score</div>
                   </div>
-                  <Button className="w-full glass-button">
+                  <Button className="w-full virtualis-button">
                     <Activity className="h-4 w-4 mr-2" />
                     View Metrics
                   </Button>

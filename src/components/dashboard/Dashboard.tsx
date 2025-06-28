@@ -83,7 +83,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a1628] p-6">
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -95,7 +97,7 @@ const Dashboard = () => {
             <Button 
               onClick={() => handleGenerateReport('Daily Operations')}
               disabled={isGeneratingReport}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="virtualis-button"
             >
               {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
               Daily Report
@@ -103,8 +105,7 @@ const Dashboard = () => {
             <Button 
               onClick={handleCMSUpdate}
               disabled={isUpdatingCMS}
-              variant="outline"
-              className="border-green-600 text-green-400 hover:bg-green-600/10"
+              className="virtualis-button"
             >
               {isUpdatingCMS ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
               Update CMS
@@ -114,53 +115,53 @@ const Dashboard = () => {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Active Patients</CardTitle>
-              <Users className="h-4 w-4 text-blue-400" />
+              <Users className="h-4 w-4 text-sky-300" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">156</div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-white/60">
                 +12% from last month
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Appointments Today</CardTitle>
-              <Calendar className="h-4 w-4 text-green-400" />
+              <Calendar className="h-4 w-4 text-green-300" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">89</div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-white/60">
                 23 completed, 66 scheduled
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Revenue Today</CardTitle>
-              <DollarSign className="h-4 w-4 text-yellow-400" />
+              <DollarSign className="h-4 w-4 text-blue-300" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">$45,230</div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-white/60">
                 +8% from yesterday
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white">Bed Occupancy</CardTitle>
-              <Activity className="h-4 w-4 text-red-400" />
+              <Activity className="h-4 w-4 text-pink-300" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">85%</div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-white/60">
                 127 of 150 beds occupied
               </p>
             </CardContent>
@@ -170,35 +171,34 @@ const Dashboard = () => {
         {/* Action Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Billing & Claims */}
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="virtualis-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
-                <DollarSign className="h-5 w-5 text-green-400" />
+                <DollarSign className="h-5 w-5 text-green-300" />
                 Billing & Claims Management
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-slate-300">Pending Claims</span>
-                <Badge variant="secondary" className="bg-orange-600/20 text-orange-300">15</Badge>
+                <span className="text-white/70">Pending Claims</span>
+                <Badge className="virtualis-badge warning">15</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-300">Outstanding Revenue</span>
+                <span className="text-white/70">Outstanding Revenue</span>
                 <span className="text-white font-semibold">$127,450</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   onClick={handleProcessClaims}
                   disabled={isProcessingClaims}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="virtualis-button"
                 >
                   {isProcessingClaims ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
                   Process Claims
                 </Button>
                 <Button 
                   onClick={() => handleExportData('Billing')}
-                  variant="outline"
-                  className="border-slate-600 text-white hover:bg-slate-700"
+                  className="virtualis-button"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
@@ -208,35 +208,34 @@ const Dashboard = () => {
           </Card>
 
           {/* Quality Reporting */}
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="virtualis-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
-                <TrendingUp className="h-5 w-5 text-blue-400" />
+                <TrendingUp className="h-5 w-5 text-sky-300" />
                 Quality & Compliance
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-slate-300">Quality Score</span>
-                <Badge className="bg-green-600/20 text-green-300 border-green-600/30">94.2%</Badge>
+                <span className="text-white/70">Quality Score</span>
+                <Badge className="virtualis-badge success">94.2%</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-300">CMS Measures</span>
+                <span className="text-white/70">CMS Measures</span>
                 <span className="text-white font-semibold">18/20 Met</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   onClick={() => handleGenerateReport('Quality Metrics')}
                   disabled={isGeneratingReport}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="virtualis-button"
                 >
                   {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
                   Generate Report
                 </Button>
                 <Button 
                   onClick={() => handleExportData('Quality')}
-                  variant="outline"
-                  className="border-slate-600 text-white hover:bg-slate-700"
+                  className="virtualis-button"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export CMS
@@ -247,27 +246,27 @@ const Dashboard = () => {
         </div>
 
         {/* AI Insights */}
-        <Card className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-600/30">
+        <Card className="virtualis-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
-              <Brain className="h-5 w-5 text-purple-400" />
+              <Brain className="h-5 w-5 text-purple-300" />
               AI-Powered Insights
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-800/30 rounded-lg">
+              <div className="p-4 virtualis-card rounded-lg">
                 <h4 className="font-medium text-white mb-2">Readmission Risk Alert</h4>
-                <p className="text-sm text-slate-300 mb-3">5 patients identified with high readmission risk</p>
-                <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
+                <p className="text-sm text-white/70 mb-3">5 patients identified with high readmission risk</p>
+                <Button size="sm" className="virtualis-button">
                   <AlertCircle className="h-3 w-3 mr-2" />
                   Review Cases
                 </Button>
               </div>
-              <div className="p-4 bg-slate-800/30 rounded-lg">
+              <div className="p-4 virtualis-card rounded-lg">
                 <h4 className="font-medium text-white mb-2">Cost Optimization</h4>
-                <p className="text-sm text-slate-300 mb-3">Potential savings of $15K identified</p>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                <p className="text-sm text-white/70 mb-3">Potential savings of $15K identified</p>
+                <Button size="sm" className="virtualis-button">
                   <TrendingUp className="h-3 w-3 mr-2" />
                   View Details
                 </Button>
@@ -277,32 +276,32 @@ const Dashboard = () => {
         </Card>
 
         {/* Recent Activities */}
-        <Card className="bg-slate-800/50 border-slate-700">
+        <Card className="virtualis-card">
           <CardHeader>
             <CardTitle className="text-white">Recent System Activities</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded">
+              <div className="flex items-center justify-between p-3 virtualis-card rounded">
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  <span className="text-slate-300">Daily backup completed successfully</span>
+                  <CheckCircle className="h-4 w-4 text-green-300" />
+                  <span className="text-white/80">Daily backup completed successfully</span>
                 </div>
-                <span className="text-xs text-slate-500">2 minutes ago</span>
+                <span className="text-xs text-white/50">2 minutes ago</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded">
+              <div className="flex items-center justify-between p-3 virtualis-card rounded">
                 <div className="flex items-center gap-3">
-                  <Upload className="h-4 w-4 text-blue-400" />
-                  <span className="text-slate-300">CMS quality measures submitted</span>
+                  <Upload className="h-4 w-4 text-sky-300" />
+                  <span className="text-white/80">CMS quality measures submitted</span>
                 </div>
-                <span className="text-xs text-slate-500">1 hour ago</span>
+                <span className="text-xs text-white/50">1 hour ago</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded">
+              <div className="flex items-center justify-between p-3 virtualis-card rounded">
                 <div className="flex items-center gap-3">
-                  <FileText className="h-4 w-4 text-purple-400" />
-                  <span className="text-slate-300">Monthly financial report generated</span>
+                  <FileText className="h-4 w-4 text-purple-300" />
+                  <span className="text-white/80">Monthly financial report generated</span>
                 </div>
-                <span className="text-xs text-slate-500">3 hours ago</span>
+                <span className="text-xs text-white/50">3 hours ago</span>
               </div>
             </div>
           </CardContent>

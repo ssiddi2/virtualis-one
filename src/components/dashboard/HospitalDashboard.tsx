@@ -46,11 +46,13 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
 
   if (!hospital) {
     return (
-      <div className="min-h-screen bg-[#0a1628] p-6 flex items-center justify-center">
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <Card className="virtualis-card">
           <CardContent className="p-8 text-center">
-            <h3 className="text-xl font-semibold mb-2">Hospital Not Found</h3>
-            <Button onClick={onBack} className="bg-blue-600 hover:bg-blue-700">
+            <h3 className="text-xl font-semibold mb-2 text-white">Hospital Not Found</h3>
+            <Button onClick={onBack} className="virtualis-button">
               Back to EMR Dashboard
             </Button>
           </CardContent>
@@ -60,21 +62,23 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
   }
 
   return (
-    <div className="min-h-screen bg-[#0a1628] p-6">
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button 
             variant="outline" 
             onClick={onBack}
-            className="bg-[#1a2332] border-[#2a3441] text-white hover:bg-[#2a3441]"
+            className="virtualis-button"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to EMR
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Building2 className="h-8 w-8 text-blue-400" />
+              <Building2 className="h-8 w-8 text-sky-300" />
               {hospital.name}
             </h1>
             <p className="text-white/70">
@@ -84,14 +88,14 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
           <div className="flex gap-2">
             <Button 
               onClick={() => navigate('/patient-tracker')}
-              className="bg-green-600 hover:bg-green-700"
+              className="virtualis-button"
             >
               <Stethoscope className="h-4 w-4 mr-2" />
               ER Tracker
             </Button>
             <Button 
               onClick={() => navigate('/ai-assistant')}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="virtualis-button"
             >
               <Brain className="h-4 w-4 mr-2" />
               AI Assistant
@@ -101,46 +105,46 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-              <Users className="h-4 w-4 text-blue-400" />
+              <CardTitle className="text-sm font-medium text-white">Total Patients</CardTitle>
+              <Users className="h-4 w-4 text-sky-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{patients?.length || 0}</div>
+              <div className="text-2xl font-bold text-white">{patients?.length || 0}</div>
               <p className="text-xs text-white/60">All patients</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Patients</CardTitle>
-              <Activity className="h-4 w-4 text-green-400" />
+              <CardTitle className="text-sm font-medium text-white">Active Patients</CardTitle>
+              <Activity className="h-4 w-4 text-green-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-400">{activePatients.length}</div>
+              <div className="text-2xl font-bold text-green-300">{activePatients.length}</div>
               <p className="text-xs text-white/60">Currently admitted</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recent Admissions</CardTitle>
-              <Calendar className="h-4 w-4 text-yellow-400" />
+              <CardTitle className="text-sm font-medium text-white">Recent Admissions</CardTitle>
+              <Calendar className="h-4 w-4 text-blue-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-400">{recentAdmissions.length}</div>
+              <div className="text-2xl font-bold text-blue-300">{recentAdmissions.length}</div>
               <p className="text-xs text-white/60">Last 7 days</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+          <Card className="virtualis-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">EMR Integration</CardTitle>
-              <Heart className="h-4 w-4 text-red-400" />
+              <CardTitle className="text-sm font-medium text-white">EMR Integration</CardTitle>
+              <Heart className="h-4 w-4 text-pink-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-400">Online</div>
+              <div className="text-2xl font-bold text-green-300">Online</div>
               <p className="text-xs text-white/60">{hospital.emr_type} connected</p>
             </CardContent>
           </Card>
@@ -148,22 +152,22 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="patients" className="space-y-6">
-          <TabsList className="bg-[#1a2332] border-[#2a3441]">
-            <TabsTrigger value="patients" className="text-white data-[state=active]:bg-[#2a3441]">
+          <TabsList className="virtualis-card">
+            <TabsTrigger value="patients" className="text-white data-[state=active]:bg-white/20">
               Patient List
             </TabsTrigger>
-            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-[#2a3441]">
+            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/20">
               Hospital Overview
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-[#2a3441]">
+            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-white/20">
               Analytics
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="patients" className="space-y-4">
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <Card className="virtualis-card">
               <CardHeader>
-                <CardTitle>Patient List - {hospital.name}</CardTitle>
+                <CardTitle className="text-white">Patient List - {hospital.name}</CardTitle>
                 <CardDescription className="text-white/70">
                   All patients currently in the system
                 </CardDescription>
@@ -174,7 +178,7 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
                     patients.map((patient) => (
                       <Card 
                         key={patient.id}
-                        className="p-4 bg-[#0f1922] border-[#2a3441] hover:border-[#3a4451] transition-all cursor-pointer"
+                        className="p-4 virtualis-card hover:scale-[1.02] transition-all cursor-pointer"
                         onClick={() => navigate(`/patient/${patient.id}`)}
                       >
                         <div className="flex items-center justify-between">
@@ -192,12 +196,12 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
                             {patient.medical_conditions && patient.medical_conditions.length > 0 && (
                               <div className="flex gap-2 mt-2">
                                 {patient.medical_conditions.slice(0, 2).map((condition, index) => (
-                                  <Badge key={index} variant="outline" className="border-blue-400 text-blue-400 text-xs">
+                                  <Badge key={index} className="virtualis-badge primary text-xs">
                                     {condition}
                                   </Badge>
                                 ))}
                                 {patient.medical_conditions.length > 2 && (
-                                  <Badge variant="outline" className="border-gray-400 text-gray-400 text-xs">
+                                  <Badge className="virtualis-badge text-xs">
                                     +{patient.medical_conditions.length - 2} more
                                   </Badge>
                                 )}
@@ -205,7 +209,7 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
                             )}
                           </div>
                           <div className="flex items-center gap-3">
-                            <Badge className={`${patient.status === 'active' ? 'bg-green-600' : 'bg-gray-600'}`}>
+                            <Badge className={`${patient.status === 'active' ? 'virtualis-badge success' : 'virtualis-badge'}`}>
                               {patient.status?.toUpperCase() || 'ACTIVE'}
                             </Badge>
                             <AIEnhancedNoteDialog 
@@ -229,78 +233,78 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+              <Card className="virtualis-card">
                 <CardHeader>
-                  <CardTitle>Hospital Information</CardTitle>
+                  <CardTitle className="text-white">Hospital Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-white/60">Name:</span>
-                      <p className="font-medium">{hospital.name}</p>
+                      <p className="font-medium text-white">{hospital.name}</p>
                     </div>
                     <div>
                       <span className="text-white/60">EMR Type:</span>
-                      <p className="font-medium">{hospital.emr_type}</p>
+                      <p className="font-medium text-white">{hospital.emr_type}</p>
                     </div>
                     <div>
                       <span className="text-white/60">Phone:</span>
-                      <p className="font-medium">{hospital.phone}</p>
+                      <p className="font-medium text-white">{hospital.phone}</p>
                     </div>
                     <div>
                       <span className="text-white/60">Email:</span>
-                      <p className="font-medium">{hospital.email || 'Not provided'}</p>
+                      <p className="font-medium text-white">{hospital.email || 'Not provided'}</p>
                     </div>
                     <div className="col-span-2">
                       <span className="text-white/60">Address:</span>
-                      <p className="font-medium">
+                      <p className="font-medium text-white">
                         {hospital.address}, {hospital.city}, {hospital.state} {hospital.zip_code}
                       </p>
                     </div>
                     <div>
                       <span className="text-white/60">License:</span>
-                      <p className="font-medium">{hospital.license_number || 'Not specified'}</p>
+                      <p className="font-medium text-white">{hospital.license_number || 'Not specified'}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+              <Card className="virtualis-card">
                 <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
+                  <CardTitle className="text-white">Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
                     onClick={() => navigate('/patient-tracker')}
-                    className="w-full bg-green-600 hover:bg-green-700 justify-start"
+                    className="w-full virtualis-button justify-start"
                   >
                     <Stethoscope className="h-4 w-4 mr-2" />
                     Emergency Department Tracker
                   </Button>
                   <Button 
                     onClick={() => navigate('/laboratory')}
-                    className="w-full bg-blue-600 hover:bg-blue-700 justify-start"
+                    className="w-full virtualis-button justify-start"
                   >
                     <TestTube className="h-4 w-4 mr-2" />
                     Laboratory Information System
                   </Button>
                   <Button 
                     onClick={() => navigate('/radiology')}
-                    className="w-full bg-purple-600 hover:bg-purple-700 justify-start"
+                    className="w-full virtualis-button justify-start"
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Radiology & PACS
                   </Button>
                   <Button 
                     onClick={() => navigate('/billing')}
-                    className="w-full bg-orange-600 hover:bg-orange-700 justify-start"
+                    className="w-full virtualis-button justify-start"
                   >
                     <Pill className="h-4 w-4 mr-2" />
                     Billing & Coding
                   </Button>
                   <Button 
                     onClick={() => navigate('/ai-assistant')}
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 justify-start"
+                    className="w-full virtualis-button justify-start"
                   >
                     <Brain className="h-4 w-4 mr-2" />
                     AI Clinical Assistant
@@ -312,53 +316,53 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
 
           <TabsContent value="analytics" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+              <Card className="virtualis-card">
                 <CardHeader>
-                  <CardTitle>Patient Statistics</CardTitle>
+                  <CardTitle className="text-white">Patient Statistics</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">Total Patients:</span>
-                      <span className="font-semibold">{patients?.length || 0}</span>
+                      <span className="font-semibold text-white">{patients?.length || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">Active Patients:</span>
-                      <span className="font-semibold text-green-400">{activePatients.length}</span>
+                      <span className="font-semibold text-green-300">{activePatients.length}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">Recent Admissions:</span>
-                      <span className="font-semibold text-yellow-400">{recentAdmissions.length}</span>
+                      <span className="font-semibold text-blue-300">{recentAdmissions.length}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">Average Length of Stay:</span>
-                      <span className="font-semibold">3.2 days</span>
+                      <span className="font-semibold text-white">3.2 days</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+              <Card className="virtualis-card">
                 <CardHeader>
-                  <CardTitle>EMR Integration Status</CardTitle>
+                  <CardTitle className="text-white">EMR Integration Status</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">Connection Status:</span>
-                      <Badge className="bg-green-600">Connected</Badge>
+                      <Badge className="virtualis-badge success">Connected</Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">EMR System:</span>
-                      <span className="font-semibold">{hospital.emr_type}</span>
+                      <span className="font-semibold text-white">{hospital.emr_type}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">Last Sync:</span>
-                      <span className="font-semibold">2 minutes ago</span>
+                      <span className="font-semibold text-white">2 minutes ago</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-white/70">Data Quality:</span>
-                      <span className="font-semibold text-green-400">Excellent</span>
+                      <span className="font-semibold text-green-300">Excellent</span>
                     </div>
                   </div>
                 </CardContent>
