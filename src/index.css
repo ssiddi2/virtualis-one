@@ -3,37 +3,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Livemed Financials™ Design System */
+/* Livemed Financials™ Design System - Light Blue Theme */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    /* Livemed Deep Blue Gradient System */
-    --background: #1e3a8a;
-    --background-gradient-start: #1e3a8a;
-    --background-gradient-end: #312e81;
+    /* Livemed Light Blue Gradient System - Matching Reference Image */
+    --background: #4a6fa5;
+    --background-gradient-start: #4a6fa5;
+    --background-gradient-end: #6b8db5;
     --foreground: #ffffff;
 
-    /* Livemed Card System - Translucent Blue */
-    --card: rgba(59, 130, 246, 0.15);
-    --card-border: rgba(59, 130, 246, 0.2);
+    /* Livemed Card System - Light Blue Glassmorphism */
+    --card: rgba(96, 140, 190, 0.3);
+    --card-border: rgba(96, 140, 190, 0.4);
     --card-foreground: #ffffff;
 
-    --popover: rgba(59, 130, 246, 0.15);
+    --popover: rgba(96, 140, 190, 0.3);
     --popover-foreground: #ffffff;
 
-    /* Livemed Primary - Yellow to Orange Gradient */
+    /* Livemed Primary - Yellow to Orange Gradient (Exact Match) */
     --primary: #f59e0b;
     --primary-foreground: #ffffff;
     --primary-gradient-start: #fbbf24;
     --primary-gradient-end: #f97316;
 
-    /* Livemed Secondary - Lighter Blue */
-    --secondary: rgba(96, 165, 250, 0.2);
+    /* Livemed Secondary - Light Blue */
+    --secondary: rgba(140, 170, 210, 0.3);
     --secondary-foreground: #ffffff;
 
-    --muted: rgba(148, 163, 184, 0.3);
-    --muted-foreground: rgba(203, 213, 225, 0.8);
+    --muted: rgba(180, 200, 220, 0.4);
+    --muted-foreground: rgba(220, 230, 240, 0.9);
 
     --accent: #fbbf24;
     --accent-foreground: #ffffff;
@@ -41,29 +41,29 @@
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
 
-    --border: rgba(59, 130, 246, 0.2);
-    --input: rgba(59, 130, 246, 0.1);
-    --input-border: rgba(59, 130, 246, 0.3);
+    --border: rgba(96, 140, 190, 0.4);
+    --input: rgba(96, 140, 190, 0.2);
+    --input-border: rgba(96, 140, 190, 0.5);
     --ring: #fbbf24;
 
     --radius: 12px;
 
-    /* Livemed Sidebar */
-    --sidebar-background: rgba(30, 58, 138, 0.9);
+    /* Livemed Sidebar - Light Blue Theme */
+    --sidebar-background: rgba(74, 111, 165, 0.8);
     --sidebar-foreground: #ffffff;
     --sidebar-primary: #fbbf24;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: rgba(96, 165, 250, 0.2);
+    --sidebar-accent: rgba(140, 170, 210, 0.3);
     --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: rgba(59, 130, 246, 0.3);
+    --sidebar-border: rgba(96, 140, 190, 0.5);
     --sidebar-ring: #fbbf24;
 
-    /* Livemed Brand Colors */
+    /* Livemed Brand Colors - Light Theme */
     --livemed-yellow: #fbbf24;
     --livemed-orange: #f97316;
-    --livemed-blue-deep: #1e3a8a;
-    --livemed-blue-light: #3b82f6;
-    --livemed-glass: rgba(59, 130, 246, 0.1);
+    --livemed-blue-light: #4a6fa5;
+    --livemed-blue-medium: #6b8db5;
+    --livemed-glass: rgba(96, 140, 190, 0.2);
   }
 }
 
@@ -74,45 +74,45 @@
 
   body {
     @apply text-white font-sans;
-    background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e40af 100%);
+    background: linear-gradient(135deg, #4a6fa5 0%, #6b8db5 50%, #5a7fb0 100%);
     min-height: 100vh;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
   }
 
-  /* Ensure consistent gradient background across all pages */
+  /* Ensure consistent light blue gradient background across all pages */
   html, body, #root {
-    background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e40af 100%);
+    background: linear-gradient(135deg, #4a6fa5 0%, #6b8db5 50%, #5a7fb0 100%);
     min-height: 100vh;
   }
 }
 
-/* Livemed Glassmorphism Components */
+/* Livemed Light Blue Glassmorphism Components */
 @layer components {
   .livemed-card {
     @apply backdrop-blur-xl border rounded-xl shadow-2xl;
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background: rgba(96, 140, 190, 0.3);
+    border: 1px solid rgba(96, 140, 190, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
 
   .livemed-card:hover {
     @apply transform transition-all duration-300;
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(96, 140, 190, 0.4);
     transform: translateY(-2px);
   }
 
   .livemed-input {
-    @apply backdrop-blur-lg border rounded-lg px-4 py-3 text-white placeholder:text-gray-400 transition-all duration-200;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    @apply backdrop-blur-lg border rounded-lg px-4 py-3 text-white placeholder:text-gray-300 transition-all duration-200;
+    background: rgba(96, 140, 190, 0.2);
+    border: 1px solid rgba(96, 140, 190, 0.5);
   }
 
   .livemed-input:focus {
     @apply outline-none ring-2;
     border-color: #fbbf24;
     ring-color: rgba(251, 191, 36, 0.3);
-    background: rgba(59, 130, 246, 0.15);
+    background: rgba(96, 140, 190, 0.3);
   }
 
   .livemed-button {
@@ -133,14 +133,14 @@
 
   .livemed-sidebar {
     @apply backdrop-blur-xl border-r;
-    background: rgba(30, 58, 138, 0.9);
-    border-right: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(74, 111, 165, 0.8);
+    border-right: 1px solid rgba(96, 140, 190, 0.5);
   }
 
   .livemed-nav-item {
     @apply backdrop-blur-sm border rounded-lg px-4 py-3 transition-all duration-300;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(96, 140, 190, 0.2);
+    border: 1px solid rgba(96, 140, 190, 0.3);
   }
 
   .livemed-nav-item:hover, .livemed-nav-item.active {
@@ -150,32 +150,32 @@
 
   .livemed-badge {
     @apply backdrop-blur-sm border rounded-full px-3 py-1 text-xs font-medium;
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(96, 140, 190, 0.3);
+    border: 1px solid rgba(96, 140, 190, 0.4);
   }
 
   .livemed-badge.success {
-    @apply text-green-300;
-    background: rgba(34, 197, 94, 0.2);
-    border-color: rgba(34, 197, 94, 0.4);
+    @apply text-green-200;
+    background: rgba(34, 197, 94, 0.3);
+    border-color: rgba(34, 197, 94, 0.5);
   }
 
   .livemed-badge.warning {
-    @apply text-yellow-300;
-    background: rgba(251, 191, 36, 0.2);
-    border-color: rgba(251, 191, 36, 0.4);
+    @apply text-yellow-200;
+    background: rgba(251, 191, 36, 0.3);
+    border-color: rgba(251, 191, 36, 0.5);
   }
 
   .livemed-badge.error {
-    @apply text-red-300;
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.4);
+    @apply text-red-200;
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
   }
 
   .livemed-badge.primary {
-    @apply text-yellow-300;
-    background: rgba(251, 191, 36, 0.2);
-    border-color: rgba(251, 191, 36, 0.4);
+    @apply text-yellow-200;
+    background: rgba(251, 191, 36, 0.3);
+    border-color: rgba(251, 191, 36, 0.5);
   }
 
   .livemed-gradient-text {
@@ -199,14 +199,14 @@
 
   /* Demo Account Styling */
   .livemed-demo-text {
-    @apply text-gray-300 text-sm;
+    @apply text-gray-200 text-sm;
     font-weight: 400;
-    opacity: 0.8;
+    opacity: 0.9;
   }
 
   .livemed-demo-icon {
-    @apply text-gray-400;
-    opacity: 0.7;
+    @apply text-gray-300;
+    opacity: 0.8;
   }
 
   /* Form Styling */
@@ -226,29 +226,29 @@
   /* Modal and Dialog Updates */
   .livemed-modal {
     @apply backdrop-blur-xl border rounded-xl shadow-2xl;
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(96, 140, 190, 0.3);
+    border: 1px solid rgba(96, 140, 190, 0.4);
   }
 
   /* Table Styling */
   .livemed-table-header {
-    background: rgba(59, 130, 246, 0.1);
-    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(96, 140, 190, 0.2);
+    border-bottom: 1px solid rgba(96, 140, 190, 0.4);
   }
 
   .livemed-table-row {
     @apply border-b transition-colors duration-200;
-    border-color: rgba(59, 130, 246, 0.2);
+    border-color: rgba(96, 140, 190, 0.3);
   }
 
   .livemed-table-row:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(96, 140, 190, 0.2);
   }
 
   /* Tab Styling */
   .livemed-tabs-list {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(96, 140, 190, 0.2);
+    border: 1px solid rgba(96, 140, 190, 0.3);
   }
 
   .livemed-tab-trigger {
@@ -256,15 +256,15 @@
   }
 
   .livemed-tab-trigger[data-state="active"] {
-    background: rgba(251, 191, 36, 0.2);
+    background: rgba(251, 191, 36, 0.3);
     color: #fbbf24;
   }
 
   /* Dropdown and Select Styling */
   .livemed-select-content {
     @apply backdrop-blur-xl border rounded-lg shadow-2xl;
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(96, 140, 190, 0.3);
+    border: 1px solid rgba(96, 140, 190, 0.4);
   }
 
   .livemed-select-item {
@@ -272,7 +272,7 @@
   }
 
   .livemed-select-item:hover {
-    background: rgba(251, 191, 36, 0.2);
+    background: rgba(251, 191, 36, 0.3);
   }
 }
 

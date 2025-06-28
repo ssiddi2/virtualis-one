@@ -64,15 +64,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Livemed Brand Colors
+				// Livemed Brand Colors - Light Theme
 				livemed: {
-					'blue-deep': '#1e3a8a',
-					'blue-medium': '#312e81', 
-					'blue-light': '#3b82f6',
+					'blue-light': '#4a6fa5',
+					'blue-medium': '#6b8db5', 
+					'blue-accent': '#5a7fb0',
 					'yellow': '#fbbf24',
 					'orange': '#f97316',
-					'glass': 'rgba(59, 130, 246, 0.1)',
-					'glass-border': 'rgba(59, 130, 246, 0.2)',
+					'glass': 'rgba(96, 140, 190, 0.2)',
+					'glass-border': 'rgba(96, 140, 190, 0.4)',
 				}
 			},
 			fontFamily: {
