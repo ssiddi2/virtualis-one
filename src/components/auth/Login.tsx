@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, Shield, Lock, Zap, Eye, Building2 } from "lucide-react";
+import { User, Lock, Shield } from "lucide-react";
 
 interface LoginProps {
   onLogin: (email: string, password: string, role: string) => void;
@@ -14,9 +15,7 @@ const Login = ({ onLogin }: LoginProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [stayLoggedIn, setStayLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +37,7 @@ const Login = ({ onLogin }: LoginProps) => {
       onLogin(email, password, role);
       toast({
         title: "Access Granted",
-        description: `Welcome to Universal EMR`,
+        description: `Welcome to Livemed Financials`,
       });
     } catch (error) {
       toast({
@@ -52,150 +51,115 @@ const Login = ({ onLogin }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a1628] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-virtualis-gold/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-virtualis-gold/5 rounded-full blur-2xl animate-float" style={{animationDelay: '2s'}}></div>
-      </div>
-
-      <div className="w-full max-w-5xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        {/* Left Side - Logo and Info */}
-        <div className="text-center lg:text-left space-y-8">
-          <div className="flex items-center justify-center lg:justify-start mb-8">
-            <div className="relative">
-              <img 
-                src="/lovable-uploads/2fea59fe-0e40-4076-8aa6-9578a98e3170.png" 
-                alt="Universal EMR" 
-                className="h-80 w-80 animate-float pulse-glow rounded-xl"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-6">
-            <h1 className="text-4xl font-bold gradient-text tech-font">
-              Universal EMR
-            </h1>
-            <p className="text-white/90 font-medium text-xl tech-font">
-              AI-Powered Clinical Platform
-            </p>
-            <p className="text-white/70 text-lg tech-font max-w-2xl">
-              Advanced Healthcare Management System
-            </p>
-          </div>
-
-          {/* Simple Feature Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-            <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
-              <Building2 className="h-8 w-8 text-virtualis-gold mx-auto mb-3" />
-              <h3 className="text-white font-semibold tech-font mb-2">Multi-Facility Access</h3>
-            </div>
-            <div className="glass-card p-6 text-center hover:scale-105 transition-all duration-300">
-              <Brain className="h-8 w-8 text-virtualis-gold mx-auto mb-3 pulse-glow" />
-              <h3 className="text-white font-semibold tech-font mb-2">Clinical AI Assistant</h3>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side - Login Form */}
-        <div className="floating-glass p-8 scan-line max-w-md mx-auto w-full">
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="w-full max-w-md relative z-10">
+        {/* Main Login Card */}
+        <div className="livemed-card p-8">
+          {/* Logo and Header */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Shield className="h-6 w-6 text-virtualis-gold" />
-              <h2 className="text-2xl font-bold text-white tech-font">Clinical Access Portal</h2>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-xl flex items-center justify-center livemed-button animate-pulse-glow">
+              <Shield className="h-8 w-8 text-white" />
             </div>
-            <p className="text-white/70 text-sm tech-font">
-              Licensed Healthcare Professionals Only
+            <h1 className="text-2xl font-bold text-white livemed-font-bold mb-2">
+              Livemed Financials
+            </h1>
+            <p className="text-gray-300 livemed-font">
+              Secure Healthcare Portal
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/90 font-medium tech-font">Professional Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="physician@hospital.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="glass-input tech-font h-12"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/90 font-medium tech-font">Password</Label>
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="livemed-form-container">
+            <div className="livemed-form-group">
+              <Label htmlFor="email" className="livemed-label">Email</Label>
               <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="glass-input tech-font h-12 pr-12"
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="livemed-input pl-10 h-12"
                   required
                 />
-                <Button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-0 h-auto bg-transparent hover:bg-transparent"
-                >
-                  <Eye className="h-4 w-4 text-white/60 hover:text-white/80" />
-                </Button>
+              </div>
+            </div>
+            
+            <div className="livemed-form-group">
+              <Label htmlFor="password" className="livemed-label">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="livemed-input pl-10 h-12"
+                  required
+                />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="role" className="text-white/90 font-medium tech-font">Role</Label>
+            <div className="livemed-form-group">
+              <Label htmlFor="role" className="livemed-label">Role</Label>
               <Select value={role} onValueChange={setRole} required>
-                <SelectTrigger className="glass-input tech-font h-12">
+                <SelectTrigger className="livemed-input h-12">
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
-                <SelectContent className="glass-card border-white/20">
-                  <SelectItem value="physician" className="tech-font text-white hover:bg-white/10">Physician</SelectItem>
-                  <SelectItem value="nurse" className="tech-font text-white hover:bg-white/10">Nurse</SelectItem>
-                  <SelectItem value="biller" className="tech-font text-white hover:bg-white/10">Billing Manager</SelectItem>
-                  <SelectItem value="admin" className="tech-font text-white hover:bg-white/10">Administrator</SelectItem>
+                <SelectContent className="livemed-select-content">
+                  <SelectItem value="physician" className="livemed-select-item">Physician</SelectItem>
+                  <SelectItem value="nurse" className="livemed-select-item">Nurse</SelectItem>
+                  <SelectItem value="biller" className="livemed-select-item">Billing Manager</SelectItem>
+                  <SelectItem value="admin" className="livemed-select-item">Administrator</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center space-x-3 pt-2">
-              <input
-                type="checkbox"
-                id="stayLoggedIn"
-                checked={stayLoggedIn}
-                onChange={(e) => setStayLoggedIn(e.target.checked)}
-                className="w-4 h-4 text-virtualis-gold bg-white/10 border-white/30 rounded focus:ring-virtualis-gold focus:ring-2"
-              />
-              <Label htmlFor="stayLoggedIn" className="text-white/80 tech-font">
-                Stay signed in
-              </Label>
-            </div>
-
             <Button 
               type="submit" 
-              className="w-full glass-button h-14 text-lg tech-font mt-8"
+              className="w-full livemed-button h-12 text-base livemed-font-bold mt-6"
               disabled={loading}
             >
               {loading ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Signing In...
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
-                  <Zap className="h-5 w-5" />
-                  Sign In
-                </div>
+                "Sign In"
               )}
             </Button>
           </form>
           
-          <div className="mt-8 text-center">
-            <div className="glass-badge mb-6 inline-flex items-center gap-2">
-              <Lock className="h-3 w-3" />
-              <span className="tech-font text-xs">SECURE • HIPAA COMPLIANT</span>
+          {/* Registration Link */}
+          <div className="mt-6 text-center">
+            <div className="flex items-center justify-center gap-2 text-gray-300 livemed-demo-text">
+              <User className="h-4 w-4 livemed-demo-icon" />
+              <span>New Physician? Register Here</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Demo Accounts Section */}
+        <div className="mt-8 text-center">
+          <p className="livemed-demo-text mb-4">Demo Accounts:</p>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-3 livemed-demo-text">
+              <Shield className="h-4 w-4 livemed-demo-icon" />
+              <span>Admin Portal (admin@livemed.com)</span>
+            </div>
+            
+            <div className="flex items-center justify-center gap-3 livemed-demo-text">
+              <User className="h-4 w-4 livemed-demo-icon" />
+              <span>CEO Dashboard (ceo@livemed.com)</span>
+            </div>
+            
+            <div className="flex items-center justify-center gap-3 livemed-demo-text">
+              <User className="h-4 w-4 livemed-demo-icon" />
+              <span>Dr. Sarah Johnson (sarah@livemed.com)</span>
             </div>
           </div>
         </div>

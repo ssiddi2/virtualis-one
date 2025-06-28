@@ -26,7 +26,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#0a1628',
+					DEFAULT: '#fbbf24',
 					foreground: '#ffffff'
 				},
 				secondary: {
@@ -34,9 +34,9 @@ export default {
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				accent: {
-					DEFAULT: '#f59e0b',
+					DEFAULT: '#fbbf24',
 					foreground: '#ffffff',
-					hover: '#d97706'
+					hover: '#f59e0b'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -64,21 +64,20 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Virtualis One™ Exact Brand Colors
-				virtualis: {
-					navy: '#0a1628',
-					'deep-navy': '#0f2337',
-					gold: '#f59e0b',
-					'gold-light': '#fbbf24',
-					'gold-dark': '#d97706',
-					glass: 'rgba(255, 255, 255, 0.1)',
-					'glass-border': 'rgba(255, 255, 255, 0.2)',
+				// Livemed Brand Colors
+				livemed: {
+					'blue-deep': '#1e3a8a',
+					'blue-medium': '#312e81', 
+					'blue-light': '#3b82f6',
+					'yellow': '#fbbf24',
+					'orange': '#f97316',
+					'glass': 'rgba(59, 130, 246, 0.1)',
+					'glass-border': 'rgba(59, 130, 246, 0.2)',
 				}
 			},
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
-				tech: ['Inter', 'system-ui', 'sans-serif'],
-				brand: ['Inter', 'system-ui', 'sans-serif'],
+				livemed: ['Inter', 'system-ui', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -104,18 +103,10 @@ export default {
 				},
 				'pulse-glow': {
 					'0%, 100%': {
-						boxShadow: '0 0 20px rgba(245, 158, 11, 0.4)'
+						boxShadow: '0 0 20px rgba(251, 191, 36, 0.4)'
 					},
 					'50%': {
-						boxShadow: '0 0 30px rgba(245, 158, 11, 0.8), 0 0 60px rgba(245, 158, 11, 0.3)'
-					}
-				},
-				'scan': {
-					'0%': {
-						left: '-100%'
-					},
-					'100%': {
-						left: '100%'
+						boxShadow: '0 0 30px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.3)'
 					}
 				},
 				'float': {
@@ -131,7 +122,6 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-glow': 'pulse-glow 2s ease-in-out infinite alternate',
-				'scan': 'scan 3s linear infinite',
 				'float': 'float 6s ease-in-out infinite'
 			},
 			backdropBlur: {
