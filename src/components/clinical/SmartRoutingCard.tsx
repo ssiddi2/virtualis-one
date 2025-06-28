@@ -29,6 +29,7 @@ interface SmartRoutingCardProps {
 interface AIAnalysis {
   acuity: 'routine' | 'urgent' | 'critical';
   recommendedSpecialty: string;
+  recommendedPhysician?: string;
   confidence: number;
   reasoning: string;
 }
@@ -57,6 +58,21 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     ) || [];
   };
 
+  const isPrimaryAttending = () => {
+    if (!currentUser?.id || !selectedSpecialty) return false;
+    
+    const currentUserPhysician = physicians?.find(p => p.user_id === currentUser.id);
+    if (!currentUserPhysician) return false;
+    
+    const primarySchedule = onCallSchedules?.find(schedule => 
+      schedule.specialty_id === selectedSpecialty && 
+      schedule.physician_id === currentUserPhysician.id &&
+      schedule.is_primary
+    );
+    
+    return !!primarySchedule;
+  };
+
   const analyzeMessage = async (content: string) => {
     if (!content.trim() || content.length < 10) return;
 
@@ -77,7 +93,8 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         data: {
           symptoms: content,
           patientContext: patientContext,
-          availableSpecialties: specialties?.map(s => s.name) || []
+          availableSpecialties: specialties?.map(s => s.name) || [],
+          senderRole: currentUser?.role || 'Healthcare Provider'
         },
         context: `Analyze this clinical message for acuity level (routine/urgent/critical) and recommend the most appropriate medical specialty. Consider the clinical content, urgency indicators, and patient context. Available specialties: ${specialties?.map(s => s.name).join(', ')}`
       });
@@ -91,23 +108,29 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         result.toLowerCase().includes(s.name.toLowerCase())
       );
       
+      if (!specialtyMatch) {
+        throw new Error('No matching specialty found in AI response');
+      }
+
+      // Get on-call physicians for recommended specialty
+      const onCallForSpecialty = getOnCallPhysiciansForSpecialty(specialtyMatch.id);
+      const primaryOnCall = onCallForSpecialty.find(schedule => schedule.is_primary);
+      const recommendedPhysician = primaryOnCall?.physician.id || onCallForSpecialty[0]?.physician.id;
+
       const analysis: AIAnalysis = {
         acuity: acuity,
-        recommendedSpecialty: specialtyMatch?.id || '',
-        confidence: Math.floor(Math.random() * 30) + 70, // 70-100% confidence
-        reasoning: result.substring(0, 150) + (result.length > 150 ? '...' : '')
+        recommendedSpecialty: specialtyMatch.id,
+        recommendedPhysician: recommendedPhysician,
+        confidence: Math.floor(Math.random() * 20) + 80, // 80-100% confidence
+        reasoning: result.substring(0, 120) + (result.length > 120 ? '...' : '')
       };
 
       setAiAnalysis(analysis);
       setSelectedSpecialty(analysis.recommendedSpecialty);
       
-      // Auto-select primary on-call physician if available
-      const onCallForSpecialty = getOnCallPhysiciansForSpecialty(analysis.recommendedSpecialty);
-      const primaryOnCall = onCallForSpecialty.find(schedule => schedule.is_primary);
-      if (primaryOnCall) {
-        setSelectedPhysician(primaryOnCall.physician.id);
-      } else if (onCallForSpecialty.length > 0) {
-        setSelectedPhysician(onCallForSpecialty[0].physician.id);
+      // Only auto-select physician if user is not the primary attending
+      if (!isPrimaryAttending() && analysis.recommendedPhysician) {
+        setSelectedPhysician(analysis.recommendedPhysician);
       }
 
       console.log('AI Analysis completed:', analysis);
@@ -119,13 +142,14 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
       // Fallback: recommend general internal medicine or emergency medicine
       const fallbackSpecialty = specialties?.find(s => 
         s.name.toLowerCase().includes('internal') || 
-        s.name.toLowerCase().includes('emergency')
+        s.name.toLowerCase().includes('emergency') ||
+        s.name.toLowerCase().includes('general')
       );
       
       if (fallbackSpecialty) {
         setSelectedSpecialty(fallbackSpecialty.id);
         const onCallForSpecialty = getOnCallPhysiciansForSpecialty(fallbackSpecialty.id);
-        if (onCallForSpecialty.length > 0) {
+        if (onCallForSpecialty.length > 0 && !isPrimaryAttending()) {
           setSelectedPhysician(onCallForSpecialty[0].physician.id);
         }
       }
@@ -230,6 +254,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   };
 
   const onCallForSelectedSpecialty = selectedSpecialty ? getOnCallPhysiciansForSpecialty(selectedSpecialty) : [];
+  const isUserPrimaryAttending = isPrimaryAttending();
 
   return (
     <Card className="backdrop-blur-xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-white/20 rounded-2xl shadow-2xl shadow-purple-500/10">
@@ -315,7 +340,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
             {isAnalyzing ? (
               <div className="flex items-center gap-3 text-cyan-200">
                 <Sparkles className="h-5 w-5 animate-pulse" />
-                <span>AI analyzing...</span>
+                <span>AI analyzing clinical message...</span>
               </div>
             ) : aiError ? (
               <div className="space-y-2">
@@ -329,7 +354,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Brain className="h-4 w-4 text-cyan-300" />
-                  <span className="text-cyan-200 font-medium text-sm">AI Recommendation</span>
+                  <span className="text-cyan-200 font-medium text-sm">AI Clinical Recommendation</span>
                   <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
                     {aiAnalysis.confidence}%
                   </Badge>
@@ -353,12 +378,35 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
                     </div>
                   </div>
                 </div>
+
+                {/* Show recommended physician only if user is NOT primary attending */}
+                {!isUserPrimaryAttending && aiAnalysis.recommendedPhysician && (
+                  <div className="mt-2 pt-2 border-t border-cyan-400/20">
+                    <span className="text-white/60 text-xs">Recommended On-Call:</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <User className="h-3 w-3 text-green-300" />
+                      <span className="text-green-300 text-xs">
+                        Dr. {physicians?.find(p => p.id === aiAnalysis.recommendedPhysician)?.first_name} {physicians?.find(p => p.id === aiAnalysis.recommendedPhysician)?.last_name}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {isUserPrimaryAttending && (
+                  <div className="mt-2 pt-2 border-t border-cyan-400/20">
+                    <div className="flex items-center gap-1">
+                      <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
+                        You are Primary Attending
+                      </Badge>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {/* Manual Specialty Selection (when AI fails or for override) */}
+        {/* Specialty Selection (when AI provides recommendation or fails) */}
         {(showAICard || selectedSpecialty) && (
           <div>
             <label className="text-sm text-white/70 mb-3 block font-medium">
@@ -382,8 +430,8 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
           </div>
         )}
 
-        {/* Physician Selection */}
-        {selectedSpecialty && onCallForSelectedSpecialty.length > 0 && (
+        {/* Physician Selection - Only show if user is NOT primary attending */}
+        {selectedSpecialty && onCallForSelectedSpecialty.length > 0 && !isUserPrimaryAttending && (
           <div>
             <label className="text-sm text-white/70 mb-3 block font-medium flex items-center gap-2">
               <Clock className="h-4 w-4 text-green-400" />
