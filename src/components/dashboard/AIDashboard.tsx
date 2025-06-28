@@ -45,7 +45,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-6">
           <Brain className="h-12 w-12 text-white animate-pulse" />
-          <div>
+          <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg p-6">
             <h1 className="text-4xl font-bold text-white">
               AI Healthcare Assistant
             </h1>
@@ -56,20 +56,20 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         </div>
         
         <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
             <Brain className="h-3 w-3 mr-1" />
             GPT-4 Powered
           </Badge>
-          <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
             <Shield className="h-3 w-3 mr-1" />
             HIPAA Compliant
           </Badge>
-          <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
           {selectedHospital && (
-            <Badge className="backdrop-blur-sm bg-white/10 text-white border border-white/20">
+            <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
               {selectedHospital.emr_type} Integration
             </Badge>
           )}
@@ -79,23 +79,23 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
-          <TabsTrigger value="workflow" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="workflow" className="text-white data-[state=active]:bg-blue-600/30">
             <Workflow className="h-4 w-4 mr-2" />
             Workflow Demo
           </TabsTrigger>
-          <TabsTrigger value="insights" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="insights" className="text-white data-[state=active]:bg-blue-600/30">
             <Brain className="h-4 w-4 mr-2" />
             AI Insights
           </TabsTrigger>
-          <TabsTrigger value="clinical" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="clinical" className="text-white data-[state=active]:bg-blue-600/30">
             <Stethoscope className="h-4 w-4 mr-2" />
             Clinical AI
           </TabsTrigger>
-          <TabsTrigger value="coding" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="coding" className="text-white data-[state=active]:bg-blue-600/30">
             <Code className="h-4 w-4 mr-2" />
             Coding & Billing
           </TabsTrigger>
-          <TabsTrigger value="tools" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="tools" className="text-white data-[state=active]:bg-blue-600/30">
             <Activity className="h-4 w-4 mr-2" />
             AI Tools
           </TabsTrigger>
@@ -214,7 +214,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg badge-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Quality Metrics</CardTitle>
               </CardHeader>
