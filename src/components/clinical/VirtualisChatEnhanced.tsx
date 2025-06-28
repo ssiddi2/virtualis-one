@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -557,7 +556,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                             <div className="flex flex-wrap gap-1 mb-1">
                               {message.aiAnalysis.keywords.map((keyword, idx) => (
                                 <Badge key={idx} className="bg-purple-600/20 text-purple-200 text-xs">
-                     {keyword}
+                                  {keyword}
                                 </Badge>
                               ))}
                             </div>
@@ -615,7 +614,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                       <SelectValue placeholder="Choose patient for context..." />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
-                      <SelectItem value="">No specific patient</SelectItem>
+                      <SelectItem value="no-patient">No specific patient</SelectItem>
                       {patients?.map((patient) => (
                         <SelectItem key={patient.id} value={patient.id}>
                           {patient.first_name} {patient.last_name} - {patient.mrn}
@@ -624,7 +623,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                       ))}
                     </SelectContent>
                   </Select>
-                  {selectedPatient && (
+                  {selectedPatient && selectedPatient !== "no-patient" && (
                     <p className="text-xs text-white/60 mt-1">
                       Patient context will help AI provide better specialty recommendations
                     </p>
@@ -659,7 +658,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
             </Card>
 
             {/* AI Routing Preview */}
-            {selectedPatient && patients && (
+            {selectedPatient && selectedPatient !== "no-patient" && patients && (
               <Card className="backdrop-blur-xl bg-purple-500/20 border border-purple-300/30 rounded-xl shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-white text-sm flex items-center gap-2">
