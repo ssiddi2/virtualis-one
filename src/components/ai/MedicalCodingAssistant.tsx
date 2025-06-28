@@ -55,7 +55,7 @@ const MedicalCodingAssistant = () => {
         <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
-              <Code className="h-5 w-5 text-green-400" />
+              <Code className="h-5 w-5 text-blue-400" />
               AI Medical Coding Assistant
             </CardTitle>
           </CardHeader>
@@ -74,7 +74,7 @@ const MedicalCodingAssistant = () => {
             <Button
               onClick={getCodingSuggestions}
               disabled={isLoading || !documentation.trim()}
-              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isLoading ? (
                 <>

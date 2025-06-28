@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,7 +82,7 @@ const LISDashboard = () => {
                   <p className="text-sm text-white/70">Pending Tests</p>
                   <p className="text-2xl font-bold text-white">23</p>
                 </div>
-                <Clock className="h-8 w-8 text-yellow-300" />
+                <Clock className="h-8 w-8 text-blue-300" />
               </div>
             </CardContent>
           </Card>
@@ -188,7 +189,7 @@ const LISDashboard = () => {
                       <div className="text-xs text-white/70">Avg. TAT</div>
                     </div>
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <TrendingUp className="h-4 w-4 mr-2" />
                     View Detailed Analytics
                   </Button>

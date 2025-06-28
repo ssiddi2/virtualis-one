@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,20 +55,20 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         </div>
         
         <div className="flex items-center justify-center gap-4">
-          <Badge className="virtualis-badge success">
+          <Badge className="bg-green-500/20 text-green-200 border border-green-400/30">
             <Brain className="h-3 w-3 mr-1" />
             GPT-4 Powered
           </Badge>
-          <Badge className="virtualis-badge primary">
+          <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30">
             <Shield className="h-3 w-3 mr-1" />
             HIPAA Compliant
           </Badge>
-          <Badge className="virtualis-badge warning">
+          <Badge className="bg-purple-500/20 text-purple-200 border border-purple-400/30">
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
           {selectedHospital && (
-            <Badge className="virtualis-badge">
+            <Badge className="bg-sky-500/20 text-sky-200 border border-sky-400/30">
               {selectedHospital.emr_type} Integration
             </Badge>
           )}
@@ -78,7 +77,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 virtualis-card">
+        <TabsList className="grid w-full grid-cols-5 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
           <TabsTrigger value="workflow" className="text-white data-[state=active]:bg-white/20">
             <Workflow className="h-4 w-4 mr-2" />
             Workflow Demo
@@ -115,7 +114,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="clinical" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <DiagnosisSupport />
-            <Card className="virtualis-card">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <FileText className="h-5 w-5 text-sky-300" />
@@ -135,7 +134,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full virtualis-button">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                   <Brain className="h-4 w-4 mr-2" />
                   Access Clinical AI Tools
                 </Button>
