@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,10 +61,10 @@ const LISDashboard = () => {
     }}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center justify-center gap-3 mb-6">
             <TestTube className="h-12 w-12 text-sky-300 animate-pulse" />
-            <div>
+            <div className="text-center">
               <h1 className="text-4xl font-bold text-white">
                 Laboratory Information System
               </h1>

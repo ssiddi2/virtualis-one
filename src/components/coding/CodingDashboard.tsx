@@ -168,15 +168,17 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
 
   if (!hospitalId) {
     return (
-      <div className="min-h-screen bg-[#0a1628] p-6 flex items-center justify-center">
-        <Card className="bg-[#1a2332] border-[#2a3441] text-white max-w-md">
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white max-w-md rounded-xl shadow-lg">
           <CardContent className="p-8 text-center">
             <Code className="h-16 w-16 text-blue-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Hospital Selected</h3>
             <p className="text-white/70 mb-4">
               Please select a hospital from the EMR Dashboard to view coding data.
             </p>
-            <Button onClick={() => navigate('/emr')} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => navigate('/emr')} className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white">
               Go to EMR Dashboard
             </Button>
           </CardContent>
@@ -188,18 +190,20 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
   const currentHospital = codingEncounters[0]?.hospital || 'Selected Hospital';
 
   return (
-    <div className="min-h-screen bg-[#0a1628] p-6 space-y-6">
+    <div className="min-h-screen p-6 space-y-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white brand-font gradient-text">3M Coding & CDI Platform</h1>
-          <p className="text-white/60 tech-font">{currentHospital} - AI-powered clinical documentation improvement</p>
+          <h1 className="text-3xl font-bold text-white">3M Coding & CDI Platform</h1>
+          <p className="text-white/60">{currentHospital} - AI-powered clinical documentation improvement</p>
         </div>
         <div className="flex gap-3">
-          <Button className="glass-button">
+          <Button className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
             <Download className="h-4 w-4" />
             Export Coding Report
           </Button>
-          <Button className="glass-button">
+          <Button className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
             <Zap className="h-4 w-4" />
             Run 3M Encoder
           </Button>
@@ -208,9 +212,9 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <FileSearch className="h-4 w-4" />
               Total Encounters
             </CardTitle>
@@ -221,9 +225,9 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Pending Coding
             </CardTitle>
@@ -234,9 +238,9 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               Completed Today
             </CardTitle>
@@ -247,9 +251,9 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
               <Brain className="h-4 w-4" />
               CDI Opportunities
             </CardTitle>
@@ -260,9 +264,9 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font">Coding Accuracy</CardTitle>
+            <CardTitle className="text-white text-sm font-medium">Coding Accuracy</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{codingMetrics.codingAccuracy}</div>
@@ -270,9 +274,9 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font">Avg Coding Time</CardTitle>
+            <CardTitle className="text-white text-sm font-medium">Avg Coding Time</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{codingMetrics.avgCodingTime}</div>
@@ -282,11 +286,11 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
       </div>
 
       {/* Main Content */}
-      <Card className="glass-card">
+      <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-white tech-font">Coding Worklist - {currentHospital}</CardTitle>
+              <CardTitle className="text-white">Coding Worklist - {currentHospital}</CardTitle>
               <CardDescription className="text-white/60">Priority-based AI-enhanced encounter coding</CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -295,10 +299,10 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
                 <input 
                   type="text" 
                   placeholder="Search encounters..." 
-                  className="glass-input pl-10 w-64"
+                  className="backdrop-blur-xl bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 pl-10 w-64 px-4 py-3 rounded-xl transition-all duration-200"
                 />
               </div>
-              <Button size="sm" className="glass-button">
+              <Button size="sm" className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
                 <Filter className="h-4 w-4" />
                 Filter
               </Button>
@@ -309,22 +313,22 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
           <Table>
             <TableHeader>
               <TableRow className="border-white/10">
-                <TableHead className="text-virtualis-gold tech-font">Encounter ID</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">Patient</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">MRN</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">Service</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">Admit Date</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">Priority</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">Complexity</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">MS-DRG</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">Status</TableHead>
-                <TableHead className="text-virtualis-gold tech-font">Actions</TableHead>
+                <TableHead className="text-white">Encounter ID</TableHead>
+                <TableHead className="text-white">Patient</TableHead>
+                <TableHead className="text-white">MRN</TableHead>
+                <TableHead className="text-white">Service</TableHead>
+                <TableHead className="text-white">Admit Date</TableHead>
+                <TableHead className="text-white">Priority</TableHead>
+                <TableHead className="text-white">Complexity</TableHead>
+                <TableHead className="text-white">MS-DRG</TableHead>
+                <TableHead className="text-white">Status</TableHead>
+                <TableHead className="text-white">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {codingEncounters.map((encounter) => (
                 <TableRow key={encounter.id} className="border-white/10 hover:bg-white/5">
-                  <TableCell className="text-white tech-font font-medium">{encounter.id}</TableCell>
+                  <TableCell className="text-white font-medium">{encounter.id}</TableCell>
                   <TableCell className="text-white">
                     <Button 
                       variant="link" 
@@ -356,7 +360,7 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
                         size="sm"
                         onClick={() => handleAIMedicalCoding(encounter)}
                         disabled={isLoading}
-                        className="glass-button text-xs"
+                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white text-xs"
                       >
                         <Brain className="h-3 w-3 mr-1" />
                         AI Code
