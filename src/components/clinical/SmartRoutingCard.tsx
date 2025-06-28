@@ -58,19 +58,27 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     ) || [];
   };
 
-  const isPrimaryAttending = () => {
-    if (!currentUser?.id || !selectedSpecialty) return false;
+  const isPrimaryAttending = (specialtyId?: string) => {
+    if (!currentUser?.id || !specialtyId) return false;
     
     const currentUserPhysician = physicians?.find(p => p.user_id === currentUser.id);
     if (!currentUserPhysician) return false;
     
     const primarySchedule = onCallSchedules?.find(schedule => 
-      schedule.specialty_id === selectedSpecialty && 
+      schedule.specialty_id === specialtyId && 
       schedule.physician_id === currentUserPhysician.id &&
       schedule.is_primary
     );
     
     return !!primarySchedule;
+  };
+
+  const getCurrentUserName = () => {
+    if (currentUser?.name) return currentUser.name;
+    if (currentUser?.first_name && currentUser?.last_name) {
+      return `${currentUser.first_name} ${currentUser.last_name}`;
+    }
+    return currentUser?.email?.split('@')[0] || 'Current User';
   };
 
   const analyzeMessage = async (content: string) => {
@@ -129,7 +137,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
       setSelectedSpecialty(analysis.recommendedSpecialty);
       
       // Only auto-select physician if user is not the primary attending
-      if (!isPrimaryAttending() && analysis.recommendedPhysician) {
+      if (!isPrimaryAttending(analysis.recommendedSpecialty) && analysis.recommendedPhysician) {
         setSelectedPhysician(analysis.recommendedPhysician);
       }
 
@@ -138,25 +146,11 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     } catch (error) {
       console.error('AI Analysis failed:', error);
       setAiError(true);
-      
-      // Fallback: recommend general internal medicine or emergency medicine
-      const fallbackSpecialty = specialties?.find(s => 
-        s.name.toLowerCase().includes('internal') || 
-        s.name.toLowerCase().includes('emergency') ||
-        s.name.toLowerCase().includes('general')
-      );
-      
-      if (fallbackSpecialty) {
-        setSelectedSpecialty(fallbackSpecialty.id);
-        const onCallForSpecialty = getOnCallPhysiciansForSpecialty(fallbackSpecialty.id);
-        if (onCallForSpecialty.length > 0 && !isPrimaryAttending()) {
-          setSelectedPhysician(onCallForSpecialty[0].physician.id);
-        }
-      }
+      setAiAnalysis(null);
       
       toast({
         title: "AI Analysis Unavailable",
-        description: "Manual specialty selection enabled. AI service is temporarily unavailable.",
+        description: "Please manually select specialty and physician. AI service is temporarily unavailable.",
         variant: "destructive"
       });
     } finally {
@@ -213,9 +207,9 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
       specialtyId: selectedSpecialty,
       specialtyName: selectedSpecialtyData?.name,
       physicianId: selectedPhysician,
-      physicianName: selectedPhysicianData ? `${selectedPhysicianData.first_name} ${selectedPhysicianData.last_name}` : undefined,
+      physicianName: selectedPhysicianData ? `Dr. ${selectedPhysicianData.first_name} ${selectedPhysicianData.last_name}` : undefined,
       urgency: aiAnalysis?.acuity || 'routine',
-      sender: currentUser?.name || 'Current User',
+      sender: getCurrentUserName(),
       senderRole: currentUser?.role || 'Healthcare Provider',
       messageType: 'consult',
       consultType: consultType,
@@ -254,7 +248,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   };
 
   const onCallForSelectedSpecialty = selectedSpecialty ? getOnCallPhysiciansForSpecialty(selectedSpecialty) : [];
-  const isUserPrimaryAttending = isPrimaryAttending();
+  const isUserPrimaryAttending = isPrimaryAttending(selectedSpecialty);
 
   return (
     <Card className="backdrop-blur-xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-white/20 rounded-2xl shadow-2xl shadow-purple-500/10">
@@ -346,7 +340,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-orange-300" />
-                  <span className="text-orange-200 font-medium text-sm">AI Unavailable - Manual Selection</span>
+                  <span className="text-orange-200 font-medium text-sm">AI Unavailable - Manual Selection Required</span>
                 </div>
                 <p className="text-orange-200/70 text-xs">Please manually select specialty and physician below</p>
               </div>
@@ -354,63 +348,64 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Brain className="h-4 w-4 text-cyan-300" />
-                  <span className="text-cyan-200 font-medium text-sm">AI Clinical Recommendation</span>
+                  <span className="text-cyan-200 font-medium text-sm">AI Recommendation</span>
                   <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
-                    {aiAnalysis.confidence}%
+                    {aiAnalysis.confidence}% confidence
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
+                <div className="space-y-2 text-sm">
+                  {/* Acuity */}
+                  <div className="flex items-center gap-2">
                     <span className="text-white/60 text-xs">Acuity:</span>
-                    <Badge className={`${getAcuityColor(aiAnalysis.acuity)} text-xs ml-2`}>
+                    <Badge className={`${getAcuityColor(aiAnalysis.acuity)} text-xs`}>
                       {aiAnalysis.acuity.toUpperCase()}
                     </Badge>
                   </div>
                   
-                  <div>
+                  {/* Specialty */}
+                  <div className="flex items-center gap-2">
                     <span className="text-white/60 text-xs">Specialty:</span>
-                    <div className="flex items-center gap-1 mt-1">
+                    <div className="flex items-center gap-1">
                       <Stethoscope className="h-3 w-3 text-purple-300" />
-                      <span className="text-purple-300 text-xs">
+                      <span className="text-purple-300 text-xs font-medium">
                         {specialties?.find(s => s.id === aiAnalysis.recommendedSpecialty)?.name || 'General'}
                       </span>
                     </div>
                   </div>
-                </div>
 
-                {/* Show recommended physician only if user is NOT primary attending */}
-                {!isUserPrimaryAttending && aiAnalysis.recommendedPhysician && (
-                  <div className="mt-2 pt-2 border-t border-cyan-400/20">
-                    <span className="text-white/60 text-xs">Recommended On-Call:</span>
-                    <div className="flex items-center gap-1 mt-1">
-                      <User className="h-3 w-3 text-green-300" />
-                      <span className="text-green-300 text-xs">
-                        Dr. {physicians?.find(p => p.id === aiAnalysis.recommendedPhysician)?.first_name} {physicians?.find(p => p.id === aiAnalysis.recommendedPhysician)?.last_name}
-                      </span>
+                  {/* On-Call Physician - Only show if user is NOT primary attending */}
+                  {!isUserPrimaryAttending && aiAnalysis.recommendedPhysician && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/60 text-xs">On-Call:</span>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-green-300" />
+                        <span className="text-green-300 text-xs font-medium">
+                          Dr. {physicians?.find(p => p.id === aiAnalysis.recommendedPhysician)?.first_name} {physicians?.find(p => p.id === aiAnalysis.recommendedPhysician)?.last_name}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {isUserPrimaryAttending && (
-                  <div className="mt-2 pt-2 border-t border-cyan-400/20">
-                    <div className="flex items-center gap-1">
+                  {/* Primary Attending Notice */}
+                  {isUserPrimaryAttending && (
+                    <div className="flex items-center gap-2 pt-2 border-t border-cyan-400/20">
                       <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">
-                        You are Primary Attending
+                        You are Primary Attending for this specialty
                       </Badge>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Specialty Selection (when AI provides recommendation or fails) */}
+        {/* Specialty Selection */}
         {(showAICard || selectedSpecialty) && (
           <div>
             <label className="text-sm text-white/70 mb-3 block font-medium">
-              Specialty {aiError ? '(Manual Selection Required)' : '(AI Selected - Can Override)'}
+              {aiAnalysis ? 'Specialty (AI Selected - Can Override)' : 'Select Specialty'}
             </label>
             <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
               <SelectTrigger className="bg-white/5 border-white/20 text-white backdrop-blur-sm rounded-xl h-12 hover:bg-white/10 transition-all">
@@ -435,11 +430,11 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
           <div>
             <label className="text-sm text-white/70 mb-3 block font-medium flex items-center gap-2">
               <Clock className="h-4 w-4 text-green-400" />
-              On-Call {specialties?.find(s => s.id === selectedSpecialty)?.name}
+              On-Call {specialties?.find(s => s.id === selectedSpecialty)?.name} Physicians
             </label>
             <Select value={selectedPhysician} onValueChange={setSelectedPhysician}>
               <SelectTrigger className="bg-white/5 border-white/20 text-white backdrop-blur-sm rounded-xl h-12 hover:bg-white/10 transition-all">
-                <SelectValue placeholder="Select physician..." />
+                <SelectValue placeholder="Select on-call physician..." />
               </SelectTrigger>
               <SelectContent className="bg-gray-900/95 border-white/20 text-white backdrop-blur-xl rounded-xl">
                 {onCallForSelectedSpecialty.map((schedule) => (
@@ -447,7 +442,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        Dr. {schedule.physician.first_name} {schedule.physician.last_name}
+                        <span>Dr. {schedule.physician.first_name} {schedule.physician.last_name}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {schedule.is_primary && (
