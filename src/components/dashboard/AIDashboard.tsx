@@ -49,7 +49,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
             <h1 className="text-4xl font-bold text-white">
               AI Healthcare Assistant
             </h1>
-            <p className="text-white/80 text-lg">
+            <p className="text-white text-lg">
               {selectedHospital ? `${selectedHospital.name} - Clinical AI Intelligence` : 'Advanced Documentation and Decision Support Platform'}
             </p>
           </div>
@@ -123,7 +123,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-white/70">
+                <p className="text-white">
                   Generate comprehensive SOAP notes, discharge summaries, and clinical documentation using AI.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
@@ -131,7 +131,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                     <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                       <feature.icon className="h-5 w-5 text-white mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
-                      <p className="text-white/60 text-xs">{feature.description}</p>
+                      <p className="text-white text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
@@ -155,7 +155,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-white/70">
+                <p className="text-white">
                   Optimize coding accuracy and maximize reimbursement with AI-powered analysis.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
@@ -163,7 +163,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                     <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                       <feature.icon className="h-5 w-5 text-white mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
-                      <p className="text-white/60 text-xs">{feature.description}</p>
+                      <p className="text-white text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
@@ -186,7 +186,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-white text-2xl font-bold">98.7%</div>
-                    <div className="text-white/70 text-sm">Accuracy Rate</div>
+                    <div className="text-white text-sm">Accuracy Rate</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Brain className="h-4 w-4 mr-2" />
@@ -204,7 +204,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-white text-2xl font-bold">23</div>
-                    <div className="text-white/70 text-sm">Alerts Today</div>
+                    <div className="text-white text-sm">Alerts Today</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Shield className="h-4 w-4 mr-2" />
@@ -214,7 +214,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg badge-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Quality Metrics</CardTitle>
               </CardHeader>
@@ -222,7 +222,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-white text-2xl font-bold">94%</div>
-                    <div className="text-white/70 text-sm">Compliance Score</div>
+                    <div className="text-white text-sm">Compliance Score</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Activity className="h-4 w-4 mr-2" />
