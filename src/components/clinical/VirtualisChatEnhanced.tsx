@@ -16,7 +16,8 @@ import {
   Phone,
   ArrowRight,
   Reply,
-  Zap
+  Zap,
+  Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
@@ -45,6 +46,8 @@ interface Message {
     suggestedActions: string[];
     recommendedSpecialty?: string;
     acuity: 'critical' | 'urgent' | 'routine';
+    confidence?: number;
+    reasoning?: string;
   };
 }
 
@@ -54,7 +57,6 @@ interface VirtualisChatEnhancedProps {
 
 const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
   const { toast } = useToast();
-  const { callAI, isLoading: aiLoading } = useAIAssistant();
   const { mutate: createConsultationRequest } = useCreateConsultationRequest();
   
   // Get hospital ID from URL or current user context
@@ -101,7 +103,9 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
           keywords: ['respiratory distress', 'low oxygen saturation', 'emergency'],
           suggestedActions: ['Immediate O2 therapy', 'Chest X-ray', 'Pulmonology consult'],
           recommendedSpecialty: 'Pulmonology',
-          acuity: 'critical'
+          acuity: 'critical',
+          confidence: 92,
+          reasoning: 'Critical respiratory compromise with hypoxemia requires immediate pulmonology intervention'
         }
       },
       {
@@ -120,7 +124,9 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
           keywords: ['post-operative', 'surgical site pain', 'high pain score'],
           suggestedActions: ['Pain assessment', 'Wound inspection', 'Surgeon notification'],
           recommendedSpecialty: 'Surgery',
-          acuity: 'urgent'
+          acuity: 'urgent',
+          confidence: 85,
+          reasoning: 'High post-operative pain requires urgent surgical evaluation to rule out complications'
         }
       },
       {
@@ -136,7 +142,9 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
           priority: 100,
           keywords: ['STAT', 'emergency surgery', 'OR'],
           suggestedActions: ['Immediate response required'],
-          acuity: 'critical'
+          acuity: 'critical',
+          confidence: 100,
+          reasoning: 'STAT page for emergency surgery requires immediate response'
         }
       }
     ];
@@ -174,14 +182,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
   };
 
   const handleSmartRoutingMessage = async (messageData: any) => {
-    // AI analysis for the new message
-    const aiAnalysis = await analyzeMessageWithAI(messageData.content, messageData.patientId);
-
-    // Determine acuity based on message type
-    let acuity = messageData.urgency;
-    if (messageData.isPriorityPage) {
-      acuity = 'urgent'; // Pages are always at least urgent
-    }
+    console.log('Received smart routing message:', messageData);
 
     const message: Message = {
       id: Date.now().toString(),
@@ -189,7 +190,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
       sender: messageData.sender,
       senderRole: messageData.senderRole,
       timestamp: new Date(),
-      acuity: acuity,
+      acuity: messageData.urgency,
       patientId: messageData.patientId,
       patientName: messageData.patientName,
       recommendedSpecialty: messageData.specialtyName,
@@ -197,11 +198,15 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
       isPriorityPage: messageData.isPriorityPage,
       consultType: messageData.consultType,
       replies: [],
-      aiAnalysis: {
-        ...aiAnalysis,
-        priority: messageData.isPriorityPage ? 100 : aiAnalysis.priority,
-        acuity: acuity
-      }
+      aiAnalysis: messageData.aiAnalysis ? {
+        priority: messageData.isPriorityPage ? 100 : (messageData.aiAnalysis.confidence || 75),
+        keywords: messageData.aiAnalysis.keywords || [],
+        suggestedActions: ['Review and respond'],
+        recommendedSpecialty: messageData.specialtyName,
+        acuity: messageData.urgency,
+        confidence: messageData.aiAnalysis.confidence,
+        reasoning: messageData.aiAnalysis.reasoning
+      } : undefined
     };
 
     setMessages(prev => [message, ...prev]);
@@ -245,42 +250,6 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
     setReplyToMessage('');
   };
 
-  const analyzeMessageWithAI = async (content: string, patientId?: string) => {
-    try {
-      const selectedPatientData = patients?.find(p => p.id === patientId);
-      const patientContext = selectedPatientData ? 
-        `Patient: ${selectedPatientData.first_name} ${selectedPatientData.last_name}, Age: ${selectedPatientData.date_of_birth}, Medical Conditions: ${selectedPatientData.medical_conditions?.join(', ') || 'None'}, Allergies: ${selectedPatientData.allergies?.join(', ') || 'None'}` : '';
-
-      const result = await callAI({
-        type: 'triage_assessment',
-        data: {
-          symptoms: content,
-          patientContext: patientContext
-        },
-        context: `Healthcare communication triage and specialty recommendation.`
-      });
-
-      const priority = Math.min(Math.max(Math.floor(Math.random() * 40) + 30, 30), 100);
-      const acuity = priority > 80 ? 'critical' : priority > 50 ? 'urgent' : 'routine';
-      
-      return {
-        priority: priority,
-        keywords: content.toLowerCase().split(' ').filter(word => word.length > 3).slice(0, 3),
-        suggestedActions: ['Review and respond'],
-        recommendedSpecialty: 'Internal Medicine',
-        acuity: acuity as 'critical' | 'urgent' | 'routine'
-      };
-    } catch (error) {
-      console.error('AI analysis failed:', error);
-      return {
-        priority: 50,
-        keywords: ['clinical message'],
-        suggestedActions: ['Review and respond'],
-        acuity: 'routine' as 'critical' | 'urgent' | 'routine'
-      };
-    }
-  };
-
   // Filter and sort messages with priority page handling
   const filteredMessages = messages.filter(msg => {
     switch (activeFilter) {
@@ -305,31 +274,29 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
   });
 
   return (
-    <div className="min-h-screen p-6" style={{
-      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-    }}>
+    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 backdrop-blur-sm bg-blue-600/30 rounded-lg border border-blue-400/30">
-                <Brain className="h-6 w-6 text-white" />
+              <div className="p-3 bg-gradient-to-r from-purple-500/30 to-blue-500/30 rounded-xl backdrop-blur-sm border border-white/20">
+                <Brain className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Virtualis Chat</h1>
-                <p className="text-white/70">AI-Powered Clinical Communication with Smart Routing</p>
+                <h1 className="text-4xl font-bold text-white">Virtualis Chat</h1>
+                <p className="text-white/70 text-lg">AI-Powered Clinical Communication</p>
               </div>
             </div>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Priority Pages</p>
+                    <p className="text-sm text-orange-200/70">Priority Pages</p>
                     <p className="text-2xl font-bold text-white">
                       {messages.filter(m => m.isPriorityPage).length}
                     </p>
@@ -339,11 +306,11 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Critical Messages</p>
+                    <p className="text-sm text-red-200/70">Critical Messages</p>
                     <p className="text-2xl font-bold text-white">
                       {messages.filter(m => m.acuity === 'critical').length}
                     </p>
@@ -353,25 +320,25 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Urgent Messages</p>
+                    <p className="text-sm text-yellow-200/70">Urgent Messages</p>
                     <p className="text-2xl font-bold text-white">
                       {messages.filter(m => m.acuity === 'urgent').length}
                     </p>
                   </div>
-                  <Clock className="h-8 w-8 text-orange-300" />
+                  <Clock className="h-8 w-8 text-yellow-300" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Active Threads</p>
+                    <p className="text-sm text-blue-200/70">Active Threads</p>
                     <p className="text-2xl font-bold text-white">
                       {messages.filter(m => m.replies && m.replies.length > 0).length}
                     </p>
@@ -381,16 +348,16 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Avg Priority</p>
+                    <p className="text-sm text-cyan-200/70">AI Confidence</p>
                     <p className="text-2xl font-bold text-white">
-                      {Math.round(messages.reduce((acc, m) => acc + (m.aiAnalysis?.priority || 0), 0) / messages.length) || 0}
+                      {Math.round(messages.reduce((acc, m) => acc + (m.aiAnalysis?.confidence || 0), 0) / messages.length) || 0}%
                     </p>
                   </div>
-                  <Star className="h-8 w-8 text-purple-300" />
+                  <Sparkles className="h-8 w-8 text-cyan-300" />
                 </div>
               </CardContent>
             </Card>
@@ -404,12 +371,12 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                 variant={activeFilter === filter ? "default" : "outline"}
                 onClick={() => setActiveFilter(filter as any)}
                 className={activeFilter === filter 
-                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                  : "bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
+                  ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0" 
+                  : "bg-white/5 border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
                 }
               >
                 {filter.charAt(0).toUpperCase() + filter.slice(1)} Messages
-                <Badge className="ml-2 bg-blue-600/50 text-white">
+                <Badge className="ml-2 bg-white/20 text-white border-0">
                   {filter === 'all' ? messages.length : 
                    filter === 'critical' ? messages.filter(m => m.acuity === 'critical').length :
                    filter === 'urgent' ? messages.filter(m => m.acuity === 'urgent').length :
@@ -423,7 +390,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Messages Feed */}
           <div className="xl:col-span-2">
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg h-[700px] flex flex-col">
+            <Card className="backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-gray-800/50 border border-white/20 rounded-xl shadow-2xl h-[700px] flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Brain className="h-5 w-5 text-blue-300" />
@@ -437,13 +404,14 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                 {filteredMessages.map((message) => (
                   <div
                     key={message.id}
-                    className={`p-4 backdrop-blur-sm border rounded-lg hover:bg-blue-600/30 transition-colors cursor-pointer ${
+                    className={`p-4 backdrop-blur-sm border rounded-xl hover:bg-white/5 transition-all cursor-pointer ${
                       message.isPriorityPage 
-                        ? 'bg-orange-600/30 border-orange-400/40 shadow-lg shadow-orange-500/20' 
-                        : 'bg-blue-600/20 border-blue-400/30'
+                        ? 'bg-gradient-to-r from-orange-600/30 to-red-600/30 border-orange-400/40 shadow-lg shadow-orange-500/20' 
+                        : 'bg-white/5 border-white/20'
                     }`}
                     onClick={() => setSelectedConversation(message)}
                   >
+                    
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
@@ -536,21 +504,23 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                         </Button>
                       </div>
                       {message.aiAnalysis && (
-                        <div className="flex items-center gap-1 text-xs text-purple-300">
-                          <Star className="h-3 w-3" />
-                          <span>Priority: {message.aiAnalysis.priority}/100</span>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Sparkles className="h-3 w-3 text-cyan-300" />
+                          <span className="text-cyan-300">
+                            AI: {message.aiAnalysis.confidence || message.aiAnalysis.priority}%
+                          </span>
                         </div>
                       )}
                     </div>
 
                     {/* Quick Reply */}
                     {replyToMessage === message.id && (
-                      <div className="mt-3 p-3 bg-blue-600/30 border border-blue-400/30 rounded">
+                      <div className="mt-3 p-3 bg-white/5 border border-white/20 rounded-xl">
                         <Textarea
                           value={replyContent[message.id] || ''}
                           onChange={(e) => setReplyContent(prev => ({ ...prev, [message.id]: e.target.value }))}
                           placeholder="Type your reply..."
-                          className="bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 mb-2"
+                          className="bg-white/5 border border-white/20 text-white placeholder:text-white/60 mb-2 resize-none"
                         />
                         <div className="flex gap-2">
                           <Button 
@@ -572,7 +542,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                               setReplyToMessage('');
                             }}
                             variant="outline"
-                            className="border-blue-400/30 text-blue-300 hover:bg-blue-600/20"
+                            className="border-white/20 text-white hover:bg-white/10"
                           >
                             Cancel
                           </Button>
