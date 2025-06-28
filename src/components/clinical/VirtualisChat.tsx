@@ -380,7 +380,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 <div>
                   <label className="text-sm text-white/70 mb-2 block">Message Priority</label>
                   <Select value={messageType} onValueChange={(value: any) => setMessageType(value)}>
-                    <SelectTrigger className="bg-white/10 border border-blue-400/30 text-white">
+                    <SelectTrigger className="bg-blue-600/20 border border-blue-400/30 text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -397,7 +397,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your clinical message here..."
-                    className="bg-white/10 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
+                    className="bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
                   />
                 </div>
 
