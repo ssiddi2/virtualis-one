@@ -13,7 +13,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-[#0a1628] w-full">
+        <div className="min-h-screen w-full" style={{
+          background: 'linear-gradient(135deg, hsl(210, 40%, 65%) 0%, hsl(210, 35%, 75%) 50%, hsl(210, 30%, 70%) 100%)'
+        }}>
           <Toaster />
           <Sonner />
           <BrowserRouter>
