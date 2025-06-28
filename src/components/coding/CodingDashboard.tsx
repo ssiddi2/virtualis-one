@@ -177,7 +177,7 @@ const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
             <p className="text-white/70 mb-4">
               Please select a hospital from the EMR Dashboard to view coding data.
             </p>
-            <Button onClick={() => navigate('/emr')} className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white">
+            <Button onClick={() => navigate('/emr')} className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
               Go to EMR Dashboard
             </Button>
           </CardContent>
