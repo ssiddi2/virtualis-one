@@ -12,7 +12,8 @@ import {
   Stethoscope, 
   Clock,
   UserPlus,
-  Sparkles
+  Sparkles,
+  AlertCircle
 } from "lucide-react";
 import { useSpecialties, useOnCallSchedules, usePhysicians } from "@/hooks/usePhysicians";
 import { usePatients } from "@/hooks/usePatients";
@@ -43,10 +44,12 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   const [messageContent, setMessageContent] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('');
   const [selectedPhysician, setSelectedPhysician] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [consultType, setConsultType] = useState<'new' | 'established'>('new');
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAICard, setShowAICard] = useState(false);
+  const [aiError, setAiError] = useState(false);
 
   const getOnCallPhysiciansForSpecialty = (specialtyId: string) => {
     return onCallSchedules?.filter(schedule => 
@@ -55,10 +58,11 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   };
 
   const analyzeMessage = async (content: string) => {
-    if (!content.trim()) return;
+    if (!content.trim() || content.length < 10) return;
 
     setIsAnalyzing(true);
     setShowAICard(true);
+    setAiError(false);
     
     try {
       const selectedPatientData = patients?.find(p => p.id === selectedPatient);
@@ -95,6 +99,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
       };
 
       setAiAnalysis(analysis);
+      setSelectedSpecialty(analysis.recommendedSpecialty);
       
       // Auto-select primary on-call physician if available
       const onCallForSpecialty = getOnCallPhysiciansForSpecialty(analysis.recommendedSpecialty);
@@ -109,9 +114,25 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
 
     } catch (error) {
       console.error('AI Analysis failed:', error);
+      setAiError(true);
+      
+      // Fallback: recommend general internal medicine or emergency medicine
+      const fallbackSpecialty = specialties?.find(s => 
+        s.name.toLowerCase().includes('internal') || 
+        s.name.toLowerCase().includes('emergency')
+      );
+      
+      if (fallbackSpecialty) {
+        setSelectedSpecialty(fallbackSpecialty.id);
+        const onCallForSpecialty = getOnCallPhysiciansForSpecialty(fallbackSpecialty.id);
+        if (onCallForSpecialty.length > 0) {
+          setSelectedPhysician(onCallForSpecialty[0].physician.id);
+        }
+      }
+      
       toast({
-        title: "AI Analysis Failed",
-        description: "Unable to analyze message. Please try again.",
+        title: "AI Analysis Unavailable",
+        description: "Manual specialty selection enabled. AI service is temporarily unavailable.",
         variant: "destructive"
       });
     } finally {
@@ -126,13 +147,15 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     if (content.trim().length > 10) {
       const timeoutId = setTimeout(() => {
         analyzeMessage(content);
-      }, 1000);
+      }, 1500);
       
       return () => clearTimeout(timeoutId);
     } else {
       setShowAICard(false);
       setAiAnalysis(null);
+      setAiError(false);
       setSelectedPhysician('');
+      setSelectedSpecialty('');
     }
   };
 
@@ -146,24 +169,24 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
       return;
     }
 
-    if (!selectedPhysician) {
+    if (!selectedPhysician && !selectedSpecialty) {
       toast({
-        title: "Physician Required",
-        description: "Please select a physician to send the message to.",
+        title: "Recipient Required",
+        description: "Please select a physician or specialty to send the message to.",
         variant: "destructive"
       });
       return;
     }
 
     const selectedPatientData = patients?.find(p => p.id === selectedPatient);
-    const selectedSpecialtyData = specialties?.find(s => s.id === aiAnalysis?.recommendedSpecialty);
+    const selectedSpecialtyData = specialties?.find(s => s.id === selectedSpecialty);
     const selectedPhysicianData = physicians?.find(p => p.id === selectedPhysician);
 
     const messageData = {
       content: messageContent,
       patientId: selectedPatient !== 'no-patient' ? selectedPatient : undefined,
       patientName: selectedPatientData ? `${selectedPatientData.first_name} ${selectedPatientData.last_name}` : undefined,
-      specialtyId: aiAnalysis?.recommendedSpecialty,
+      specialtyId: selectedSpecialty,
       specialtyName: selectedSpecialtyData?.name,
       physicianId: selectedPhysician,
       physicianName: selectedPhysicianData ? `${selectedPhysicianData.first_name} ${selectedPhysicianData.last_name}` : undefined,
@@ -182,8 +205,10 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     setMessageContent('');
     setSelectedPatient('');
     setSelectedPhysician('');
+    setSelectedSpecialty('');
     setAiAnalysis(null);
     setShowAICard(false);
+    setAiError(false);
 
     const recipientName = selectedPhysicianData 
       ? `Dr. ${selectedPhysicianData.first_name} ${selectedPhysicianData.last_name}` 
@@ -204,7 +229,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     }
   };
 
-  const onCallForRecommendedSpecialty = aiAnalysis ? getOnCallPhysiciansForSpecialty(aiAnalysis.recommendedSpecialty) : [];
+  const onCallForSelectedSpecialty = selectedSpecialty ? getOnCallPhysiciansForSpecialty(selectedSpecialty) : [];
 
   return (
     <Card className="backdrop-blur-xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-white/20 rounded-2xl shadow-2xl shadow-purple-500/10">
@@ -280,13 +305,25 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
           />
         </div>
 
-        {/* AI Analysis Card - compact version */}
+        {/* AI Analysis Card */}
         {showAICard && (
-          <div className="p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/30 rounded-xl backdrop-blur-sm animate-in slide-in-from-top-4 duration-300">
+          <div className={`p-4 border rounded-xl backdrop-blur-sm animate-in slide-in-from-top-4 duration-300 ${
+            aiError 
+              ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30' 
+              : 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-400/30'
+          }`}>
             {isAnalyzing ? (
               <div className="flex items-center gap-3 text-cyan-200">
                 <Sparkles className="h-5 w-5 animate-pulse" />
                 <span>AI analyzing...</span>
+              </div>
+            ) : aiError ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-orange-300" />
+                  <span className="text-orange-200 font-medium text-sm">AI Unavailable - Manual Selection</span>
+                </div>
+                <p className="text-orange-200/70 text-xs">Please manually select specialty and physician below</p>
               </div>
             ) : aiAnalysis && (
               <div className="space-y-3">
@@ -321,19 +358,43 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
           </div>
         )}
 
-        {/* Physician Selection - shows after AI analysis */}
-        {aiAnalysis && onCallForRecommendedSpecialty.length > 0 && (
+        {/* Manual Specialty Selection (when AI fails or for override) */}
+        {(showAICard || selectedSpecialty) && (
+          <div>
+            <label className="text-sm text-white/70 mb-3 block font-medium">
+              Specialty {aiError ? '(Manual Selection Required)' : '(AI Selected - Can Override)'}
+            </label>
+            <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+              <SelectTrigger className="bg-white/5 border-white/20 text-white backdrop-blur-sm rounded-xl h-12 hover:bg-white/10 transition-all">
+                <SelectValue placeholder="Select specialty..." />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900/95 border-white/20 text-white backdrop-blur-xl rounded-xl">
+                {specialties?.map((specialty) => (
+                  <SelectItem key={specialty.id} value={specialty.id} className="hover:bg-white/10 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Stethoscope className="h-4 w-4" />
+                      {specialty.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Physician Selection */}
+        {selectedSpecialty && onCallForSelectedSpecialty.length > 0 && (
           <div>
             <label className="text-sm text-white/70 mb-3 block font-medium flex items-center gap-2">
               <Clock className="h-4 w-4 text-green-400" />
-              Send to On-Call {specialties?.find(s => s.id === aiAnalysis?.recommendedSpecialty)?.name}
+              On-Call {specialties?.find(s => s.id === selectedSpecialty)?.name}
             </label>
             <Select value={selectedPhysician} onValueChange={setSelectedPhysician}>
               <SelectTrigger className="bg-white/5 border-white/20 text-white backdrop-blur-sm rounded-xl h-12 hover:bg-white/10 transition-all">
                 <SelectValue placeholder="Select physician..." />
               </SelectTrigger>
               <SelectContent className="bg-gray-900/95 border-white/20 text-white backdrop-blur-xl rounded-xl">
-                {onCallForRecommendedSpecialty.map((schedule) => (
+                {onCallForSelectedSpecialty.map((schedule) => (
                   <SelectItem key={schedule.physician.id} value={schedule.physician.id} className="hover:bg-white/10 rounded-lg">
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
@@ -357,7 +418,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         {/* Send Button */}
         <Button 
           onClick={handleSend}
-          disabled={!messageContent.trim() || !selectedPhysician || aiLoading}
+          disabled={!messageContent.trim() || (!selectedPhysician && !selectedSpecialty) || aiLoading}
           className="w-full h-12 text-white font-semibold rounded-xl transition-all bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 shadow-lg shadow-purple-500/25"
         >
           <Send className="h-5 w-5 mr-2" />
