@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -274,109 +275,110 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
   });
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 lg:p-6 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="max-w-[2000px] mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 lg:mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-r from-purple-500/30 to-blue-500/30 rounded-xl backdrop-blur-sm border border-white/20">
-                <Brain className="h-8 w-8 text-white" />
+              <div className="p-2 lg:p-3 bg-gradient-to-r from-purple-500/30 to-blue-500/30 rounded-xl backdrop-blur-sm border border-white/20">
+                <Brain className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white">Virtualis Chat</h1>
-                <p className="text-white/70 text-lg">AI-Powered Clinical Communication</p>
+                <h1 className="text-2xl lg:text-4xl font-bold text-white">Virtualis Chat</h1>
+                <p className="text-white/70 text-sm lg:text-lg">AI-Powered Clinical Communication</p>
               </div>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 mb-4 lg:mb-6">
             <Card className="backdrop-blur-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
+              <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-orange-200/70">Priority Pages</p>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-xs lg:text-sm text-orange-200/70">Priority Pages</p>
+                    <p className="text-lg lg:text-2xl font-bold text-white">
                       {messages.filter(m => m.isPriorityPage).length}
                     </p>
                   </div>
-                  <Zap className="h-8 w-8 text-orange-300" />
+                  <Zap className="h-6 w-6 lg:h-8 lg:w-8 text-orange-300" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="backdrop-blur-xl bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
+              <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-red-200/70">Critical Messages</p>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-xs lg:text-sm text-red-200/70">Critical Messages</p>
+                    <p className="text-lg lg:text-2xl font-bold text-white">
                       {messages.filter(m => m.acuity === 'critical').length}
                     </p>
                   </div>
-                  <AlertTriangle className="h-8 w-8 text-red-300" />
+                  <AlertTriangle className="h-6 w-6 lg:h-8 lg:w-8 text-red-300" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="backdrop-blur-xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
+              <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-yellow-200/70">Urgent Messages</p>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-xs lg:text-sm text-yellow-200/70">Urgent Messages</p>
+                    <p className="text-lg lg:text-2xl font-bold text-white">
                       {messages.filter(m => m.acuity === 'urgent').length}
                     </p>
                   </div>
-                  <Clock className="h-8 w-8 text-yellow-300" />
+                  <Clock className="h-6 w-6 lg:h-8 lg:w-8 text-yellow-300" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
+              <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-blue-200/70">Active Threads</p>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-xs lg:text-sm text-blue-200/70">Active Threads</p>
+                    <p className="text-lg lg:text-2xl font-bold text-white">
                       {messages.filter(m => m.replies && m.replies.length > 0).length}
                     </p>
                   </div>
-                  <MessageSquare className="h-8 w-8 text-blue-300" />
+                  <MessageSquare className="h-6 w-6 lg:h-8 lg:w-8 text-blue-300" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="backdrop-blur-xl bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
+              <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-cyan-200/70">AI Confidence</p>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-xs lg:text-sm text-cyan-200/70">AI Confidence</p>
+                    <p className="text-lg lg:text-2xl font-bold text-white">
                       {Math.round(messages.reduce((acc, m) => acc + (m.aiAnalysis?.confidence || 0), 0) / messages.length) || 0}%
                     </p>
                   </div>
-                  <Sparkles className="h-8 w-8 text-cyan-300" />
+                  <Sparkles className="h-6 w-6 lg:h-8 lg:w-8 text-cyan-300" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Filters */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-4 lg:mb-6">
             {['all', 'critical', 'urgent', 'mine'].map((filter) => (
               <Button
                 key={filter}
                 variant={activeFilter === filter ? "default" : "outline"}
                 onClick={() => setActiveFilter(filter as any)}
+                size="sm"
                 className={activeFilter === filter 
                   ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0" 
                   : "bg-white/5 border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
                 }
               >
                 {filter.charAt(0).toUpperCase() + filter.slice(1)} Messages
-                <Badge className="ml-2 bg-white/20 text-white border-0">
+                <Badge className="ml-2 bg-white/20 text-white border-0 text-xs">
                   {filter === 'all' ? messages.length : 
                    filter === 'critical' ? messages.filter(m => m.acuity === 'critical').length :
                    filter === 'urgent' ? messages.filter(m => m.acuity === 'urgent').length :
@@ -387,24 +389,24 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4 lg:gap-6">
           {/* Messages Feed */}
-          <div className="xl:col-span-2">
-            <Card className="backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-gray-800/50 border border-white/20 rounded-xl shadow-2xl h-[700px] flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Brain className="h-5 w-5 text-blue-300" />
+          <div className="xl:col-span-1 2xl:col-span-2 order-2 xl:order-1">
+            <Card className="backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-gray-800/50 border border-white/20 rounded-xl shadow-2xl h-[600px] lg:h-[700px] flex flex-col">
+              <CardHeader className="pb-3 lg:pb-4">
+                <CardTitle className="flex items-center gap-2 text-white text-lg lg:text-xl">
+                  <Brain className="h-4 w-4 lg:h-5 lg:w-5 text-blue-300" />
                   Clinical Communication Feed
                 </CardTitle>
-                <CardDescription className="text-white/70">
+                <CardDescription className="text-white/70 text-sm">
                   Click on messages to view full conversation threads
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto space-y-4">
+              <CardContent className="flex-1 overflow-y-auto space-y-3 lg:space-y-4 px-3 lg:px-6">
                 {filteredMessages.map((message) => (
                   <div
                     key={message.id}
-                    className={`p-4 backdrop-blur-sm border rounded-xl hover:bg-white/5 transition-all cursor-pointer ${
+                    className={`p-3 lg:p-4 backdrop-blur-sm border rounded-xl hover:bg-white/5 transition-all cursor-pointer ${
                       message.isPriorityPage 
                         ? 'bg-gradient-to-r from-orange-600/30 to-red-600/30 border-orange-400/40 shadow-lg shadow-orange-500/20' 
                         : 'bg-white/5 border-white/20'
@@ -412,30 +414,30 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                     onClick={() => setSelectedConversation(message)}
                   >
                     
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                    <div className="flex items-start justify-between mb-2 lg:mb-3">
+                      <div className="flex items-center gap-2 lg:gap-3 flex-1 min-w-0">
+                        <Avatar className="h-6 w-6 lg:h-8 lg:w-8 flex-shrink-0">
                           <AvatarFallback className={`text-white text-xs ${
                             message.isPriorityPage ? 'bg-orange-600' : 'bg-blue-600'
                           }`}>
                             {getInitials(message.sender)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-white">{message.sender}</span>
-                            <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1 lg:gap-2 mb-1 flex-wrap">
+                            <span className="font-medium text-white text-sm lg:text-base truncate">{message.sender}</span>
+                            <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs flex-shrink-0">
                               {message.senderRole}
                             </Badge>
                             {message.isPriorityPage && (
-                              <Badge className="bg-orange-600/40 text-orange-200 border border-orange-400/50 text-xs">
+                              <Badge className="bg-orange-600/40 text-orange-200 border border-orange-400/50 text-xs flex-shrink-0">
                                 <Zap className="h-3 w-3 mr-1" />
-                                PRIORITY PAGE
+                                PRIORITY
                               </Badge>
                             )}
-                            <Badge className={`text-xs ${getAcuityColor(message.acuity)}`}>
+                            <Badge className={`text-xs flex-shrink-0 ${getAcuityColor(message.acuity)}`}>
                               {getAcuityIcon(message.acuity)}
-                              <span className="ml-1">{message.acuity.toUpperCase()}</span>
+                              <span className="ml-1 hidden sm:inline">{message.acuity.toUpperCase()}</span>
                             </Badge>
                           </div>
                           <span className="text-xs text-white/60">
@@ -444,20 +446,20 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                         </div>
                       </div>
                       {message.replies && message.replies.length > 0 && (
-                        <Badge className="bg-purple-600/20 text-purple-200 border border-purple-400/30">
+                        <Badge className="bg-purple-600/20 text-purple-200 border border-purple-400/30 text-xs flex-shrink-0">
                           {message.replies.length} replies
                         </Badge>
                       )}
                     </div>
                     
-                    <p className="text-white/90 mb-3">{message.content}</p>
+                    <p className="text-white/90 mb-2 lg:mb-3 text-sm lg:text-base line-clamp-3">{message.content}</p>
                     
                     {message.patientName && (
-                      <div className="flex items-center gap-2 mb-2 text-sm text-white/70">
-                        <User className="h-3 w-3" />
-                        <span>Patient: {message.patientName}</span>
+                      <div className="flex items-center gap-2 mb-2 text-xs lg:text-sm text-white/70">
+                        <User className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">Patient: {message.patientName}</span>
                         {message.consultType && (
-                          <Badge className="bg-green-600/20 text-green-300 border border-green-400/30 text-xs ml-2">
+                          <Badge className="bg-green-600/20 text-green-300 border border-green-400/30 text-xs ml-2 flex-shrink-0">
                             {message.consultType === 'new' ? 'New Consult' : 'Established Patient'}
                           </Badge>
                         )}
@@ -465,28 +467,28 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                     )}
                     
                     {message.recommendedSpecialty && (
-                      <div className="flex items-center gap-2 mb-3">
-                        <Stethoscope className="h-4 w-4 text-purple-300" />
-                        <span className="text-sm text-purple-300 font-medium">
+                      <div className="flex items-center gap-2 mb-2 lg:mb-3">
+                        <Stethoscope className="h-3 w-3 lg:h-4 lg:w-4 text-purple-300 flex-shrink-0" />
+                        <span className="text-xs lg:text-sm text-purple-300 font-medium truncate">
                           {message.recommendedSpecialty}
                         </span>
                         {message.targetPhysician && (
-                          <Badge className="bg-green-600/20 text-green-300 border border-green-400/30 text-xs">
+                          <Badge className="bg-green-600/20 text-green-300 border border-green-400/30 text-xs flex-shrink-0">
                             → {message.targetPhysician}
                           </Badge>
                         )}
                       </div>
                     )}
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex gap-1 lg:gap-2">
                         <Button 
                           size="sm" 
                           onClick={(e) => {
                             e.stopPropagation();
                             setReplyToMessage(replyToMessage === message.id ? '' : message.id);
                           }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 h-auto"
                         >
                           <Reply className="h-3 w-3 mr-1" />
                           Reply
@@ -497,14 +499,14 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                             e.stopPropagation();
                             setSelectedConversation(message);
                           }}
-                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                          className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-2 py-1 h-auto"
                         >
                           <ArrowRight className="h-3 w-3 mr-1" />
-                          View Thread
+                          View
                         </Button>
                       </div>
                       {message.aiAnalysis && (
-                        <div className="flex items-center gap-2 text-xs">
+                        <div className="flex items-center gap-1 lg:gap-2 text-xs">
                           <Sparkles className="h-3 w-3 text-cyan-300" />
                           <span className="text-cyan-300">
                             AI: {message.aiAnalysis.confidence || message.aiAnalysis.priority}%
@@ -515,12 +517,12 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
 
                     {/* Quick Reply */}
                     {replyToMessage === message.id && (
-                      <div className="mt-3 p-3 bg-white/5 border border-white/20 rounded-xl">
+                      <div className="mt-3 p-2 lg:p-3 bg-white/5 border border-white/20 rounded-xl">
                         <Textarea
                           value={replyContent[message.id] || ''}
                           onChange={(e) => setReplyContent(prev => ({ ...prev, [message.id]: e.target.value }))}
                           placeholder="Type your reply..."
-                          className="bg-white/5 border border-white/20 text-white placeholder:text-white/60 mb-2 resize-none"
+                          className="bg-white/5 border border-white/20 text-white placeholder:text-white/60 mb-2 resize-none min-h-[60px] text-sm"
                         />
                         <div className="flex gap-2">
                           <Button 
@@ -530,7 +532,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                               handleQuickReply(message.id);
                             }}
                             disabled={!replyContent[message.id]?.trim()}
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 h-auto"
                           >
                             <Send className="h-3 w-3 mr-1" />
                             Send
@@ -542,7 +544,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                               setReplyToMessage('');
                             }}
                             variant="outline"
-                            className="border-white/20 text-white hover:bg-white/10"
+                            className="border-white/20 text-white hover:bg-white/10 text-xs px-2 py-1 h-auto"
                           >
                             Cancel
                           </Button>
@@ -557,12 +559,14 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
           </div>
 
           {/* Smart Routing Card */}
-          <div>
-            <SmartRoutingCard
-              currentUser={currentUser}
-              onSendMessage={handleSmartRoutingMessage}
-              hospitalId={hospitalId}
-            />
+          <div className="order-1 xl:order-2">
+            <div className="sticky top-4">
+              <SmartRoutingCard
+                currentUser={currentUser}
+                onSendMessage={handleSmartRoutingMessage}
+                hospitalId={hospitalId}
+              />
+            </div>
           </div>
         </div>
       </div>
