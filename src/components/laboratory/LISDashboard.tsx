@@ -73,21 +73,6 @@ const LISDashboard = () => {
               </p>
             </div>
           </div>
-          
-          <div className="flex items-center justify-center gap-4">
-            <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30">
-              <Microscope className="h-3 w-3 mr-1" />
-              Advanced Diagnostics
-            </Badge>
-            <Badge className="bg-green-500/20 text-green-200 border border-green-400/30">
-              <Shield className="h-3 w-3 mr-1" />
-              Quality Assured
-            </Badge>
-            <Badge className="bg-purple-500/20 text-purple-200 border border-purple-400/30">
-              <Activity className="h-3 w-3 mr-1" />
-              Real-time Results
-            </Badge>
-          </div>
         </div>
 
         {/* Stats Cards */}
