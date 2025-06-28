@@ -15,7 +15,8 @@ import {
   Star,
   Phone,
   ArrowRight,
-  Reply
+  Reply,
+  Zap
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
@@ -36,6 +37,8 @@ interface Message {
   recommendedSpecialty?: string;
   targetPhysician?: string;
   replies?: Message[];
+  isPriorityPage?: boolean;
+  consultType?: 'new' | 'established';
   aiAnalysis?: {
     priority: number;
     keywords: string[];
@@ -119,6 +122,22 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
           recommendedSpecialty: 'Surgery',
           acuity: 'urgent'
         }
+      },
+      {
+        id: '3',
+        content: 'Need you in OR 3 STAT. Emergency surgery in progress.',
+        sender: 'Dr. Williams',
+        senderRole: 'Surgery',
+        timestamp: new Date(Date.now() - 2 * 60000),
+        acuity: 'critical',
+        isPriorityPage: true,
+        replies: [],
+        aiAnalysis: {
+          priority: 100,
+          keywords: ['STAT', 'emergency surgery', 'OR'],
+          suggestedActions: ['Immediate response required'],
+          acuity: 'critical'
+        }
       }
     ];
     setMessages(mockMessages);
@@ -158,21 +177,30 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
     // AI analysis for the new message
     const aiAnalysis = await analyzeMessageWithAI(messageData.content, messageData.patientId);
 
+    // Determine acuity based on message type
+    let acuity = messageData.urgency;
+    if (messageData.isPriorityPage) {
+      acuity = 'urgent'; // Pages are always at least urgent
+    }
+
     const message: Message = {
       id: Date.now().toString(),
       content: messageData.content,
       sender: messageData.sender,
       senderRole: messageData.senderRole,
       timestamp: new Date(),
-      acuity: messageData.urgency,
+      acuity: acuity,
       patientId: messageData.patientId,
       patientName: messageData.patientName,
       recommendedSpecialty: messageData.specialtyName,
       targetPhysician: messageData.physicianName,
+      isPriorityPage: messageData.isPriorityPage,
+      consultType: messageData.consultType,
       replies: [],
       aiAnalysis: {
         ...aiAnalysis,
-        acuity: messageData.urgency
+        priority: messageData.isPriorityPage ? 100 : aiAnalysis.priority,
+        acuity: acuity
       }
     };
 
@@ -253,7 +281,7 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
     }
   };
 
-  // Filter and sort messages
+  // Filter and sort messages with priority page handling
   const filteredMessages = messages.filter(msg => {
     switch (activeFilter) {
       case 'critical': return msg.acuity === 'critical';
@@ -262,6 +290,10 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
       default: return true;
     }
   }).sort((a, b) => {
+    // Priority pages always come first
+    if (a.isPriorityPage && !b.isPriorityPage) return -1;
+    if (!a.isPriorityPage && b.isPriorityPage) return 1;
+    
     const priorityDiff = (b.aiAnalysis?.priority || 0) - (a.aiAnalysis?.priority || 0);
     if (priorityDiff !== 0) return priorityDiff;
     
@@ -292,7 +324,21 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/70">Priority Pages</p>
+                    <p className="text-2xl font-bold text-white">
+                      {messages.filter(m => m.isPriorityPage).length}
+                    </p>
+                  </div>
+                  <Zap className="h-8 w-8 text-orange-300" />
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -391,13 +437,19 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                 {filteredMessages.map((message) => (
                   <div
                     key={message.id}
-                    className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg hover:bg-blue-600/30 transition-colors cursor-pointer"
+                    className={`p-4 backdrop-blur-sm border rounded-lg hover:bg-blue-600/30 transition-colors cursor-pointer ${
+                      message.isPriorityPage 
+                        ? 'bg-orange-600/30 border-orange-400/40 shadow-lg shadow-orange-500/20' 
+                        : 'bg-blue-600/20 border-blue-400/30'
+                    }`}
                     onClick={() => setSelectedConversation(message)}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-blue-600 text-white text-xs">
+                          <AvatarFallback className={`text-white text-xs ${
+                            message.isPriorityPage ? 'bg-orange-600' : 'bg-blue-600'
+                          }`}>
                             {getInitials(message.sender)}
                           </AvatarFallback>
                         </Avatar>
@@ -407,6 +459,12 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                             <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs">
                               {message.senderRole}
                             </Badge>
+                            {message.isPriorityPage && (
+                              <Badge className="bg-orange-600/40 text-orange-200 border border-orange-400/50 text-xs">
+                                <Zap className="h-3 w-3 mr-1" />
+                                PRIORITY PAGE
+                              </Badge>
+                            )}
                             <Badge className={`text-xs ${getAcuityColor(message.acuity)}`}>
                               {getAcuityIcon(message.acuity)}
                               <span className="ml-1">{message.acuity.toUpperCase()}</span>
@@ -430,6 +488,11 @@ const VirtualisChatEnhanced = ({ currentUser }: VirtualisChatEnhancedProps) => {
                       <div className="flex items-center gap-2 mb-2 text-sm text-white/70">
                         <User className="h-3 w-3" />
                         <span>Patient: {message.patientName}</span>
+                        {message.consultType && (
+                          <Badge className="bg-green-600/20 text-green-300 border border-green-400/30 text-xs ml-2">
+                            {message.consultType === 'new' ? 'New Consult' : 'Established Patient'}
+                          </Badge>
+                        )}
                       </div>
                     )}
                     
