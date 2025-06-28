@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -127,7 +128,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.clinical.map((feature) => (
-                    <div key={feature.name} className="p-3 virtualis-card rounded-lg">
+                    <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                       <feature.icon className="h-5 w-5 text-sky-300 mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white/60 text-xs">{feature.description}</p>
@@ -146,7 +147,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="coding" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <MedicalCodingAssistant />
-            <Card className="virtualis-card">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-green-300" />
@@ -159,14 +160,14 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.coding.map((feature) => (
-                    <div key={feature.name} className="p-3 virtualis-card rounded-lg">
+                    <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                       <feature.icon className="h-5 w-5 text-sky-300 mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white/60 text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full virtualis-button">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                   <Code className="h-4 w-4 mr-2" />
                   Launch Coding Assistant
                 </Button>
@@ -177,17 +178,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
         <TabsContent value="tools" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="virtualis-card">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Clinical Decision Support</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 virtualis-card">
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-green-300 text-2xl font-bold">98.7%</div>
                     <div className="text-white/70 text-sm">Accuracy Rate</div>
                   </div>
-                  <Button className="w-full virtualis-button">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Brain className="h-4 w-4 mr-2" />
                     Launch Assistant
                   </Button>
@@ -195,17 +196,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="virtualis-card">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Drug Safety</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 virtualis-card">
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-blue-300 text-2xl font-bold">23</div>
                     <div className="text-white/70 text-sm">Alerts Today</div>
                   </div>
-                  <Button className="w-full virtualis-button">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Shield className="h-4 w-4 mr-2" />
                     Check Interactions
                   </Button>
@@ -213,17 +214,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="virtualis-card">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Quality Metrics</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 virtualis-card">
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-sky-300 text-2xl font-bold">94%</div>
                     <div className="text-white/70 text-sm">Compliance Score</div>
                   </div>
-                  <Button className="w-full virtualis-button">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Activity className="h-4 w-4 mr-2" />
                     View Metrics
                   </Button>
