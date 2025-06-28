@@ -3,28 +3,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Virtualis One™ True Light Blue Sky Theme with Sun Gradient */
+/* Virtualis One™ Clean Design System */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    --background: 210 100% 99%;
-    --foreground: 15 23 42;
+    --background: 210 24% 8%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 15 23 42;
+    --card: 215 25% 12%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 15 23 42;
+    --popover: 215 25% 12%;
+    --popover-foreground: 0 0% 100%;
 
     --primary: 210 100% 10%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 15 23 42;
+    --secondary: 215 20% 18%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 100 20% 40%;
+    --muted: 215 20% 18%;
+    --muted-foreground: 215 20% 70%;
 
     --accent: 38 92% 50%;
     --accent-foreground: 0 0% 100%;
@@ -32,29 +32,26 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 40% 92%;
-    --input: 210 40% 96%;
+    --border: 215 20% 20%;
+    --input: 215 20% 20%;
     --ring: 38 92% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 15 23 42;
+    --sidebar-background: 210 24% 8%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 38 92% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 41 59;
+    --sidebar-accent: 215 20% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 30 41 59;
+    --sidebar-border: 215 20% 20%;
     --sidebar-ring: 38 92% 50%;
 
-    /* Sun Gradient Colors */
-    --sun-gradient-start: 245 158 11;
-    --sun-gradient-end: 251 146 60;
+    /* Virtualis One™ Brand Colors */
     --virtualis-gold: 245 158 11;
     --virtualis-alert-green: 34 197 94;
     --virtualis-alert-red: 239 68 68;
     --virtualis-alert-blue: 59 130 246;
-    --virtualis-navy: 15 23 42;
   }
 }
 
@@ -64,102 +61,73 @@
   }
 
   body {
-    @apply text-slate-800 font-sans;
-    /* True light sky blue gradient background */
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #bae6fd 50%, #7dd3fc 75%, #38bdf8 100%);
+    @apply bg-[#0a1628] text-white font-sans;
+    background: #0a1628;
     min-height: 100vh;
   }
 }
 
-/* True Light Theme Glass Morphism Components */
+/* Clean Glass Morphism Components */
 @layer components {
   .glass-card {
-    @apply backdrop-blur-sm border border-white/60 rounded-2xl shadow-lg;
-    /* Light white glassy card with slight blue tint */
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%);
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-xl;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
   }
 
   .glass-card:hover {
     @apply transform scale-[1.02] transition-all duration-300;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 249, 255, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
   }
 
   .glass-input {
-    @apply backdrop-blur-sm border border-sky-200/80 rounded-xl px-4 py-3 text-slate-800 placeholder:text-slate-500;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+    @apply backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/60;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
   }
 
   .glass-input:focus {
-    @apply outline-none border-orange-400/60 ring-2 ring-orange-400/20;
+    @apply outline-none border-virtualis-gold/50 ring-2 ring-virtualis-gold/20;
   }
 
   .glass-button {
-    @apply backdrop-blur-sm border border-white/40 rounded-xl px-6 py-3 text-white font-semibold transition-all duration-300;
-    /* Sun gradient button */
-    background: linear-gradient(135deg, rgb(245, 158, 11) 0%, rgb(251, 146, 60) 100%);
+    @apply backdrop-blur-lg bg-gradient-to-r from-virtualis-gold/90 to-orange-500/90 border border-white/20 rounded-xl px-6 py-3 text-white font-semibold transition-all duration-300;
   }
 
   .glass-button:hover {
     @apply transform scale-105;
-    background: linear-gradient(135deg, rgb(217, 119, 6) 0%, rgb(234, 88, 12) 100%);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 1) 0%, rgba(251, 146, 60, 1) 100%);
   }
 
-  /* Navy blue sidebar - darker contrast against light theme */
   .glass-sidebar {
-    @apply backdrop-blur-xl border-r border-slate-700/40;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%);
+    @apply backdrop-blur-xl bg-black/20 border-r border-white/10;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.2) 100%);
   }
 
   .glass-nav-item {
-    @apply backdrop-blur-sm border border-sky-200/60 rounded-xl px-4 py-3 transition-all duration-300 text-slate-700;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+    @apply backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl px-4 py-3 transition-all duration-300;
   }
 
   .glass-nav-item:hover, .glass-nav-item.active {
-    @apply border-orange-400/60 text-slate-800;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 146, 60, 0.1) 100%);
-  }
-
-  /* Sidebar specific nav items - for navy sidebar */
-  .sidebar .glass-nav-item {
-    @apply text-slate-200;
-    background: linear-gradient(135deg, rgba(51, 65, 85, 0.4) 0%, rgba(71, 85, 105, 0.3) 100%);
-  }
-
-  .sidebar .glass-nav-item:hover, .sidebar .glass-nav-item.active {
-    @apply border-orange-400/50 text-white;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(251, 146, 60, 0.2) 100%);
+    @apply bg-virtualis-gold/20 border-virtualis-gold/30;
   }
 
   .glass-badge {
-    @apply backdrop-blur-sm border rounded-full px-3 py-1 text-xs font-medium;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
-    border-color: rgba(56, 189, 248, 0.4);
-    color: rgb(3, 105, 161);
+    @apply backdrop-blur-sm bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs font-medium;
   }
 
   .glass-badge.success {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 253, 244, 0.8) 100%);
-    border-color: rgba(34, 197, 94, 0.4);
-    color: rgb(21, 128, 61);
+    @apply bg-green-500/20 border-green-400/30 text-green-300;
   }
 
   .glass-badge.warning {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(254, 252, 232, 0.8) 100%);
-    border-color: rgba(245, 158, 11, 0.4);
-    color: rgb(146, 64, 14);
+    @apply bg-yellow-500/20 border-yellow-400/30 text-yellow-300;
   }
 
   .glass-badge.error {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(254, 242, 242, 0.8) 100%);
-    border-color: rgba(239, 68, 68, 0.4);
-    color: rgb(153, 27, 27);
+    @apply bg-red-500/20 border-red-400/30 text-red-300;
   }
 
   .glass-badge.primary {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(239, 246, 255, 0.8) 100%);
-    border-color: rgba(59, 130, 246, 0.4);
-    color: rgb(30, 64, 175);
+    @apply bg-virtualis-gold/20 border-virtualis-gold/30 text-virtualis-gold;
   }
 
   .gradient-text {
@@ -180,103 +148,4 @@
     font-weight: 700;
     letter-spacing: 0.05em;
   }
-
-  /* Sign-in card - light blue glassy */
-  .floating-glass {
-    @apply backdrop-blur-lg border border-white/70 rounded-2xl shadow-2xl;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%);
-  }
-
-  .floating-glass .glass-input {
-    @apply backdrop-blur-sm border border-sky-200/70 text-slate-800 placeholder:text-slate-600;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
-  }
-
-  .floating-glass .glass-input:focus {
-    @apply outline-none border-orange-400/50 ring-2 ring-orange-400/20;
-  }
-
-  /* Light theme dashboard elements */
-  .futuristic-card {
-    @apply backdrop-blur-lg border border-white/60 rounded-2xl shadow-xl;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 249, 255, 0.8) 100%);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .futuristic-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.8), transparent);
-    animation: scan 4s linear infinite;
-  }
-
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite alternate;
-  }
-
-  .scan-line::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.9), transparent);
-    animation: scan 3s linear infinite;
-  }
-
-  /* Dashboard specific styling - light theme */
-  .dashboard-bg {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #bae6fd 50%, #7dd3fc 75%, #38bdf8 100%);
-  }
-
-  /* Main content area styling - very light blue/white */
-  .main-content {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f0f9ff 50%, #e0f2fe 75%, #bae6fd 100%);
-  }
-}
-
-@keyframes scan {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
-}
-
-@keyframes pulse-glow {
-  0% {
-    box-shadow: 0 0 5px rgba(245, 158, 11, 0.6);
-  }
-  100% {
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.9), 0 0 30px rgba(245, 158, 11, 0.5);
-  }
-}
-
-/* Virtualis Navy Blue Color */
-.virtualis-navy {
-  background-color: rgb(15, 23, 42);
-}
-
-.text-virtualis-navy {
-  color: rgb(15, 23, 42);
-}
-
-.border-virtualis-navy {
-  border-color: rgb(15, 23, 42);
-}
-
-/* True light theme overrides */
-.light-theme .glass-sidebar {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%);
-}
-
-.light-theme body {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #bae6fd 50%, #7dd3fc 75%, #38bdf8 100%);
 }
