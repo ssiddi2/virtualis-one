@@ -45,7 +45,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-6">
           <Brain className="h-12 w-12 text-white animate-pulse" />
-          <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg p-6">
+          <div className="space-y-2">
             <h1 className="text-4xl font-bold text-white">
               AI Healthcare Assistant
             </h1>
