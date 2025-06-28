@@ -13,7 +13,8 @@ import {
   Clock,
   UserPlus,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  XCircle
 } from "lucide-react";
 import { useSpecialties, useOnCallSchedules, usePhysicians } from "@/hooks/usePhysicians";
 import { usePatients } from "@/hooks/usePatients";
@@ -50,7 +51,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAICard, setShowAICard] = useState(false);
-  const [aiError, setAiError] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const getOnCallPhysiciansForSpecialty = (specialtyId: string) => {
     return onCallSchedules?.filter(schedule => 
@@ -86,7 +87,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
 
     setIsAnalyzing(true);
     setShowAICard(true);
-    setAiError(false);
+    setAiError(null);
     
     try {
       const selectedPatientData = patients?.find(p => p.id === selectedPatient);
@@ -145,12 +146,22 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
 
     } catch (error) {
       console.error('AI Analysis failed:', error);
-      setAiError(true);
+      
+      let errorMessage = 'AI analysis temporarily unavailable';
+      if (error instanceof Error) {
+        if (error.message.includes('Rate limit')) {
+          errorMessage = 'Rate limit reached - please wait or upgrade OpenAI billing';
+        } else if (error.message.includes('API key')) {
+          errorMessage = 'OpenAI API configuration issue';
+        }
+      }
+      
+      setAiError(errorMessage);
       setAiAnalysis(null);
       
       toast({
         title: "AI Analysis Unavailable",
-        description: "Please manually select specialty and physician. AI service is temporarily unavailable.",
+        description: errorMessage + ". Please select specialty and physician manually.",
         variant: "destructive"
       });
     } finally {
@@ -171,7 +182,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     } else {
       setShowAICard(false);
       setAiAnalysis(null);
-      setAiError(false);
+      setAiError(null);
       setSelectedPhysician('');
       setSelectedSpecialty('');
     }
@@ -226,7 +237,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     setSelectedSpecialty('');
     setAiAnalysis(null);
     setShowAICard(false);
-    setAiError(false);
+    setAiError(null);
 
     const recipientName = selectedPhysicianData 
       ? `Dr. ${selectedPhysicianData.first_name} ${selectedPhysicianData.last_name}` 
@@ -328,7 +339,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         {showAICard && (
           <div className={`p-4 border rounded-xl backdrop-blur-sm animate-in slide-in-from-top-4 duration-300 ${
             aiError 
-              ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30' 
+              ? 'bg-gradient-to-r from-red-500/10 to-orange-500/10 border-red-400/30' 
               : 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-400/30'
           }`}>
             {isAnalyzing ? (
@@ -337,12 +348,19 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
                 <span>AI analyzing clinical message...</span>
               </div>
             ) : aiError ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-orange-300" />
-                  <span className="text-orange-200 font-medium text-sm">AI Unavailable - Manual Selection Required</span>
+                  <XCircle className="h-5 w-5 text-red-300" />
+                  <span className="text-red-200 font-medium">AI Analysis Failed</span>
                 </div>
-                <p className="text-orange-200/70 text-xs">Please manually select specialty and physician below</p>
+                <p className="text-red-200/80 text-sm">{aiError}</p>
+                <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-400/30 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-yellow-300 mt-0.5 flex-shrink-0" />
+                  <div className="text-yellow-200 text-sm">
+                    <p className="font-medium mb-1">Manual Selection Required</p>
+                    <p>Please select specialty and physician manually below. Consider Internal Medicine or Emergency Medicine for general cases.</p>
+                  </div>
+                </div>
               </div>
             ) : aiAnalysis && (
               <div className="space-y-3">
@@ -401,7 +419,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
           </div>
         )}
 
-        {/* Specialty Selection */}
+        {/* Specialty Selection - Show if AI provided recommendation OR if AI failed */}
         {(showAICard || selectedSpecialty) && (
           <div>
             <label className="text-sm text-white/70 mb-3 block font-medium">
