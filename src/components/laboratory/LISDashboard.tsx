@@ -1,343 +1,315 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  TestTube, 
-  Microscope, 
-  AlertTriangle, 
-  CheckCircle, 
+  Flask, 
+  Activity, 
   Clock, 
+  CheckCircle, 
+  AlertTriangle,
+  Microscope,
+  FileText,
   TrendingUp,
-  Search,
-  Filter,
-  Download,
-  FlaskConical,
+  Users,
   Beaker,
-  Activity
-} from "lucide-react";
+  TestTube,
+  Shield
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const LISDashboard = () => {
-  const [selectedTests, setSelectedTests] = useState([]);
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const labMetrics = {
-    totalTests: 2847,
-    pendingResults: 127,
-    criticalValues: 8,
-    completedToday: 891,
-    avgTurnaroundTime: "2.4 hrs",
-    qualityScore: "98.7%"
-  };
-
-  const pendingTests = [
-    { 
-      id: "LAB-2024-001", 
-      patient: "John Smith", 
-      mrn: "MRN123456",
-      orderDate: "2024-01-15 08:30", 
-      testType: "Complete Blood Count",
-      specimen: "Blood", 
-      priority: "STAT", 
-      status: "In Progress",
-      expectedTAT: "1 hr",
-      technologist: "Sarah Lab"
-    },
-    { 
-      id: "LAB-2024-002", 
-      patient: "Mary Johnson", 
-      mrn: "MRN789012",
-      orderDate: "2024-01-15 07:45", 
-      testType: "Basic Metabolic Panel",
-      specimen: "Serum", 
-      priority: "Routine", 
-      status: "Pending Review",
-      expectedTAT: "4 hrs",
-      technologist: "Mike Chen"
-    },
-    { 
-      id: "LAB-2024-003", 
-      patient: "Robert Brown", 
-      mrn: "MRN345678",
-      orderDate: "2024-01-15 06:15", 
-      testType: "Lipid Panel",
-      specimen: "Plasma", 
-      priority: "ASAP", 
-      status: "Critical Value",
-      expectedTAT: "2 hrs",
-      technologist: "Lisa Wong"
-    }
+  const labResults = [
+    { id: 1, patient: 'John Smith', test: 'Complete Blood Count', status: 'completed', priority: 'routine', timestamp: '2 hours ago' },
+    { id: 2, patient: 'Sarah Johnson', test: 'Liver Function Panel', status: 'pending', priority: 'urgent', timestamp: '30 minutes ago' },
+    { id: 3, patient: 'Mike Wilson', test: 'Cardiac Enzymes', status: 'critical', priority: 'stat', timestamp: '15 minutes ago' },
+    { id: 4, patient: 'Lisa Davis', test: 'Thyroid Function', status: 'completed', priority: 'routine', timestamp: '4 hours ago' },
   ];
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "STAT": return "text-red-400";
-      case "ASAP": return "text-orange-400";
-      case "Routine": return "text-green-400";
-      default: return "text-gray-400";
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Critical Value": return "text-red-400";
-      case "Pending Review": return "text-yellow-400";
-      case "In Progress": return "text-blue-400";
-      case "Completed": return "text-green-400";
-      default: return "text-gray-400";
+      case 'completed': return 'bg-green-500/20 text-green-200 border-green-400/30';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'critical': return 'bg-red-500/20 text-red-200 border-red-400/30';
+      default: return 'bg-blue-500/20 text-blue-200 border-blue-400/30';
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "Critical Value": return <AlertTriangle className="h-4 w-4" />;
-      case "Completed": return <CheckCircle className="h-4 w-4" />;
-      case "In Progress": return <Clock className="h-4 w-4" />;
-      default: return <Activity className="h-4 w-4" />;
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'stat': return 'bg-red-500/20 text-red-200 border-red-400/30';
+      case 'urgent': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'routine': return 'bg-blue-500/20 text-blue-200 border-blue-400/30';
+      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
     }
+  };
+
+  const handleResultClick = (result: any) => {
+    toast({
+      title: "Lab Result",
+      description: `Viewing ${result.test} for ${result.patient}`,
+    });
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white brand-font gradient-text">Laboratory Information System</h1>
-          <p className="text-white/60 tech-font">Comprehensive laboratory workflow and result management</p>
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <Flask className="h-12 w-12 text-sky-300 animate-pulse" />
+            <div>
+              <h1 className="text-4xl font-bold text-white">
+                Laboratory Information System
+              </h1>
+              <p className="text-white/80 text-lg">
+                Comprehensive Lab Management & Results
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center gap-4">
+            <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30">
+              <Microscope className="h-3 w-3 mr-1" />
+              Advanced Diagnostics
+            </Badge>
+            <Badge className="bg-green-500/20 text-green-200 border border-green-400/30">
+              <Shield className="h-3 w-3 mr-1" />
+              Quality Assured
+            </Badge>
+            <Badge className="bg-purple-500/20 text-purple-200 border border-purple-400/30">
+              <Activity className="h-3 w-3 mr-1" />
+              Real-time Results
+            </Badge>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <Button className="glass-button">
-            <Download className="h-4 w-4" />
-            Export Lab Report
-          </Button>
-          <Button className="glass-button">
-            <TestTube className="h-4 w-4" />
-            New Lab Order
-          </Button>
-        </div>
-      </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
-              <TestTube className="h-4 w-4" />
-              Total Tests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{labMetrics.totalTests}</div>
-            <p className="text-xs text-blue-400 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              +8.3% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Pending Results
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{labMetrics.pendingResults}</div>
-            <p className="text-xs text-yellow-400">Awaiting review</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Critical Values
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{labMetrics.criticalValues}</div>
-            <p className="text-xs text-red-400">Immediate attention</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Completed Today
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{labMetrics.completedToday}</div>
-            <p className="text-xs text-green-400">Daily performance</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font">Avg Turnaround</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{labMetrics.avgTurnaroundTime}</div>
-            <p className="text-xs text-green-400">Below target</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font">Quality Score</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{labMetrics.qualityScore}</div>
-            <p className="text-xs text-green-400">Excellent rating</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="worklist" className="space-y-4">
-        <TabsList className="glass-nav-item bg-black/20">
-          <TabsTrigger value="worklist" className="text-white data-[state=active]:text-virtualis-gold">Lab Worklist</TabsTrigger>
-          <TabsTrigger value="results" className="text-white data-[state=active]:text-virtualis-gold">Results Review</TabsTrigger>
-          <TabsTrigger value="quality" className="text-white data-[state=active]:text-virtualis-gold">Quality Control</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-white data-[state=active]:text-virtualis-gold">Lab Analytics</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="worklist" className="space-y-4">
-          <Card className="glass-card">
-            <CardHeader>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-white tech-font">Laboratory Worklist</CardTitle>
-                  <CardDescription className="text-white/60">Priority-based test processing queue</CardDescription>
+                  <p className="text-sm text-white/70">Pending Tests</p>
+                  <p className="text-2xl font-bold text-white">23</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
-                    <input 
-                      type="text" 
-                      placeholder="Search lab orders..." 
-                      className="glass-input pl-10 w-64"
-                    />
-                  </div>
-                  <Button size="sm" className="glass-button">
-                    <Filter className="h-4 w-4" />
-                    Filter
-                  </Button>
-                </div>
+                <Clock className="h-8 w-8 text-yellow-300" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-white/10">
-                    <TableHead className="text-virtualis-gold tech-font">Lab ID</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Patient</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">MRN</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Order Date</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Test Type</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Specimen</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Priority</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Status</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">TAT</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Technologist</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pendingTests.map((test) => (
-                    <TableRow key={test.id} className="border-white/10 hover:bg-white/5">
-                      <TableCell className="text-white tech-font font-medium">{test.id}</TableCell>
-                      <TableCell className="text-white">{test.patient}</TableCell>
-                      <TableCell className="text-white font-mono text-sm">{test.mrn}</TableCell>
-                      <TableCell className="text-white text-sm">{test.orderDate}</TableCell>
-                      <TableCell className="text-white">{test.testType}</TableCell>
-                      <TableCell className="text-white">
-                        <span className="glass-badge primary">{test.specimen}</span>
-                      </TableCell>
-                      <TableCell className={getPriorityColor(test.priority)}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">{test.priority}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className={getStatusColor(test.status)}>
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(test.status)}
-                          <span>{test.status}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-white text-sm">{test.expectedTAT}</TableCell>
-                      <TableCell className="text-white">{test.technologist}</TableCell>
-                      <TableCell>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Completed Today</p>
+                  <p className="text-2xl font-bold text-white">156</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-300" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Critical Results</p>
+                  <p className="text-2xl font-bold text-white">3</p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-red-300" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Turnaround Time</p>
+                  <p className="text-2xl font-bold text-white">2.4h</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-sky-300" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
+            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/20">
+              <Activity className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="results" className="text-white data-[state=active]:bg-white/20">
+              <FileText className="h-4 w-4 mr-2" />
+              Results
+            </TabsTrigger>
+            <TabsTrigger value="instruments" className="text-white data-[state=active]:bg-white/20">
+              <Beaker className="h-4 w-4 mr-2" />
+              Instruments
+            </TabsTrigger>
+            <TabsTrigger value="quality" className="text-white data-[state=active]:bg-white/20">
+              <Shield className="h-4 w-4 mr-2" />
+              Quality Control
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-white">Recent Lab Results</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {labResults.slice(0, 3).map((result) => (
+                    <div key={result.id} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-white">{result.patient}</span>
                         <div className="flex gap-2">
-                          <Button size="sm" className="glass-button text-xs">
-                            Process
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-white hover:bg-white/10 text-xs">
-                            View
-                          </Button>
+                          <Badge className={`text-xs ${getPriorityColor(result.priority)}`}>
+                            {result.priority.toUpperCase()}
+                          </Badge>
+                          <Badge className={`text-xs ${getStatusColor(result.status)}`}>
+                            {result.status.toUpperCase()}
+                          </Badge>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                      <p className="text-sm text-white/70">{result.test}</p>
+                      <p className="text-xs text-white/50">{result.timestamp}</p>
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                </CardContent>
+              </Card>
 
-        <TabsContent value="results" className="space-y-4">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="text-white tech-font">Results Review & Validation</CardTitle>
-              <CardDescription className="text-white/60">Critical value management and result verification</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Microscope className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Results Management Center</h3>
-                <p className="text-white/60 mb-4">Advanced result validation and critical value alerting</p>
-                <Button className="glass-button">Review Critical Values</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-white">Lab Performance</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                      <TestTube className="h-6 w-6 text-sky-300 mx-auto mb-2" />
+                      <div className="text-lg font-semibold text-white">98.2%</div>
+                      <div className="text-xs text-white/70">Accuracy Rate</div>
+                    </div>
+                    <div className="text-center p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                      <Clock className="h-6 w-6 text-green-300 mx-auto mb-2" />
+                      <div className="text-lg font-semibold text-white">2.4h</div>
+                      <div className="text-xs text-white/70">Avg. TAT</div>
+                    </div>
+                  </div>
+                  <Button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    View Detailed Analytics
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-        <TabsContent value="quality" className="space-y-4">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="text-white tech-font">Quality Control Management</CardTitle>
-              <CardDescription className="text-white/60">QC monitoring and instrument calibration tracking</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <FlaskConical className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Quality Assurance Dashboard</h3>
-                <p className="text-white/60 mb-4">Comprehensive QC monitoring and compliance tracking</p>
-                <Button className="glass-button">View QC Status</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="results" className="space-y-6">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-white">Lab Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {labResults.map((result) => (
+                    <div 
+                      key={result.id} 
+                      className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg cursor-pointer hover:bg-blue-500/25 transition-colors"
+                      onClick={() => handleResultClick(result)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Users className="h-4 w-4 text-blue-300" />
+                            <span className="font-medium text-white">{result.patient}</span>
+                            <Badge className={`text-xs ${getPriorityColor(result.priority)}`}>
+                              {result.priority.toUpperCase()}
+                            </Badge>
+                          </div>
+                          <p className="text-white/80">{result.test}</p>
+                          <p className="text-xs text-white/50">{result.timestamp}</p>
+                        </div>
+                        <Badge className={`${getStatusColor(result.status)}`}>
+                          {result.status.toUpperCase()}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="text-white tech-font">Laboratory Analytics</CardTitle>
-              <CardDescription className="text-white/60">Performance metrics and utilization analysis</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Beaker className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Lab Performance Dashboard</h3>
-                <p className="text-white/60 mb-4">Turnaround times, utilization patterns, and efficiency metrics</p>
-                <Button className="glass-button">View Analytics</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="instruments" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {['Hematology Analyzer', 'Chemistry Analyzer', 'Microbiology System'].map((instrument) => (
+                <Card key={instrument} className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Microscope className="h-5 w-5 text-sky-300" />
+                      {instrument}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-white/70">Status</span>
+                        <Badge className="bg-green-500/20 text-green-200 border border-green-400/30">Online</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-white/70">Queue</span>
+                        <span className="text-white">5 samples</span>
+                      </div>
+                      <Button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="quality" className="space-y-6">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-white">Quality Control Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                    <Shield className="h-8 w-8 text-green-300 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-white">99.1%</div>
+                    <div className="text-sm text-white/70">QC Pass Rate</div>
+                  </div>
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                    <CheckCircle className="h-8 w-8 text-blue-300 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-white">0.2%</div>
+                    <div className="text-sm text-white/70">Error Rate</div>
+                  </div>
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                    <TrendingUp className="h-8 w-8 text-purple-300 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-white">95.8%</div>
+                    <div className="text-sm text-white/70">Efficiency</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

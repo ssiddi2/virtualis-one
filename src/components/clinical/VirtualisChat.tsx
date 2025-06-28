@@ -117,10 +117,10 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
   const getAcuityColor = (acuity: string) => {
     switch (acuity) {
-      case 'critical': return 'bg-red-600 text-white';
-      case 'urgent': return 'bg-yellow-600 text-white';
-      case 'routine': return 'bg-green-600 text-white';
-      default: return 'bg-gray-600 text-white';
+      case 'critical': return 'bg-red-500/20 text-red-200 border-red-400/30';
+      case 'urgent': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'routine': return 'bg-green-500/20 text-green-200 border-green-400/30';
+      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
     }
   };
 
@@ -185,7 +185,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a1628] p-6">
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -201,7 +203,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -215,7 +217,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -229,7 +231,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -241,7 +243,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -262,8 +264,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 variant={activeFilter === filter ? "default" : "outline"}
                 onClick={() => setActiveFilter(filter as any)}
                 className={activeFilter === filter 
-                  ? "bg-blue-600 hover:bg-blue-700" 
-                  : "bg-[#1a2332] border-[#2a3441] text-white hover:bg-[#2a3441]"
+                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white" 
+                  : "bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
                 }
               >
                 {filter.charAt(0).toUpperCase() + filter.slice(1)} Messages
@@ -275,9 +277,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Messages Feed */}
           <div className="lg:col-span-2">
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white h-[600px] flex flex-col">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg h-[600px] flex flex-col">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <MessageSquare className="h-5 w-5" />
                   Clinical Messages Feed
                 </CardTitle>
@@ -289,13 +291,13 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 {filteredMessages.map((message) => (
                   <div
                     key={message.id}
-                    className="p-4 bg-[#0f1922] rounded-lg border-l-4 border-l-blue-500"
+                    className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg border-l-4 border-l-blue-500"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-blue-400" />
-                        <span className="font-medium">{message.sender}</span>
-                        <Badge variant="outline" className="text-xs border-gray-500 text-gray-300">
+                        <span className="font-medium text-white">{message.sender}</span>
+                        <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs">
                           {message.senderRole}
                         </Badge>
                         <Badge className={`text-xs ${getAcuityColor(message.acuity)}`}>
@@ -320,14 +322,14 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                     {message.recommendedSpecialty && (
                       <div className="flex items-center gap-2 mb-2">
                         <Stethoscope className="h-4 w-4 text-purple-400" />
-                        <span className="text-sm">
+                        <span className="text-sm text-white">
                           AI Recommends: <span className="text-purple-400 font-medium">{message.recommendedSpecialty}</span>
                         </span>
                       </div>
                     )}
                     
                     {message.aiAnalysis && (
-                      <div className="mt-3 p-2 bg-[#1a2332] rounded border">
+                      <div className="mt-3 p-2 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
                         <div className="flex items-center gap-2 mb-1">
                           <Brain className="h-3 w-3 text-purple-400" />
                           <span className="text-xs text-purple-400">AI Analysis</span>
@@ -345,15 +347,15 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                     )}
                     
                     <div className="flex gap-2 mt-3">
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Button size="sm" className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white">
                         <MessageSquare className="h-3 w-3 mr-1" />
                         Reply
                       </Button>
-                      <Button size="sm" variant="outline" className="border-green-600 text-green-400 hover:bg-green-600">
+                      <Button size="sm" variant="outline" className="border-green-600 text-green-400 hover:bg-green-600/20">
                         <Phone className="h-3 w-3 mr-1" />
                         Call
                       </Button>
-                      <Button size="sm" variant="outline" className="border-purple-600 text-purple-400 hover:bg-purple-600">
+                      <Button size="sm" variant="outline" className="border-purple-600 text-purple-400 hover:bg-purple-600/20">
                         <Video className="h-3 w-3 mr-1" />
                         Video
                       </Button>
@@ -367,9 +369,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
           {/* Message Composer */}
           <div className="space-y-6">
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
-                <CardTitle>Send Message</CardTitle>
+                <CardTitle className="text-white">Send Message</CardTitle>
                 <CardDescription className="text-white/70">
                   AI-powered message prioritization
                 </CardDescription>
@@ -378,10 +380,10 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 <div>
                   <label className="text-sm text-white/70 mb-2 block">Message Priority</label>
                   <Select value={messageType} onValueChange={(value: any) => setMessageType(value)}>
-                    <SelectTrigger className="bg-[#0f1922] border-[#2a3441] text-white">
+                    <SelectTrigger className="bg-blue-600/20 border-blue-400/30 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
+                    <SelectContent className="bg-blue-700 border-blue-500 text-white">
                       <SelectItem value="routine">Routine</SelectItem>
                       <SelectItem value="urgent">Urgent</SelectItem>
                       <SelectItem value="critical">Critical</SelectItem>
@@ -395,7 +397,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                     placeholder="Search patient..."
                     value={selectedPatient}
                     onChange={(e) => setSelectedPatient(e.target.value)}
-                    className="bg-[#0f1922] border-[#2a3441] text-white"
+                    className="bg-blue-600/20 border-blue-400/30 text-white placeholder:text-white/50"
                   />
                 </div>
 
@@ -405,13 +407,13 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                     placeholder="Type your clinical message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    className="bg-[#0f1922] border-[#2a3441] text-white min-h-[100px]"
+                    className="bg-blue-600/20 border-blue-400/30 text-white placeholder:text-white/50 min-h-[100px]"
                   />
                 </div>
 
                 <Button 
                   onClick={handleSendMessage}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300"
                   disabled={!newMessage.trim()}
                 >
                   <Send className="h-4 w-4 mr-2" />
@@ -421,15 +423,15 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
             </Card>
 
             {/* AI Insights */}
-            <Card className="bg-[#1a2332] border-[#2a3441] text-white">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <Brain className="h-5 w-5 text-purple-400" />
                   AI Insights
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 bg-[#0f1922] rounded-lg border border-red-500/20">
+                <div className="p-3 backdrop-blur-sm bg-blue-600/20 border border-red-500/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <AlertTriangle className="h-4 w-4 text-red-400" />
                     <span className="text-sm font-medium text-red-400">High Priority Alert</span>
@@ -439,7 +441,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   </p>
                 </div>
 
-                <div className="p-3 bg-[#0f1922] rounded-lg border border-purple-500/20">
+                <div className="p-3 backdrop-blur-sm bg-blue-600/20 border border-purple-500/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <Stethoscope className="h-4 w-4 text-purple-400" />
                     <span className="text-sm font-medium text-purple-400">Specialty Recommendation</span>
@@ -449,7 +451,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   </p>
                 </div>
 
-                <div className="p-3 bg-[#0f1922] rounded-lg border border-green-500/20">
+                <div className="p-3 backdrop-blur-sm bg-blue-600/20 border border-green-500/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <Users className="h-4 w-4 text-green-400" />
                     <span className="text-sm font-medium text-green-400">Team Efficiency</span>

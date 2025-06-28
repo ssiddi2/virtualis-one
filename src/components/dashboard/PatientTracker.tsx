@@ -1,240 +1,302 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { Clock, User, AlertCircle } from "lucide-react";
-
-interface Patient {
-  id: string;
-  name: string;
-  age: number;
-  room: string;
-  complaint: string;
-  status: 'waiting' | 'in-progress' | 'discharge-ready';
-  provider: string;
-  admitTime: string;
-  acuity: 'low' | 'medium' | 'high';
-}
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { 
+  Users, 
+  Clock, 
+  AlertTriangle, 
+  CheckCircle, 
+  User,
+  Activity,
+  MapPin,
+  Calendar,
+  Search,
+  Filter,
+  Heart,
+  Thermometer
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const PatientTracker = () => {
-  const navigate = useNavigate();
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
 
-  useEffect(() => {
-    // Mock patient data
-    setPatients([
-      {
-        id: "1",
-        name: "Sarah Johnson",
-        age: 45,
-        room: "101",
-        complaint: "Chest pain",
-        status: "in-progress",
-        provider: "Dr. Smith",
-        admitTime: "09:30 AM",
-        acuity: "high"
-      },
-      {
-        id: "2", 
-        name: "Michael Brown",
-        age: 32,
-        room: "102",
-        complaint: "Ankle injury",
-        status: "waiting",
-        provider: "Dr. Johnson",
-        admitTime: "10:15 AM",
-        acuity: "low"
-      },
-      {
-        id: "3",
-        name: "Emily Davis",
-        age: 28,
-        room: "103",
-        complaint: "Severe headache",
-        status: "discharge-ready",
-        provider: "Dr. Smith",
-        admitTime: "08:45 AM",
-        acuity: "medium"
-      },
-      {
-        id: "4",
-        name: "Robert Wilson",
-        age: 67,
-        room: "104",
-        complaint: "Shortness of breath",
-        status: "in-progress",
-        provider: "Dr. Johnson",
-        admitTime: "11:00 AM",
-        acuity: "high"
-      },
-      {
-        id: "5",
-        name: "Lisa Garcia",
-        age: 34,
-        room: "Waiting",
-        complaint: "Stomach pain",
-        status: "waiting",
-        provider: "Unassigned",
-        admitTime: "11:30 AM",
-        acuity: "medium"
-      }
-    ]);
-  }, []);
+  const patients = [
+    {
+      id: 1,
+      name: 'John Smith',
+      mrn: 'MRN-001234',
+      room: 'ER-101',
+      status: 'critical',
+      condition: 'Chest Pain',
+      admissionTime: '08:30 AM',
+      vitals: { hr: 95, bp: '140/90', temp: 98.6, spo2: 98 },
+      physician: 'Dr. Johnson'
+    },
+    {
+      id: 2,
+      name: 'Sarah Davis',
+      mrn: 'MRN-001235',
+      room: 'ICU-201',
+      status: 'stable',
+      condition: 'Post-Op Monitoring',
+      admissionTime: '06:15 AM',
+      vitals: { hr: 72, bp: '120/80', temp: 98.2, spo2: 99 },
+      physician: 'Dr. Wilson'
+    },
+    {
+      id: 3,
+      name: 'Mike Johnson',
+      mrn: 'MRN-001236',
+      room: 'Room-305',
+      status: 'observation',
+      condition: 'Fever Investigation',
+      admissionTime: '10:45 AM',
+      vitals: { hr: 88, bp: '130/85', temp: 101.2, spo2: 97 },
+      physician: 'Dr. Martinez'
+    },
+    {
+      id: 4,
+      name: 'Lisa Wilson',
+      mrn: 'MRN-001237',
+      room: 'ER-102',
+      status: 'discharge',
+      condition: 'Minor Laceration',
+      admissionTime: '11:20 AM',
+      vitals: { hr: 78, bp: '115/75', temp: 98.4, spo2: 99 },
+      physician: 'Dr. Brown'
+    }
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'waiting':
-        return 'bg-blue-100 text-blue-800';
-      case 'in-progress':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'discharge-ready':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'critical': return 'bg-red-500/20 text-red-200 border-red-400/30';
+      case 'stable': return 'bg-green-500/20 text-green-200 border-green-400/30';
+      case 'observation': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'discharge': return 'bg-blue-500/20 text-blue-200 border-blue-400/30';
+      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
     }
   };
 
-  const getAcuityColor = (acuity: string) => {
-    switch (acuity) {
-      case 'high':
-        return 'text-red-600';
-      case 'medium':
-        return 'text-yellow-600';
-      case 'low':
-        return 'text-green-600';
-      default:
-        return 'text-gray-600';
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'critical': return <AlertTriangle className="h-4 w-4" />;
+      case 'stable': return <CheckCircle className="h-4 w-4" />;
+      case 'observation': return <Clock className="h-4 w-4" />;
+      case 'discharge': return <User className="h-4 w-4" />;
+      default: return <Activity className="h-4 w-4" />;
     }
   };
 
-  const groupedPatients = {
-    waiting: patients.filter(p => p.status === 'waiting'),
-    'in-progress': patients.filter(p => p.status === 'in-progress'),
-    'discharge-ready': patients.filter(p => p.status === 'discharge-ready')
+  const filteredPatients = patients.filter(patient => {
+    const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         patient.mrn.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = selectedFilter === 'all' || patient.status === selectedFilter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const handlePatientClick = (patient: any) => {
+    toast({
+      title: "Patient Details",
+      description: `Viewing details for ${patient.name}`,
+    });
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
-          Patient Tracker Board
-        </CardTitle>
-        <CardDescription>Real-time patient status and care progression</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Waiting Column */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-blue-700">Waiting Room</h3>
-              <Badge variant="secondary">{groupedPatients.waiting.length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {groupedPatients.waiting.map((patient) => (
-                <Card 
-                  key={patient.id} 
-                  className="p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/patient/${patient.id}`)}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium">{patient.name}</h4>
-                      <p className="text-sm text-gray-600">Age {patient.age}</p>
-                    </div>
-                    <AlertCircle className={`h-4 w-4 ${getAcuityColor(patient.acuity)}`} />
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">{patient.complaint}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {patient.admitTime}
-                    </span>
-                    <Badge className={getStatusColor(patient.status)}>
-                      Waiting
-                    </Badge>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* In Progress Column */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-yellow-700">In Progress</h3>
-              <Badge variant="secondary">{groupedPatients['in-progress'].length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {groupedPatients['in-progress'].map((patient) => (
-                <Card 
-                  key={patient.id} 
-                  className="p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/patient/${patient.id}`)}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium">{patient.name}</h4>
-                      <p className="text-sm text-gray-600">Room {patient.room}</p>
-                    </div>
-                    <AlertCircle className={`h-4 w-4 ${getAcuityColor(patient.acuity)}`} />
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">{patient.complaint}</p>
-                  <p className="text-sm text-blue-600 mb-2">{patient.provider}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {patient.admitTime}
-                    </span>
-                    <Badge className={getStatusColor(patient.status)}>
-                      In Progress
-                    </Badge>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Discharge Ready Column */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-green-700">Discharge Ready</h3>
-              <Badge variant="secondary">{groupedPatients['discharge-ready'].length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {groupedPatients['discharge-ready'].map((patient) => (
-                <Card 
-                  key={patient.id} 
-                  className="p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/patient/${patient.id}`)}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium">{patient.name}</h4>
-                      <p className="text-sm text-gray-600">Room {patient.room}</p>
-                    </div>
-                    <AlertCircle className={`h-4 w-4 ${getAcuityColor(patient.acuity)}`} />
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">{patient.complaint}</p>
-                  <p className="text-sm text-blue-600 mb-2">{patient.provider}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {patient.admitTime}
-                    </span>
-                    <Badge className={getStatusColor(patient.status)}>
-                      Ready
-                    </Badge>
-                  </div>
-                </Card>
-              ))}
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <Users className="h-12 w-12 text-sky-300 animate-pulse" />
+            <div>
+              <h1 className="text-4xl font-bold text-white">
+                Patient Tracker
+              </h1>
+              <p className="text-white/80 text-lg">
+                Real-time Patient Monitoring & Status Updates
+              </p>
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Total Patients</p>
+                  <p className="text-2xl font-bold text-white">{patients.length}</p>
+                </div>
+                <Users className="h-8 w-8 text-blue-300" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Critical</p>
+                  <p className="text-2xl font-bold text-white">
+                    {patients.filter(p => p.status === 'critical').length}
+                  </p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-red-300" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Stable</p>
+                  <p className="text-2xl font-bold text-white">
+                    {patients.filter(p => p.status === 'stable').length}
+                  </p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-300" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Observation</p>
+                  <p className="text-2xl font-bold text-white">
+                    {patients.filter(p => p.status === 'observation').length}
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-yellow-300" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filter */}
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex gap-4 items-center">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-white/50" />
+                <Input
+                  placeholder="Search patients by name or MRN..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-blue-600/20 border-blue-400/30 text-white placeholder:text-white/50"
+                />
+              </div>
+              <div className="flex gap-2">
+                {['all', 'critical', 'stable', 'observation', 'discharge'].map((filter) => (
+                  <Button
+                    key={filter}
+                    variant={selectedFilter === filter ? "default" : "outline"}
+                    onClick={() => setSelectedFilter(filter)}
+                    className={selectedFilter === filter 
+                      ? "bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white" 
+                      : "bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
+                    }
+                  >
+                    <Filter className="h-4 w-4 mr-2" />
+                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Patient List */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredPatients.map((patient) => (
+            <Card 
+              key={patient.id} 
+              className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg cursor-pointer hover:bg-blue-500/25 transition-colors"
+              onClick={() => handlePatientClick(patient)}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between text-white">
+                  <div className="flex items-center gap-3">
+                    <User className="h-6 w-6 text-sky-300" />
+                    <div>
+                      <div className="font-semibold">{patient.name}</div>
+                      <div className="text-sm text-white/70">{patient.mrn}</div>
+                    </div>
+                  </div>
+                  <Badge className={`${getStatusColor(patient.status)} text-xs`}>
+                    {getStatusIcon(patient.status)}
+                    <span className="ml-1">{patient.status.toUpperCase()}</span>
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-white/70">
+                    <MapPin className="h-4 w-4" />
+                    <span>{patient.room}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/70">
+                    <Calendar className="h-4 w-4" />
+                    <span>{patient.admissionTime}</span>
+                  </div>
+                </div>
+                
+                <div className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                  <div className="text-sm font-medium text-white mb-1">Condition</div>
+                  <div className="text-white/80">{patient.condition}</div>
+                  <div className="text-xs text-white/60 mt-1">Attending: {patient.physician}</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-center p-2 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Heart className="h-3 w-3 text-red-300" />
+                      <span className="text-xs text-white/70">HR</span>
+                    </div>
+                    <div className="text-sm font-semibold text-white">{patient.vitals.hr}</div>
+                  </div>
+                  <div className="text-center p-2 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Activity className="h-3 w-3 text-blue-300" />
+                      <span className="text-xs text-white/70">BP</span>
+                    </div>
+                    <div className="text-sm font-semibold text-white">{patient.vitals.bp}</div>
+                  </div>
+                  <div className="text-center p-2 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Thermometer className="h-3 w-3 text-yellow-300" />
+                      <span className="text-xs text-white/70">Temp</span>
+                    </div>
+                    <div className="text-sm font-semibold text-white">{patient.vitals.temp}°F</div>
+                  </div>
+                  <div className="text-center p-2 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Activity className="h-3 w-3 text-green-300" />
+                      <span className="text-xs text-white/70">SpO2</span>
+                    </div>
+                    <div className="text-sm font-semibold text-white">{patient.vitals.spo2}%</div>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                  View Full Chart
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
