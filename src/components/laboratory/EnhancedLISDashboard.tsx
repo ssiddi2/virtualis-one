@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -260,7 +259,7 @@ const EnhancedLISDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white brand-font gradient-text flex items-center gap-3">
-            <TestTube className="h-8 w-8 text-virtualis-gold" />
+            <Microscope className="h-8 w-8 text-blue-400" />
             Enhanced Laboratory Information System
           </h1>
           <p className="text-white/60 tech-font">AI-Powered Lab Management with Device Integration & Smart Analytics</p>
@@ -285,7 +284,7 @@ const EnhancedLISDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
               <TestTube className="h-4 w-4" />
               Total Tests
             </CardTitle>
@@ -301,7 +300,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
               <Monitor className="h-4 w-4" />
               Connected Devices
             </CardTitle>
@@ -314,7 +313,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
               <Bot className="h-4 w-4" />
               Automated Tests
             </CardTitle>
@@ -327,7 +326,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
               Critical Values
             </CardTitle>
@@ -340,7 +339,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font">Avg Turnaround</CardTitle>
+            <CardTitle className="text-blue-400 text-sm font-medium tech-font">Avg Turnaround</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{labMetrics.avgTurnaroundTime}</div>
@@ -350,7 +349,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-virtualis-gold text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
               <Shield className="h-4 w-4" />
               QC Compliance
             </CardTitle>
@@ -365,11 +364,11 @@ const EnhancedLISDashboard = () => {
       {/* Main Content Tabs */}
       <Tabs defaultValue="worklist" className="space-y-4">
         <TabsList className="glass-nav-item bg-black/20">
-          <TabsTrigger value="worklist" className="text-white data-[state=active]:text-virtualis-gold">Smart Worklist</TabsTrigger>
-          <TabsTrigger value="devices" className="text-white data-[state=active]:text-virtualis-gold">Device Management</TabsTrigger>
-          <TabsTrigger value="results" className="text-white data-[state=active]:text-virtualis-gold">Results Review</TabsTrigger>
-          <TabsTrigger value="quality" className="text-white data-[state=active]:text-virtualis-gold">Quality Control</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-white data-[state=active]:text-virtualis-gold">Lab Analytics</TabsTrigger>
+          <TabsTrigger value="worklist" className="text-white data-[state=active]:text-blue-400">Smart Worklist</TabsTrigger>
+          <TabsTrigger value="devices" className="text-white data-[state=active]:text-blue-400">Device Management</TabsTrigger>
+          <TabsTrigger value="results" className="text-white data-[state=active]:text-blue-400">Results Review</TabsTrigger>
+          <TabsTrigger value="quality" className="text-white data-[state=active]:text-blue-400">Quality Control</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-white data-[state=active]:text-blue-400">Lab Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="worklist" className="space-y-4">
@@ -404,16 +403,16 @@ const EnhancedLISDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/10">
-                    <TableHead className="text-virtualis-gold tech-font">Lab ID</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Patient</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Test Type</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Specimen</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Priority</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Status</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Device</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">TAT</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Critical Values</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Actions</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Lab ID</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Patient</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Test Type</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Specimen</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Priority</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Status</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Device</TableHead>
+                    <TableHead className="text-blue-400 tech-font">TAT</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Critical Values</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -541,7 +540,7 @@ const EnhancedLISDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <Microscope className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
+                <Microscope className="h-12 w-12 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">Smart Results Management</h3>
                 <p className="text-white/60 mb-4">AI-powered result validation with automated critical value detection</p>
                 <Button className="glass-button">Review Critical Values</Button>
@@ -563,13 +562,13 @@ const EnhancedLISDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/10">
-                    <TableHead className="text-virtualis-gold tech-font">Device</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Test</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Level</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Result</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Target</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Status</TableHead>
-                    <TableHead className="text-virtualis-gold tech-font">Actions</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Device</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Test</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Level</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Result</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Target</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Status</TableHead>
+                    <TableHead className="text-blue-400 tech-font">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -609,7 +608,7 @@ const EnhancedLISDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <Beaker className="h-12 w-12 text-virtualis-gold mx-auto mb-4" />
+                <Beaker className="h-12 w-12 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">Advanced Lab Analytics</h3>
                 <p className="text-white/60 mb-4">Device performance, turnaround optimization, and predictive maintenance</p>
                 <Button className="glass-button">Launch Analytics</Button>
