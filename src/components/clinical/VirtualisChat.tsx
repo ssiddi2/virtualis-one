@@ -18,9 +18,12 @@ import {
   Phone,
   Video,
   FileText,
-  Users
+  Users,
+  ArrowRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAIAssistant } from "@/hooks/useAIAssistant";
+import SmartRoutingDialog from "./SmartRoutingDialog";
 
 interface Message {
   id: string;
@@ -46,11 +49,14 @@ interface VirtualisChatProps {
 
 const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   const { toast } = useToast();
+  const { callAI, isLoading: aiLoading } = useAIAssistant();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('');
   const [messageType, setMessageType] = useState<'routine' | 'urgent' | 'critical'>('routine');
   const [activeFilter, setActiveFilter] = useState<'all' | 'critical' | 'urgent' | 'mine'>('all');
+  const [smartRoutingOpen, setSmartRoutingOpen] = useState(false);
+  const [selectedMessageForRouting, setSelectedMessageForRouting] = useState<Message | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Mock data for demonstration
@@ -68,7 +74,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         recommendedSpecialty: 'Pulmonology',
         aiAnalysis: {
           priority: 95,
-          keywords: ['respiratory distress', 'low oxygen saturation'],
+          keywords: ['respiratory distress', 'low oxygen saturation', 'emergency'],
           suggestedActions: ['Immediate O2 therapy', 'Chest X-ray', 'Pulmonology consult']
         }
       },
@@ -84,7 +90,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         recommendedSpecialty: 'Surgery',
         aiAnalysis: {
           priority: 75,
-          keywords: ['post-operative', 'surgical site pain'],
+          keywords: ['post-operative', 'surgical site pain', 'high pain score'],
           suggestedActions: ['Pain assessment', 'Wound inspection', 'Surgeon notification']
         }
       },
@@ -99,7 +105,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         patientName: 'Robert Wilson',
         aiAnalysis: {
           priority: 30,
-          keywords: ['discharge planning'],
+          keywords: ['discharge planning', 'scheduled meeting'],
           suggestedActions: ['Confirm availability', 'Prepare discharge summary']
         }
       }
@@ -133,8 +139,70 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     }
   };
 
+  const analyzeMessageWithAI = async (content: string, acuity: string) => {
+    try {
+      const result = await callAI({
+        type: 'triage_assessment',
+        data: {
+          symptoms: content
+        },
+        context: `Message acuity: ${acuity}, Healthcare communication triage`
+      });
+
+      // Parse AI response to extract priority and recommendations
+      const aiAnalysis = {
+        priority: acuity === 'critical' ? 95 : acuity === 'urgent' ? 70 : 40,
+        keywords: extractKeywords(content),
+        suggestedActions: extractSuggestedActions(result),
+        recommendedSpecialty: extractRecommendedSpecialty(result)
+      };
+
+      return aiAnalysis;
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+      return {
+        priority: acuity === 'critical' ? 95 : acuity === 'urgent' ? 70 : 40,
+        keywords: ['message analysis'],
+        suggestedActions: ['Review and respond']
+      };
+    }
+  };
+
+  const extractKeywords = (content: string): string[] => {
+    const keywords = [];
+    const medicalTerms = ['pain', 'distress', 'emergency', 'urgent', 'critical', 'post-op', 'surgical', 'discharge'];
+    medicalTerms.forEach(term => {
+      if (content.toLowerCase().includes(term)) {
+        keywords.push(term);
+      }
+    });
+    return keywords.length > 0 ? keywords : ['clinical message'];
+  };
+
+  const extractSuggestedActions = (aiResponse: string): string[] => {
+    // Simple extraction - in reality, this would be more sophisticated
+    const actions = [];
+    if (aiResponse.includes('consult')) actions.push('Request consultation');
+    if (aiResponse.includes('assessment')) actions.push('Clinical assessment');
+    if (aiResponse.includes('monitor')) actions.push('Monitor patient');
+    return actions.length > 0 ? actions : ['Review and respond'];
+  };
+
+  const extractRecommendedSpecialty = (aiResponse: string): string | undefined => {
+    const specialties = ['Cardiology', 'Pulmonology', 'Surgery', 'Neurology', 'Emergency Medicine'];
+    for (const specialty of specialties) {
+      if (aiResponse.toLowerCase().includes(specialty.toLowerCase())) {
+        return specialty;
+      }
+    }
+    return undefined;
+  };
+
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
+
+    // Get AI analysis for the new message
+    const aiAnalysis = await analyzeMessageWithAI(newMessage, messageType);
 
     const message: Message = {
       id: Date.now().toString(),
@@ -144,11 +212,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
       timestamp: new Date(),
       acuity: messageType,
       patientId: selectedPatient || undefined,
-      aiAnalysis: {
-        priority: messageType === 'critical' ? 95 : messageType === 'urgent' ? 70 : 40,
-        keywords: ['new message'],
-        suggestedActions: ['Review and respond']
-      }
+      recommendedSpecialty: aiAnalysis.recommendedSpecialty,
+      aiAnalysis: aiAnalysis
     };
 
     setMessages(prev => [...prev, message]);
@@ -156,20 +221,26 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     
     toast({
       title: "Message Sent",
-      description: `${messageType.charAt(0).toUpperCase() + messageType.slice(1)} priority message sent successfully.`,
+      description: `${messageType.charAt(0).toUpperCase() + messageType.slice(1)} priority message sent with AI analysis.`,
     });
 
-    // Simulate AI analysis and specialty recommendation
-    setTimeout(() => {
-      if (messageType === 'critical' || messageType === 'urgent') {
+    // Auto-suggest routing for critical/urgent messages
+    if (messageType === 'critical' || messageType === 'urgent') {
+      setTimeout(() => {
         toast({
-          title: "AI Recommendation",
-          description: "Based on message content, recommended specialty consultation has been suggested.",
+          title: "Smart Routing Available",
+          description: `AI recommends ${aiAnalysis.recommendedSpecialty || 'specialist'} consultation for this ${messageType} message.`,
         });
-      }
-    }, 2000);
+      }, 2000);
+    }
   };
 
+  const handleSmartRouting = (message: Message) => {
+    setSelectedMessageForRouting(message);
+    setSmartRoutingOpen(true);
+  };
+
+  // AI-powered message sorting: Priority score from AI analysis, then timestamp
   const filteredMessages = messages.filter(msg => {
     switch (activeFilter) {
       case 'critical': return msg.acuity === 'critical';
@@ -178,9 +249,16 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
       default: return true;
     }
   }).sort((a, b) => {
-    // Sort by priority (AI analysis) and timestamp
+    // Primary sort: AI priority score (higher first)
     const priorityDiff = (b.aiAnalysis?.priority || 0) - (a.aiAnalysis?.priority || 0);
     if (priorityDiff !== 0) return priorityDiff;
+    
+    // Secondary sort: Acuity level
+    const acuityValues = { critical: 3, urgent: 2, routine: 1 };
+    const acuityDiff = acuityValues[b.acuity] - acuityValues[a.acuity];
+    if (acuityDiff !== 0) return acuityDiff;
+    
+    // Tertiary sort: Timestamp (newest first)
     return b.timestamp.getTime() - a.timestamp.getTime();
   });
 
@@ -197,7 +275,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Virtualis Chat</h1>
-              <p className="text-white/70">AI-Powered Clinical Communication Platform</p>
+              <p className="text-white/70">AI-Powered Clinical Communication with Smart Routing</p>
             </div>
           </div>
 
@@ -235,10 +313,12 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Active Consultations</p>
-                    <p className="text-2xl font-bold text-white">7</p>
+                    <p className="text-sm text-white/70">AI Routed</p>
+                    <p className="text-2xl font-bold text-white">
+                      {messages.filter(m => m.recommendedSpecialty).length}
+                    </p>
                   </div>
-                  <Stethoscope className="h-8 w-8 text-blue-300" />
+                  <Brain className="h-8 w-8 text-purple-300" />
                 </div>
               </CardContent>
             </Card>
@@ -247,10 +327,12 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Response Time</p>
-                    <p className="text-2xl font-bold text-white">2.3m</p>
+                    <p className="text-sm text-white/70">Avg Priority</p>
+                    <p className="text-2xl font-bold text-white">
+                      {Math.round(messages.reduce((acc, m) => acc + (m.aiAnalysis?.priority || 0), 0) / messages.length) || 0}
+                    </p>
                   </div>
-                  <MessageSquare className="h-8 w-8 text-green-300" />
+                  <Star className="h-8 w-8 text-blue-300" />
                 </div>
               </CardContent>
             </Card>
@@ -264,11 +346,17 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 variant={activeFilter === filter ? "default" : "outline"}
                 onClick={() => setActiveFilter(filter as any)}
                 className={activeFilter === filter 
-                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white" 
+                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
                   : "bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
                 }
               >
                 {filter.charAt(0).toUpperCase() + filter.slice(1)} Messages
+                <Badge className="ml-2 bg-blue-600/50 text-white">
+                  {filter === 'all' ? messages.length : 
+                   filter === 'critical' ? messages.filter(m => m.acuity === 'critical').length :
+                   filter === 'urgent' ? messages.filter(m => m.acuity === 'urgent').length :
+                   messages.filter(m => m.sender === (currentUser?.name || 'Current User')).length}
+                </Badge>
               </Button>
             ))}
           </div>
@@ -280,11 +368,11 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg h-[600px] flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <MessageSquare className="h-5 w-5 text-blue-300" />
-                  Clinical Messages Feed
+                  <Brain className="h-5 w-5 text-blue-300" />
+                  AI-Prioritized Clinical Messages
                 </CardTitle>
                 <CardDescription className="text-white/70">
-                  AI-prioritized communications sorted by acuity
+                  Messages sorted by AI priority score and acuity level
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto space-y-4">
@@ -338,6 +426,15 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                             <span className="text-xs text-blue-300">Priority: {message.aiAnalysis.priority}/100</span>
                           </div>
                         </div>
+                        {message.aiAnalysis.keywords.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {message.aiAnalysis.keywords.map((keyword, idx) => (
+                              <Badge key={idx} className="bg-purple-600/20 text-purple-200 text-xs">
+                                {keyword}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                         {message.aiAnalysis.suggestedActions && (
                           <div className="text-xs text-white/70">
                             Suggested: {message.aiAnalysis.suggestedActions.join(', ')}
@@ -347,17 +444,21 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                     )}
                     
                     <div className="flex gap-2 mt-3">
-                      <Button size="sm" className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                         <MessageSquare className="h-3 w-3 mr-1" />
                         Reply
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleSmartRouting(message)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <ArrowRight className="h-3 w-3 mr-1" />
+                        Smart Route
                       </Button>
                       <Button size="sm" variant="outline" className="border-green-400/30 text-green-300 hover:bg-green-600/20">
                         <Phone className="h-3 w-3 mr-1" />
                         Call
-                      </Button>
-                      <Button size="sm" variant="outline" className="border-purple-400/30 text-purple-300 hover:bg-purple-600/20">
-                        <Video className="h-3 w-3 mr-1" />
-                        Video
                       </Button>
                     </div>
                   </div>
@@ -373,7 +474,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardHeader>
                 <CardTitle className="text-white">Send Message</CardTitle>
                 <CardDescription className="text-white/70">
-                  AI-powered message prioritization
+                  AI-powered message analysis and smart routing
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -403,11 +504,11 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
                 <Button 
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
+                  disabled={!newMessage.trim() || aiLoading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Send Message
+                  {aiLoading ? 'Analyzing...' : 'Send & Analyze'}
                 </Button>
               </CardContent>
             </Card>
@@ -435,6 +536,17 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
           </div>
         </div>
       </div>
+
+      {/* Smart Routing Dialog */}
+      <SmartRoutingDialog
+        open={smartRoutingOpen}
+        onClose={() => setSmartRoutingOpen(false)}
+        messageContent={selectedMessageForRouting?.content || ''}
+        messageId={selectedMessageForRouting?.id || ''}
+        urgency={selectedMessageForRouting?.acuity || 'routine'}
+        patientId={selectedMessageForRouting?.patientId}
+        aiRecommendedSpecialty={selectedMessageForRouting?.recommendedSpecialty}
+      />
     </div>
   );
 };
