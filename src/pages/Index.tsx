@@ -38,18 +38,29 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(210, 40%, 65%) 0%, hsl(210, 35%, 75%) 50%, hsl(210, 30%, 70%) 100%)'
+      }}>
         <div className="text-white">Loading...</div>
       </div>
     );
   }
 
   if (!user) {
-    return <AuthForm />;
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, hsl(210, 40%, 65%) 0%, hsl(210, 35%, 75%) 50%, hsl(210, 30%, 70%) 100%)',
+        minHeight: '100vh'
+      }}>
+        <AuthForm />
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-screen bg-[#0a1628] overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{
+      background: 'linear-gradient(135deg, hsl(210, 40%, 65%) 0%, hsl(210, 35%, 75%) 50%, hsl(210, 30%, 70%) 100%)'
+    }}>
       <Sidebar selectedHospitalId={selectedHospitalId} />
       <main className="flex-1 overflow-auto">
         <Routes>
