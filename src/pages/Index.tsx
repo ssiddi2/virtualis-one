@@ -39,7 +39,7 @@ const Index = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%)'
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <div className="text-white">Loading...</div>
       </div>
@@ -49,7 +49,7 @@ const Index = () => {
   if (!user) {
     return (
       <div style={{
-        background: 'linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%)',
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)',
         minHeight: '100vh'
       }}>
         <AuthForm />
@@ -59,11 +59,11 @@ const Index = () => {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{
-      background: 'linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%)'
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
       <Sidebar selectedHospitalId={selectedHospitalId} />
       <main className="flex-1 overflow-auto" style={{
-        background: 'linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%)'
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <Routes>
           <Route path="/" element={<Navigate to="/emr" replace />} />
@@ -76,12 +76,12 @@ const Index = () => {
               />
             ) : (
               <div className="min-h-screen flex items-center justify-center" style={{
-                background: 'linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%)'
+                background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
               }}>
                 <div className="text-center text-white">
                   <h2 className="text-2xl font-bold mb-4">Select a Hospital</h2>
                   <p className="text-white/70 mb-4">Please select a hospital from the EMR dashboard to view AI insights.</p>
-                  <Button onClick={() => navigate('/emr')} className="livemed-button">
+                  <Button onClick={() => navigate('/emr')} className="virtualis-button">
                     Go to EMR Dashboard
                   </Button>
                 </div>

@@ -3,57 +3,58 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Virtualis Design System - Light Blue Glassmorphism Theme */
+/* Virtualis Design System - Enhanced Blue Glassmorphism Theme */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    /* Virtualis Blue Theme - Light Blue Sky Gradient */
-    --background: 210 100% 85%;
-    --background-gradient-start: 220 100% 88%;
-    --background-gradient-end: 200 100% 82%;
-    --foreground: 220 20% 20%;
+    /* Enhanced Blue Theme - Rich Navy to Sky Blue Gradient */
+    --background: 220 85% 65%;
+    --background-gradient-start: 225 70% 25%;
+    --background-gradient-middle: 220 65% 45%;
+    --background-gradient-end: 210 60% 65%;
+    --foreground: 0 0% 100%;
 
-    /* Card System - Sky Blue Glassmorphism */
-    --card: 210 60% 92%;
-    --card-border: 210 40% 75%;
-    --card-foreground: 220 30% 15%;
+    /* Enhanced Card System - Vibrant Blue Glassmorphism */
+    --card: 220 45% 55%;
+    --card-border: 215 50% 70%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 210 60% 92%;
-    --popover-foreground: 220 30% 15%;
+    --popover: 220 45% 55%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Primary - Sunshine Gradient */
-    --primary: 45 100% 60%;
-    --primary-foreground: 220 30% 15%;
+    /* Primary - Enhanced Sunshine Gradient */
+    --primary: 45 100% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Medium Blue */
-    --secondary: 210 40% 75%;
-    --secondary-foreground: 220 30% 15%;
+    /* Secondary - Enhanced Medium Blue */
+    --secondary: 215 50% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 30% 80%;
-    --muted-foreground: 220 20% 40%;
+    --muted: 220 35% 75%;
+    --muted-foreground: 220 20% 20%;
 
-    --accent: 45 100% 60%;
-    --accent-foreground: 220 30% 15%;
+    --accent: 45 100% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 40% 75%;
-    --input: 210 50% 85%;
-    --ring: 45 100% 60%;
+    --border: 215 50% 70%;
+    --input: 220 40% 60%;
+    --ring: 45 100% 55%;
 
     --radius: 16px;
 
-    /* Sidebar - Navy Blue */
-    --sidebar-background: 220 40% 25%;
+    /* Enhanced Sidebar - Rich Navy */
+    --sidebar-background: 225 70% 25%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 45 100% 60%;
-    --sidebar-primary-foreground: 220 30% 15%;
-    --sidebar-accent: 210 30% 35%;
+    --sidebar-primary: 45 100% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 45% 35%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 30% 45%;
-    --sidebar-ring: 45 100% 60%;
+    --sidebar-border: 215 50% 40%;
+    --sidebar-ring: 45 100% 55%;
   }
 }
 
@@ -64,58 +65,82 @@
 
   body {
     @apply text-foreground font-sans;
-    background: linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%) !important;
+    background: linear-gradient(135deg, 
+      hsl(225, 70%, 25%) 0%, 
+      hsl(220, 65%, 35%) 25%, 
+      hsl(215, 60%, 45%) 50%, 
+      hsl(210, 55%, 55%) 75%, 
+      hsl(205, 50%, 65%) 100%) !important;
     min-height: 100vh;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
+    color: white;
   }
 
-  /* Force light blue gradient background across all pages */
+  /* Force enhanced blue gradient background across all pages */
   html, body, #root, .min-h-screen {
-    background: linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%) !important;
+    background: linear-gradient(135deg, 
+      hsl(225, 70%, 25%) 0%, 
+      hsl(220, 65%, 35%) 25%, 
+      hsl(215, 60%, 45%) 50%, 
+      hsl(210, 55%, 55%) 75%, 
+      hsl(205, 50%, 65%) 100%) !important;
     min-height: 100vh;
+    color: white;
   }
 }
 
-/* Virtualis Glassmorphism Components */
+/* Enhanced Virtualis Glassmorphism Components */
 @layer components {
   .virtualis-card, .glass-card {
-    @apply backdrop-blur-xl border rounded-2xl shadow-lg;
-    background: rgba(173, 216, 230, 0.4) !important;
-    border: 1px solid rgba(135, 206, 235, 0.6) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    @apply backdrop-blur-2xl border rounded-2xl shadow-2xl;
+    background: rgba(100, 149, 237, 0.15) !important;
+    border: 1px solid rgba(135, 206, 250, 0.3) !important;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
   }
 
   .virtualis-card:hover, .glass-card:hover {
     @apply transform transition-all duration-300;
-    background: rgba(173, 216, 230, 0.55) !important;
+    background: rgba(100, 149, 237, 0.25) !important;
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
   .virtualis-input, .glass-input {
-    @apply backdrop-blur-lg border rounded-xl px-4 py-3 text-gray-800 placeholder:text-gray-500 transition-all duration-200;
-    background: rgba(173, 216, 230, 0.3) !important;
-    border: 1px solid rgba(135, 206, 235, 0.5) !important;
+    @apply backdrop-blur-xl border rounded-xl px-4 py-3 text-white placeholder:text-blue-200 transition-all duration-200;
+    background: rgba(100, 149, 237, 0.15) !important;
+    border: 1px solid rgba(135, 206, 250, 0.3) !important;
+    backdrop-filter: blur(15px);
   }
 
   .virtualis-input:focus, .glass-input:focus {
     @apply outline-none ring-2;
-    border-color: #fbbf24 !important;
-    ring-color: rgba(251, 191, 36, 0.3);
-    background: rgba(173, 216, 230, 0.45) !important;
+    border-color: rgba(255, 193, 7, 0.6) !important;
+    ring-color: rgba(255, 193, 7, 0.3);
+    background: rgba(100, 149, 237, 0.25) !important;
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.2);
   }
 
   .virtualis-button, .glass-button {
     @apply rounded-xl px-6 py-3 text-white font-semibold transition-all duration-300 transform;
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #f97316 100%) !important;
-    box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
+    background: linear-gradient(135deg, #FFC107 0%, #FF9800 50%, #FF5722 100%) !important;
+    box-shadow: 
+      0 4px 20px rgba(255, 193, 7, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: none;
   }
 
   .virtualis-button:hover, .glass-button:hover {
     @apply scale-105;
-    background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%) !important;
-    box-shadow: 0 6px 25px rgba(251, 191, 36, 0.4);
+    background: linear-gradient(135deg, #FF9800 0%, #FF5722 50%, #E91E63 100%) !important;
+    box-shadow: 
+      0 6px 25px rgba(255, 193, 7, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
   .virtualis-button:active, .glass-button:active {
@@ -123,81 +148,84 @@
   }
 
   .virtualis-sidebar, .glass-sidebar {
-    @apply backdrop-blur-xl border-r;
-    background: rgba(25, 42, 86, 0.9) !important;
-    border-right: 1px solid rgba(135, 206, 235, 0.3) !important;
+    @apply backdrop-blur-2xl border-r;
+    background: rgba(30, 58, 138, 0.8) !important;
+    border-right: 1px solid rgba(135, 206, 250, 0.2) !important;
+    backdrop-filter: blur(20px);
   }
 
   .virtualis-nav-item, .glass-nav-item {
     @apply backdrop-blur-sm border rounded-xl px-4 py-3 transition-all duration-300;
-    background: rgba(70, 130, 180, 0.3) !important;
-    border: 1px solid rgba(135, 206, 235, 0.4) !important;
+    background: rgba(59, 130, 246, 0.15) !important;
+    border: 1px solid rgba(135, 206, 250, 0.25) !important;
   }
 
   .virtualis-nav-item:hover, .virtualis-nav-item.active, .glass-nav-item:hover, .glass-nav-item.active {
-    background: rgba(251, 191, 36, 0.2) !important;
-    border-color: rgba(251, 191, 36, 0.5) !important;
+    background: rgba(255, 193, 7, 0.2) !important;
+    border-color: rgba(255, 193, 7, 0.4) !important;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
   }
 
   .virtualis-badge, .glass-badge {
     @apply backdrop-blur-sm border rounded-full px-3 py-1 text-xs font-medium;
-    background: rgba(173, 216, 230, 0.4) !important;
-    border: 1px solid rgba(135, 206, 235, 0.6) !important;
-    color: hsl(220, 30%, 15%) !important;
+    background: rgba(100, 149, 237, 0.2) !important;
+    border: 1px solid rgba(135, 206, 250, 0.4) !important;
+    color: white !important;
   }
 
   .virtualis-badge.success, .glass-badge.success {
-    @apply text-green-700;
-    background: rgba(34, 197, 94, 0.3) !important;
-    border-color: rgba(34, 197, 94, 0.5) !important;
+    @apply text-green-200;
+    background: rgba(34, 197, 94, 0.25) !important;
+    border-color: rgba(34, 197, 94, 0.4) !important;
   }
 
   .virtualis-badge.warning, .glass-badge.warning {
-    @apply text-orange-700;
-    background: rgba(251, 191, 36, 0.3) !important;
-    border-color: rgba(251, 191, 36, 0.5) !important;
+    @apply text-yellow-200;
+    background: rgba(255, 193, 7, 0.25) !important;
+    border-color: rgba(255, 193, 7, 0.4) !important;
   }
 
   .virtualis-badge.error, .glass-badge.error {
-    @apply text-red-700;
-    background: rgba(239, 68, 68, 0.3) !important;
-    border-color: rgba(239, 68, 68, 0.5) !important;
+    @apply text-red-200;
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
   }
 
   .virtualis-badge.primary, .glass-badge.primary {
-    @apply text-orange-800;
-    background: rgba(251, 191, 36, 0.3) !important;
-    border-color: rgba(251, 191, 36, 0.5) !important;
+    @apply text-orange-200;
+    background: rgba(255, 193, 7, 0.25) !important;
+    border-color: rgba(255, 193, 7, 0.4) !important;
   }
 
   .virtualis-gradient-text, .gradient-text {
-    background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%) !important;
+    background: linear-gradient(135deg, #FFC107 0%, #FF9800 50%, #FF5722 100%) !important;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Override shadcn components */
+  /* Enhanced shadcn component overrides */
   .bg-card {
-    background: rgba(173, 216, 230, 0.4) !important;
-    border: 1px solid rgba(135, 206, 235, 0.6) !important;
+    background: rgba(100, 149, 237, 0.15) !important;
+    border: 1px solid rgba(135, 206, 250, 0.3) !important;
+    backdrop-filter: blur(20px);
   }
 
   .bg-background {
-    background: linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%) !important;
+    background: linear-gradient(135deg, 
+      hsl(225, 70%, 25%) 0%, 
+      hsl(220, 65%, 35%) 25%, 
+      hsl(215, 60%, 45%) 50%, 
+      hsl(210, 55%, 55%) 75%, 
+      hsl(205, 50%, 65%) 100%) !important;
   }
 
   .bg-primary {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #f97316 100%) !important;
+    background: linear-gradient(135deg, #FFC107 0%, #FF9800 50%, #FF5722 100%) !important;
   }
 
   .bg-secondary {
-    background: rgba(173, 216, 230, 0.4) !important;
-  }
-
-  /* Remove golden/yellow text colors */
-  .text-yellow-400, .text-yellow-300, .text-yellow-500 {
-    color: hsl(220, 30%, 15%) !important;
+    background: rgba(100, 149, 237, 0.15) !important;
   }
 
   /* Force proper text colors */
@@ -205,12 +233,21 @@
     color: white !important;
   }
 
-  .text-gray-800, .text-gray-700 {
-    color: hsl(220, 30%, 15%) !important;
+  .text-gray-800, .text-gray-700, .text-gray-600 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Remove any golden/yellow text colors that might interfere */
+  .text-yellow-400, .text-yellow-300, .text-yellow-500, .text-amber-400, .text-orange-400 {
+    color: white !important;
   }
 }
 
-/* Animation Enhancements */
+/* Enhanced Animation Effects */
 @layer utilities {
   .animate-float {
     animation: float 6s ease-in-out infinite;
@@ -226,7 +263,13 @@
   }
 
   @keyframes pulse-glow {
-    0% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
-    100% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.6), 0 0 60px rgba(251, 191, 36, 0.2); }
+    0% { 
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+    }
+    100% { 
+      box-shadow: 
+        0 0 30px rgba(255, 193, 7, 0.6), 
+        0 0 60px rgba(255, 193, 7, 0.2);
+    }
   }
 }

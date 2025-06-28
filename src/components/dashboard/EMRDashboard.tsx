@@ -100,23 +100,23 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%)'
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
-        <div className="text-gray-800">Loading EMR systems...</div>
+        <div className="text-white">Loading EMR systems...</div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen p-6" style={{
-      background: 'linear-gradient(135deg, hsl(220, 100%, 88%) 0%, hsl(210, 100%, 85%) 50%, hsl(200, 100%, 82%) 100%)'
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 virtualis-gradient-text">EMR Systems Dashboard</h1>
-            <p className="text-gray-600 text-lg">Electronic Medical Records Management</p>
+            <h1 className="text-4xl font-bold text-white virtualis-gradient-text">EMR Systems Dashboard</h1>
+            <p className="text-white/80 text-lg">Electronic Medical Records Management</p>
           </div>
           <div className="flex gap-3">
             <Button 
@@ -142,12 +142,12 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="virtualis-card animate-float">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Connected Systems</CardTitle>
-              <Database className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-sm font-medium text-white">Connected Systems</CardTitle>
+              <Database className="h-5 w-5 text-blue-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-800">{hospitals?.length || 0}</div>
-              <p className="text-xs text-gray-600 mt-1">
+              <div className="text-3xl font-bold text-white">{hospitals?.length || 0}</div>
+              <p className="text-xs text-white/70 mt-1">
                 All systems operational
               </p>
             </CardContent>
@@ -155,12 +155,12 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
 
           <Card className="virtualis-card animate-float" style={{ animationDelay: '0.1s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Data Sync Status</CardTitle>
-              <Wifi className="h-5 w-5 text-green-600" />
+              <CardTitle className="text-sm font-medium text-white">Data Sync Status</CardTitle>
+              <Wifi className="h-5 w-5 text-green-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-800">99.8%</div>
-              <p className="text-xs text-gray-600 mt-1">
+              <div className="text-3xl font-bold text-white">99.8%</div>
+              <p className="text-xs text-white/70 mt-1">
                 Last sync: 2 minutes ago
               </p>
             </CardContent>
@@ -168,12 +168,12 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
 
           <Card className="virtualis-card animate-float" style={{ animationDelay: '0.2s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Active Users</CardTitle>
-              <Users className="h-5 w-5 text-purple-600" />
+              <CardTitle className="text-sm font-medium text-white">Active Users</CardTitle>
+              <Users className="h-5 w-5 text-purple-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-800">247</div>
-              <p className="text-xs text-gray-600 mt-1">
+              <div className="text-3xl font-bold text-white">247</div>
+              <p className="text-xs text-white/70 mt-1">
                 +12% from yesterday
               </p>
             </CardContent>
@@ -181,12 +181,12 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
 
           <Card className="virtualis-card animate-float" style={{ animationDelay: '0.3s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Security Status</CardTitle>
-              <Shield className="h-5 w-5 text-orange-600" />
+              <CardTitle className="text-sm font-medium text-white">Security Status</CardTitle>
+              <Shield className="h-5 w-5 text-orange-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-800">Secure</div>
-              <p className="text-xs text-gray-600 mt-1">
+              <div className="text-3xl font-bold text-white">Secure</div>
+              <p className="text-xs text-white/70 mt-1">
                 HIPAA compliant
               </p>
             </CardContent>
@@ -199,8 +199,8 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
             <Card key={hospital.id} className="virtualis-card hover:scale-[1.02] transition-all duration-300 cursor-pointer">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-gray-800 flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-blue-300" />
                     {hospital.name}
                   </CardTitle>
                   <Badge className="virtualis-badge success">
@@ -209,24 +209,24 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-white/80">
                   Location: {hospital.address}
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="text-gray-500">Patients</div>
-                    <div className="text-gray-800 font-semibold text-lg">{Math.floor(Math.random() * 500) + 100}</div>
+                    <div className="text-white/70">Patients</div>
+                    <div className="text-white font-semibold text-lg">{Math.floor(Math.random() * 500) + 100}</div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Staff</div>
-                    <div className="text-gray-800 font-semibold text-lg">{Math.floor(Math.random() * 100) + 20}</div>
+                    <div className="text-white/70">Staff</div>
+                    <div className="text-white font-semibold text-lg">{Math.floor(Math.random() * 100) + 20}</div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 text-xs">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                  <span className="text-gray-600">Last sync: {Math.floor(Math.random() * 30) + 1} min ago</span>
+                  <CheckCircle className="h-3 w-3 text-green-300" />
+                  <span className="text-white/70">Last sync: {Math.floor(Math.random() * 30) + 1} min ago</span>
                 </div>
 
                 <Button 
@@ -243,7 +243,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
         {/* System Management */}
         <Card className="virtualis-card">
           <CardHeader>
-            <CardTitle className="text-gray-800 text-xl">System Management</CardTitle>
+            <CardTitle className="text-white text-xl">System Management</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

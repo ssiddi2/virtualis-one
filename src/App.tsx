@@ -14,7 +14,8 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <div className="min-h-screen w-full" style={{
-          background: 'linear-gradient(135deg, hsl(220, 45%, 20%) 0%, hsl(220, 40%, 25%) 50%, hsl(220, 35%, 30%) 100%)'
+          background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)',
+          color: 'white'
         }}>
           <Toaster />
           <Sonner />
