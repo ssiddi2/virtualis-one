@@ -39,6 +39,7 @@ interface Message {
     priority: number;
     keywords: string[];
     suggestedActions: string[];
+    recommendedSpecialty?: string;
   };
 }
 
@@ -75,7 +76,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         aiAnalysis: {
           priority: 95,
           keywords: ['respiratory distress', 'low oxygen saturation', 'emergency'],
-          suggestedActions: ['Immediate O2 therapy', 'Chest X-ray', 'Pulmonology consult']
+          suggestedActions: ['Immediate O2 therapy', 'Chest X-ray', 'Pulmonology consult'],
+          recommendedSpecialty: 'Pulmonology'
         }
       },
       {
@@ -91,7 +93,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         aiAnalysis: {
           priority: 75,
           keywords: ['post-operative', 'surgical site pain', 'high pain score'],
-          suggestedActions: ['Pain assessment', 'Wound inspection', 'Surgeon notification']
+          suggestedActions: ['Pain assessment', 'Wound inspection', 'Surgeon notification'],
+          recommendedSpecialty: 'Surgery'
         }
       },
       {
@@ -163,7 +166,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
       return {
         priority: acuity === 'critical' ? 95 : acuity === 'urgent' ? 70 : 40,
         keywords: ['message analysis'],
-        suggestedActions: ['Review and respond']
+        suggestedActions: ['Review and respond'],
+        recommendedSpecialty: undefined
       };
     }
   };
