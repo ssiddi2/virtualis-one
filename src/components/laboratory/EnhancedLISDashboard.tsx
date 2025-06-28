@@ -258,11 +258,11 @@ const EnhancedLISDashboard = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white brand-font gradient-text flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <Microscope className="h-8 w-8 text-blue-400" />
             Enhanced Laboratory Information System
           </h1>
-          <p className="text-white/60 tech-font">AI-Powered Lab Management with Device Integration & Smart Analytics</p>
+          <p className="text-white/60">AI-Powered Lab Management with Device Integration & Smart Analytics</p>
         </div>
         <div className="flex gap-3">
           <Button className="glass-button">
@@ -284,7 +284,7 @@ const EnhancedLISDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium flex items-center gap-2">
               <TestTube className="h-4 w-4" />
               Total Tests
             </CardTitle>
@@ -300,7 +300,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium flex items-center gap-2">
               <Monitor className="h-4 w-4" />
               Connected Devices
             </CardTitle>
@@ -313,7 +313,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium flex items-center gap-2">
               <Bot className="h-4 w-4" />
               Automated Tests
             </CardTitle>
@@ -326,7 +326,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
               Critical Values
             </CardTitle>
@@ -339,7 +339,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-blue-400 text-sm font-medium tech-font">Avg Turnaround</CardTitle>
+            <CardTitle className="text-blue-400 text-sm font-medium">Avg Turnaround</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{labMetrics.avgTurnaroundTime}</div>
@@ -349,7 +349,7 @@ const EnhancedLISDashboard = () => {
 
         <Card className="glass-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-blue-400 text-sm font-medium tech-font flex items-center gap-2">
+            <CardTitle className="text-blue-400 text-sm font-medium flex items-center gap-2">
               <Shield className="h-4 w-4" />
               QC Compliance
             </CardTitle>
@@ -376,7 +376,7 @@ const EnhancedLISDashboard = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-white tech-font">AI-Enhanced Laboratory Worklist</CardTitle>
+                  <CardTitle className="text-white">AI-Enhanced Laboratory Worklist</CardTitle>
                   <CardDescription className="text-white/60">Real-time device integration with automated processing</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
@@ -403,22 +403,22 @@ const EnhancedLISDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/10">
-                    <TableHead className="text-blue-400 tech-font">Lab ID</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Patient</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Test Type</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Specimen</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Priority</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Status</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Device</TableHead>
-                    <TableHead className="text-blue-400 tech-font">TAT</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Critical Values</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Actions</TableHead>
+                    <TableHead className="text-blue-400">Lab ID</TableHead>
+                    <TableHead className="text-blue-400">Patient</TableHead>
+                    <TableHead className="text-blue-400">Test Type</TableHead>
+                    <TableHead className="text-blue-400">Specimen</TableHead>
+                    <TableHead className="text-blue-400">Priority</TableHead>
+                    <TableHead className="text-blue-400">Status</TableHead>
+                    <TableHead className="text-blue-400">Device</TableHead>
+                    <TableHead className="text-blue-400">TAT</TableHead>
+                    <TableHead className="text-blue-400">Critical Values</TableHead>
+                    <TableHead className="text-blue-400">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendingTests.map((test) => (
                     <TableRow key={test.id} className="border-white/10 hover:bg-white/5">
-                      <TableCell className="text-white tech-font font-medium">{test.id}</TableCell>
+                      <TableCell className="text-white font-medium">{test.id}</TableCell>
                       <TableCell className="text-white">{test.patient}</TableCell>
                       <TableCell className="text-white">{test.testType}</TableCell>
                       <TableCell className="text-white">
@@ -467,7 +467,7 @@ const EnhancedLISDashboard = () => {
         <TabsContent value="devices" className="space-y-4">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-white tech-font flex items-center gap-2">
+              <CardTitle className="text-white flex items-center gap-2">
                 <Monitor className="h-5 w-5" />
                 Connected Laboratory Devices
               </CardTitle>
@@ -535,7 +535,7 @@ const EnhancedLISDashboard = () => {
         <TabsContent value="results" className="space-y-4">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-white tech-font">Results Review & Validation</CardTitle>
+              <CardTitle className="text-white">Results Review & Validation</CardTitle>
               <CardDescription className="text-white/60">AI-assisted result verification and critical value management</CardDescription>
             </CardHeader>
             <CardContent>
@@ -552,7 +552,7 @@ const EnhancedLISDashboard = () => {
         <TabsContent value="quality" className="space-y-4">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-white tech-font flex items-center gap-2">
+              <CardTitle className="text-white flex items-center gap-2">
                 <FlaskConical className="h-5 w-5" />
                 Real-Time Quality Control
               </CardTitle>
@@ -562,13 +562,13 @@ const EnhancedLISDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/10">
-                    <TableHead className="text-blue-400 tech-font">Device</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Test</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Level</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Result</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Target</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Status</TableHead>
-                    <TableHead className="text-blue-400 tech-font">Actions</TableHead>
+                    <TableHead className="text-blue-400">Device</TableHead>
+                    <TableHead className="text-blue-400">Test</TableHead>
+                    <TableHead className="text-blue-400">Level</TableHead>
+                    <TableHead className="text-blue-400">Result</TableHead>
+                    <TableHead className="text-blue-400">Target</TableHead>
+                    <TableHead className="text-blue-400">Status</TableHead>
+                    <TableHead className="text-blue-400">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -603,7 +603,7 @@ const EnhancedLISDashboard = () => {
         <TabsContent value="analytics" className="space-y-4">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-white tech-font">Laboratory Analytics Dashboard</CardTitle>
+              <CardTitle className="text-white">Laboratory Analytics Dashboard</CardTitle>
               <CardDescription className="text-white/60">Performance metrics and predictive analytics</CardDescription>
             </CardHeader>
             <CardContent>
