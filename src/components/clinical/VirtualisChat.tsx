@@ -380,10 +380,10 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 <div>
                   <label className="text-sm text-white/70 mb-2 block">Message Priority</label>
                   <Select value={messageType} onValueChange={(value: any) => setMessageType(value)}>
-                    <SelectTrigger className="bg-blue-600/20 border-blue-400/30 text-white">
+                    <SelectTrigger className="bg-white/10 border border-blue-400/30 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-blue-700 border-blue-500 text-white">
+                    <SelectContent>
                       <SelectItem value="routine">Routine</SelectItem>
                       <SelectItem value="urgent">Urgent</SelectItem>
                       <SelectItem value="critical">Critical</SelectItem>
@@ -392,29 +392,19 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 </div>
 
                 <div>
-                  <label className="text-sm text-white/70 mb-2 block">Patient (Optional)</label>
-                  <Input
-                    placeholder="Search patient..."
-                    value={selectedPatient}
-                    onChange={(e) => setSelectedPatient(e.target.value)}
-                    className="bg-blue-600/20 border-blue-400/30 text-white placeholder:text-white/50"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm text-white/70 mb-2 block">Message</label>
+                  <label className="text-sm text-white/70 mb-2 block">Message Content</label>
                   <Textarea
-                    placeholder="Type your clinical message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    className="bg-blue-600/20 border-blue-400/30 text-white placeholder:text-white/50 min-h-[100px]"
+                    placeholder="Type your clinical message here..."
+                    className="bg-white/10 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
                   />
                 </div>
 
                 <Button 
                   onClick={handleSendMessage}
-                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300"
                   disabled={!newMessage.trim()}
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
                 >
                   <Send className="h-4 w-4 mr-2" />
                   Send Message
@@ -422,44 +412,24 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               </CardContent>
             </Card>
 
-            {/* AI Insights */}
+            {/* Quick Actions */}
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Brain className="h-5 w-5 text-purple-400" />
-                  AI Insights
-                </CardTitle>
+                <CardTitle className="text-white">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 backdrop-blur-sm bg-blue-600/20 border border-red-500/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <AlertTriangle className="h-4 w-4 text-red-400" />
-                    <span className="text-sm font-medium text-red-400">High Priority Alert</span>
-                  </div>
-                  <p className="text-xs text-white/70">
-                    Multiple respiratory distress cases detected. Consider activating rapid response protocol.
-                  </p>
-                </div>
-
-                <div className="p-3 backdrop-blur-sm bg-blue-600/20 border border-purple-500/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Stethoscope className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm font-medium text-purple-400">Specialty Recommendation</span>
-                  </div>
-                  <p className="text-xs text-white/70">
-                    Cardiology consultation recommended for 3 current cases based on symptom patterns.
-                  </p>
-                </div>
-
-                <div className="p-3 backdrop-blur-sm bg-blue-600/20 border border-green-500/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Users className="h-4 w-4 text-green-400" />
-                    <span className="text-sm font-medium text-green-400">Team Efficiency</span>
-                  </div>
-                  <p className="text-xs text-white/70">
-                    Average response time improved by 15% this week. Great teamwork!
-                  </p>
-                </div>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start">
+                  <Stethoscope className="h-4 w-4 mr-2" />
+                  Request Consultation
+                </Button>
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white justify-start">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Create Report
+                </Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-start">
+                  <Users className="h-4 w-4 mr-2" />
+                  Start Team Chat
+                </Button>
               </CardContent>
             </Card>
           </div>
