@@ -24,6 +24,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
 import { usePatients } from "@/hooks/usePatients";
+import { useSpecialties, useOnCallSchedules } from "@/hooks/usePhysicians";
 import SmartRoutingDialog from "./SmartRoutingDialog";
 
 interface Message {
@@ -54,6 +55,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   const { toast } = useToast();
   const { callAI, isLoading: aiLoading } = useAIAssistant();
   const { data: patients } = usePatients(hospitalId);
+  const { data: specialties } = useSpecialties();
+  const { data: onCallSchedules } = useOnCallSchedules();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('');
@@ -64,6 +67,8 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
   // Mock data for demonstration
   useEffect(() => {
+    if (!hospitalId) return;
+    
     const mockMessages: Message[] = [
       {
         id: '1',
@@ -119,7 +124,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
       }
     ];
     setMessages(mockMessages);
-  }, []);
+  }, [hospitalId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -147,24 +152,32 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     }
   };
 
-  const analyzeMessageWithAI = async (content: string) => {
+  const analyzeMessageWithAI = async (content: string, patientId?: string) => {
     try {
+      // Get patient context if available
+      const selectedPatientData = patients?.find(p => p.id === patientId);
+      const patientContext = selectedPatientData ? 
+        `Patient: ${selectedPatientData.first_name} ${selectedPatientData.last_name}, Age: ${selectedPatientData.date_of_birth}, Medical Conditions: ${selectedPatientData.medical_conditions?.join(', ') || 'None'}, Allergies: ${selectedPatientData.allergies?.join(', ') || 'None'}` : '';
+
       const result = await callAI({
         type: 'triage_assessment',
         data: {
-          symptoms: content
+          symptoms: content,
+          patientContext: patientContext
         },
-        context: `Healthcare communication triage and specialty recommendation`
+        context: `Healthcare communication triage and specialty recommendation. Analyze the clinical message and determine priority level (0-100), acuity (critical/urgent/routine), and recommend appropriate medical specialty for consultation. Consider patient context if provided.`
       });
 
       // Parse AI response to extract priority, acuity, and recommendations
       const priority = extractPriority(result);
       const acuity = extractAcuity(result, priority);
+      const recommendedSpecialty = extractRecommendedSpecialty(result);
+      
       const aiAnalysis = {
         priority: priority,
         keywords: extractKeywords(content),
         suggestedActions: extractSuggestedActions(result),
-        recommendedSpecialty: extractRecommendedSpecialty(result),
+        recommendedSpecialty: recommendedSpecialty,
         acuity: acuity as 'critical' | 'urgent' | 'routine'
       };
 
@@ -179,7 +192,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         priority: priority,
         keywords: extractKeywords(content),
         suggestedActions: ['Review and respond'],
-        recommendedSpecialty: undefined,
+        recommendedSpecialty: determineFallbackSpecialty(content),
         acuity: acuity as 'critical' | 'urgent' | 'routine'
       };
     }
@@ -253,20 +266,36 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   };
 
   const extractRecommendedSpecialty = (aiResponse: string): string | undefined => {
-    const specialties = ['Cardiology', 'Pulmonology', 'Surgery', 'Neurology', 'Emergency Medicine', 'Internal Medicine', 'Orthopedics', 'Radiology'];
-    for (const specialty of specialties) {
-      if (aiResponse.toLowerCase().includes(specialty.toLowerCase())) {
-        return specialty;
+    const lowerResponse = aiResponse.toLowerCase();
+    const specialtyMappings = [
+      { keywords: ['heart', 'cardiac', 'chest pain', 'arrhythmia'], specialty: 'Cardiology' },
+      { keywords: ['respiratory', 'breathing', 'lung', 'oxygen', 'pneumonia'], specialty: 'Pulmonology' },
+      { keywords: ['surgery', 'surgical', 'post-op', 'operative', 'incision'], specialty: 'Surgery' },
+      { keywords: ['neuro', 'seizure', 'stroke', 'headache', 'confusion'], specialty: 'Neurology' },
+      { keywords: ['emergency', 'critical', 'trauma', 'urgent'], specialty: 'Emergency Medicine' },
+      { keywords: ['infection', 'fever', 'sepsis', 'antibiotic'], specialty: 'Internal Medicine' },
+      { keywords: ['bone', 'fracture', 'joint', 'orthopedic'], specialty: 'Orthopedics' },
+      { keywords: ['imaging', 'scan', 'x-ray', 'mri', 'ct'], specialty: 'Radiology' }
+    ];
+
+    for (const mapping of specialtyMappings) {
+      if (mapping.keywords.some(keyword => lowerResponse.includes(keyword))) {
+        return mapping.specialty;
       }
     }
+
     return undefined;
+  };
+
+  const determineFallbackSpecialty = (content: string): string | undefined => {
+    return extractRecommendedSpecialty(content);
   };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    // Get AI analysis for the new message - AI determines acuity automatically
-    const aiAnalysis = await analyzeMessageWithAI(newMessage);
+    // Get AI analysis for the new message with patient context
+    const aiAnalysis = await analyzeMessageWithAI(newMessage, selectedPatient);
     const selectedPatientData = patients?.find(p => p.id === selectedPatient);
 
     const message: Message = {
@@ -284,10 +313,11 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
     setMessages(prev => [...prev, message]);
     setNewMessage('');
+    setSelectedPatient('');
     
     toast({
       title: "Message Sent",
-      description: `AI determined ${aiAnalysis.acuity} priority with ${aiAnalysis.priority}/100 urgency score.`,
+      description: `AI determined ${aiAnalysis.acuity} priority with ${aiAnalysis.priority}/100 urgency score.${aiAnalysis.recommendedSpecialty ? ` Recommends ${aiAnalysis.recommendedSpecialty} consultation.` : ''}`,
     });
 
     // Auto-suggest routing for critical/urgent messages
@@ -296,6 +326,15 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         toast({
           title: "Smart Routing Available",
           description: `AI recommends ${aiAnalysis.recommendedSpecialty || 'specialist'} consultation for this ${aiAnalysis.acuity} message.`,
+          action: (
+            <Button
+              size="sm"
+              onClick={() => handleSmartRouting(message)}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Route Now
+            </Button>
+          ),
         });
       }, 2000);
     }
@@ -304,6 +343,20 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   const handleSmartRouting = (message: Message) => {
     setSelectedMessageForRouting(message);
     setSmartRoutingOpen(true);
+  };
+
+  // Get on-call physician for a specialty
+  const getOnCallPhysician = (specialtyName?: string) => {
+    if (!specialtyName || !specialties || !onCallSchedules) return null;
+    
+    const specialty = specialties.find(s => s.name.toLowerCase().includes(specialtyName.toLowerCase()));
+    if (!specialty) return null;
+    
+    const onCallSchedule = onCallSchedules.find(schedule => 
+      schedule.specialty_id === specialty.id && schedule.is_primary
+    );
+    
+    return onCallSchedule?.physician || null;
   };
 
   // AI-powered message sorting: Priority score from AI analysis, then timestamp
@@ -327,6 +380,23 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     // Tertiary sort: Timestamp (newest first)
     return b.timestamp.getTime() - a.timestamp.getTime();
   });
+
+  if (!hospitalId) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg max-w-md">
+          <CardHeader>
+            <CardTitle className="text-white text-center">No Hospital Selected</CardTitle>
+            <CardDescription className="text-white/70 text-center">
+              Please select a hospital from the dashboard to access Virtualis Chat
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6" style={{
@@ -442,93 +512,104 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto space-y-4">
-                {filteredMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-blue-300" />
-                        <span className="font-medium text-white">{message.sender}</span>
-                        <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs">
-                          {message.senderRole}
-                        </Badge>
-                        <Badge className={`text-xs ${getAcuityColor(message.acuity)}`}>
-                          {getAcuityIcon(message.acuity)}
-                          <span className="ml-1">{message.acuity.toUpperCase()}</span>
-                        </Badge>
-                      </div>
-                      <span className="text-xs text-white/60">
-                        {message.timestamp.toLocaleTimeString()}
-                      </span>
-                    </div>
-                    
-                    <p className="text-white/90 mb-3">{message.content}</p>
-                    
-                    {message.patientName && (
-                      <div className="flex items-center gap-2 mb-2 text-sm text-white/70">
-                        <User className="h-3 w-3" />
-                        <span>Patient: {message.patientName}</span>
-                      </div>
-                    )}
-                    
-                    {message.recommendedSpecialty && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <Stethoscope className="h-4 w-4 text-purple-300" />
-                        <span className="text-sm text-white">
-                          AI Recommends: <span className="text-purple-300 font-medium">{message.recommendedSpecialty}</span>
+                {filteredMessages.map((message) => {
+                  const onCallPhysician = getOnCallPhysician(message.recommendedSpecialty);
+                  
+                  return (
+                    <div
+                      key={message.id}
+                      className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-blue-300" />
+                          <span className="font-medium text-white">{message.sender}</span>
+                          <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs">
+                            {message.senderRole}
+                          </Badge>
+                          <Badge className={`text-xs ${getAcuityColor(message.acuity)}`}>
+                            {getAcuityIcon(message.acuity)}
+                            <span className="ml-1">{message.acuity.toUpperCase()}</span>
+                          </Badge>
+                        </div>
+                        <span className="text-xs text-white/60">
+                          {message.timestamp.toLocaleTimeString()}
                         </span>
                       </div>
-                    )}
-                    
-                    {message.aiAnalysis && (
-                      <div className="mt-3 p-2 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Brain className="h-3 w-3 text-purple-300" />
-                          <span className="text-xs text-purple-300">AI Analysis</span>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 text-blue-300" />
-                            <span className="text-xs text-blue-300">Priority: {message.aiAnalysis.priority}/100</span>
-                          </div>
+                      
+                      <p className="text-white/90 mb-3">{message.content}</p>
+                      
+                      {message.patientName && (
+                        <div className="flex items-center gap-2 mb-2 text-sm text-white/70">
+                          <User className="h-3 w-3" />
+                          <span>Patient: {message.patientName}</span>
                         </div>
-                        {message.aiAnalysis.keywords.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-1">
-                            {message.aiAnalysis.keywords.map((keyword, idx) => (
-                              <Badge key={idx} className="bg-purple-600/20 text-purple-200 text-xs">
-                                {keyword}
-                              </Badge>
-                            ))}
+                      )}
+                      
+                      {message.recommendedSpecialty && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <Stethoscope className="h-4 w-4 text-purple-300" />
+                          <span className="text-sm text-white">
+                            AI Recommends: <span className="text-purple-300 font-medium">{message.recommendedSpecialty}</span>
+                          </span>
+                          {onCallPhysician && (
+                            <Badge className="bg-green-600/20 text-green-300 border border-green-400/30 text-xs ml-2">
+                              On Call: {onCallPhysician.first_name} {onCallPhysician.last_name}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                      
+                      {message.aiAnalysis && (
+                        <div className="mt-3 p-2 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Brain className="h-3 w-3 text-purple-300" />
+                            <span className="text-xs text-purple-300">AI Analysis</span>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 text-blue-300" />
+                              <span className="text-xs text-blue-300">Priority: {message.aiAnalysis.priority}/100</span>
+                            </div>
                           </div>
-                        )}
-                        {message.aiAnalysis.suggestedActions && (
-                          <div className="text-xs text-white/70">
-                            Suggested: {message.aiAnalysis.suggestedActions.join(', ')}
-                          </div>
+                          {message.aiAnalysis.keywords.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-1">
+                              {message.aiAnalysis.keywords.map((keyword, idx) => (
+                                <Badge key={idx} className="bg-purple-600/20 text-purple-200 text-xs">
+                                  {keyword}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                          {message.aiAnalysis.suggestedActions && (
+                            <div className="text-xs text-white/70">
+                              Suggested: {message.aiAnalysis.suggestedActions.join(', ')}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2 mt-3">
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Reply
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleSmartRouting(message)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          <ArrowRight className="h-3 w-3 mr-1" />
+                          Smart Route
+                        </Button>
+                        {onCallPhysician && (
+                          <Button size="sm" variant="outline" className="border-green-400/30 text-green-300 hover:bg-green-600/20">
+                            <Phone className="h-3 w-3 mr-1" />
+                            Call {onCallPhysician.first_name}
+                          </Button>
                         )}
                       </div>
-                    )}
-                    
-                    <div className="flex gap-2 mt-3">
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        Reply
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleSmartRouting(message)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                      >
-                        <ArrowRight className="h-3 w-3 mr-1" />
-                        Smart Route
-                      </Button>
-                      <Button size="sm" variant="outline" className="border-green-400/30 text-green-300 hover:bg-green-600/20">
-                        <Phone className="h-3 w-3 mr-1" />
-                        Call
-                      </Button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </CardContent>
             </Card>
@@ -540,7 +621,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardHeader>
                 <CardTitle className="text-white">Send Message</CardTitle>
                 <CardDescription className="text-white/70">
-                  AI will automatically determine priority and suggest routing
+                  AI will automatically determine priority and suggest specialist routing
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -548,30 +629,39 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   <label className="text-sm text-white/70 mb-2 block">Select Patient (Optional)</label>
                   <Select value={selectedPatient} onValueChange={setSelectedPatient}>
                     <SelectTrigger className="bg-blue-600/20 border border-blue-400/30 text-white">
-                      <SelectValue placeholder="Choose patient..." />
+                      <SelectValue placeholder="Choose patient for context..." />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
                       <SelectItem value="">No specific patient</SelectItem>
                       {patients?.map((patient) => (
                         <SelectItem key={patient.id} value={patient.id}>
                           {patient.first_name} {patient.last_name} - {patient.mrn}
+                          {patient.room_number && ` (Room ${patient.room_number})`}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {selectedPatient && (
+                    <p className="text-xs text-white/60 mt-1">
+                      Patient context will help AI provide better specialty recommendations
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="text-sm text-white/70 mb-2 block">Message Content</label>
+                  <label className="text-sm text-white/70 mb-2 block">Clinical Message</label>
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your clinical message here... AI will analyze urgency and recommend appropriate specialty routing."
+                    placeholder="Describe the clinical situation... AI will analyze urgency, determine acuity level, and recommend appropriate specialty consultation."
                     className="bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
                   />
-                  <p className="text-xs text-white/60 mt-1">
-                    AI will automatically determine message priority and suggest specialist routing
-                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Brain className="h-3 w-3 text-purple-300" />
+                    <p className="text-xs text-white/60">
+                      AI will auto-determine: Priority Score → Acuity Level → Specialty Recommendation → On-Call Routing
+                    </p>
+                  </div>
                 </div>
 
                 <Button 
@@ -580,10 +670,35 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  {aiLoading ? 'Analyzing with AI...' : 'Send & AI Analyze'}
+                  {aiLoading ? 'AI Analyzing...' : 'Send & AI Route'}
                 </Button>
               </CardContent>
             </Card>
+
+            {/* AI Routing Preview */}
+            {selectedPatient && patients && (
+              <Card className="backdrop-blur-xl bg-purple-500/20 border border-purple-300/30 rounded-xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-white text-sm flex items-center gap-2">
+                    <Brain className="h-4 w-4 text-purple-300" />
+                    Patient Context Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {(() => {
+                    const patient = patients.find(p => p.id === selectedPatient);
+                    return patient ? (
+                      <div className="text-sm text-white/80">
+                        <p><span className="text-purple-300">Name:</span> {patient.first_name} {patient.last_name}</p>
+                        <p><span className="text-purple-300">Room:</span> {patient.room_number || 'Not assigned'}</p>
+                        <p><span className="text-purple-300">Conditions:</span> {patient.medical_conditions?.join(', ') || 'None listed'}</p>
+                        <p><span className="text-purple-300">Allergies:</span> {patient.allergies?.join(', ') || 'None listed'}</p>
+                      </div>
+                    ) : null;
+                  })()}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Quick Actions */}
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
@@ -593,15 +708,15 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardContent className="space-y-3">
                 <Button className="w-full bg-blue-600/20 border border-blue-400/30 text-white hover:bg-blue-500/30 justify-start">
                   <Stethoscope className="h-4 w-4 mr-2" />
-                  Request Consultation
+                  Emergency Consult
                 </Button>
                 <Button className="w-full bg-green-600/20 border border-green-400/30 text-white hover:bg-green-500/30 justify-start">
                   <FileText className="h-4 w-4 mr-2" />
-                  Create Report
+                  Discharge Planning
                 </Button>
                 <Button className="w-full bg-purple-600/20 border border-purple-400/30 text-white hover:bg-purple-500/30 justify-start">
                   <Users className="h-4 w-4 mr-2" />
-                  Start Team Chat
+                  Team Conference
                 </Button>
               </CardContent>
             </Card>
