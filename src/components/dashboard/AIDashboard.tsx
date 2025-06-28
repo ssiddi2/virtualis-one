@@ -50,26 +50,26 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               AI Healthcare Assistant
             </h1>
             <p className="text-white/80 text-lg">
-              {selectedHospital ? `${selectedHospital.name} - Clinical AI Intelligence` : 'Intelligent Clinical Support'}
+              {selectedHospital ? `${selectedHospital.name} - Clinical AI Intelligence` : 'Advanced Documentation and Decision Support Platform'}
             </p>
           </div>
         </div>
         
-        <div className="flex items-center justify-center gap-4">
-          <Badge className="bg-green-500/20 text-green-200 border border-green-400/30">
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-blue-200 border border-blue-400/30">
             <Brain className="h-3 w-3 mr-1" />
             GPT-4 Powered
           </Badge>
-          <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-blue-200 border border-blue-400/30">
             <Shield className="h-3 w-3 mr-1" />
             HIPAA Compliant
           </Badge>
-          <Badge className="bg-purple-500/20 text-purple-200 border border-purple-400/30">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-blue-200 border border-blue-400/30">
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
           {selectedHospital && (
-            <Badge className="bg-sky-500/20 text-sky-200 border border-sky-400/30">
+            <Badge className="backdrop-blur-sm bg-sky-500/20 text-sky-200 border border-sky-400/30">
               {selectedHospital.emr_type} Integration
             </Badge>
           )}
@@ -150,7 +150,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
             <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-300" />
+                  <DollarSign className="h-5 w-5 text-sky-300" />
                   Revenue Cycle AI
                 </CardTitle>
               </CardHeader>
@@ -185,7 +185,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                    <div className="text-green-300 text-2xl font-bold">98.7%</div>
+                    <div className="text-sky-300 text-2xl font-bold">98.7%</div>
                     <div className="text-white/70 text-sm">Accuracy Rate</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
@@ -203,7 +203,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                    <div className="text-blue-300 text-2xl font-bold">23</div>
+                    <div className="text-sky-300 text-2xl font-bold">23</div>
                     <div className="text-white/70 text-sm">Alerts Today</div>
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
