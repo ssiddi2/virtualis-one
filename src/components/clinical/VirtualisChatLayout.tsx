@@ -28,7 +28,8 @@ import {
   Mic,
   ChevronDown,
   Sparkles,
-  Activity
+  Activity,
+  Search
 } from 'lucide-react';
 
 interface AIAnalysis {
@@ -84,11 +85,13 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
   const [activeThreadId, setActiveThreadId] = useState<string>('1');
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
+  const [directMessageDialogOpen, setDirectMessageDialogOpen] = useState(false);
   const [smartRoutingOpen, setSmartRoutingOpen] = useState(false);
   const [smartRoutingData, setSmartRoutingData] = useState<any>(null);
   const [newMessage, setNewMessage] = useState('');
   const [showFabOptions, setShowFabOptions] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Mock chat threads with messages - now with AI analysis capability
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([
@@ -394,8 +397,9 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       description: `${(aiAnalysis?.acuity || consultRequest.urgency).toUpperCase()} priority consult requested for ${consultRequest.specialty || consultRequest.provider}`,
     });
     
-    // Add the consultation request as a new message with AI analysis
-    const newMessage: Message = {
+    // Create a new chat thread for the consultation
+    const newThreadId = (chatThreads.length + 1).toString();
+    const consultMessage: Message = {
       id: Date.now().toString(),
       content: `Consultation requested: ${consultRequest.clinicalQuestion}`,
       sender: profile?.first_name || user?.email || 'Current User',
@@ -408,33 +412,65 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                     consultRequest.urgency === 'urgent' ? 70 : 30),
       aiAnalysis
     };
-    
-    if (activeThread) {
-      setChatThreads(prev => prev.map(thread => 
-        thread.id === activeThreadId
-          ? {
-              ...thread,
-              messages: [...thread.messages, newMessage],
-              lastMessage: `Consultation requested: ${consultRequest.clinicalQuestion}`,
-              timestamp: new Date(),
-              acuity: newMessage.acuity,
-              priorityScore: newMessage.priorityScore
-            }
-          : thread
-      ));
-    }
+
+    const newConsultThread: ChatThread = {
+      id: newThreadId,
+      participants: [consultRequest.specialty || consultRequest.provider, profile?.first_name || 'Current User'],
+      lastMessage: `Consultation: ${consultRequest.clinicalQuestion.substring(0, 50)}...`,
+      timestamp: new Date(),
+      acuity: consultMessage.acuity,
+      unreadCount: 0,
+      patientName: consultRequest.patientId ? 'Selected Patient' : undefined,
+      specialty: consultRequest.specialty,
+      isGroup: false,
+      messages: [consultMessage],
+      priorityScore: consultMessage.priorityScore
+    };
+
+    setChatThreads(prev => [newConsultThread, ...prev]);
+    setActiveThreadId(newThreadId);
 
     // Show smart routing for consultation
     if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
       setSmartRoutingData({
         messageContent: consultRequest.clinicalQuestion,
-        messageId: newMessage.id,
+        messageId: consultMessage.id,
         urgency: aiAnalysis.acuity,
         patientId: consultRequest.patientId,
         aiRecommendedSpecialty: aiAnalysis.recommendedSpecialty
       });
       setSmartRoutingOpen(true);
     }
+  };
+
+  const handleDirectMessage = (physicianId: string) => {
+    const physician = physicians?.find(p => p.id === physicianId);
+    if (!physician) return;
+
+    // Create new direct message thread
+    const newThreadId = (chatThreads.length + 1).toString();
+    const newThread: ChatThread = {
+      id: newThreadId,
+      participants: [`${physician.first_name} ${physician.last_name}`],
+      lastMessage: 'Start a conversation...',
+      timestamp: new Date(),
+      acuity: 'routine',
+      unreadCount: 0,
+      isGroup: false,
+      messages: [],
+      priorityScore: 0
+    };
+
+    setChatThreads(prev => [newThread, ...prev]);
+    setActiveThreadId(newThreadId);
+    setDirectMessageDialogOpen(false);
+    setShowFabOptions(false);
+    setSearchQuery('');
+
+    toast({
+      title: "Direct Message Started",
+      description: `Started conversation with ${physician.first_name} ${physician.last_name}`,
+    });
   };
 
   const handleSmartRoutingSend = (messageData: any) => {
@@ -476,6 +512,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     );
   }
 
+  const filteredPhysicians = physicians?.filter(physician => 
+    `${physician.first_name} ${physician.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    physician.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
   return (
     <div className="min-h-screen flex" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
@@ -485,6 +526,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         activeThreadId={activeThreadId}
         onThreadSelect={handleThreadSelect}
         onNewChat={handleNewChat}
+        chatThreads={chatThreads}
       />
 
       {/* Main Chat Area */}
@@ -662,26 +704,39 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         </div>
       </div>
 
-      {/* Transparent FAB with Options */}
+      {/* Enhanced FAB with Options */}
       <div className="fixed bottom-6 right-6">
         {showFabOptions && (
           <div className="absolute bottom-20 right-0 space-y-3 animate-fade-in">
-            {/* New Chat Option with futuristic styling */}
+            {/* New Chat Option with enhanced transparency */}
             <div className="flex items-center gap-3">
-              <span className="text-cyan-300/90 text-sm bg-black/80 px-4 py-2 rounded-full border border-cyan-400/50 backdrop-blur-md font-light tracking-widest shadow-lg shadow-cyan-500/20">
+              <span className="text-cyan-200/80 text-sm bg-black/40 backdrop-blur-md px-6 py-3 rounded-full border border-cyan-300/20 font-light tracking-[0.2em] shadow-2xl shadow-cyan-500/10 hover:bg-black/60 hover:border-cyan-300/30 transition-all duration-300">
                 NEW CHAT
               </span>
               <Button
                 onClick={handleNewChat}
-                className="backdrop-blur-xl bg-blue-500/20 hover:bg-blue-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-blue-300/30 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                className="backdrop-blur-xl bg-blue-500/15 hover:bg-blue-500/30 text-white rounded-full w-12 h-12 shadow-2xl border border-blue-300/20 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-blue-500/20"
               >
                 <MessageSquare className="h-5 w-5" />
               </Button>
             </div>
             
-            {/* Consult Option with futuristic styling */}
+            {/* Direct Message Option */}
             <div className="flex items-center gap-3">
-              <span className="text-purple-300/90 text-sm bg-black/80 px-4 py-2 rounded-full border border-purple-400/50 backdrop-blur-md font-light tracking-widest shadow-lg shadow-purple-500/20">
+              <span className="text-green-200/80 text-sm bg-black/40 backdrop-blur-md px-6 py-3 rounded-full border border-green-300/20 font-light tracking-[0.2em] shadow-2xl shadow-green-500/10 hover:bg-black/60 hover:border-green-300/30 transition-all duration-300">
+                MESSAGE
+              </span>
+              <Button
+                onClick={() => setDirectMessageDialogOpen(true)}
+                className="backdrop-blur-xl bg-green-500/15 hover:bg-green-500/30 text-white rounded-full w-12 h-12 shadow-2xl border border-green-300/20 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-green-500/20"
+              >
+                <User className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            {/* Consult Option with enhanced transparency */}
+            <div className="flex items-center gap-3">
+              <span className="text-purple-200/80 text-sm bg-black/40 backdrop-blur-md px-6 py-3 rounded-full border border-purple-300/20 font-light tracking-[0.2em] shadow-2xl shadow-purple-500/10 hover:bg-black/60 hover:border-purple-300/30 transition-all duration-300">
                 CONSULT
               </span>
               <Button
@@ -689,7 +744,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                   setConsultDialogOpen(true);
                   setShowFabOptions(false);
                 }}
-                className="backdrop-blur-xl bg-purple-500/20 hover:bg-purple-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-purple-300/30 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                className="backdrop-blur-xl bg-purple-500/15 hover:bg-purple-500/30 text-white rounded-full w-12 h-12 shadow-2xl border border-purple-300/20 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-purple-500/20"
               >
                 <Stethoscope className="h-5 w-5" />
               </Button>
@@ -697,20 +752,81 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           </div>
         )}
 
-        {/* Main FAB - Transparent with 180 degree rotation */}
+        {/* Main FAB - Enhanced transparency */}
         <Button
           onClick={() => setShowFabOptions(!showFabOptions)}
-          className="backdrop-blur-xl bg-white/10 hover:bg-white/20 text-white rounded-full w-16 h-16 shadow-2xl border border-white/10 p-0 overflow-hidden group transition-all duration-300 hover:scale-110"
+          className="backdrop-blur-xl bg-white/5 hover:bg-white/15 text-white rounded-full w-16 h-16 shadow-2xl border border-white/10 p-0 overflow-hidden group transition-all duration-300 hover:scale-110 hover:shadow-white/20"
         >
           <div className={`flex flex-col items-center justify-center transition-transform duration-300 ${showFabOptions ? 'rotate-180' : ''}`}>
             <img 
               src="/lovable-uploads/b0a1d2d7-905e-4bca-a277-2b91f740f891.png" 
               alt="Virtualis" 
-              className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300"
+              className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300 opacity-90"
             />
           </div>
         </Button>
       </div>
+
+      {/* Direct Message Dialog */}
+      {directMessageDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDirectMessageDialogOpen(false)} />
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg w-full max-w-md z-10">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Direct Message
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                <Input
+                  placeholder="Search physicians..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                />
+              </div>
+
+              <div className="max-h-60 overflow-y-auto space-y-2">
+                {filteredPhysicians.map((physician) => (
+                  <div
+                    key={physician.id}
+                    onClick={() => handleDirectMessage(physician.id)}
+                    className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-blue-600/50 text-white text-xs">
+                          {physician.first_name.charAt(0)}{physician.last_name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="text-white font-medium text-sm">
+                          {physician.first_name} {physician.last_name}
+                        </div>
+                        <div className="text-white/70 text-xs">
+                          {physician.specialty}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setDirectMessageDialogOpen(false)}
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Enhanced Consultation Dialog */}
       <EnhancedConsultDialog

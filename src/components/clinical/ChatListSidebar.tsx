@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,61 +29,11 @@ interface ChatListSidebarProps {
   activeThreadId?: string;
   onThreadSelect: (threadId: string) => void;
   onNewChat: () => void;
+  chatThreads: ChatThread[];
 }
 
-const ChatListSidebar = ({ activeThreadId, onThreadSelect, onNewChat }: ChatListSidebarProps) => {
+const ChatListSidebar = ({ activeThreadId, onThreadSelect, onNewChat, chatThreads }: ChatListSidebarProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Mock chat threads data
-  const chatThreads: ChatThread[] = [
-    {
-      id: '1',
-      participants: ['Frank Jones', 'Dr. Infectious Disease'],
-      lastMessage: 'Patient showing signs of respiratory distress...',
-      timestamp: new Date(Date.now() - 5 * 60000),
-      acuity: 'critical',
-      unreadCount: 2,
-      patientName: 'Frank Jones',
-      specialty: 'Infectious Disease',
-      isGroup: false
-    },
-    {
-      id: '2',
-      participants: ['Dr. Hana', 'Frank', '+2 more'],
-      lastMessage: 'Lol',
-      timestamp: new Date(Date.now() - 10 * 60000),
-      acuity: 'routine',
-      unreadCount: 0,
-      isGroup: true
-    },
-    {
-      id: '3',
-      participants: ['Dr. Hana Khan'],
-      lastMessage: 'Hello 👋',
-      timestamp: new Date(Date.now() - 15 * 60000),
-      acuity: 'routine',
-      unreadCount: 1,
-      isGroup: false
-    },
-    {
-      id: '4',
-      participants: ['Frank', 'Dr. Sam', '+6 more'],
-      lastMessage: 'So sickkkkk Alh!',
-      timestamp: new Date(Date.now() - 20 * 60000),
-      acuity: 'urgent',
-      unreadCount: 0,
-      isGroup: true
-    },
-    {
-      id: '5',
-      participants: ['Dr. Sohail D.O.C'],
-      lastMessage: "There's re some critical bugs we are working thru...",
-      timestamp: new Date(Date.now() - 25 * 60000),
-      acuity: 'critical',
-      unreadCount: 1,
-      isGroup: false
-    }
-  ];
 
   const getAcuityColor = (acuity: string) => {
     switch (acuity) {
