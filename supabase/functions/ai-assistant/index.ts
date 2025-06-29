@@ -2,7 +2,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const cohereApiKey = Deno.env.get('COHERE_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,12 +18,12 @@ serve(async (req) => {
     const { type, data, context } = await req.json();
     console.log('AI Assistant request:', { type, data: { ...data, symptoms: data.symptoms?.substring(0, 50) + '...' } });
 
-    if (!openAIApiKey) {
-      console.error('OpenAI API key not found in environment');
-      throw new Error('OpenAI API key not configured');
+    if (!cohereApiKey) {
+      console.error('Cohere API key not found in environment');
+      throw new Error('Cohere API key not configured');
     }
 
-    console.log('OpenAI API key found, length:', openAIApiKey.length);
+    console.log('Cohere API key found, length:', cohereApiKey.length);
 
     let systemPrompt = '';
     let userPrompt = '';
@@ -69,47 +69,45 @@ serve(async (req) => {
         userPrompt = data.prompt || 'Please provide assistance.';
     }
 
-    console.log('Calling OpenAI API...');
+    console.log('Calling Cohere API...');
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.cohere.ai/v1/chat', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${cohereApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
+        model: 'command-r-plus',
+        message: userPrompt,
+        preamble: systemPrompt,
         temperature: 0.3,
         max_tokens: 1500,
       }),
     });
 
-    console.log('OpenAI API response status:', response.status);
+    console.log('Cohere API response status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
+      console.error('Cohere API error:', errorData);
       
-      // More specific error handling
+      // More specific error handling for Cohere
       if (response.status === 429) {
         throw new Error('Rate limit exceeded. Please wait a moment and try again.');
       } else if (response.status === 401) {
-        throw new Error('Invalid OpenAI API key. Please check your API key configuration.');
+        throw new Error('Invalid Cohere API key. Please check your API key configuration.');
       } else if (response.status === 402) {
-        throw new Error('Insufficient OpenAI credits. Please add billing to your OpenAI account.');
+        throw new Error('Insufficient Cohere credits. Please add billing to your Cohere account.');
       } else {
-        throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Cohere API error: ${errorData.message || 'Unknown error'}`);
       }
     }
 
     const aiData = await response.json();
-    console.log('OpenAI response received successfully');
+    console.log('Cohere response received successfully');
     
-    const result = aiData.choices[0].message.content;
+    const result = aiData.text;
 
     return new Response(JSON.stringify({ 
       result,
