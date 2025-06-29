@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ interface VirtualisChatLayoutProps {
 }
 
 const VirtualisChatLayout = ({ children, hospitalId }: VirtualisChatLayoutProps) => {
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('available');
   const { data: physicians } = usePhysicians();
@@ -90,7 +91,7 @@ const VirtualisChatLayout = ({ children, hospitalId }: VirtualisChatLayoutProps)
     const matchesSearch = physician.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          physician.last_name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesSpecialty = !selectedSpecialty || 
+    const matchesSpecialty = selectedSpecialty === 'all' || 
       (physician.specialty && 
        typeof physician.specialty === 'object' && 
        'name' in physician.specialty && 
@@ -156,7 +157,7 @@ const VirtualisChatLayout = ({ children, hospitalId }: VirtualisChatLayoutProps)
               <SelectValue placeholder="Filter by specialty" />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-700">
-              <SelectItem value="">All Specialties</SelectItem>
+              <SelectItem value="all">All Specialties</SelectItem>
               {specialties.map((specialty) => (
                 <SelectItem key={specialty.id} value={specialty.name}>
                   {specialty.name}
