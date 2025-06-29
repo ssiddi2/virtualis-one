@@ -519,11 +519,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     // Check name match
     if (fullName.includes(searchLower)) return true;
     
-    // Check specialty match
+    // Check specialty match with proper type handling
     if (physician.specialty) {
       if (typeof physician.specialty === 'string') {
         return physician.specialty.toLowerCase().includes(searchLower);
-      } else if (typeof physician.specialty === 'object' && physician.specialty.name) {
+      } else if (typeof physician.specialty === 'object' && physician.specialty !== null && 'name' in physician.specialty && typeof physician.specialty.name === 'string') {
         return physician.specialty.name.toLowerCase().includes(searchLower);
       }
     }
