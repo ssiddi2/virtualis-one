@@ -26,18 +26,28 @@ const Index = () => {
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
   const { setSelectedHospitalId: setAISelectedHospitalId } = useAIAssistantContext();
 
+  console.log('Index render state:', { selectedHospitalId, user: !!user, loading });
+
   const handleSelectHospital = (hospitalId: string) => {
-    console.log('Selected hospital:', hospitalId);
+    console.log('Hospital selected in Index:', hospitalId);
     setSelectedHospitalId(hospitalId);
     setAISelectedHospitalId(hospitalId);
+    
+    // Add a small delay to ensure state is set before navigation
+    setTimeout(() => {
+      console.log('State after hospital selection:', { selectedHospitalId: hospitalId });
+    }, 100);
   };
 
   const handleBackToEMR = () => {
+    console.log('Back to EMR called');
     setSelectedHospitalId(null);
     setAISelectedHospitalId(null);
   };
 
   const requireHospitalSelection = (component: React.ReactElement) => {
+    console.log('requireHospitalSelection check:', { selectedHospitalId });
+    
     if (!selectedHospitalId) {
       return (
         <div className="min-h-screen flex items-center justify-center" style={{
@@ -56,7 +66,9 @@ const Index = () => {
     return component;
   };
 
+  // Loading state
   if (loading) {
+    console.log('Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center" style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
@@ -66,7 +78,9 @@ const Index = () => {
     );
   }
 
+  // Authentication check
   if (!user) {
+    console.log('Showing auth form - no user');
     return (
       <div style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)',
@@ -77,11 +91,15 @@ const Index = () => {
     );
   }
 
+  console.log('Rendering main app layout');
+
   return (
     <div className="flex h-screen overflow-hidden" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
-      {selectedHospitalId && <Sidebar selectedHospitalId={selectedHospitalId} />}
+      {selectedHospitalId && (
+        <Sidebar selectedHospitalId={selectedHospitalId} />
+      )}
       <main className={`${selectedHospitalId ? 'flex-1' : 'w-full'} overflow-auto`} style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>

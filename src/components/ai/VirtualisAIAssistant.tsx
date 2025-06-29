@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ const VirtualisAIAssistant = ({ selectedHospitalId }: VirtualisAIAssistantProps)
   const [inputValue, setInputValue] = useState('');
   const [awaitingConfirmation, setAwaitingConfirmation] = useState<string | null>(null);
   
+  // Always call all hooks at the top level - NEVER conditionally
   const { parseIntent, isLoading, error } = useVirtualisAI();
   const { data: patients } = usePatients(selectedHospitalId || undefined);
   const { data: physicians } = usePhysicians();
@@ -60,13 +62,8 @@ const VirtualisAIAssistant = ({ selectedHospitalId }: VirtualisAIAssistantProps)
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Don't render the button if no hospital is selected
-  if (!selectedHospitalId) {
-    return null;
-  }
-
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });  
   };
 
   useEffect(() => {
@@ -78,6 +75,11 @@ const VirtualisAIAssistant = ({ selectedHospitalId }: VirtualisAIAssistantProps)
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  // Early return AFTER all hooks are called
+  if (!selectedHospitalId) {
+    return null;
+  }
 
   const addMessage = (message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
