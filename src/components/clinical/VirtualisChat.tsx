@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -343,6 +342,16 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
   const handleSmartRouting = (message: Message) => {
     setSelectedMessageForRouting(message);
     setSmartRoutingOpen(true);
+  };
+
+  const handleSmartRoutingSend = (messageData: any) => {
+    setSmartRoutingOpen(false);
+    setSelectedMessageForRouting(null);
+    
+    toast({
+      title: "Smart Routing Completed",
+      description: `Message routed to ${messageData.specialty || messageData.physician}`,
+    });
   };
 
   // Get on-call physician for a specialty
@@ -733,6 +742,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
         urgency={selectedMessageForRouting?.acuity || 'routine'}
         patientId={selectedMessageForRouting?.patientId}
         aiRecommendedSpecialty={selectedMessageForRouting?.recommendedSpecialty}
+        onSend={handleSmartRoutingSend}
       />
     </div>
   );
