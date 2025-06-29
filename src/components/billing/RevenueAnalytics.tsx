@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -11,7 +10,7 @@ import {
   BarChart3,
   PieChart
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, Pie } from 'recharts';
 
 interface RevenueAnalyticsProps {
   hospitalId: string;
@@ -137,18 +136,17 @@ const RevenueAnalytics = ({ hospitalId }: RevenueAnalyticsProps) => {
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <RechartsPieChart>
-                <RechartsPieChart
+                <Pie
+                  data={denialReasons}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  fill="#8884d8"
                   dataKey="value"
-                  data={denialReasons}
                 >
                   {denialReasons.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
-                </RechartsPieChart>
+                </Pie>
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: 'rgba(30, 64, 175, 0.8)',
