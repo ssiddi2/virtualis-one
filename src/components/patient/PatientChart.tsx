@@ -22,7 +22,8 @@ import {
   Stethoscope,
   TrendingUp,
   Download,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

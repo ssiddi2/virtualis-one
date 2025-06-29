@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
@@ -18,7 +19,11 @@ import {
   Clock,
   User,
   Phone,
-  Video
+  Video,
+  Send,
+  Paperclip,
+  Mic,
+  ChevronDown
 } from 'lucide-react';
 
 interface Message {
@@ -33,6 +38,19 @@ interface Message {
   read?: boolean;
 }
 
+interface ChatThread {
+  id: string;
+  participants: string[];
+  lastMessage: string;
+  timestamp: Date;
+  acuity: 'critical' | 'urgent' | 'routine';
+  unreadCount: number;
+  patientName?: string;
+  specialty?: string;
+  isGroup: boolean;
+  messages: Message[];
+}
+
 interface VirtualisChatLayoutProps {
   hospitalId?: string;
 }
@@ -42,66 +60,155 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const { toast } = useToast();
   const [activeThreadId, setActiveThreadId] = useState<string>('1');
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
+  const [newMessage, setNewMessage] = useState('');
+  const [showFabOptions, setShowFabOptions] = useState(false);
+
+  // Mock chat threads with messages
+  const [chatThreads, setChatThreads] = useState<ChatThread[]>([
     {
       id: '1',
-      content: 'Patient in Room 405 showing signs of respiratory distress. O2 sat dropping to 88%. Immediate consultation needed.',
-      sender: 'Dr. Johnson',
-      senderRole: 'Emergency Medicine',
-      timestamp: new Date(Date.now() - 5 * 60000),
+      participants: ['Frank Jones', 'Dr. Infectious Disease'],
+      lastMessage: 'On my way to assess the patient. ETA 3 minutes.',
+      timestamp: new Date(Date.now() - 2 * 60000),
       acuity: 'critical',
+      unreadCount: 0,
       patientName: 'Frank Jones',
-      delivered: true
+      specialty: 'Infectious Disease',
+      isGroup: false,
+      messages: [
+        {
+          id: '1',
+          content: 'Patient in Room 405 showing signs of respiratory distress. O2 sat dropping to 88%. Immediate consultation needed.',
+          sender: 'Dr. Johnson',
+          senderRole: 'Emergency Medicine',
+          timestamp: new Date(Date.now() - 5 * 60000),
+          acuity: 'critical',
+          patientName: 'Frank Jones',
+          delivered: true
+        },
+        {
+          id: '2',
+          content: 'On my way to assess the patient. ETA 3 minutes.',
+          sender: 'Dr. Smith',
+          senderRole: 'Infectious Disease',
+          timestamp: new Date(Date.now() - 2 * 60000),
+          acuity: 'critical',
+          delivered: true,
+          read: true
+        }
+      ]
     },
     {
       id: '2',
-      content: 'On my way to assess the patient. ETA 3 minutes.',
-      sender: 'Dr. Smith',
-      senderRole: 'Infectious Disease',
-      timestamp: new Date(Date.now() - 2 * 60000),
-      acuity: 'critical',
-      delivered: true,
-      read: true
+      participants: ['Dr. Hana', 'Frank', '+2 more'],
+      lastMessage: 'Lol',
+      timestamp: new Date(Date.now() - 10 * 60000),
+      acuity: 'routine',
+      unreadCount: 0,
+      isGroup: true,
+      messages: [
+        {
+          id: '3',
+          content: 'Lol',
+          sender: 'Dr. Hana',
+          senderRole: 'Cardiology',
+          timestamp: new Date(Date.now() - 10 * 60000),
+          acuity: 'routine',
+          delivered: true,
+          read: true
+        }
+      ]
+    },
+    {
+      id: '3',
+      participants: ['Dr. Hana Khan'],
+      lastMessage: 'Hello 👋',
+      timestamp: new Date(Date.now() - 15 * 60000),
+      acuity: 'routine',
+      unreadCount: 1,
+      isGroup: false,
+      messages: [
+        {
+          id: '4',
+          content: 'Hello 👋',
+          sender: 'Dr. Hana Khan',
+          senderRole: 'Cardiology',
+          timestamp: new Date(Date.now() - 15 * 60000),
+          acuity: 'routine',
+          delivered: true
+        }
+      ]
     }
   ]);
 
-  const getAcuityColor = (acuity: string) => {
-    switch (acuity) {
-      case 'critical': return 'border-l-red-500 bg-red-500/5';
-      case 'urgent': return 'border-l-yellow-500 bg-yellow-500/5';
-      case 'routine': return 'border-l-green-500 bg-green-500/5';
-      default: return 'border-l-gray-500 bg-gray-500/5';
-    }
-  };
-
-  const getAcuityHaloColor = (acuity: string) => {
-    switch (acuity) {
-      case 'critical': return 'ring-2 ring-red-500/50 ring-offset-2 ring-offset-blue-900/50';
-      case 'urgent': return 'ring-2 ring-yellow-500/50 ring-offset-2 ring-offset-blue-900/50';
-      case 'routine': return 'ring-2 ring-green-500/50 ring-offset-2 ring-offset-blue-900/50';
-      default: return 'ring-2 ring-gray-500/50 ring-offset-2 ring-offset-blue-900/50';
-    }
-  };
-
-  const getAcuityIcon = (acuity: string) => {
-    switch (acuity) {
-      case 'critical': return <AlertTriangle className="h-3 w-3 text-red-500" />;
-      case 'urgent': return <Clock className="h-3 w-3 text-yellow-500" />;
-      case 'routine': return <MessageSquare className="h-3 w-3 text-green-500" />;
-      default: return <MessageSquare className="h-3 w-3 text-gray-500" />;
-    }
-  };
+  const activeThread = chatThreads.find(thread => thread.id === activeThreadId);
+  const messages = activeThread?.messages || [];
 
   const handleThreadSelect = (threadId: string) => {
     setActiveThreadId(threadId);
-    // In a real app, you'd load messages for this thread
+    // Mark messages as read
+    setChatThreads(prev => prev.map(thread => 
+      thread.id === threadId 
+        ? { ...thread, unreadCount: 0 }
+        : thread
+    ));
+  };
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !activeThread) return;
+
+    const message: Message = {
+      id: Date.now().toString(),
+      content: newMessage,
+      sender: profile?.first_name || user?.email || 'Current User',
+      senderRole: 'Physician',
+      timestamp: new Date(),
+      acuity: activeThread.acuity,
+      delivered: false
+    };
+
+    setChatThreads(prev => prev.map(thread => 
+      thread.id === activeThreadId
+        ? {
+            ...thread,
+            messages: [...thread.messages, message],
+            lastMessage: newMessage,
+            timestamp: new Date()
+          }
+        : thread
+    ));
+
+    setNewMessage('');
+
+    toast({
+      title: "Message Sent",
+      description: "Your message has been delivered",
+    });
   };
 
   const handleNewChat = () => {
-    setConsultDialogOpen(true);
+    setShowFabOptions(false);
+    // Create a new chat thread
+    const newThreadId = (chatThreads.length + 1).toString();
+    const newThread: ChatThread = {
+      id: newThreadId,
+      participants: ['New Chat'],
+      lastMessage: 'Start a conversation...',
+      timestamp: new Date(),
+      acuity: 'routine',
+      unreadCount: 0,
+      isGroup: false,
+      messages: []
+    };
+
+    setChatThreads(prev => [newThread, ...prev]);
+    setActiveThreadId(newThreadId);
   };
 
   const handleConsultSubmit = (consultRequest: any) => {
+    setShowFabOptions(false);
+    setConsultDialogOpen(false);
+    
     toast({
       title: "Consultation Request Sent",
       description: `${consultRequest.urgency.toUpperCase()} priority consult requested for ${consultRequest.specialty || consultRequest.provider}`,
@@ -119,8 +226,18 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       delivered: false
     };
     
-    setMessages(prev => [...prev, newMessage]);
-    setConsultDialogOpen(false);
+    if (activeThread) {
+      setChatThreads(prev => prev.map(thread => 
+        thread.id === activeThreadId
+          ? {
+              ...thread,
+              messages: [...thread.messages, newMessage],
+              lastMessage: `Consultation requested: ${consultRequest.clinicalQuestion}`,
+              timestamp: new Date()
+            }
+          : thread
+      ));
+    }
   };
 
   if (!hospitalId) {
@@ -159,7 +276,10 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">Virtualis Chat</h1>
-                <p className="text-white/70 text-sm">Frank Jones - Infectious Disease</p>
+                <p className="text-white/70 text-sm">
+                  {activeThread ? activeThread.participants.join(', ') : 'Select a conversation'}
+                  {activeThread?.patientName && ` - ${activeThread.patientName}`}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -238,22 +358,72 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           ))}
         </div>
 
-        {/* Floating Action Button with Virtualis Logo */}
-        <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3">
-          <Button
-            onClick={() => setConsultDialogOpen(true)}
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white rounded-full w-16 h-16 shadow-2xl backdrop-blur-sm border border-orange-300/30 p-0 overflow-hidden group transition-all duration-300 hover:scale-110"
-          >
+        {/* Message Input Area */}
+        <div className="p-4 backdrop-blur-xl bg-blue-500/20 border-t border-blue-300/30">
+          <div className="flex items-center gap-3">
+            <Button size="sm" className="bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/30">
+              <Paperclip className="h-4 w-4" />
+            </Button>
+            <div className="flex-1 relative">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type your message..."
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-20"
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <Button size="sm" className="bg-transparent hover:bg-white/10 p-1">
+                  <Mic className="h-4 w-4 text-white/60" />
+                </Button>
+              </div>
+            </div>
+            <Button 
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim()}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced FAB with Options */}
+      <div className="fixed bottom-6 right-6">
+        {showFabOptions && (
+          <div className="absolute bottom-20 right-0 space-y-2 animate-fade-in">
+            <Button
+              onClick={handleNewChat}
+              className="backdrop-blur-xl bg-blue-500/30 hover:bg-blue-500/50 text-white rounded-full w-14 h-14 shadow-lg border border-blue-300/30 flex items-center justify-center"
+            >
+              <MessageSquare className="h-6 w-6" />
+            </Button>
+            <div className="text-xs text-white text-center">Message</div>
+            
+            <Button
+              onClick={() => setConsultDialogOpen(true)}
+              className="backdrop-blur-xl bg-purple-500/30 hover:bg-purple-500/50 text-white rounded-full w-14 h-14 shadow-lg border border-purple-300/30 flex items-center justify-center"
+            >
+              <Stethoscope className="h-6 w-6" />
+            </Button>
+            <div className="text-xs text-white text-center">Consult</div>
+          </div>
+        )}
+
+        <Button
+          onClick={() => setShowFabOptions(!showFabOptions)}
+          className="backdrop-blur-xl bg-white/10 hover:bg-white/20 text-white rounded-full w-16 h-16 shadow-2xl border border-white/20 p-0 overflow-hidden group transition-all duration-300 hover:scale-110"
+        >
+          <div className="flex flex-col items-center justify-center">
             <img 
               src="/lovable-uploads/b0a1d2d7-905e-4bca-a277-2b91f740f891.png" 
               alt="Virtualis" 
-              className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-300"
+              className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300"
             />
-          </Button>
-          <div className="backdrop-blur-sm bg-white/10 rounded-full px-3 py-1 text-white text-xs text-center border border-white/20">
-            Consult
+            <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showFabOptions ? 'rotate-180' : ''}`} />
           </div>
-        </div>
+        </Button>
       </div>
 
       {/* Enhanced Consultation Dialog */}
