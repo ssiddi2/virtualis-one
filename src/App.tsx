@@ -8,7 +8,6 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import { AIAssistantProvider } from "@/components/ai/AIAssistantProvider";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
-import VirtualisChatPage from "./pages/VirtualisChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,7 +23,6 @@ const App = () => (
             <Routes>
               <Route path="/*" element={<Index />} />
               <Route path="/demo" element={<Demo />} />
-              <Route path="/chat" element={<VirtualisChatPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import CMSReporting from "@/components/reporting/CMSReporting";
 import CopilotComposer from "@/components/patient/CopilotComposer";
 import AIDashboard from "@/components/dashboard/AIDashboard";
 import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
+import VirtualisChatPage from "./VirtualisChat";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -133,6 +133,9 @@ const Index = () => {
                 );
               }
             })()
+          } />
+          <Route path="/chat" element={
+            requireHospitalSelection(<VirtualisChatPage hospitalId={selectedHospitalId!} />)
           } />
           <Route path="/patient/:patientId" element={
             requireHospitalSelection(<PatientDetailsPage />)
