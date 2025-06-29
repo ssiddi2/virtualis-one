@@ -60,7 +60,7 @@ const VirtualisAIAssistant = ({ selectedHospitalId }: VirtualisAIAssistantProps)
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Don't render if no hospital is selected
+  // Don't render the button if no hospital is selected
   if (!selectedHospitalId) {
     return null;
   }

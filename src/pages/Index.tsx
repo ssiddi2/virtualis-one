@@ -81,8 +81,8 @@ const Index = () => {
     <div className="flex h-screen overflow-hidden" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
-      <Sidebar selectedHospitalId={selectedHospitalId} />
-      <main className="flex-1 overflow-auto" style={{
+      {selectedHospitalId && <Sidebar selectedHospitalId={selectedHospitalId} />}
+      <main className={`${selectedHospitalId ? 'flex-1' : 'w-full'} overflow-auto`} style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <Routes>
