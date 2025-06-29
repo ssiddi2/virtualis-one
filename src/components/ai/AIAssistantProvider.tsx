@@ -1,9 +1,10 @@
 
-import { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import VirtualisAIAssistant from './VirtualisAIAssistant';
 
 interface AIAssistantContextType {
-  // Future expansion for assistant state management
+  selectedHospitalId: string | null;
+  setSelectedHospitalId: (hospitalId: string | null) => void;
 }
 
 const AIAssistantContext = createContext<AIAssistantContextType | undefined>(undefined);
@@ -21,10 +22,12 @@ interface AIAssistantProviderProps {
 }
 
 export const AIAssistantProvider = ({ children }: AIAssistantProviderProps) => {
+  const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
+
   return (
-    <AIAssistantContext.Provider value={{}}>
+    <AIAssistantContext.Provider value={{ selectedHospitalId, setSelectedHospitalId }}>
       {children}
-      <VirtualisAIAssistant />
+      <VirtualisAIAssistant selectedHospitalId={selectedHospitalId} />
     </AIAssistantContext.Provider>
   );
 };

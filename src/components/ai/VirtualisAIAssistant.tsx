@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,14 +40,18 @@ interface ConfirmationData {
   finalAction?: string;
 }
 
-const VirtualisAIAssistant = () => {
+interface VirtualisAIAssistantProps {
+  selectedHospitalId?: string | null;
+}
+
+const VirtualisAIAssistant = ({ selectedHospitalId }: VirtualisAIAssistantProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [awaitingConfirmation, setAwaitingConfirmation] = useState<string | null>(null);
   
   const { parseIntent, isLoading, error } = useVirtualisAI();
-  const { data: patients } = usePatients();
+  const { data: patients } = usePatients(selectedHospitalId || undefined);
   const { data: physicians } = usePhysicians();
   const { data: onCallSchedules } = useOnCallSchedules();
   const { user, profile } = useAuth();
@@ -56,6 +59,11 @@ const VirtualisAIAssistant = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Don't render if no hospital is selected
+  if (!selectedHospitalId) {
+    return null;
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,21 +92,28 @@ const VirtualisAIAssistant = () => {
   const findPatientMatches = (patientInfo: string) => {
     if (!patients) return [];
     
-    if (patientInfo.startsWith('room ')) {
-      const roomNumber = patientInfo.replace('room ', '');
+    const lowerPatientInfo = patientInfo.toLowerCase();
+    
+    if (lowerPatientInfo.startsWith('room ')) {
+      const roomNumber = patientInfo.replace(/room\s+/i, '');
       return patients.filter(p => p.room_number === roomNumber);
     }
     
-    if (patientInfo.startsWith('mrn ')) {
-      const mrn = patientInfo.replace('mrn ', '');
+    if (lowerPatientInfo.startsWith('mrn ')) {
+      const mrn = patientInfo.replace(/mrn\s+/i, '');
       return patients.filter(p => p.mrn.toLowerCase().includes(mrn.toLowerCase()));
     }
     
-    // Name search
-    return patients.filter(p => 
-      p.first_name.toLowerCase().includes(patientInfo.toLowerCase()) ||
-      p.last_name.toLowerCase().includes(patientInfo.toLowerCase())
-    );
+    // Name search - split the input to handle first and last names
+    const nameParts = patientInfo.toLowerCase().split(' ');
+    return patients.filter(p => {
+      const fullName = `${p.first_name} ${p.last_name}`.toLowerCase();
+      return nameParts.some(part => 
+        p.first_name.toLowerCase().includes(part) ||
+        p.last_name.toLowerCase().includes(part) ||
+        fullName.includes(patientInfo.toLowerCase())
+      );
+    });
   };
 
   const findRecipientMatches = (recipientInfo: string) => {
@@ -106,7 +121,7 @@ const VirtualisAIAssistant = () => {
     
     // Find on-call physicians for the specialty
     const relevantSchedules = onCallSchedules.filter(schedule => 
-      schedule.specialty.name.toLowerCase().includes(recipientInfo.toLowerCase())
+      schedule.specialty?.name.toLowerCase().includes(recipientInfo.toLowerCase())
     );
     
     return relevantSchedules.map(schedule => schedule.physician);
@@ -205,6 +220,7 @@ const VirtualisAIAssistant = () => {
         patient,
         recipient,
         user: user?.id,
+        hospitalId: selectedHospitalId,
         timestamp: new Date()
       });
     } catch (error) {
@@ -233,7 +249,7 @@ const VirtualisAIAssistant = () => {
       // Parse user intent using Virtualis AI
       const intent = await parseIntent({
         input: userInput,
-        context: 'Clinical workflow execution',
+        context: `Clinical workflow execution for hospital ${selectedHospitalId}`,
         availableSpecialties: physicians?.map(p => p.specialty?.name).filter(Boolean) || []
       });
       
@@ -346,7 +362,12 @@ const VirtualisAIAssistant = () => {
                 <div className="text-center text-slate-500 py-8">
                   <Bot className="h-12 w-12 mx-auto mb-3 text-slate-300" />
                   <p className="text-sm">Hi! I'm your clinical assistant.</p>
-                  <p className="text-xs">What would you like me to help you with?</p>
+                  <p className="text-xs">Try: "Order CBC for room 302" or "Page cardiology"</p>
+                  {patients && patients.length > 0 && (
+                    <div className="mt-4 text-xs text-slate-400">
+                      <p>Available patients: {patients.filter(p => p.status === 'active').length} active</p>
+                    </div>
+                  )}
                 </div>
               )}
 

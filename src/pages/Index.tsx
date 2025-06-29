@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useAIAssistantContext } from "@/components/ai/AIAssistantProvider";
 import AuthForm from "@/components/auth/AuthForm";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
@@ -23,14 +24,17 @@ const Index = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
+  const { setSelectedHospitalId: setAISelectedHospitalId } = useAIAssistantContext();
 
   const handleSelectHospital = (hospitalId: string) => {
     console.log('Selected hospital:', hospitalId);
     setSelectedHospitalId(hospitalId);
+    setAISelectedHospitalId(hospitalId);
   };
 
   const handleBackToEMR = () => {
     setSelectedHospitalId(null);
+    setAISelectedHospitalId(null);
   };
 
   const requireHospitalSelection = (component: React.ReactElement) => {
@@ -82,6 +86,7 @@ const Index = () => {
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <Routes>
+          <Route path="/" element={<Navigate to="/emr" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/ai-dashboard" element={
             requireHospitalSelection(
@@ -135,7 +140,6 @@ const Index = () => {
           <Route path="/ai-assistant" element={
             requireHospitalSelection(<CopilotComposer hospitalId={selectedHospitalId!} />)
           } />
-          <Route path="*" element={<Navigate to="/emr" replace />} />
         </Routes>
       </main>
     </div>
