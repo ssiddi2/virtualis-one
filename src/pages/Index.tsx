@@ -8,7 +8,6 @@ import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
-import PatientChart from "@/components/patient/PatientChart";
 import PatientDetailsPage from "@/components/patient/PatientDetailsPage";
 import AdmissionForm from "@/components/patient/AdmissionForm";
 import BillingDashboard from "@/components/billing/BillingDashboard";
@@ -19,8 +18,6 @@ import CMSReporting from "@/components/reporting/CMSReporting";
 import CopilotComposer from "@/components/patient/CopilotComposer";
 import AIDashboard from "@/components/dashboard/AIDashboard";
 import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
-import Demo from "@/pages/Demo";
-import VirtualisChatPage from "@/pages/VirtualisChat";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -139,10 +136,6 @@ const Index = () => {
           <Route path="/ai-assistant" element={
             requireHospitalSelection(<CopilotComposer hospitalId={selectedHospitalId!} />)
           } />
-          <Route path="/virtualis-chat" element={
-            requireHospitalSelection(<VirtualisChatPage />)
-          } />
-          <Route path="/demo" element={<Demo />} />
           <Route path="*" element={<Navigate to="/emr" replace />} />
         </Routes>
       </main>
