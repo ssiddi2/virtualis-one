@@ -512,11 +512,24 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     );
   }
 
-  const filteredPhysicians = physicians?.filter(physician => 
-    `${physician.first_name} ${physician.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (physician.specialty && typeof physician.specialty === 'string' && physician.specialty.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (physician.specialty && typeof physician.specialty === 'object' && physician.specialty.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  ) || [];
+  const filteredPhysicians = physicians?.filter(physician => {
+    const fullName = `${physician.first_name} ${physician.last_name}`.toLowerCase();
+    const searchLower = searchQuery.toLowerCase();
+    
+    // Check name match
+    if (fullName.includes(searchLower)) return true;
+    
+    // Check specialty match
+    if (physician.specialty) {
+      if (typeof physician.specialty === 'string') {
+        return physician.specialty.toLowerCase().includes(searchLower);
+      } else if (typeof physician.specialty === 'object' && physician.specialty.name) {
+        return physician.specialty.name.toLowerCase().includes(searchLower);
+      }
+    }
+    
+    return false;
+  }) || [];
 
   return (
     <div className="min-h-screen flex" style={{
