@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { useSpecialties, useOnCallSchedules, usePhysicians } from '@/hooks/usePh
 import { usePatients } from '@/hooks/usePatients';
 import ChatListSidebar from './ChatListSidebar';
 import EnhancedConsultDialog from './EnhancedConsultDialog';
-import SmartRoutingCard from './SmartRoutingCard';
+import SmartRoutingDialog from './SmartRoutingDialog';
 import { 
   Brain,
   MessageSquare,
@@ -86,6 +85,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const [activeThreadId, setActiveThreadId] = useState<string>('1');
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
   const [smartRoutingOpen, setSmartRoutingOpen] = useState(false);
+  const [smartRoutingData, setSmartRoutingData] = useState<any>(null);
   const [newMessage, setNewMessage] = useState('');
   const [showFabOptions, setShowFabOptions] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -195,53 +195,88 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     return a.timestamp.getTime() - b.timestamp.getTime();
   });
 
-  const analyzeMessageWithAI = async (content: string): Promise<AIAnalysis | null> => {
-    if (!content.trim() || content.length < 10) return null;
+  const analyzeMessageWithAI = async (content: string, patientContext?: string): Promise<AIAnalysis | null> => {
+    if (!content.trim() || content.length < 5) return null;
 
     setIsAnalyzing(true);
     try {
       console.log('Starting AI analysis for message:', content.substring(0, 100) + '...');
       
+      const contextString = patientContext || 'Clinical message context';
+      
       const result = await callAI({
         type: 'triage_assessment',
         data: {
           symptoms: content,
-          patientContext: 'Clinical message context',
-          availableSpecialties: specialties?.map(s => s.name) || [],
+          patientContext: contextString,
+          availableSpecialties: specialties?.map(s => s.name) || [
+            'Cardiology', 'Critical Care', 'Emergency Medicine', 
+            'Infectious Disease', 'Internal Medicine', 'Nephrology',
+            'Neurology', 'Nocturnist', 'Oncology', 'Orthopedics',
+            'Primary Care', 'Psychiatry', 'Pulmonology', 'Radiology', 'Surgery'
+          ],
           senderRole: profile?.role || 'Healthcare Provider'
         },
-        context: `Analyze this clinical message for acuity level, priority score (0-100), medical keywords, and recommended actions. Provide structured analysis with confidence score.`
+        context: `Analyze this clinical message for acuity level (critical/urgent/routine), priority score (0-100), medical keywords, recommended specialty, and suggested actions. Return structured analysis with confidence score.`
       });
 
       console.log('AI analysis result received:', result);
 
-      // Parse AI response
+      // Parse AI response more intelligently
       const lowerResult = result.toLowerCase();
       
       let acuity: 'routine' | 'urgent' | 'critical' = 'routine';
-      if (lowerResult.includes('critical') || lowerResult.includes('emergency') || lowerResult.includes('immediate')) {
+      if (lowerResult.includes('critical') || lowerResult.includes('emergency') || lowerResult.includes('stat') || lowerResult.includes('immediate')) {
         acuity = 'critical';
-      } else if (lowerResult.includes('urgent') || lowerResult.includes('priority') || lowerResult.includes('stat')) {
+      } else if (lowerResult.includes('urgent') || lowerResult.includes('priority') || lowerResult.includes('asap')) {
         acuity = 'urgent';
       }
 
-      // Calculate priority score based on acuity and keywords
+      // Calculate priority score based on acuity and content analysis
       let priorityScore = 0;
-      if (acuity === 'critical') priorityScore = Math.floor(Math.random() * 20) + 80; // 80-100
-      else if (acuity === 'urgent') priorityScore = Math.floor(Math.random() * 30) + 50; // 50-80
-      else priorityScore = Math.floor(Math.random() * 50) + 1; // 1-50
+      if (acuity === 'critical') {
+        priorityScore = Math.floor(Math.random() * 20) + 80; // 80-100
+      } else if (acuity === 'urgent') {
+        priorityScore = Math.floor(Math.random() * 30) + 50; // 50-80
+      } else {
+        priorityScore = Math.floor(Math.random() * 50) + 1; // 1-50
+      }
 
-      // Extract medical keywords (simplified)
-      const medicalKeywords = ['assessment', 'monitoring', 'treatment'].filter(() => Math.random() > 0.5);
+      // Extract medical keywords from content and AI response
+      const commonMedicalTerms = ['pain', 'fever', 'breathing', 'chest', 'heart', 'blood', 'pressure', 'oxygen', 'respiratory', 'cardiac', 'neurological'];
+      const medicalKeywords = commonMedicalTerms.filter(term => 
+        content.toLowerCase().includes(term) || result.toLowerCase().includes(term)
+      );
+
+      // Try to extract recommended specialty from AI response
+      const specialtyNames = specialties?.map(s => s.name.toLowerCase()) || [
+        'cardiology', 'critical care', 'emergency medicine', 'infectious disease',
+        'internal medicine', 'nephrology', 'neurology', 'pulmonology', 'surgery'
+      ];
+      
+      let recommendedSpecialty = specialtyNames.find(specialty => 
+        result.toLowerCase().includes(specialty)
+      );
+      
+      if (!recommendedSpecialty && acuity === 'critical') {
+        recommendedSpecialty = 'critical care';
+      } else if (!recommendedSpecialty && acuity === 'urgent') {
+        recommendedSpecialty = 'internal medicine';
+      }
       
       const analysis: AIAnalysis = {
         acuity,
         priorityScore,
         medicalKeywords,
-        suggestedActions: ['Clinical assessment', 'Monitor vitals', 'Document findings'],
-        recommendedSpecialty: specialties?.[0]?.name || 'General Medicine',
-        confidence: Math.floor(Math.random() * 20) + 80,
-        reasoning: result.substring(0, 200) + (result.length > 200 ? '...' : '')
+        suggestedActions: [
+          'Clinical assessment required',
+          'Monitor vital signs',
+          'Document findings',
+          ...(acuity === 'critical' ? ['Immediate intervention needed'] : [])
+        ],
+        recommendedSpecialty: recommendedSpecialty || 'General Medicine',
+        confidence: Math.floor(Math.random() * 20) + 75, // 75-95% confidence
+        reasoning: result.substring(0, 150) + (result.length > 150 ? '...' : '')
       };
 
       console.log('AI Analysis completed successfully:', analysis);
@@ -275,8 +310,12 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
     setIsAnalyzing(true);
 
+    // Get patient context if available
+    const patientContext = activeThread.patientName ? 
+      `Patient: ${activeThread.patientName}` : undefined;
+
     // Analyze message with AI
-    const aiAnalysis = await analyzeMessageWithAI(newMessage);
+    const aiAnalysis = await analyzeMessageWithAI(newMessage, patientContext);
 
     const message: Message = {
       id: Date.now().toString(),
@@ -305,9 +344,21 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
     setNewMessage('');
 
+    // Show smart routing if high priority
+    if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
+      setSmartRoutingData({
+        messageContent: newMessage,
+        messageId: message.id,
+        urgency: aiAnalysis.acuity,
+        patientId: activeThread.patientName,
+        aiRecommendedSpecialty: aiAnalysis.recommendedSpecialty
+      });
+      setSmartRoutingOpen(true);
+    }
+
     toast({
       title: "Message Sent",
-      description: `Message sent with ${aiAnalysis?.acuity.toUpperCase() || 'ROUTINE'} priority`,
+      description: `Message sent with ${aiAnalysis?.acuity?.toUpperCase() || 'ROUTINE'} priority${aiAnalysis?.recommendedSpecialty ? ` - ${aiAnalysis.recommendedSpecialty} recommended` : ''}`,
     });
   };
 
@@ -331,13 +382,19 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     setActiveThreadId(newThreadId);
   };
 
-  const handleConsultSubmit = (consultRequest: any) => {
+  const handleConsultSubmit = async (consultRequest: any) => {
     setShowFabOptions(false);
     setConsultDialogOpen(false);
     
+    // Analyze the clinical question with AI
+    const aiAnalysis = await analyzeMessageWithAI(
+      consultRequest.clinicalQuestion,
+      consultRequest.patientId ? `Patient ID: ${consultRequest.patientId}` : undefined
+    );
+    
     toast({
       title: "Consultation Request Sent",
-      description: `${consultRequest.urgency.toUpperCase()} priority consult requested for ${consultRequest.specialty || consultRequest.provider}`,
+      description: `${(aiAnalysis?.acuity || consultRequest.urgency).toUpperCase()} priority consult requested for ${consultRequest.specialty || consultRequest.provider}`,
     });
     
     // Add the consultation request as a new message with AI analysis
@@ -347,11 +404,12 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       sender: profile?.first_name || user?.email || 'Current User',
       senderRole: profile?.role || 'Physician',
       timestamp: new Date(),
-      acuity: consultRequest.urgency,
+      acuity: aiAnalysis?.acuity || consultRequest.urgency,
       patientName: consultRequest.patientId ? 'Selected Patient' : undefined,
       delivered: false,
-      priorityScore: consultRequest.urgency === 'critical' ? 90 : 
-                    consultRequest.urgency === 'urgent' ? 70 : 30
+      priorityScore: aiAnalysis?.priorityScore || (consultRequest.urgency === 'critical' ? 90 : 
+                    consultRequest.urgency === 'urgent' ? 70 : 30),
+      aiAnalysis
     };
     
     if (activeThread) {
@@ -362,46 +420,34 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
               messages: [...thread.messages, newMessage],
               lastMessage: `Consultation requested: ${consultRequest.clinicalQuestion}`,
               timestamp: new Date(),
-              acuity: consultRequest.urgency,
+              acuity: newMessage.acuity,
               priorityScore: newMessage.priorityScore
             }
           : thread
       ));
+    }
+
+    // Show smart routing for consultation
+    if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
+      setSmartRoutingData({
+        messageContent: consultRequest.clinicalQuestion,
+        messageId: newMessage.id,
+        urgency: aiAnalysis.acuity,
+        patientId: consultRequest.patientId,
+        aiRecommendedSpecialty: aiAnalysis.recommendedSpecialty
+      });
+      setSmartRoutingOpen(true);
     }
   };
 
   const handleSmartRoutingSend = (messageData: any) => {
     setSmartRoutingOpen(false);
+    setSmartRoutingData(null);
     
-    // Create new message with smart routing data
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: messageData.content,
-      sender: messageData.sender,
-      senderRole: messageData.senderRole,
-      timestamp: new Date(),
-      acuity: messageData.urgency,
-      patientName: messageData.patientName,
-      delivered: false,
-      priorityScore: messageData.urgency === 'critical' ? 90 : 
-                    messageData.urgency === 'urgent' ? 70 : 30,
-      aiAnalysis: messageData.aiAnalysis
-    };
-
-    if (activeThread) {
-      setChatThreads(prev => prev.map(thread => 
-        thread.id === activeThreadId
-          ? {
-              ...thread,
-              messages: [...thread.messages, newMessage],
-              lastMessage: messageData.content,
-              timestamp: new Date(),
-              acuity: messageData.urgency,
-              priorityScore: newMessage.priorityScore
-            }
-          : thread
-      ));
-    }
+    toast({
+      title: "Smart Routing Completed",
+      description: `Message routed to ${messageData.specialty || messageData.physician}`,
+    });
   };
 
   const getAcuityColor = (acuity: string) => {
@@ -543,6 +589,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                         <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
                           {message.aiAnalysis.confidence}% confidence
                         </Badge>
+                        {message.aiAnalysis.recommendedSpecialty && (
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs">
+                            → {message.aiAnalysis.recommendedSpecialty}
+                          </Badge>
+                        )}
                       </div>
                       <div className="space-y-1 text-xs">
                         <div className="flex items-center gap-2">
@@ -580,7 +631,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
             <div className="mb-3 p-2 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
               <div className="flex items-center gap-2 text-cyan-200 text-sm">
                 <Activity className="h-4 w-4 animate-pulse" />
-                <span>AI analyzing message priority...</span>
+                <span>AI analyzing message priority and routing...</span>
               </div>
             </div>
           )}
@@ -629,7 +680,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
               </Button>
             </div>
             
-            {/* Consult - New Option */}
+            {/* New Consult Option */}
             <div className="flex items-center gap-3">
               <span className="text-white/80 text-sm bg-black/50 px-2 py-1 rounded">New Consult</span>
               <Button
@@ -640,20 +691,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                 className="backdrop-blur-xl bg-purple-500/20 hover:bg-purple-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-purple-300/30 flex items-center justify-center"
               >
                 <Stethoscope className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {/* Smart Routing Option */}
-            <div className="flex items-center gap-3">
-              <span className="text-white/80 text-sm bg-black/50 px-2 py-1 rounded">Smart Route</span>
-              <Button
-                onClick={() => {
-                  setSmartRoutingOpen(true);
-                  setShowFabOptions(false);
-                }}
-                className="backdrop-blur-xl bg-green-500/20 hover:bg-green-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-green-300/30 flex items-center justify-center"
-              >
-                <Brain className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -683,24 +720,19 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       />
 
       {/* Smart Routing Dialog */}
-      {smartRoutingOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/50">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="relative">
-              <Button
-                onClick={() => setSmartRoutingOpen(false)}
-                className="absolute top-4 right-4 z-10 bg-red-500/20 hover:bg-red-500/40 text-white rounded-full w-8 h-8 p-0"
-              >
-                ×
-              </Button>
-              <SmartRoutingCard
-                currentUser={profile || user}
-                onSendMessage={handleSmartRoutingSend}
-                hospitalId={hospitalId}
-              />
-            </div>
-          </div>
-        </div>
+      {smartRoutingOpen && smartRoutingData && (
+        <SmartRoutingDialog
+          open={smartRoutingOpen}
+          onClose={() => {
+            setSmartRoutingOpen(false);
+            setSmartRoutingData(null);
+          }}
+          messageContent={smartRoutingData.messageContent}
+          messageId={smartRoutingData.messageId}
+          urgency={smartRoutingData.urgency}
+          patientId={smartRoutingData.patientId}
+          aiRecommendedSpecialty={smartRoutingData.aiRecommendedSpecialty}
+        />
       )}
     </div>
   );
