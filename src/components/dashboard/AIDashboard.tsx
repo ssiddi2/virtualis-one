@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ interface AIDashboardProps {
 }
 
 const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
-  const [activeTab, setActiveTab] = useState('workflow');
+  const [activeTab, setActiveTab] = useState('assistant');
   const { data: hospitals } = useHospitals();
   
   const selectedHospital = hospitalId ? hospitals?.find(h => h.id === hospitalId) : null;
@@ -83,11 +82,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
-          <TabsTrigger value="workflow" className="text-white data-[state=active]:bg-blue-600/30">
-            <Workflow className="h-4 w-4 mr-2" />
-            Workflow Demo
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
           <TabsTrigger value="assistant" className="text-white data-[state=active]:bg-blue-600/30">
             <MessageSquare className="h-4 w-4 mr-2" />
             AI Assistant
@@ -109,10 +104,6 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
             AI Tools
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="workflow" className="space-y-6">
-          <AIWorkflowDashboard hospitalId={hospitalId} />
-        </TabsContent>
 
         <TabsContent value="assistant" className="space-y-6">
           <VirtualisChatLayout hospitalId={hospitalId} />
