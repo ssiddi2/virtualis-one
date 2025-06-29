@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,13 @@ import {
   Pill,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
+  TestTube,
+  Camera,
+  Stethoscope,
+  TrendingUp,
+  Download,
+  Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,7 +30,7 @@ const PatientChart = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Mock patient data
+  // Mock patient data with enhanced lab and imaging data
   const patientData = {
     id: 'PAT-001',
     name: 'John Smith',
@@ -54,6 +59,17 @@ const PatientChart = () => {
     diagnoses: [
       { condition: 'Hypertension', status: 'Chronic', date: '2022-01-15' },
       { condition: 'Type 2 Diabetes', status: 'Chronic', date: '2021-05-20' }
+    ],
+    labs: [
+      { name: 'Complete Blood Count', date: '2024-01-15', status: 'completed', critical: false, results: { wbc: '7.2', rbc: '4.8', hgb: '14.2', hct: '42.1' } },
+      { name: 'Basic Metabolic Panel', date: '2024-01-15', status: 'completed', critical: true, results: { glucose: '180', bun: '18', creatinine: '1.2', sodium: '142' } },
+      { name: 'Lipid Panel', date: '2024-01-10', status: 'completed', critical: false, results: { cholesterol: '220', hdl: '45', ldl: '140', triglycerides: '175' } },
+      { name: 'Troponin I', date: '2024-01-15', status: 'pending', critical: false, results: null }
+    ],
+    imaging: [
+      { type: 'Chest X-Ray', date: '2024-01-15', status: 'completed', findings: 'No acute cardiopulmonary abnormalities', critical: false },
+      { type: 'CT Chest w/contrast', date: '2024-01-14', status: 'completed', findings: 'Small pulmonary nodule, follow-up recommended', critical: true },
+      { type: 'Echocardiogram', date: '2024-01-12', status: 'completed', findings: 'Normal left ventricular function, EF 60%', critical: false }
     ],
     recentNotes: [
       { date: '2024-01-15 10:30', provider: 'Dr. Johnson', note: 'Patient stable, responding well to treatment' },
@@ -162,12 +178,18 @@ const PatientChart = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
+          <TabsList className="grid w-full grid-cols-6 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
             <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/20">
               Overview
             </TabsTrigger>
             <TabsTrigger value="vitals" className="text-white data-[state=active]:bg-white/20">
               Vitals
+            </TabsTrigger>
+            <TabsTrigger value="labs" className="text-white data-[state=active]:bg-white/20">
+              Labs
+            </TabsTrigger>
+            <TabsTrigger value="imaging" className="text-white data-[state=active]:bg-white/20">
+              Imaging
             </TabsTrigger>
             <TabsTrigger value="medications" className="text-white data-[state=active]:bg-white/20">
               Medications
@@ -188,7 +210,7 @@ const PatientChart = () => {
                     <div key={index} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-white">{diagnosis.condition}</span>
-                        <Badge className="bg-yellow-500/20 text-yellow-200 border border-yellow-400/30 text-xs">
+                        <Badge className="bg-yellow-500/20 text-yellow-200 border border-yellow-400/30">
                           {diagnosis.status}
                         </Badge>
                       </div>
@@ -253,6 +275,125 @@ const PatientChart = () => {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="labs" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {patientData.labs.map((lab, index) => (
+                <Card key={index} className="backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-purple-500/10 border border-blue-300/30 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${lab.critical ? 'bg-red-500/20' : 'bg-blue-500/20'}`}>
+                          <TestTube className={`h-5 w-5 ${lab.critical ? 'text-red-300' : 'text-blue-300'}`} />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg text-white">{lab.name}</CardTitle>
+                          <p className="text-sm text-white/60">{lab.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {lab.critical && (
+                          <Badge className="bg-red-500/20 text-red-200 border border-red-400/30 text-xs">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            CRITICAL
+                          </Badge>
+                        )}
+                        <Badge className={`text-xs ${
+                          lab.status === 'completed' 
+                            ? 'bg-green-500/20 text-green-200 border-green-400/30' 
+                            : 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30'
+                        }`}>
+                          {lab.status.toUpperCase()}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {lab.results ? (
+                      <div className="space-y-2">
+                        {Object.entries(lab.results).map(([key, value]) => (
+                          <div key={key} className="flex justify-between items-center p-2 backdrop-blur-sm bg-white/5 rounded-lg border border-white/10">
+                            <span className="text-white/80 capitalize">{key}:</span>
+                            <span className="text-white font-medium">{value}</span>
+                          </div>
+                        ))}
+                        <div className="flex gap-2 mt-3">
+                          <Button size="sm" className="bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/30">
+                            <Eye className="h-3 w-3 mr-1" />
+                            View Details
+                          </Button>
+                          <Button size="sm" className="bg-green-600/30 hover:bg-green-600/50 border border-green-400/30">
+                            <Download className="h-3 w-3 mr-1" />
+                            Export
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <Loader2 className="h-6 w-6 animate-spin text-blue-300 mx-auto mb-2" />
+                        <p className="text-white/60">Processing results...</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="imaging" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {patientData.imaging.map((study, index) => (
+                <Card key={index} className="backdrop-blur-xl bg-gradient-to-br from-purple-500/20 to-pink-500/10 border border-purple-300/30 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${study.critical ? 'bg-red-500/20' : 'bg-purple-500/20'}`}>
+                          {study.type.includes('Echo') ? (
+                            <Stethoscope className={`h-5 w-5 ${study.critical ? 'text-red-300' : 'text-purple-300'}`} />
+                          ) : (
+                            <Camera className={`h-5 w-5 ${study.critical ? 'text-red-300' : 'text-purple-300'}`} />
+                          )}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg text-white">{study.type}</CardTitle>
+                          <p className="text-sm text-white/60">{study.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {study.critical && (
+                          <Badge className="bg-red-500/20 text-red-200 border border-red-400/30 text-xs">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            CRITICAL
+                          </Badge>
+                        )}
+                        <Badge className="bg-green-500/20 text-green-200 border border-green-400/30 text-xs">
+                          {study.status.toUpperCase()}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 backdrop-blur-sm bg-white/5 rounded-lg border border-white/10">
+                        <h4 className="text-white font-medium mb-2">Findings:</h4>
+                        <p className="text-white/80 text-sm">{study.findings}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/30">
+                          <Eye className="h-3 w-3 mr-1" />
+                          View Images
+                        </Button>
+                        <Button size="sm" className="bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/30">
+                          <Download className="h-3 w-3 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 

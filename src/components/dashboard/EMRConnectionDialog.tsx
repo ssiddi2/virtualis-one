@@ -12,7 +12,8 @@ import {
   Server,
   Key,
   Lock,
-  Activity
+  Activity,
+  Zap
 } from 'lucide-react';
 
 interface EMRConnectionDialogProps {
@@ -34,33 +35,27 @@ const EMRConnectionDialog = ({
   const connectionSteps = [
     { 
       id: 1, 
-      name: 'Initializing Connection', 
-      icon: Wifi, 
-      description: 'Establishing secure tunnel to EMR system' 
+      name: 'Neural Link', 
+      icon: Zap, 
+      description: 'Establishing quantum tunnel to EMR core' 
     },
     { 
       id: 2, 
       name: 'Authentication', 
       icon: Key, 
-      description: 'Verifying FHIR R4 credentials and permissions' 
+      description: 'FHIR R4 biometric verification' 
     },
     { 
       id: 3, 
-      name: 'Security Handshake', 
+      name: 'Encryption', 
       icon: Shield, 
-      description: 'Enabling HIPAA-compliant encryption protocols' 
+      description: 'Military-grade HIPAA protocols active' 
     },
     { 
       id: 4, 
-      name: 'Data Sync', 
-      icon: Database, 
-      description: 'Synchronizing patient data and clinical workflows' 
-    },
-    { 
-      id: 5, 
-      name: 'System Ready', 
+      name: 'Sync Complete', 
       icon: CheckCircle, 
-      description: 'EMR system successfully connected and active' 
+      description: 'All systems operational' 
     }
   ];
 
@@ -75,13 +70,13 @@ const EMRConnectionDialog = ({
         if (nextStep >= connectionSteps.length) {
           setTimeout(() => {
             onComplete();
-          }, 1000);
+          }, 800);
           clearInterval(timer);
           return nextStep;
         }
         return nextStep;
       });
-    }, 800);
+    }, 600);
 
     return () => clearInterval(timer);
   }, [isOpen, onComplete, connectionSteps.length]);
@@ -90,102 +85,113 @@ const EMRConnectionDialog = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{
-      background: 'rgba(10, 22, 40, 0.95)',
-      backdropFilter: 'blur(8px)'
+      background: 'rgba(5, 15, 35, 0.98)',
+      backdropFilter: 'blur(12px)'
     }}>
-      <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-2xl shadow-2xl max-w-lg w-full animate-scale-in">
-        <CardHeader className="text-center pb-4">
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-3 backdrop-blur-sm bg-blue-600/30 rounded-xl border border-blue-400/30">
-              <Database className="h-8 w-8 text-blue-300" />
+      <Card className="backdrop-blur-2xl bg-gradient-to-br from-blue-500/30 to-purple-500/20 border border-cyan-300/40 rounded-3xl shadow-2xl max-w-md w-full animate-scale-in overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 animate-pulse" />
+        
+        <CardHeader className="text-center pb-6 relative z-10">
+          <div className="flex items-center justify-center mb-6">
+            <div className="relative p-4">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl blur-lg animate-pulse" />
+              <div className="relative p-4 backdrop-blur-sm bg-cyan-500/20 rounded-2xl border border-cyan-300/30">
+                <Database className="h-10 w-10 text-cyan-300" />
+              </div>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-white mb-2">
-            Connecting to EMR System
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-cyan-200 to-blue-200 bg-clip-text text-transparent mb-2">
+            NEURAL LINK ACTIVE
           </CardTitle>
           <div className="space-y-2">
-            <h3 className="text-lg text-white">{hospitalName}</h3>
-            <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30">
+            <h3 className="text-lg text-white font-medium">{hospitalName}</h3>
+            <Badge className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200 border border-cyan-400/30 px-3 py-1">
               <Server className="h-3 w-3 mr-1" />
-              {emrType} System
+              {emrType} CORE
             </Badge>
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-6">
-          {/* Progress Bar */}
-          <div className="space-y-2">
+        <CardContent className="space-y-6 relative z-10">
+          {/* Futuristic Progress Bar */}
+          <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-white/70">Connection Progress</span>
-              <span className="text-white font-medium">{Math.round(progress)}%</span>
+              <span className="text-cyan-200 font-medium">SYNC PROGRESS</span>
+              <span className="text-white font-bold">{Math.round(progress)}%</span>
             </div>
-            <Progress 
-              value={progress} 
-              className="h-2 bg-blue-900/50"
-            />
+            <div className="relative">
+              <div className="h-2 bg-slate-800/50 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-300 relative"
+                  style={{ width: `${progress}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full" />
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Connection Steps */}
+          {/* Streamlined Connection Steps */}
           <div className="space-y-3">
             {connectionSteps.map((step, index) => {
               const StepIcon = step.icon;
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
-              const isPending = index > currentStep;
 
               return (
                 <div 
                   key={step.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 ${
+                  className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-500 ${
                     isActive 
-                      ? 'bg-blue-600/30 border border-blue-400/40 scale-105' 
+                      ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/20 border border-cyan-400/50 scale-105 shadow-lg shadow-cyan-500/20' 
                       : isCompleted 
-                      ? 'bg-green-600/20 border border-green-400/30' 
-                      : 'bg-blue-500/10 border border-blue-400/20'
+                      ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/10 border border-green-400/30' 
+                      : 'bg-slate-800/20 border border-slate-600/30'
                   }`}
                 >
                   <div className={`p-2 rounded-lg ${
                     isActive 
-                      ? 'bg-blue-500/30 animate-pulse' 
+                      ? 'bg-cyan-500/30 shadow-lg shadow-cyan-500/30' 
                       : isCompleted 
                       ? 'bg-green-500/30' 
-                      : 'bg-gray-500/20'
+                      : 'bg-slate-600/20'
                   }`}>
                     {isActive ? (
-                      <Loader2 className="h-4 w-4 text-blue-300 animate-spin" />
+                      <Loader2 className="h-5 w-5 text-cyan-300 animate-spin" />
                     ) : isCompleted ? (
-                      <CheckCircle className="h-4 w-4 text-green-300" />
+                      <CheckCircle className="h-5 w-5 text-green-300" />
                     ) : (
-                      <StepIcon className="h-4 w-4 text-gray-400" />
+                      <StepIcon className="h-5 w-5 text-slate-400" />
                     )}
                   </div>
                   
                   <div className="flex-1">
-                    <div className={`font-medium ${
-                      isActive ? 'text-white' : isCompleted ? 'text-green-300' : 'text-white/60'
+                    <div className={`font-bold ${
+                      isActive ? 'text-cyan-200' : isCompleted ? 'text-green-300' : 'text-slate-400'
                     }`}>
                       {step.name}
                     </div>
                     <div className={`text-xs ${
-                      isActive ? 'text-blue-200' : isCompleted ? 'text-green-200' : 'text-white/40'
+                      isActive ? 'text-cyan-300' : isCompleted ? 'text-green-200' : 'text-slate-500'
                     }`}>
                       {step.description}
                     </div>
                   </div>
 
                   {isActive && (
-                    <Activity className="h-4 w-4 text-blue-300 animate-pulse" />
+                    <Activity className="h-4 w-4 text-cyan-300 animate-pulse" />
                   )}
                 </div>
               );
             })}
           </div>
 
-          {/* Security Notice */}
-          <div className="flex items-center gap-2 p-3 backdrop-blur-sm bg-green-600/20 border border-green-400/30 rounded-lg">
-            <Lock className="h-4 w-4 text-green-300" />
-            <div className="text-sm text-green-200">
-              <span className="font-medium">Secure Connection:</span> All data is encrypted end-to-end and HIPAA compliant
+          {/* Security Badge */}
+          <div className="flex items-center gap-3 p-3 backdrop-blur-sm bg-gradient-to-r from-green-600/20 to-emerald-600/10 border border-green-400/30 rounded-xl">
+            <Lock className="h-5 w-5 text-green-300" />
+            <div className="text-sm">
+              <span className="font-bold text-green-200">QUANTUM ENCRYPTION:</span>
+              <span className="text-green-300 ml-1">Military-grade HIPAA compliance active</span>
             </div>
           </div>
         </CardContent>
