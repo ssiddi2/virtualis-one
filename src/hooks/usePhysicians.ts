@@ -10,6 +10,7 @@ export interface Physician {
   email: string;
   phone?: string;
   specialty_id?: string;
+  hospital_id?: string;  // Added missing hospital_id property
   is_active: boolean;
   created_at: string;
   updated_at: string;
