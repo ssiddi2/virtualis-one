@@ -69,7 +69,8 @@ const Index = () => {
               selectedHospitalId ? (
                 <HospitalDashboard 
                   hospitalId={selectedHospitalId}
-                  onHospitalChange={setSelectedHospitalId}
+                  user={profile}
+                  onBack={() => setSelectedHospitalId('')}
                 />
               ) : (
                 <EMRDashboard 
