@@ -104,7 +104,10 @@ const Index = () => {
                 onBack={handleBackToEMR}
               />
             ) : (
-              <EMRDashboard user={profile || user} onSelectHospital={handleSelectHospital} />
+              <EMRDashboard 
+                user={profile || user} 
+                onSelectHospital={handleSelectHospital} 
+              />
             )
           } />
           <Route path="/patient/:patientId" element={
