@@ -17,6 +17,7 @@ interface SmartRoutingDialogProps {
   urgency: 'routine' | 'urgent' | 'critical';
   patientId?: string;
   aiRecommendedSpecialty?: string;
+  onSend: (messageData: any) => void;
 }
 
 const SmartRoutingDialog = ({
@@ -26,7 +27,8 @@ const SmartRoutingDialog = ({
   messageId,
   urgency,
   patientId,
-  aiRecommendedSpecialty
+  aiRecommendedSpecialty,
+  onSend
 }: SmartRoutingDialogProps) => {
   const { toast } = useToast();
   const { data: specialties } = useSpecialties();
@@ -91,6 +93,15 @@ const SmartRoutingDialog = ({
         description: `${routingType === 'consult' ? 'Consultation' : 'Page'} sent to ${
           physicianName ? `${physicianName.first_name} ${physicianName.last_name}` : specialtyName
         }`,
+      });
+
+      // Call the onSend callback with the message data
+      onSend({
+        messageId,
+        specialty: specialtyName,
+        physician: physicianName ? `${physicianName.first_name} ${physicianName.last_name}` : undefined,
+        urgency,
+        routingType
       });
 
       onClose();
