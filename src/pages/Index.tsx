@@ -26,21 +26,17 @@ const Index = () => {
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
   const { setSelectedHospitalId: setAISelectedHospitalId } = useAIAssistantContext();
 
-  console.log('Index render state:', { selectedHospitalId, user: !!user, loading });
+  console.log('Index render state:', { selectedHospitalId, user: !!user, loading, currentPath: window.location.pathname });
 
   const handleSelectHospital = (hospitalId: string) => {
     console.log('Hospital selected in Index:', hospitalId);
     setSelectedHospitalId(hospitalId);
     setAISelectedHospitalId(hospitalId);
-    
-    // Add a small delay to ensure state is set before navigation
-    setTimeout(() => {
-      console.log('State after hospital selection:', { selectedHospitalId: hospitalId });
-    }, 100);
+    console.log('State immediately after setting:', { selectedHospitalId: hospitalId });
   };
 
   const handleBackToEMR = () => {
-    console.log('Back to EMR called');
+    console.log('Back to EMR called - clearing hospital selection');
     setSelectedHospitalId(null);
     setAISelectedHospitalId(null);
   };
@@ -91,7 +87,7 @@ const Index = () => {
     );
   }
 
-  console.log('Rendering main app layout');
+  console.log('Rendering main app layout with selectedHospitalId:', selectedHospitalId);
 
   return (
     <div className="flex h-screen overflow-hidden" style={{
@@ -115,18 +111,28 @@ const Index = () => {
             )
           } />
           <Route path="/emr" element={
-            selectedHospitalId ? (
-              <HospitalDashboard 
-                hospitalId={selectedHospitalId} 
-                user={profile || user} 
-                onBack={handleBackToEMR}
-              />
-            ) : (
-              <EMRDashboard 
-                user={profile || user} 
-                onSelectHospital={handleSelectHospital} 
-              />
-            )
+            (() => {
+              console.log('EMR route rendering with selectedHospitalId:', selectedHospitalId);
+              
+              if (selectedHospitalId) {
+                console.log('Rendering HospitalDashboard for hospital:', selectedHospitalId);
+                return (
+                  <HospitalDashboard 
+                    hospitalId={selectedHospitalId} 
+                    user={profile || user} 
+                    onBack={handleBackToEMR}
+                  />
+                );
+              } else {
+                console.log('Rendering EMRDashboard (no hospital selected)');
+                return (
+                  <EMRDashboard 
+                    user={profile || user} 
+                    onSelectHospital={handleSelectHospital} 
+                  />
+                );
+              }
+            })()
           } />
           <Route path="/patient/:patientId" element={
             requireHospitalSelection(<PatientDetailsPage />)
