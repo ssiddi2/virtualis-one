@@ -251,7 +251,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         content.toLowerCase().includes(term) || result.toLowerCase().includes(term)
       );
 
-      // Try to extract recommended specialty from AI response - fix the specialty name handling
+      // Try to extract recommended specialty from AI response
       const specialtyNames = specialties?.map(s => s.name.toLowerCase()) || [
         'cardiology', 'critical care', 'emergency medicine', 'infectious disease',
         'internal medicine', 'nephrology', 'neurology', 'pulmonology', 'surgery'
@@ -512,24 +512,10 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     );
   }
 
-  const filteredPhysicians = physicians?.filter(physician => {
-    const fullName = `${physician.first_name} ${physician.last_name}`.toLowerCase();
-    const searchLower = searchQuery.toLowerCase();
-    
-    // Check name match
-    if (fullName.includes(searchLower)) return true;
-    
-    // Check specialty match with proper type handling
-    if (physician.specialty) {
-      if (typeof physician.specialty === 'string') {
-        return physician.specialty.toLowerCase().includes(searchLower);
-      } else if (typeof physician.specialty === 'object' && physician.specialty !== null && 'name' in physician.specialty && typeof physician.specialty.name === 'string') {
-        return physician.specialty.name.toLowerCase().includes(searchLower);
-      }
-    }
-    
-    return false;
-  }) || [];
+  const filteredPhysicians = physicians?.filter(physician => 
+    `${physician.first_name} ${physician.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    physician.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   return (
     <div className="min-h-screen flex" style={{
@@ -821,7 +807,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                           {physician.first_name} {physician.last_name}
                         </div>
                         <div className="text-white/70 text-xs">
-                          {typeof physician.specialty === 'string' ? physician.specialty : physician.specialty?.name || 'General Medicine'}
+                          {physician.specialty}
                         </div>
                       </div>
                     </div>
