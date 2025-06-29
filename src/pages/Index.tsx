@@ -134,6 +134,9 @@ const Index = () => {
               }
             })()
           } />
+          <Route path="/virtualis-chat" element={
+            requireHospitalSelection(<VirtualisChatPage hospitalId={selectedHospitalId!} />)
+          } />
           <Route path="/chat" element={
             requireHospitalSelection(<VirtualisChatPage hospitalId={selectedHospitalId!} />)
           } />
