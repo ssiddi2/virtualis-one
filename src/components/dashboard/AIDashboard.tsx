@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Users, FileText, Code, Stethoscope, DollarSign, Shield, Activity, Workflow } from 'lucide-react';
+import { Brain, Users, FileText, Code, Stethoscope, DollarSign, Shield, Activity, Workflow, MessageSquare } from 'lucide-react';
 import MedicalCodingAssistant from '@/components/ai/MedicalCodingAssistant';
 import DiagnosisSupport from '@/components/ai/DiagnosisSupport';
 import AIInsightsDashboard from '@/components/ai/AIInsightsDashboard';
 import AIWorkflowDashboard from '@/components/ai/AIWorkflowDashboard';
+import VirtualisChatLayout from '@/components/clinical/VirtualisChatLayout';
 import { useHospitals } from '@/hooks/useHospitals';
 
 interface AIDashboardProps {
@@ -47,10 +48,10 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
           <Brain className="h-12 w-12 text-white animate-pulse" />
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-white">
-              AI Healthcare Assistant
+              AI Healthcare Platform
             </h1>
             <p className="text-white text-lg">
-              {selectedHospital ? `${selectedHospital.name} - Clinical AI Intelligence` : 'Advanced Documentation and Decision Support Platform'}
+              {selectedHospital ? `${selectedHospital.name} - Unified AI Assistant & Analytics` : 'Advanced AI-Powered Clinical Intelligence Platform'}
             </p>
           </div>
         </div>
@@ -68,6 +69,10 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
+            <MessageSquare className="h-3 w-3 mr-1" />
+            AI Chat Assistant
+          </Badge>
           {selectedHospital && (
             <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
               {selectedHospital.emr_type} Integration
@@ -78,10 +83,14 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
+        <TabsList className="grid w-full grid-cols-6 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
           <TabsTrigger value="workflow" className="text-white data-[state=active]:bg-blue-600/30">
             <Workflow className="h-4 w-4 mr-2" />
             Workflow Demo
+          </TabsTrigger>
+          <TabsTrigger value="assistant" className="text-white data-[state=active]:bg-blue-600/30">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            AI Assistant
           </TabsTrigger>
           <TabsTrigger value="insights" className="text-white data-[state=active]:bg-blue-600/30">
             <Brain className="h-4 w-4 mr-2" />
@@ -103,6 +112,10 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
         <TabsContent value="workflow" className="space-y-6">
           <AIWorkflowDashboard hospitalId={hospitalId} />
+        </TabsContent>
+
+        <TabsContent value="assistant" className="space-y-6">
+          <VirtualisChatLayout hospitalId={hospitalId} />
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">
