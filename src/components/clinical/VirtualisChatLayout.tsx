@@ -666,9 +666,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       <div className="fixed bottom-6 right-6">
         {showFabOptions && (
           <div className="absolute bottom-20 right-0 space-y-3 animate-fade-in">
-            {/* Neural Link Option */}
+            {/* New Chat Option with futuristic styling */}
             <div className="flex items-center gap-3">
-              <span className="text-cyan-300/90 text-sm bg-black/70 px-3 py-1.5 rounded-full border border-cyan-400/30 backdrop-blur-sm font-medium tracking-wider">NEURAL LINK</span>
+              <span className="text-cyan-300/90 text-sm bg-black/80 px-4 py-2 rounded-full border border-cyan-400/50 backdrop-blur-md font-light tracking-widest shadow-lg shadow-cyan-500/20">
+                NEW CHAT
+              </span>
               <Button
                 onClick={handleNewChat}
                 className="backdrop-blur-xl bg-blue-500/20 hover:bg-blue-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-blue-300/30 flex items-center justify-center transition-all duration-300 hover:scale-110"
@@ -677,9 +679,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
               </Button>
             </div>
             
-            {/* Quantum Consult Option */}
+            {/* Consult Option with futuristic styling */}
             <div className="flex items-center gap-3">
-              <span className="text-purple-300/90 text-sm bg-black/70 px-3 py-1.5 rounded-full border border-purple-400/30 backdrop-blur-sm font-medium tracking-wider">QUANTUM CONSULT</span>
+              <span className="text-purple-300/90 text-sm bg-black/80 px-4 py-2 rounded-full border border-purple-400/50 backdrop-blur-md font-light tracking-widest shadow-lg shadow-purple-500/20">
+                CONSULT
+              </span>
               <Button
                 onClick={() => {
                   setConsultDialogOpen(true);
