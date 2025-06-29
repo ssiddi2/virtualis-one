@@ -22,9 +22,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/*" element={<Index />} />
               <Route path="/demo" element={<Demo />} />
-              <Route path="/emr" element={<Index />} />
               <Route path="/chat" element={<VirtualisChatPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

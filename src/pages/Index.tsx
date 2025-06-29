@@ -82,7 +82,6 @@ const Index = () => {
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <Routes>
-          <Route path="/" element={<Navigate to="/emr" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/ai-dashboard" element={
             requireHospitalSelection(
