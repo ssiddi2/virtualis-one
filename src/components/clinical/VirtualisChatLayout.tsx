@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -515,7 +514,8 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
   const filteredPhysicians = physicians?.filter(physician => 
     `${physician.first_name} ${physician.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    physician.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
+    (physician.specialty && typeof physician.specialty === 'string' && physician.specialty.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (physician.specialty && typeof physician.specialty === 'object' && physician.specialty.name.toLowerCase().includes(searchQuery.toLowerCase()))
   ) || [];
 
   return (
@@ -808,7 +808,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                           {physician.first_name} {physician.last_name}
                         </div>
                         <div className="text-white/70 text-xs">
-                          {physician.specialty}
+                          {typeof physician.specialty === 'string' ? physician.specialty : physician.specialty?.name || 'General Medicine'}
                         </div>
                       </div>
                     </div>
