@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -251,7 +252,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         content.toLowerCase().includes(term) || result.toLowerCase().includes(term)
       );
 
-      // Try to extract recommended specialty from AI response
+      // Try to extract recommended specialty from AI response - fix the specialty name handling
       const specialtyNames = specialties?.map(s => s.name.toLowerCase()) || [
         'cardiology', 'critical care', 'emergency medicine', 'infectious disease',
         'internal medicine', 'nephrology', 'neurology', 'pulmonology', 'surgery'
