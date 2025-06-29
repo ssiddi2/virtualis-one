@@ -66,9 +66,9 @@ const Index = () => {
             path="/" 
             element={
               selectedHospitalId ? (
-                <HospitalDashboard hospitalId={selectedHospitalId} />
+                <div>Hospital Dashboard</div>
               ) : (
-                <EMRDashboard onHospitalSelect={setSelectedHospitalId} />
+                <div>EMR Network Dashboard</div>
               )
             } 
           />
@@ -77,14 +77,14 @@ const Index = () => {
           <Route 
             path="/dashboard" 
             element={requireHospitalSelection(
-              <Dashboard hospitalId={selectedHospitalId} />
+              <div>Dashboard</div>
             )} 
           />
           
           <Route 
             path="/patient/:patientId" 
             element={requireHospitalSelection(
-              <PatientDetailsPage hospitalId={selectedHospitalId} />
+              <div>Patient Details</div>
             )} 
           />
           

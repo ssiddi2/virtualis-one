@@ -5,18 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { User, Lock, Shield } from "lucide-react";
 
-interface LoginProps {
-  onLogin: (email: string, password: string, role: string) => void;
-}
-
-const Login = ({ onLogin }: LoginProps) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +31,20 @@ const Login = ({ onLogin }: LoginProps) => {
     setLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      onLogin(email, password, role);
-      toast({
-        title: "Access Granted",
-        description: `Welcome to Livemed Financials`,
-      });
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        toast({
+          title: "Authentication Failed",
+          description: "Access denied - Please verify credentials",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Access Granted",
+          description: `Welcome to Virtualis One™`,
+        });
+      }
     } catch (error) {
       toast({
         title: "Authentication Failed",
@@ -61,10 +67,10 @@ const Login = ({ onLogin }: LoginProps) => {
               <Shield className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-white livemed-font-bold mb-2">
-              Livemed Financials
+              Virtualis One™
             </h1>
             <p className="text-gray-300 livemed-font">
-              Secure Healthcare Portal
+              Universal EMR Platform
             </p>
           </div>
 
@@ -111,7 +117,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 <SelectContent className="livemed-select-content">
                   <SelectItem value="physician" className="livemed-select-item">Physician</SelectItem>
                   <SelectItem value="nurse" className="livemed-select-item">Nurse</SelectItem>
-                  <SelectItem value="biller" className="livemed-select-item">Billing Manager</SelectItem>
+                  <SelectItem value="pharmacist" className="livemed-select-item">Pharmacist</SelectItem>
                   <SelectItem value="admin" className="livemed-select-item">Administrator</SelectItem>
                 </SelectContent>
               </Select>
@@ -137,7 +143,7 @@ const Login = ({ onLogin }: LoginProps) => {
           <div className="mt-6 text-center">
             <div className="flex items-center justify-center gap-2 text-gray-300 livemed-demo-text">
               <User className="h-4 w-4 livemed-demo-icon" />
-              <span>New Physician? Register Here</span>
+              <span>New Healthcare Provider? Register Here</span>
             </div>
           </div>
         </div>
@@ -149,17 +155,12 @@ const Login = ({ onLogin }: LoginProps) => {
           <div className="space-y-3">
             <div className="flex items-center justify-center gap-3 livemed-demo-text">
               <Shield className="h-4 w-4 livemed-demo-icon" />
-              <span>Admin Portal (admin@livemed.com)</span>
+              <span>Admin Portal (admin@virtualis.com)</span>
             </div>
             
             <div className="flex items-center justify-center gap-3 livemed-demo-text">
               <User className="h-4 w-4 livemed-demo-icon" />
-              <span>CEO Dashboard (ceo@livemed.com)</span>
-            </div>
-            
-            <div className="flex items-center justify-center gap-3 livemed-demo-text">
-              <User className="h-4 w-4 livemed-demo-icon" />
-              <span>Dr. Sarah Johnson (sarah@livemed.com)</span>
+              <span>Dr. Sarah Johnson (sarah@virtualis.com)</span>
             </div>
           </div>
         </div>
