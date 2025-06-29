@@ -275,12 +275,14 @@ const EMRConnectionDialog = ({
         </CardContent>
       </Card>
 
-      <style jsx>{`
-        @keyframes gradient-shift {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
+      <style>
+        {`
+          @keyframes gradient-shift {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}
+      </style>
     </div>
   );
 };
