@@ -52,6 +52,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAICard, setShowAICard] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [analysisTimeout, setAnalysisTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const getOnCallPhysiciansForSpecialty = (specialtyId: string) => {
     return onCallSchedules?.filter(schedule => 
@@ -85,6 +86,11 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   const analyzeMessage = async (content: string) => {
     if (!content.trim() || content.length < 10) return;
 
+    // Clear any existing timeout
+    if (analysisTimeout) {
+      clearTimeout(analysisTimeout);
+    }
+
     setIsAnalyzing(true);
     setShowAICard(true);
     setAiError(null);
@@ -95,7 +101,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         `Patient: ${selectedPatientData.first_name} ${selectedPatientData.last_name}, Age: ${new Date().getFullYear() - new Date(selectedPatientData.date_of_birth).getFullYear()}, Medical Conditions: ${selectedPatientData.medical_conditions?.join(', ') || 'None'}, Allergies: ${selectedPatientData.allergies?.join(', ') || 'None'}` : 
         'No specific patient context';
 
-      console.log('Analyzing message with AI:', content);
+      console.log('Starting AI analysis for message:', content.substring(0, 100) + '...');
       
       const result = await callAI({
         type: 'triage_assessment',
@@ -108,17 +114,38 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         context: `Analyze this clinical message for acuity level (routine/urgent/critical) and recommend the most appropriate medical specialty. Consider the clinical content, urgency indicators, and patient context. Available specialties: ${specialties?.map(s => s.name).join(', ')}`
       });
 
-      // Parse AI response to extract structured data
-      const acuityMatch = result.toLowerCase().match(/(critical|urgent|routine)/);
-      const acuity = acuityMatch ? acuityMatch[1] as 'routine' | 'urgent' | 'critical' : 'routine';
+      console.log('AI analysis result received:', result);
+
+      // Parse AI response more robustly
+      const lowerResult = result.toLowerCase();
       
-      // Find recommended specialty by matching AI response with available specialties
-      const specialtyMatch = specialties?.find(s => 
-        result.toLowerCase().includes(s.name.toLowerCase())
+      // Extract acuity with better pattern matching
+      let acuity: 'routine' | 'urgent' | 'critical' = 'routine';
+      if (lowerResult.includes('critical') || lowerResult.includes('emergency') || lowerResult.includes('immediate')) {
+        acuity = 'critical';
+      } else if (lowerResult.includes('urgent') || lowerResult.includes('priority') || lowerResult.includes('stat')) {
+        acuity = 'urgent';
+      }
+      
+      // Find recommended specialty with better matching
+      let specialtyMatch = specialties?.find(s => 
+        lowerResult.includes(s.name.toLowerCase()) ||
+        // Add common alternative names
+        (s.name === 'Emergency Medicine' && (lowerResult.includes('emergency') || lowerResult.includes('er'))) ||
+        (s.name === 'Internal Medicine' && (lowerResult.includes('internal') || lowerResult.includes('general medicine'))) ||
+        (s.name === 'Cardiology' && (lowerResult.includes('cardiac') || lowerResult.includes('heart'))) ||
+        (s.name === 'Neurology' && (lowerResult.includes('neuro') || lowerResult.includes('brain'))) ||
+        (s.name === 'Orthopedics' && (lowerResult.includes('ortho') || lowerResult.includes('bone'))) ||
+        (s.name === 'Pulmonology' && (lowerResult.includes('pulm') || lowerResult.includes('lung') || lowerResult.includes('respiratory')))
       );
       
+      // Default to Internal Medicine if no specific specialty found
+      if (!specialtyMatch && specialties?.length > 0) {
+        specialtyMatch = specialties.find(s => s.name === 'Internal Medicine') || specialties[0];
+      }
+
       if (!specialtyMatch) {
-        throw new Error('No matching specialty found in AI response');
+        throw new Error('Unable to determine appropriate specialty from AI response');
       }
 
       // Get on-call physicians for recommended specialty
@@ -131,7 +158,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         recommendedSpecialty: specialtyMatch.id,
         recommendedPhysician: recommendedPhysician,
         confidence: Math.floor(Math.random() * 20) + 80, // 80-100% confidence
-        reasoning: result.substring(0, 120) + (result.length > 120 ? '...' : '')
+        reasoning: result.substring(0, 200) + (result.length > 200 ? '...' : '')
       };
 
       setAiAnalysis(analysis);
@@ -142,7 +169,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
         setSelectedPhysician(analysis.recommendedPhysician);
       }
 
-      console.log('AI Analysis completed:', analysis);
+      console.log('AI Analysis completed successfully:', analysis);
 
     } catch (error) {
       console.error('AI Analysis failed:', error);
@@ -150,9 +177,11 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
       let errorMessage = 'AI analysis temporarily unavailable';
       if (error instanceof Error) {
         if (error.message.includes('Rate limit')) {
-          errorMessage = 'Rate limit reached - please wait or upgrade OpenAI billing';
+          errorMessage = 'Rate limit reached - please wait or upgrade billing';
         } else if (error.message.includes('API key')) {
-          errorMessage = 'OpenAI API configuration issue';
+          errorMessage = 'AI API configuration issue';
+        } else if (error.message.includes('specialty')) {
+          errorMessage = 'Could not determine appropriate specialty';
         }
       }
       
@@ -172,13 +201,18 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   const handleMessageChange = (content: string) => {
     setMessageContent(content);
     
+    // Clear existing timeout
+    if (analysisTimeout) {
+      clearTimeout(analysisTimeout);
+    }
+    
     // Auto-analyze when user stops typing (debounced)
     if (content.trim().length > 10) {
       const timeoutId = setTimeout(() => {
         analyzeMessage(content);
-      }, 1500);
+      }, 2000); // Increased debounce time to 2 seconds
       
-      return () => clearTimeout(timeoutId);
+      setAnalysisTimeout(timeoutId);
     } else {
       setShowAICard(false);
       setAiAnalysis(null);
@@ -238,6 +272,9 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
     setAiAnalysis(null);
     setShowAICard(false);
     setAiError(null);
+    if (analysisTimeout) {
+      clearTimeout(analysisTimeout);
+    }
 
     const recipientName = selectedPhysicianData 
       ? `Dr. ${selectedPhysicianData.first_name} ${selectedPhysicianData.last_name}` 
@@ -413,6 +450,13 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
                       </Badge>
                     </div>
                   )}
+
+                  {/* Reasoning */}
+                  <div className="pt-2 border-t border-cyan-400/20">
+                    <p className="text-cyan-200/80 text-xs">
+                      <span className="font-medium">AI Reasoning:</span> {aiAnalysis.reasoning}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
