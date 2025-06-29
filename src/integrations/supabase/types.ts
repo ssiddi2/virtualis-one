@@ -231,6 +231,56 @@ export type Database = {
           },
         ]
       }
+      claim_denials: {
+        Row: {
+          appeal_deadline: string | null
+          appeal_submitted_date: string | null
+          billing_charge_id: string | null
+          created_at: string | null
+          denial_code: string
+          denial_date: string
+          denial_reason: string
+          id: string
+          resolution_amount: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          appeal_deadline?: string | null
+          appeal_submitted_date?: string | null
+          billing_charge_id?: string | null
+          created_at?: string | null
+          denial_code: string
+          denial_date?: string
+          denial_reason: string
+          id?: string
+          resolution_amount?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          appeal_deadline?: string | null
+          appeal_submitted_date?: string | null
+          billing_charge_id?: string | null
+          created_at?: string | null
+          denial_code?: string
+          denial_date?: string
+          denial_reason?: string
+          id?: string
+          resolution_amount?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_denials_billing_charge_id_fkey"
+            columns: ["billing_charge_id"]
+            isOneToOne: false
+            referencedRelation: "billing_charges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cms_quality_measures: {
         Row: {
           benchmark_rate: number | null
@@ -477,8 +527,12 @@ export type Database = {
       }
       medical_records: {
         Row: {
+          ai_coding_suggestions: Json | null
           assessment: string | null
           chief_complaint: string | null
+          coding_confidence_score: number | null
+          coding_reviewed_at: string | null
+          coding_reviewed_by: string | null
           created_at: string | null
           diagnosis_codes: string[] | null
           discharge_summary: string | null
@@ -496,8 +550,12 @@ export type Database = {
           visit_date: string | null
         }
         Insert: {
+          ai_coding_suggestions?: Json | null
           assessment?: string | null
           chief_complaint?: string | null
+          coding_confidence_score?: number | null
+          coding_reviewed_at?: string | null
+          coding_reviewed_by?: string | null
           created_at?: string | null
           diagnosis_codes?: string[] | null
           discharge_summary?: string | null
@@ -515,8 +573,12 @@ export type Database = {
           visit_date?: string | null
         }
         Update: {
+          ai_coding_suggestions?: Json | null
           assessment?: string | null
           chief_complaint?: string | null
+          coding_confidence_score?: number | null
+          coding_reviewed_at?: string | null
+          coding_reviewed_by?: string | null
           created_at?: string | null
           diagnosis_codes?: string[] | null
           discharge_summary?: string | null
@@ -790,6 +852,50 @@ export type Database = {
           },
         ]
       }
+      payment_postings: {
+        Row: {
+          adjustment_reason: string | null
+          billing_charge_id: string | null
+          created_at: string | null
+          id: string
+          payer_name: string | null
+          payment_amount: number
+          payment_date: string
+          payment_method: string
+          reference_number: string | null
+        }
+        Insert: {
+          adjustment_reason?: string | null
+          billing_charge_id?: string | null
+          created_at?: string | null
+          id?: string
+          payer_name?: string | null
+          payment_amount: number
+          payment_date?: string
+          payment_method: string
+          reference_number?: string | null
+        }
+        Update: {
+          adjustment_reason?: string | null
+          billing_charge_id?: string | null
+          created_at?: string | null
+          id?: string
+          payer_name?: string | null
+          payment_amount?: number
+          payment_date?: string
+          payment_method?: string
+          reference_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_postings_billing_charge_id_fkey"
+            columns: ["billing_charge_id"]
+            isOneToOne: false
+            referencedRelation: "billing_charges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       physicians: {
         Row: {
           created_at: string
@@ -833,6 +939,68 @@ export type Database = {
             columns: ["specialty_id"]
             isOneToOne: false
             referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prior_authorizations: {
+        Row: {
+          approval_date: string | null
+          auth_number: string | null
+          created_at: string | null
+          denial_reason: string | null
+          estimated_cost: number | null
+          expiration_date: string | null
+          id: string
+          insurance_provider: string
+          patient_id: string
+          requested_date: string
+          requesting_provider_id: string | null
+          service_code: string
+          service_description: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_date?: string | null
+          auth_number?: string | null
+          created_at?: string | null
+          denial_reason?: string | null
+          estimated_cost?: number | null
+          expiration_date?: string | null
+          id?: string
+          insurance_provider: string
+          patient_id: string
+          requested_date?: string
+          requesting_provider_id?: string | null
+          service_code: string
+          service_description: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_date?: string | null
+          auth_number?: string | null
+          created_at?: string | null
+          denial_reason?: string | null
+          estimated_cost?: number | null
+          expiration_date?: string | null
+          id?: string
+          insurance_provider?: string
+          patient_id?: string
+          requested_date?: string
+          requesting_provider_id?: string | null
+          service_code?: string
+          service_description?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prior_authorizations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -963,6 +1131,47 @@ export type Database = {
             columns: ["radiologist_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revenue_analytics: {
+        Row: {
+          created_at: string | null
+          hospital_id: string
+          id: string
+          metric_name: string
+          metric_period: string
+          metric_value: number
+          period_end: string
+          period_start: string
+        }
+        Insert: {
+          created_at?: string | null
+          hospital_id: string
+          id?: string
+          metric_name: string
+          metric_period: string
+          metric_value: number
+          period_end: string
+          period_start: string
+        }
+        Update: {
+          created_at?: string | null
+          hospital_id?: string
+          id?: string
+          metric_name?: string
+          metric_period?: string
+          metric_value?: number
+          period_end?: string
+          period_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_analytics_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
         ]
