@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,10 +26,11 @@ import {
 import { usePhysicians } from '@/hooks/usePhysicians';
 
 interface VirtualisChatLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  hospitalId?: string;
 }
 
-const VirtualisChatLayout = ({ children }: VirtualisChatLayoutProps) => {
+const VirtualisChatLayout = ({ children, hospitalId }: VirtualisChatLayoutProps) => {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('available');
@@ -91,12 +91,16 @@ const VirtualisChatLayout = ({ children }: VirtualisChatLayoutProps) => {
                          physician.last_name.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesSpecialty = !selectedSpecialty || 
-      (physician.specialty && typeof physician.specialty === 'object' && 
+      (physician.specialty && 
+       typeof physician.specialty === 'object' && 
        'name' in physician.specialty && 
        typeof physician.specialty.name === 'string' &&
        physician.specialty.name.toLowerCase().includes(selectedSpecialty.toLowerCase()));
     
-    return matchesSearch && matchesSpecialty;
+    // Filter by hospital if hospitalId is provided
+    const matchesHospital = !hospitalId || physician.hospital_id === hospitalId;
+    
+    return matchesSearch && matchesSpecialty && matchesHospital;
   }) || [];
 
   const getStatusColor = (status: string) => {
