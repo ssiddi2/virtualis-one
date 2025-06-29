@@ -1,13 +1,14 @@
+
 import { useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useAIAssistantContext } from "@/components/ai/AIAssistantProvider";
 import AuthForm from "@/components/auth/AuthForm";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
+import PatientChart from "@/components/patient/PatientChart";
 import PatientDetailsPage from "@/components/patient/PatientDetailsPage";
 import AdmissionForm from "@/components/patient/AdmissionForm";
 import BillingDashboard from "@/components/billing/BillingDashboard";
@@ -18,32 +19,24 @@ import CMSReporting from "@/components/reporting/CMSReporting";
 import CopilotComposer from "@/components/patient/CopilotComposer";
 import AIDashboard from "@/components/dashboard/AIDashboard";
 import ERPatientTracker from "@/components/dashboard/ERPatientTracker";
-import VirtualisChatPage from "./VirtualisChat";
+import Demo from "@/pages/Demo";
+import VirtualisChatPage from "@/pages/VirtualisChat";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
-  const { setSelectedHospitalId: setAISelectedHospitalId } = useAIAssistantContext();
-
-  console.log('Index render state:', { selectedHospitalId, user: !!user, loading, currentPath: window.location.pathname });
 
   const handleSelectHospital = (hospitalId: string) => {
-    console.log('Hospital selected in Index:', hospitalId);
+    console.log('Selected hospital:', hospitalId);
     setSelectedHospitalId(hospitalId);
-    setAISelectedHospitalId(hospitalId);
-    console.log('State immediately after setting:', { selectedHospitalId: hospitalId });
   };
 
   const handleBackToEMR = () => {
-    console.log('Back to EMR called - clearing hospital selection');
     setSelectedHospitalId(null);
-    setAISelectedHospitalId(null);
   };
 
   const requireHospitalSelection = (component: React.ReactElement) => {
-    console.log('requireHospitalSelection check:', { selectedHospitalId });
-    
     if (!selectedHospitalId) {
       return (
         <div className="min-h-screen flex items-center justify-center" style={{
@@ -62,9 +55,7 @@ const Index = () => {
     return component;
   };
 
-  // Loading state
   if (loading) {
-    console.log('Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center" style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
@@ -74,9 +65,7 @@ const Index = () => {
     );
   }
 
-  // Authentication check
   if (!user) {
-    console.log('Showing auth form - no user');
     return (
       <div style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)',
@@ -87,16 +76,12 @@ const Index = () => {
     );
   }
 
-  console.log('Rendering main app layout with selectedHospitalId:', selectedHospitalId);
-
   return (
     <div className="flex h-screen overflow-hidden" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
-      {selectedHospitalId && (
-        <Sidebar selectedHospitalId={selectedHospitalId} />
-      )}
-      <main className={`${selectedHospitalId ? 'flex-1' : 'w-full'} overflow-auto`} style={{
+      <Sidebar selectedHospitalId={selectedHospitalId} />
+      <main className="flex-1 overflow-auto" style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <Routes>
@@ -111,34 +96,15 @@ const Index = () => {
             )
           } />
           <Route path="/emr" element={
-            (() => {
-              console.log('EMR route rendering with selectedHospitalId:', selectedHospitalId);
-              
-              if (selectedHospitalId) {
-                console.log('Rendering HospitalDashboard for hospital:', selectedHospitalId);
-                return (
-                  <HospitalDashboard 
-                    hospitalId={selectedHospitalId} 
-                    user={profile || user} 
-                    onBack={handleBackToEMR}
-                  />
-                );
-              } else {
-                console.log('Rendering EMRDashboard (no hospital selected)');
-                return (
-                  <EMRDashboard 
-                    user={profile || user} 
-                    onSelectHospital={handleSelectHospital} 
-                  />
-                );
-              }
-            })()
-          } />
-          <Route path="/virtualis-chat" element={
-            requireHospitalSelection(<VirtualisChatPage hospitalId={selectedHospitalId!} />)
-          } />
-          <Route path="/chat" element={
-            requireHospitalSelection(<VirtualisChatPage hospitalId={selectedHospitalId!} />)
+            selectedHospitalId ? (
+              <HospitalDashboard 
+                hospitalId={selectedHospitalId} 
+                user={profile || user} 
+                onBack={handleBackToEMR}
+              />
+            ) : (
+              <EMRDashboard user={profile || user} onSelectHospital={handleSelectHospital} />
+            )
           } />
           <Route path="/patient/:patientId" element={
             requireHospitalSelection(<PatientDetailsPage />)
@@ -173,6 +139,11 @@ const Index = () => {
           <Route path="/ai-assistant" element={
             requireHospitalSelection(<CopilotComposer hospitalId={selectedHospitalId!} />)
           } />
+          <Route path="/virtualis-chat" element={
+            requireHospitalSelection(<VirtualisChatPage />)
+          } />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="*" element={<Navigate to="/emr" replace />} />
         </Routes>
       </main>
     </div>
