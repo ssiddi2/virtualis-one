@@ -16,11 +16,14 @@ serve(async (req) => {
 
   try {
     const { type, data, context } = await req.json();
-    console.log('AI Assistant request:', { type, data, context });
+    console.log('AI Assistant request:', { type, data: { ...data, symptoms: data.symptoms?.substring(0, 50) + '...' } });
 
     if (!openAIApiKey) {
+      console.error('OpenAI API key not found in environment');
       throw new Error('OpenAI API key not configured');
     }
+
+    console.log('OpenAI API key found, length:', openAIApiKey.length);
 
     let systemPrompt = '';
     let userPrompt = '';
@@ -57,8 +60,8 @@ serve(async (req) => {
         break;
 
       case 'triage_assessment':
-        systemPrompt = `You are an emergency department triage AI assistant. Analyze patient presentation to provide triage recommendations, acuity assessment, and immediate care priorities. Focus on identifying high-risk conditions and appropriate resource allocation.`;
-        userPrompt = `Triage assessment for: ${data.symptoms}. Provide acuity level recommendation, immediate priorities, and suggested diagnostic workup. Consider emergency vs urgent vs routine classification.`;
+        systemPrompt = `You are an emergency department triage AI assistant. Analyze patient presentation to provide triage recommendations, acuity assessment, and immediate care priorities. Focus on identifying high-risk conditions and appropriate resource allocation. Always provide structured responses with clear acuity levels (routine/urgent/critical) and specialty recommendations.`;
+        userPrompt = `Triage assessment for: ${data.symptoms}. Patient context: ${data.patientContext || 'No specific patient context'}. Available specialties: ${data.availableSpecialties?.join(', ') || 'General Medicine'}. Provide acuity level (routine/urgent/critical), recommended specialty, and brief clinical reasoning.`;
         break;
 
       default:
@@ -66,8 +69,8 @@ serve(async (req) => {
         userPrompt = data.prompt || 'Please provide assistance.';
     }
 
-    console.log('Calling OpenAI with prompts:', { systemPrompt: systemPrompt.substring(0, 100), userPrompt: userPrompt.substring(0, 100) });
-
+    console.log('Calling OpenAI API...');
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -81,14 +84,26 @@ serve(async (req) => {
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 2000,
+        max_tokens: 1500,
       }),
     });
+
+    console.log('OpenAI API response status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json();
       console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      
+      // More specific error handling
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+      } else if (response.status === 401) {
+        throw new Error('Invalid OpenAI API key. Please check your API key configuration.');
+      } else if (response.status === 402) {
+        throw new Error('Insufficient OpenAI credits. Please add billing to your OpenAI account.');
+      } else {
+        throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      }
     }
 
     const aiData = await response.json();
