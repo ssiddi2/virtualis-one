@@ -5,11 +5,12 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Login from "@/components/auth/Login";
 import Sidebar from "@/components/layout/Sidebar";
-import Dashboard from "@/components/dashboard/Dashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
+import EMRDashboard from "@/components/dashboard/EMRDashboard";
+import Dashboard from "@/components/dashboard/Dashboard";
+import AIDashboard from "@/components/dashboard/AIDashboard";
 import PatientDetailsPage from "@/components/patient/PatientDetailsPage";
 import PatientChart from "@/components/patient/PatientChart";
-import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import VirtualisChatPage from "./VirtualisChat";
 import V1DriftPage from "./V1DriftPage";
 import V1DriftAnalytics from "@/components/ai/V1DriftAnalytics";
@@ -66,9 +67,14 @@ const Index = () => {
             path="/" 
             element={
               selectedHospitalId ? (
-                <div>Hospital Dashboard</div>
+                <HospitalDashboard 
+                  hospitalId={selectedHospitalId}
+                  onHospitalChange={setSelectedHospitalId}
+                />
               ) : (
-                <div>EMR Network Dashboard</div>
+                <EMRDashboard 
+                  onHospitalSelect={setSelectedHospitalId}
+                />
               )
             } 
           />
@@ -77,14 +83,24 @@ const Index = () => {
           <Route 
             path="/dashboard" 
             element={requireHospitalSelection(
-              <div>Dashboard</div>
+              <Dashboard />
+            )} 
+          />
+
+          <Route 
+            path="/ai-dashboard" 
+            element={requireHospitalSelection(
+              <AIDashboard 
+                user={profile} 
+                hospitalId={selectedHospitalId}
+              />
             )} 
           />
           
           <Route 
             path="/patient/:patientId" 
             element={requireHospitalSelection(
-              <div>Patient Details</div>
+              <PatientDetailsPage />
             )} 
           />
           
