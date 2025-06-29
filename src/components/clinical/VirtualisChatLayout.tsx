@@ -346,14 +346,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
     // Show smart routing if high priority
     if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
-      setSmartRoutingData({
-        messageContent: newMessage,
-        messageId: message.id,
-        urgency: aiAnalysis.acuity,
-        patientId: activeThread.patientName,
-        aiRecommendedSpecialty: aiAnalysis.recommendedSpecialty
+      // Only show toast notification, no additional smart routing dialog
+      toast({
+        title: "High Priority Message Detected",
+        description: `${aiAnalysis.acuity.toUpperCase()} priority - ${aiAnalysis.recommendedSpecialty} recommended`,
       });
-      setSmartRoutingOpen(true);
     }
 
     toast({
@@ -669,26 +666,26 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       <div className="fixed bottom-6 right-6">
         {showFabOptions && (
           <div className="absolute bottom-20 right-0 space-y-3 animate-fade-in">
-            {/* Message Option */}
+            {/* Neural Link Option */}
             <div className="flex items-center gap-3">
-              <span className="text-white/80 text-sm bg-black/50 px-2 py-1 rounded">Message</span>
+              <span className="text-cyan-300/90 text-sm bg-black/70 px-3 py-1.5 rounded-full border border-cyan-400/30 backdrop-blur-sm font-medium tracking-wider">NEURAL LINK</span>
               <Button
                 onClick={handleNewChat}
-                className="backdrop-blur-xl bg-blue-500/20 hover:bg-blue-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-blue-300/30 flex items-center justify-center"
+                className="backdrop-blur-xl bg-blue-500/20 hover:bg-blue-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-blue-300/30 flex items-center justify-center transition-all duration-300 hover:scale-110"
               >
                 <MessageSquare className="h-5 w-5" />
               </Button>
             </div>
             
-            {/* New Consult Option */}
+            {/* Quantum Consult Option */}
             <div className="flex items-center gap-3">
-              <span className="text-white/80 text-sm bg-black/50 px-2 py-1 rounded">New Consult</span>
+              <span className="text-purple-300/90 text-sm bg-black/70 px-3 py-1.5 rounded-full border border-purple-400/30 backdrop-blur-sm font-medium tracking-wider">QUANTUM CONSULT</span>
               <Button
                 onClick={() => {
                   setConsultDialogOpen(true);
                   setShowFabOptions(false);
                 }}
-                className="backdrop-blur-xl bg-purple-500/20 hover:bg-purple-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-purple-300/30 flex items-center justify-center"
+                className="backdrop-blur-xl bg-purple-500/20 hover:bg-purple-500/40 text-white rounded-full w-12 h-12 shadow-lg border border-purple-300/30 flex items-center justify-center transition-all duration-300 hover:scale-110"
               >
                 <Stethoscope className="h-5 w-5" />
               </Button>
@@ -696,18 +693,17 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           </div>
         )}
 
-        {/* Main FAB - Transparent */}
+        {/* Main FAB - Transparent with 180 degree rotation */}
         <Button
           onClick={() => setShowFabOptions(!showFabOptions)}
           className="backdrop-blur-xl bg-white/10 hover:bg-white/20 text-white rounded-full w-16 h-16 shadow-2xl border border-white/10 p-0 overflow-hidden group transition-all duration-300 hover:scale-110"
         >
-          <div className="flex flex-col items-center justify-center">
+          <div className={`flex flex-col items-center justify-center transition-transform duration-300 ${showFabOptions ? 'rotate-180' : ''}`}>
             <img 
               src="/lovable-uploads/b0a1d2d7-905e-4bca-a277-2b91f740f891.png" 
               alt="Virtualis" 
               className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300"
             />
-            <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showFabOptions ? 'rotate-180' : ''}`} />
           </div>
         </Button>
       </div>
@@ -719,7 +715,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         onSubmit={handleConsultSubmit}
       />
 
-      {/* Smart Routing Dialog */}
+      {/* Smart Routing Dialog - Only for consultations */}
       {smartRoutingOpen && smartRoutingData && (
         <SmartRoutingDialog
           open={smartRoutingOpen}
@@ -732,6 +728,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           urgency={smartRoutingData.urgency}
           patientId={smartRoutingData.patientId}
           aiRecommendedSpecialty={smartRoutingData.aiRecommendedSpecialty}
+          onSend={handleSmartRoutingSend}
         />
       )}
     </div>
