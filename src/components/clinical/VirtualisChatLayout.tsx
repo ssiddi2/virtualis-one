@@ -120,6 +120,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     };
     
     setMessages(prev => [...prev, newMessage]);
+    setConsultDialogOpen(false);
   };
 
   if (!hospitalId) {
@@ -181,18 +182,26 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
               key={message.id}
               className={`
                 p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg border-l-4
-                ${getAcuityColor(message.acuity)}
+                ${message.acuity === 'critical' ? 'border-l-red-500 bg-red-500/5' : 
+                  message.acuity === 'urgent' ? 'border-l-yellow-500 bg-yellow-500/5' : 
+                  'border-l-green-500 bg-green-500/5'}
               `}
             >
               <div className="flex items-start gap-3">
                 <div className="relative">
-                  <Avatar className={`h-10 w-10 ${getAcuityHaloColor(message.acuity)}`}>
+                  <Avatar className={`h-10 w-10 ${
+                    message.acuity === 'critical' ? 'ring-2 ring-red-500/50 ring-offset-2 ring-offset-blue-900/50' :
+                    message.acuity === 'urgent' ? 'ring-2 ring-yellow-500/50 ring-offset-2 ring-offset-blue-900/50' :
+                    'ring-2 ring-green-500/50 ring-offset-2 ring-offset-blue-900/50'
+                  }`}>
                     <AvatarFallback className="bg-blue-600/50 text-white text-sm">
                       {message.sender.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-1 -right-1">
-                    {getAcuityIcon(message.acuity)}
+                    {message.acuity === 'critical' ? <AlertTriangle className="h-3 w-3 text-red-500" /> :
+                     message.acuity === 'urgent' ? <Clock className="h-3 w-3 text-yellow-500" /> :
+                     <MessageSquare className="h-3 w-3 text-green-500" />}
                   </div>
                 </div>
                 
@@ -229,15 +238,19 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           ))}
         </div>
 
-        {/* Floating Action Buttons */}
-        <div className="fixed bottom-6 right-6 flex flex-col gap-3">
+        {/* Floating Action Button with Virtualis Logo */}
+        <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3">
           <Button
             onClick={() => setConsultDialogOpen(true)}
-            className="bg-green-600 hover:bg-green-700 text-white rounded-full w-14 h-14 shadow-lg"
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white rounded-full w-16 h-16 shadow-2xl backdrop-blur-sm border border-orange-300/30 p-0 overflow-hidden group transition-all duration-300 hover:scale-110"
           >
-            <Users className="h-6 w-6" />
+            <img 
+              src="/lovable-uploads/b0a1d2d7-905e-4bca-a277-2b91f740f891.png" 
+              alt="Virtualis" 
+              className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-300"
+            />
           </Button>
-          <div className="bg-white/10 backdrop-blur-sm rounded-full p-2 text-white text-xs text-center">
+          <div className="backdrop-blur-sm bg-white/10 rounded-full px-3 py-1 text-white text-xs text-center border border-white/20">
             Consult
           </div>
         </div>
