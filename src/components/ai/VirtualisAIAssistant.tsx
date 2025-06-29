@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,7 +47,7 @@ const VirtualisAIAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [awaitingConfirmation, setAwaitingConfirmation] = useState<string | null>(null);
   
-  const { parseIntent, isLoading: isProcessing } = useVirtualisAI();
+  const { parseIntent, isLoading, error } = useVirtualisAI();
   const { data: patients } = usePatients();
   const { data: physicians } = usePhysicians();
   const { data: onCallSchedules } = useOnCallSchedules();
@@ -217,7 +218,7 @@ const VirtualisAIAssistant = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || isProcessing) return;
+    if (!inputValue.trim() || isLoading) return;
 
     const userInput = inputValue.trim();
     setInputValue('');
@@ -293,7 +294,7 @@ const VirtualisAIAssistant = () => {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300"
         size="lg"
       >
         <Bot className="h-6 w-6 text-white" />
@@ -315,7 +316,7 @@ const VirtualisAIAssistant = () => {
               </div>
               <div>
                 <span>AI Assistant</span>
-                {isProcessing && (
+                {isLoading && (
                   <div className="flex items-center gap-1 text-sm text-slate-500">
                     <div className="flex gap-1">
                       <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" />
@@ -430,12 +431,12 @@ const VirtualisAIAssistant = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="What do you want to do?"
                 className="flex-1 bg-white/50 border-white/20 focus:border-blue-300"
-                disabled={isProcessing || awaitingConfirmation !== null}
+                disabled={isLoading || awaitingConfirmation !== null}
               />
               <Button
                 type="submit"
                 size="sm"
-                disabled={isProcessing || !inputValue.trim() || awaitingConfirmation !== null}
+                disabled={isLoading || !inputValue.trim() || awaitingConfirmation !== null}
                 className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white"
               >
                 <Send className="h-4 w-4" />
