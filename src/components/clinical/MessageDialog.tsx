@@ -2,11 +2,9 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Send, Brain, User } from 'lucide-react';
-import { usePatients } from '@/hooks/usePatients';
+import { Search, MessageSquare, User, Phone, Video, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface MessageDialogProps {
@@ -15,140 +13,252 @@ interface MessageDialogProps {
   hospitalId?: string;
 }
 
+// Mock user data for demonstration
+const mockUsers = [
+  {
+    id: '1',
+    name: 'Dr. Sarah Johnson',
+    role: 'Emergency Medicine',
+    status: 'online',
+    avatar: 'SJ',
+    lastSeen: 'Online now'
+  },
+  {
+    id: '2',
+    name: 'Dr. Michael Chen',
+    role: 'Cardiology',
+    status: 'online',
+    avatar: 'MC',
+    lastSeen: 'Online now'
+  },
+  {
+    id: '3',
+    name: 'Nurse Martinez',
+    role: 'ICU Nurse',
+    status: 'away',
+    avatar: 'NM',
+    lastSeen: '5 min ago'
+  },
+  {
+    id: '4',
+    name: 'Dr. Emily Rodriguez',
+    role: 'Pulmonology',
+    status: 'offline',
+    avatar: 'ER',
+    lastSeen: '1 hour ago'
+  },
+  {
+    id: '5',
+    name: 'Dr. James Wilson',
+    role: 'Surgery',
+    status: 'busy',
+    avatar: 'JW',
+    lastSeen: 'In surgery'
+  },
+  {
+    id: '6',
+    name: 'Lisa Thompson',
+    role: 'Case Manager',
+    status: 'online',
+    avatar: 'LT',
+    lastSeen: 'Online now'
+  }
+];
+
 const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
   const { toast } = useToast();
-  const { data: patients } = usePatients(hospitalId);
-  const [message, setMessage] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState('');
-  const [urgency, setUrgency] = useState<'routine' | 'urgent' | 'critical'>('routine');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
-  const handleSendMessage = () => {
-    if (!message.trim()) {
+  const filteredUsers = mockUsers.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'online': return 'bg-green-500';
+      case 'away': return 'bg-yellow-500';
+      case 'busy': return 'bg-red-500';
+      case 'offline': return 'bg-gray-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'online': return 'bg-green-500/20 text-green-200 border-green-400/30';
+      case 'away': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'busy': return 'bg-red-500/20 text-red-200 border-red-400/30';
+      case 'offline': return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
+      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsers(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleStartConversation = () => {
+    if (selectedUsers.length === 0) {
       toast({
-        title: "Error",
-        description: "Please enter a message",
+        title: "Select Users",
+        description: "Please select at least one user to start a conversation",
         variant: "destructive"
       });
       return;
     }
 
-    // Here you would integrate with your message sending logic
+    const selectedUserNames = mockUsers
+      .filter(user => selectedUsers.includes(user.id))
+      .map(user => user.name)
+      .join(', ');
+
     toast({
-      title: "Message Sent",
-      description: `AI-analyzed message sent with ${urgency} priority${selectedPatient ? ' for selected patient' : ''}`,
+      title: "Conversation Started",
+      description: `New conversation with ${selectedUserNames}`,
     });
 
-    // Reset form
-    setMessage('');
-    setSelectedPatient('');
-    setUrgency('routine');
+    setSelectedUsers([]);
+    setSearchTerm('');
     onClose();
-  };
-
-  const getUrgencyColor = (level: string) => {
-    switch (level) {
-      case 'critical': return 'bg-red-500/20 text-red-200 border-red-400/30';
-      case 'urgent': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
-      case 'routine': return 'bg-green-500/20 text-green-200 border-green-400/30';
-      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
-    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[#1a2332] border-[#2a3441] text-white">
+      <DialogContent className="max-w-2xl bg-[#1a2332]/95 backdrop-blur-xl border-[#2a3441]/50 text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-blue-400" />
-            Send Clinical Message
+            <MessageSquare className="h-5 w-5 text-blue-400" />
+            Select Team Members
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            AI will analyze your message for priority and suggest appropriate routing
+            Choose healthcare professionals to start a conversation
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Patient Selection */}
-          <div>
-            <label className="text-sm text-white/70 mb-2 block">Select Patient (Optional)</label>
-            <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-              <SelectTrigger className="bg-[#0f1922] border-[#2a3441] text-white">
-                <SelectValue placeholder="Choose patient for context..." />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
-                <SelectItem value="">No specific patient</SelectItem>
-                {patients?.map((patient) => (
-                  <SelectItem key={patient.id} value={patient.id}>
-                    {patient.first_name} {patient.last_name} - {patient.mrn}
-                    {patient.room_number && ` (Room ${patient.room_number})`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Urgency Selection */}
-          <div>
-            <label className="text-sm text-white/70 mb-2 block">Message Urgency</label>
-            <Select value={urgency} onValueChange={(value: 'routine' | 'urgent' | 'critical') => setUrgency(value)}>
-              <SelectTrigger className="bg-[#0f1922] border-[#2a3441] text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
-                <SelectItem value="routine">Routine</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-                <SelectItem value="critical">Critical</SelectItem>
-              </SelectContent>
-            </Select>
-            <Badge className={`mt-2 ${getUrgencyColor(urgency)}`}>
-              {urgency.toUpperCase()} Priority
-            </Badge>
-          </div>
-
-          {/* Message Content */}
-          <div>
-            <label className="text-sm text-white/70 mb-2 block">Clinical Message</label>
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Describe the clinical situation... AI will analyze and route appropriately."
-              className="bg-[#0f1922] border-[#2a3441] text-white placeholder:text-white/60 min-h-[120px]"
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name or role..."
+              className="bg-[#0f1922]/80 border-[#2a3441]/50 text-white placeholder:text-white/60 pl-10 backdrop-blur-sm"
             />
           </div>
 
-          {/* Patient Context Preview */}
-          {selectedPatient && patients && (
-            <div className="p-3 bg-[#0f1922] border border-[#2a3441] rounded-lg">
+          {/* Selected Users Summary */}
+          {selectedUsers.length > 0 && (
+            <div className="p-3 bg-[#0f1922]/60 backdrop-blur-sm border border-[#2a3441]/50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <User className="h-4 w-4 text-blue-400" />
-                <span className="text-sm font-medium text-white">Patient Context</span>
+                <CheckCircle className="h-4 w-4 text-green-400" />
+                <span className="text-sm font-medium text-white">Selected ({selectedUsers.length})</span>
               </div>
-              {(() => {
-                const patient = patients.find(p => p.id === selectedPatient);
-                return patient ? (
-                  <div className="text-sm text-white/80 space-y-1">
-                    <p><span className="text-blue-300">Name:</span> {patient.first_name} {patient.last_name}</p>
-                    <p><span className="text-blue-300">Room:</span> {patient.room_number || 'Not assigned'}</p>
-                    <p><span className="text-blue-300">Conditions:</span> {patient.medical_conditions?.join(', ') || 'None listed'}</p>
-                  </div>
-                ) : null;
-              })()}
+              <div className="flex flex-wrap gap-2">
+                {selectedUsers.map(userId => {
+                  const user = mockUsers.find(u => u.id === userId);
+                  return user ? (
+                    <Badge key={userId} className="bg-blue-600/30 text-blue-200 border border-blue-400/30">
+                      {user.name}
+                    </Badge>
+                  ) : null;
+                })}
+              </div>
             </div>
           )}
 
+          {/* User List */}
+          <div className="max-h-96 overflow-y-auto space-y-2">
+            {filteredUsers.map((user) => (
+              <div
+                key={user.id}
+                onClick={() => toggleUserSelection(user.id)}
+                className={`p-4 backdrop-blur-sm border rounded-lg cursor-pointer transition-all duration-200 ${
+                  selectedUsers.includes(user.id)
+                    ? 'bg-blue-600/30 border-blue-400/50 shadow-lg'
+                    : 'bg-[#0f1922]/60 border-[#2a3441]/50 hover:bg-[#2a3441]/30'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div className="relative">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+                        {user.avatar}
+                      </div>
+                      <div className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-[#1a2332] ${getStatusColor(user.status)}`}></div>
+                    </div>
+
+                    {/* User Info */}
+                    <div>
+                      <h3 className="font-medium text-white">{user.name}</h3>
+                      <p className="text-sm text-white/70">{user.role}</p>
+                      <p className="text-xs text-white/50">{user.lastSeen}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Status Badge */}
+                    <Badge className={`text-xs ${getStatusBadge(user.status)}`}>
+                      {user.status.toUpperCase()}
+                    </Badge>
+
+                    {/* Quick Actions */}
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast({ title: "Calling...", description: `Calling ${user.name}` });
+                        }}
+                      >
+                        <Phone className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast({ title: "Video Call", description: `Starting video call with ${user.name}` });
+                        }}
+                      >
+                        <Video className="h-3 w-3" />
+                      </Button>
+                    </div>
+
+                    {/* Selection Indicator */}
+                    {selectedUsers.includes(user.id) && (
+                      <CheckCircle className="h-5 w-5 text-green-400" />
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Action Buttons */}
-          <div className="flex gap-2 pt-4">
+          <div className="flex gap-2 pt-4 border-t border-[#2a3441]/50">
             <Button
-              onClick={handleSendMessage}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              onClick={handleStartConversation}
+              disabled={selectedUsers.length === 0}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
             >
-              <Send className="h-4 w-4 mr-2" />
-              Send Message
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Start Conversation ({selectedUsers.length})
             </Button>
             <Button
               onClick={onClose}
               variant="outline"
-              className="bg-[#0f1922] border-[#2a3441] text-white hover:bg-[#2a3441]"
+              className="bg-[#0f1922]/60 border-[#2a3441]/50 text-white hover:bg-[#2a3441]/30 backdrop-blur-sm"
             >
               Cancel
             </Button>
