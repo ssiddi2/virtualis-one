@@ -19,9 +19,9 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
   const { toast } = useToast();
   const { data: patients } = usePatients(hospitalId);
   const [consultation, setConsultation] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState('');
+  const [selectedPatient, setSelectedPatient] = useState('none');
   const [priority, setPriority] = useState<'routine' | 'urgent' | 'critical'>('routine');
-  const [specialty, setSpecialty] = useState('');
+  const [specialty, setSpecialty] = useState('auto');
 
   const specialties = [
     'Cardiology',
@@ -49,14 +49,14 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
 
     toast({
       title: "Consultation Initiated",
-      description: `Consultation request submitted with ${priority} priority${selectedPatient ? ' for selected patient' : ''}`,
+      description: `Consultation request submitted with ${priority} priority${selectedPatient !== 'none' ? ' for selected patient' : ''}`,
     });
 
     // Reset form
     setConsultation('');
-    setSelectedPatient('');
+    setSelectedPatient('none');
     setPriority('routine');
-    setSpecialty('');
+    setSpecialty('auto');
     onClose();
   };
 
@@ -103,7 +103,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
                 <SelectValue placeholder="Select patient for consultation..." />
               </SelectTrigger>
               <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="">No patient selected</SelectItem>
+                <SelectItem value="none">No patient selected</SelectItem>
                 {patients?.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
                     {patient.first_name} {patient.last_name} - {patient.mrn}
@@ -147,7 +147,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
                 <SelectValue placeholder="Auto-determine optimal specialty..." />
               </SelectTrigger>
               <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="">Auto-Detection</SelectItem>
+                <SelectItem value="auto">Auto-Detection</SelectItem>
                 {specialties.map((spec) => (
                   <SelectItem key={spec} value={spec}>
                     {spec}
@@ -178,7 +178,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
           </div>
 
           {/* Patient Context Preview */}
-          {selectedPatient && patients && (
+          {selectedPatient !== 'none' && patients && (
             <div className="p-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <User className="h-4 w-4 text-blue-400" />
