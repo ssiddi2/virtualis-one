@@ -31,7 +31,7 @@ interface EnhancedConsultDialogProps {
 const EnhancedConsultDialog = ({ open, onClose, onSubmit }: EnhancedConsultDialogProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPatient, setSelectedPatient] = useState('');
-  const [consultationType, setConsultationType] = useState<'new' | 'established'>('');
+  const [consultationType, setConsultationType] = useState<'new' | 'established' | ''>('');
   const [clinicalQuestion, setClinicalQuestion] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
