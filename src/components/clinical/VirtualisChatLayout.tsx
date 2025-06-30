@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
 
+  // Debug logging
+  console.log('VirtualisChatLayout - hospitalId:', hospitalId);
+  console.log('VirtualisChatLayout - profile:', profile);
+  console.log('VirtualisChatLayout - user:', user);
+
   const toggleChatMode = () => {
     const newMode = chatMode === 'patient-threads' ? 'general-chat' : 'patient-threads';
     setChatMode(newMode);
@@ -53,6 +57,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   };
 
   if (!hospitalId) {
+    console.log('No hospital ID provided, showing selection message');
     return (
       <div className="min-h-screen flex items-center justify-center" style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
@@ -70,6 +75,8 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       </div>
     );
   }
+
+  console.log('Rendering VirtualisChatLayout with hospitalId:', hospitalId);
 
   return (
     <div className="min-h-screen" style={{
