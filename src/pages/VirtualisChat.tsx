@@ -2,15 +2,15 @@
 import VirtualisChatLayout from "@/components/clinical/VirtualisChatLayout";
 import { useAuth } from "@/components/auth/AuthProvider";
 
-interface VirtualisChatPageProps {
-  hospitalId?: string;
-}
-
-const VirtualisChatPage = ({ hospitalId }: VirtualisChatPageProps) => {
+const VirtualisChatPage = () => {
   const { profile, user } = useAuth();
 
-  // Use the passed hospitalId from routing, or fall back to user profile
-  const effectiveHospitalId = hospitalId || profile?.hospital_id || user?.user_metadata?.hospital_id;
+  // Get the hospital ID from the user profile or user metadata
+  const effectiveHospitalId = profile?.hospital_id || user?.user_metadata?.hospital_id;
+
+  console.log('VirtualisChatPage - Hospital ID:', effectiveHospitalId);
+  console.log('VirtualisChatPage - Profile:', profile);
+  console.log('VirtualisChatPage - User:', user);
 
   return (
     <VirtualisChatLayout hospitalId={effectiveHospitalId} />
