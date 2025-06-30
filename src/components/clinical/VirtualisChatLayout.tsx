@@ -468,7 +468,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
   const filteredPhysicians = physicians?.filter(physician => 
     `${physician.first_name} ${physician.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    physician.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
+    physician.specialty?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   return (
