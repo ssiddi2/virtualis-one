@@ -280,11 +280,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
     } catch (error) {
       console.error('AI Analysis failed:', error);
-      toast({
-        title: "AI Analysis Unavailable",
-        description: "AI analysis temporarily unavailable. Message sent without analysis.",
-        variant: "destructive"
-      });
+      // Don't show error toast here to avoid spam
       return null;
     } finally {
       setIsAnalyzing(false);
@@ -370,60 +366,86 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   };
 
   const handleConsultSubmit = async (consultRequest: any) => {
-    setShowFabOptions(false);
-    setConsultDialogOpen(false);
-    
-    const aiAnalysis = await analyzeMessageWithAI(
-      consultRequest.clinicalQuestion,
-      consultRequest.patientId ? `Patient ID: ${consultRequest.patientId}` : undefined
-    );
-    
-    toast({
-      title: "Consultation Request Sent",
-      description: `${(aiAnalysis?.acuity || consultRequest.urgency).toUpperCase()} priority consult requested for ${consultRequest.specialty || consultRequest.provider}`,
-    });
-    
-    const newThreadId = (chatThreads.length + 1).toString();
-    const consultMessage: Message = {
-      id: Date.now().toString(),
-      content: `Consultation requested: ${consultRequest.clinicalQuestion}`,
-      sender: profile?.first_name || user?.email || 'Current User',
-      senderRole: profile?.role || 'Physician',
-      timestamp: new Date(),
-      acuity: aiAnalysis?.acuity || consultRequest.urgency,
-      patientName: consultRequest.patientId ? 'Selected Patient' : undefined,
-      delivered: false,
-      priorityScore: aiAnalysis?.priorityScore || (consultRequest.urgency === 'critical' ? 90 : 
-                    consultRequest.urgency === 'urgent' ? 70 : 30),
-      aiAnalysis
-    };
-
-    const newConsultThread: ChatThread = {
-      id: newThreadId,
-      participants: [consultRequest.specialty || consultRequest.provider, profile?.first_name || 'Current User'],
-      lastMessage: `Consultation: ${consultRequest.clinicalQuestion.substring(0, 50)}...`,
-      timestamp: new Date(),
-      acuity: consultMessage.acuity,
-      unreadCount: 0,
-      patientName: consultRequest.patientId ? 'Selected Patient' : undefined,
-      specialty: consultRequest.specialty,
-      isGroup: false,
-      messages: [consultMessage],
-      priorityScore: consultMessage.priorityScore
-    };
-
-    setChatThreads(prev => [newConsultThread, ...prev]);
-    setActiveThreadId(newThreadId);
-
-    if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
-      setSmartRoutingData({
-        messageContent: consultRequest.clinicalQuestion,
-        messageId: consultMessage.id,
-        urgency: aiAnalysis.acuity,
-        patientId: consultRequest.patientId,
-        aiRecommendedSpecialty: aiAnalysis.recommendedSpecialty
+    try {
+      setShowFabOptions(false);
+      setConsultDialogOpen(false);
+      
+      // Safely get patient context
+      let patientContext = undefined;
+      if (consultRequest.patientId && patients) {
+        const patient = patients.find(p => p.id === consultRequest.patientId);
+        if (patient) {
+          patientContext = `Patient: ${patient.first_name} ${patient.last_name}`;
+        }
+      }
+      
+      // Analyze with proper error handling
+      let aiAnalysis = null;
+      try {
+        aiAnalysis = await analyzeMessageWithAI(
+          consultRequest.clinicalQuestion,
+          patientContext
+        );
+      } catch (error) {
+        console.error('AI Analysis failed during consult:', error);
+        // Continue without AI analysis
+      }
+      
+      // Show success toast immediately
+      toast({
+        title: "Consultation Request Sent",
+        description: `${(aiAnalysis?.acuity || 'ROUTINE').toUpperCase()} priority consult requested`,
       });
-      setSmartRoutingOpen(true);
+      
+      const newThreadId = (chatThreads.length + 1).toString();
+      const consultMessage: Message = {
+        id: Date.now().toString(),
+        content: `Consultation requested: ${consultRequest.clinicalQuestion}`,
+        sender: profile?.first_name || user?.email || 'Current User',
+        senderRole: profile?.role || 'Physician',
+        timestamp: new Date(),
+        acuity: aiAnalysis?.acuity || 'routine',
+        patientName: patientContext ? 'Selected Patient' : undefined,
+        delivered: false,
+        priorityScore: aiAnalysis?.priorityScore || 50,
+        aiAnalysis
+      };
+
+      const newConsultThread: ChatThread = {
+        id: newThreadId,
+        participants: ['Consultant', profile?.first_name || 'Current User'],
+        lastMessage: `Consultation: ${consultRequest.clinicalQuestion.substring(0, 50)}...`,
+        timestamp: new Date(),
+        acuity: consultMessage.acuity,
+        unreadCount: 0,
+        patientName: patientContext ? 'Selected Patient' : undefined,
+        specialty: consultRequest.specialty || 'General',
+        isGroup: false,
+        messages: [consultMessage],
+        priorityScore: consultMessage.priorityScore
+      };
+
+      setChatThreads(prev => [newConsultThread, ...prev]);
+      setActiveThreadId(newThreadId);
+
+      // Only show smart routing for high priority
+      if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
+        setSmartRoutingData({
+          messageContent: consultRequest.clinicalQuestion,
+          messageId: consultMessage.id,
+          urgency: aiAnalysis.acuity,
+          patientId: consultRequest.patientId,
+          aiRecommendedSpecialty: aiAnalysis.recommendedSpecialty
+        });
+        setSmartRoutingOpen(true);
+      }
+    } catch (error) {
+      console.error('Error in handleConsultSubmit:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send consultation request. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 

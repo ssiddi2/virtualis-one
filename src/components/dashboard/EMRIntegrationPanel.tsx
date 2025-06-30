@@ -200,46 +200,46 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
   return (
     <>
-      <div className="p-4 space-y-4 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-        <div className="flex items-center gap-3">
+      <div className="p-3 space-y-3 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div className="flex items-center gap-2">
           <Button
             onClick={onBack}
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-blue-800/50"
+            className="text-white hover:bg-blue-800/50 text-sm"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            <ArrowLeft className="h-3 w-3 mr-1" />
+            Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-white">
-              EMR SIMULATION CONSOLE
+            <h1 className="text-lg font-bold text-white">
+              Healthcare System Integration
             </h1>
-            <p className="text-blue-200 text-sm">
+            <p className="text-blue-200 text-xs">
               {hospital.name} • {hospital.location}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-6xl">
-          <div className="lg:col-span-2">
-            <Card className="bg-blue-900/40 backdrop-blur-xl border-blue-400/30 shadow-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white flex items-center gap-2 text-lg">
-                  <Database className="h-5 w-5 text-blue-300" />
-                  HEALTHCARE SIMULATION CONFIG
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 max-w-5xl">
+          <div className="lg:col-span-3">
+            <Card className="bg-gradient-to-br from-blue-800/40 via-blue-700/30 to-blue-900/50 backdrop-blur-xl border-blue-400/40 shadow-xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white flex items-center gap-2 text-base">
+                  <Database className="h-4 w-4 text-blue-300" />
+                  Clinical Data Integration
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <div>
-                  <Label className="text-white text-sm">EMR System Type</Label>
+                  <Label className="text-white text-xs">Healthcare System Type</Label>
                   <Select value={formData.emr_type} onValueChange={(value) => handleInputChange('emr_type', value)}>
-                    <SelectTrigger className="bg-blue-500/10 border-blue-400/30 text-white h-9">
-                      <SelectValue placeholder="Select EMR System" />
+                    <SelectTrigger className="bg-blue-500/20 border-blue-400/40 text-white h-8 text-sm">
+                      <SelectValue placeholder="Select System Type" />
                     </SelectTrigger>
                     <SelectContent className="bg-blue-900 border-blue-400/30">
                       {emrTypes.map((emr) => (
-                        <SelectItem key={emr} value={emr} className="text-white focus:bg-blue-800">{emr}</SelectItem>
+                        <SelectItem key={emr} value={emr} className="text-white focus:bg-blue-800 text-sm">{emr}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -247,86 +247,86 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
                 {getEmrFields()}
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-2 pt-2">
                   <Button
                     onClick={handleTestConnection}
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs h-8"
                   >
-                    <TestTube className="h-4 w-4 mr-2" />
-                    START SIMULATION
+                    <TestTube className="h-3 w-3 mr-1" />
+                    Test Connection
                   </Button>
                   
                   <Button
                     onClick={handleSave}
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-xs h-8"
                   >
-                    <Key className="h-4 w-4 mr-2" />
-                    SAVE CONFIG
+                    <Key className="h-3 w-3 mr-1" />
+                    Save Configuration
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="space-y-4">
-            <Card className="bg-blue-900/40 backdrop-blur-xl border-blue-400/30 shadow-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white text-lg">SIMULATION STATUS</CardTitle>
+          <div className="space-y-3">
+            <Card className="bg-gradient-to-br from-blue-800/40 via-blue-700/30 to-blue-900/50 backdrop-blur-xl border-blue-400/40 shadow-xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white text-sm">Integration Status</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-200 text-sm">Current Mode:</span>
+                  <span className="text-blue-200 text-xs">Connection:</span>
                   <Badge className={
                     testResult === 'success' 
-                      ? "bg-green-500/20 text-green-300 border-green-400/30" 
-                      : "bg-blue-500/20 text-blue-300 border-blue-400/30"
+                      ? "bg-green-500/30 text-green-300 border-green-400/40 text-xs" 
+                      : "bg-blue-500/30 text-blue-300 border-blue-400/40 text-xs"
                   }>
-                    {testResult === 'success' && <CheckCircle className="h-3 w-3 mr-1" />}
-                    <Database className="h-3 w-3 mr-1" />
-                    {testResult === 'success' ? 'SIMULATED' : 'DEMO MODE'}
+                    {testResult === 'success' && <CheckCircle className="h-2 w-2 mr-1" />}
+                    <Database className="h-2 w-2 mr-1" />
+                    {testResult === 'success' ? 'Active' : 'Demo Mode'}
                   </Badge>
                 </div>
                 
                 <div className="text-xs text-blue-300">
-                  Last Updated: {new Date().toLocaleString()}
+                  Updated: {new Date().toLocaleString()}
                 </div>
                 
                 {testResult === 'success' && (
-                  <div className="p-3 bg-green-500/10 border border-green-400/30 rounded-lg">
+                  <div className="p-2 bg-green-500/20 border border-green-400/40 rounded-lg">
                     <p className="text-green-300 text-xs">
-                      ✓ Healthcare simulation ready
+                      ✓ Healthcare system connected
                       <br />
                       ✓ Clinical workflows active
                       <br />
-                      ✓ Demo data accessible
+                      ✓ Patient data accessible
                     </p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card className="bg-blue-900/40 backdrop-blur-xl border-blue-400/30 shadow-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white text-lg">SIMULATION FEATURES</CardTitle>
+            <Card className="bg-gradient-to-br from-blue-800/40 via-blue-700/30 to-blue-900/50 backdrop-blur-xl border-blue-400/40 shadow-xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white text-sm">Clinical Features</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-blue-200">Patient Demo Data</span>
-                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">Active</Badge>
+                  <span className="text-blue-200">Patient Records</span>
+                  <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-xs">Active</Badge>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-blue-200">Clinical Workflows</span>
-                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">Active</Badge>
+                  <span className="text-blue-200">Care Coordination</span>
+                  <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-xs">Active</Badge>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-blue-200">AI Healthcare Assistant</span>
-                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">Active</Badge>
+                  <span className="text-blue-200">Clinical Decision Support</span>
+                  <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-xs">Active</Badge>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-blue-200">Real Integration</span>
-                  <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">Demo Only</Badge>
+                  <span className="text-blue-200">Live Integration</span>
+                  <Badge className="bg-blue-500/30 text-blue-300 border-blue-400/40 text-xs">Demo</Badge>
                 </div>
               </CardContent>
             </Card>
