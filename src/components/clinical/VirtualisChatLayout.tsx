@@ -85,13 +85,11 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
   const [activeThreadId, setActiveThreadId] = useState<string>('1');
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
-  const [directMessageDialogOpen, setDirectMessageDialogOpen] = useState(false);
   const [smartRoutingOpen, setSmartRoutingOpen] = useState(false);
   const [smartRoutingData, setSmartRoutingData] = useState<any>(null);
   const [newMessage, setNewMessage] = useState('');
   const [showFabOptions, setShowFabOptions] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Mock chat threads with messages - now with AI analysis capability
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([
@@ -443,36 +441,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     }
   };
 
-  const handleDirectMessage = (physicianId: string) => {
-    const physician = physicians?.find(p => p.id === physicianId);
-    if (!physician) return;
-
-    // Create new direct message thread
-    const newThreadId = (chatThreads.length + 1).toString();
-    const newThread: ChatThread = {
-      id: newThreadId,
-      participants: [`${physician.first_name} ${physician.last_name}`],
-      lastMessage: 'Start a conversation...',
-      timestamp: new Date(),
-      acuity: 'routine',
-      unreadCount: 0,
-      isGroup: false,
-      messages: [],
-      priorityScore: 0
-    };
-
-    setChatThreads(prev => [newThread, ...prev]);
-    setActiveThreadId(newThreadId);
-    setDirectMessageDialogOpen(false);
-    setShowFabOptions(false);
-    setSearchQuery('');
-
-    toast({
-      title: "Direct Message Started",
-      description: `Started conversation with ${physician.first_name} ${physician.last_name}`,
-    });
-  };
-
   const handleSmartRoutingSend = (messageData: any) => {
     setSmartRoutingOpen(false);
     setSmartRoutingData(null);
@@ -704,7 +672,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         </div>
       </div>
 
-      {/* Enhanced FAB with Options */}
+      {/* Enhanced FAB with Options - Removed Direct Message Option */}
       <div className="fixed bottom-6 right-6">
         {showFabOptions && (
           <div className="absolute bottom-20 right-0 space-y-3 animate-fade-in">
@@ -718,19 +686,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                 className="backdrop-blur-xl bg-blue-500/15 hover:bg-blue-500/30 text-white rounded-full w-12 h-12 shadow-2xl border border-blue-300/20 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-blue-500/20"
               >
                 <MessageSquare className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {/* Direct Message Option */}
-            <div className="flex items-center gap-3">
-              <span className="text-green-200/80 text-sm bg-black/40 backdrop-blur-md px-6 py-3 rounded-full border border-green-300/20 font-light tracking-[0.2em] shadow-2xl shadow-green-500/10 hover:bg-black/60 hover:border-green-300/30 transition-all duration-300">
-                MESSAGE
-              </span>
-              <Button
-                onClick={() => setDirectMessageDialogOpen(true)}
-                className="backdrop-blur-xl bg-green-500/15 hover:bg-green-500/30 text-white rounded-full w-12 h-12 shadow-2xl border border-green-300/20 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-green-500/20"
-              >
-                <User className="h-5 w-5" />
               </Button>
             </div>
             
@@ -766,67 +721,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           </div>
         </Button>
       </div>
-
-      {/* Direct Message Dialog */}
-      {directMessageDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDirectMessageDialogOpen(false)} />
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg w-full max-w-md z-10">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Direct Message
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                <Input
-                  placeholder="Search physicians..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                />
-              </div>
-
-              <div className="max-h-60 overflow-y-auto space-y-2">
-                {filteredPhysicians.map((physician) => (
-                  <div
-                    key={physician.id}
-                    onClick={() => handleDirectMessage(physician.id)}
-                    className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-blue-600/50 text-white text-xs">
-                          {physician.first_name.charAt(0)}{physician.last_name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="text-white font-medium text-sm">
-                          {physician.first_name} {physician.last_name}
-                        </div>
-                        <div className="text-white/70 text-xs">
-                          {physician.specialty}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setDirectMessageDialogOpen(false)}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Enhanced Consultation Dialog */}
       <EnhancedConsultDialog
