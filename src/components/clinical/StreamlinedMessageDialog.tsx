@@ -9,49 +9,25 @@ import { Send, MessageSquare, User, AlertTriangle, Clock, CheckCircle } from 'lu
 import { usePatients } from '@/hooks/usePatients';
 import { useToast } from '@/hooks/use-toast';
 
-interface MessageDialogProps {
+interface StreamlinedMessageDialogProps {
   open: boolean;
   onClose: () => void;
   hospitalId?: string;
 }
 
-const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
+const StreamlinedMessageDialog = ({ open, onClose, hospitalId }: StreamlinedMessageDialogProps) => {
   const { toast } = useToast();
   const { data: patients } = usePatients(hospitalId);
   const [message, setMessage] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState('none');
-  const [acuity, setAcuity] = useState<'low' | 'moderate' | 'critical'>('low');
+  const [selectedPatient, setSelectedPatient] = useState('');
+  const [acuity, setAcuity] = useState<'low' | 'moderate' | 'critical'>('moderate');
   const [recipient, setRecipient] = useState('team');
-
-  const handleSendMessage = () => {
-    console.log('Message sent');
-    if (!message.trim()) {
-      toast({
-        title: "Message Required",
-        description: "Please enter a message to send",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Message Sent",
-      description: `Message sent to ${recipient} with ${acuity} acuity level${selectedPatient !== 'none' ? ' for selected patient' : ''}`,
-    });
-
-    // Reset form
-    setMessage('');
-    setSelectedPatient('none');
-    setAcuity('low');
-    setRecipient('team');
-    onClose();
-  };
 
   const getAcuityColor = (level: string) => {
     switch (level) {
-      case 'critical': return 'bg-red-600/30 text-red-100 border-red-500/50';
-      case 'moderate': return 'bg-yellow-600/30 text-yellow-100 border-yellow-500/50';
-      case 'low': return 'bg-green-600/30 text-green-100 border-green-500/50';
+      case 'critical': return 'bg-red-500/20 text-red-200 border-red-400/30';
+      case 'moderate': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'low': return 'bg-green-500/20 text-green-200 border-green-400/30';
       default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
     }
   };
@@ -65,6 +41,28 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
     }
   };
 
+  const handleSendMessage = () => {
+    if (!message.trim()) {
+      toast({
+        title: "Message Required",
+        description: "Please enter a message to send",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Message Sent",
+      description: `${acuity.toUpperCase()} priority message sent to ${recipient}`,
+    });
+
+    setMessage('');
+    setSelectedPatient('');
+    setAcuity('moderate');
+    setRecipient('team');
+    onClose();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/10 border border-blue-300/40 text-white shadow-2xl rounded-2xl">
@@ -74,11 +72,11 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
             Send Clinical Message
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            Send messages to team members with acuity classification
+            Send messages to team members with priority classification
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="space-y-4">
           {/* Patient Selection */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
@@ -90,7 +88,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
                 <SelectValue placeholder="Select patient for context..." />
               </SelectTrigger>
               <SelectContent className="bg-gradient-to-br from-blue-800/95 to-indigo-800/95 border border-blue-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="none">No patient context</SelectItem>
+                <SelectItem value="">No patient context</SelectItem>
                 {patients?.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
                     {patient.first_name} {patient.last_name} - {patient.mrn}
@@ -101,11 +99,11 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
             </Select>
           </div>
 
-          {/* Acuity Level */}
+          {/* Priority Level */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <AlertTriangle className="h-3 w-3" />
-              Message Acuity Level
+              Priority Level
             </label>
             <Select value={acuity} onValueChange={(value: 'low' | 'moderate' | 'critical') => setAcuity(value)}>
               <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
@@ -119,7 +117,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
             </Select>
             <Badge className={`mt-2 ${getAcuityColor(acuity)} flex items-center gap-1 w-fit border font-semibold`}>
               {getAcuityIcon(acuity)}
-              <span>{acuity.toUpperCase()} ACUITY</span>
+              <span>{acuity.toUpperCase()} PRIORITY</span>
             </Badge>
           </div>
 
@@ -153,13 +151,13 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Enter your clinical message... Include relevant patient information and specific instructions or questions..."
+              placeholder="Enter your clinical message..."
               className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm rounded-lg"
             />
           </div>
 
           {/* Patient Context Preview */}
-          {selectedPatient !== 'none' && patients && (
+          {selectedPatient && patients && (
             <div className="p-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <User className="h-4 w-4 text-blue-400" />
@@ -171,31 +169,11 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
                   <div className="text-sm text-white/80 space-y-1">
                     <p><span className="text-blue-300">Patient:</span> {patient.first_name} {patient.last_name}</p>
                     <p><span className="text-blue-300">Location:</span> {patient.room_number || 'Unassigned'}</p>
-                    <p><span className="text-blue-300">Conditions:</span> {patient.medical_conditions?.join(', ') || 'None documented'}</p>
-                    <p><span className="text-blue-300">Allergies:</span> {patient.allergies?.join(', ') || 'None documented'}</p>
                   </div>
                 ) : null;
               })()}
             </div>
           )}
-
-          {/* Message Summary */}
-          <div className="p-3 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 backdrop-blur-sm border border-blue-400/30 rounded-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-blue-300" />
-                <span className="text-sm font-medium text-white">Message Summary</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className={`${getAcuityColor(acuity)} text-xs border font-semibold`}>
-                  {acuity.toUpperCase()}
-                </Badge>
-                <Badge className="bg-blue-600/30 text-blue-100 border-blue-500/50 text-xs">
-                  {recipient.toUpperCase()}
-                </Badge>
-              </div>
-            </div>
-          </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2 pt-4 border-t border-white/20">
@@ -220,4 +198,4 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
   );
 };
 
-export default MessageDialog;
+export default StreamlinedMessageDialog;
