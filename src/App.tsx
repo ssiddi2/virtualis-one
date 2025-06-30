@@ -15,7 +15,7 @@ import Settings from "@/pages/Settings";
 import Tasks from "@/pages/Tasks";
 import VirtualisChat from "@/pages/VirtualisChat";
 import NotFound from "@/pages/NotFound";
-import { PatientDetailsPage } from "@/components/patient/PatientDetailsPage";
+import PatientDetailsPage from "@/components/patient/PatientDetailsPage";
 import CPOESystem from "@/components/clinical/CPOESystem";
 import BillingDashboard from "@/components/billing/BillingDashboard";
 import EnhancedLISDashboard from "@/components/laboratory/EnhancedLISDashboard";
@@ -45,7 +45,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   return (
     <Routes>
@@ -95,7 +95,7 @@ const AppRoutes = () => {
       
       <Route path="/billing" element={
         <ProtectedRoute>
-          <BillingDashboard />
+          <BillingDashboard hospitalId={profile?.hospital_id || ''} />
         </ProtectedRoute>
       } />
       
@@ -125,7 +125,10 @@ const AppRoutes = () => {
       
       <Route path="/ai-dashboard" element={
         <ProtectedRoute>
-          <AIDashboard />
+          <AIDashboard 
+            user={profile || user} 
+            hospitalId={profile?.hospital_id || ''} 
+          />
         </ProtectedRoute>
       } />
       

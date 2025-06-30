@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/contexts/AuthContext';
 import PatientThreadManager from './PatientThreadManager';
 import PatientChatInterface from './PatientChatInterface';
 import { Brain, MessageSquare } from 'lucide-react';

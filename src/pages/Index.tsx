@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import AuthForm from "@/components/auth/AuthForm";
-import Sidebar from "@/components/layout/Sidebar";
+import { Sidebar } from "@/components/layout/Sidebar";
 import Dashboard from "@/components/dashboard/Dashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";

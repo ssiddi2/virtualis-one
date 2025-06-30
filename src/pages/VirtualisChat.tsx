@@ -1,6 +1,6 @@
 
 import VirtualisChatLayout from "@/components/clinical/VirtualisChatLayout";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface VirtualisChatPageProps {
   hospitalId?: string;
