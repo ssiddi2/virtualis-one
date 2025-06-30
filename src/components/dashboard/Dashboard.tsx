@@ -1,310 +1,273 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+  Activity, 
   Users, 
+  MessageSquare, 
   Calendar, 
-  FileText, 
   TrendingUp, 
-  AlertCircle,
-  CheckCircle,
-  DollarSign,
-  Activity,
+  AlertTriangle,
+  Heart,
   Brain,
-  Download,
-  Upload,
-  RefreshCw
+  Stethoscope,
+  FlaskConical,
+  FileText,
+  Database,
+  Settings
 } from 'lucide-react';
+import { usePatients } from '@/hooks/usePatients';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import VirtualisChatModal from '@/components/clinical/VirtualisChatModal';
+import EMRInitializationStatus from './EMRInitializationStatus';
+import PatientTracker from './PatientTracker';
+import FuturisticPatientTracker from './FuturisticPatientTracker';
 
-const Dashboard = () => {
+interface DashboardProps {
+  hospitalId?: string;
+}
+
+const Dashboard = ({ hospitalId }: DashboardProps) => {
+  const { profile, user } = useAuth();
   const { toast } = useToast();
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  const [isUpdatingCMS, setIsUpdatingCMS] = useState(false);
-  const [isProcessingClaims, setIsProcessingClaims] = useState(false);
+  const { data: patients, isLoading: patientsLoading } = usePatients(hospitalId);
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const handleGenerateReport = async (reportType: string) => {
-    setIsGeneratingReport(true);
-    
-    // Simulate report generation
-    setTimeout(() => {
-      toast({
-        title: "Report Generated",
-        description: `${reportType} report has been generated and is ready for download.`,
-      });
-      setIsGeneratingReport(false);
-    }, 2000);
-  };
+  // Use the passed hospitalId from routing, or fall back to user profile
+  const effectiveHospitalId = hospitalId || profile?.hospital_id || user?.user_metadata?.hospital_id;
 
-  const handleCMSUpdate = async () => {
-    setIsUpdatingCMS(true);
-    
-    // Simulate CMS quality measure update
-    setTimeout(() => {
-      toast({
-        title: "CMS Quality Measures Updated",
-        description: "Successfully submitted quality measures to CMS reporting system.",
-      });
-      setIsUpdatingCMS(false);
-    }, 3000);
-  };
+  const activePatients = patients?.filter(p => p.status === 'active') || [];
+  const criticalPatients = activePatients.filter(p => 
+    p.medical_conditions?.some(condition => 
+      condition.toLowerCase().includes('cardiac') || 
+      condition.toLowerCase().includes('critical')
+    )
+  );
+  const recentAdmissions = activePatients.filter(p => {
+    if (!p.admission_date) return false;
+    const admissionDate = new Date(p.admission_date);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - admissionDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 1;
+  });
 
-  const handleProcessClaims = async () => {
-    setIsProcessingClaims(true);
-    
-    // Simulate claims processing
-    setTimeout(() => {
-      toast({
-        title: "Claims Processed",
-        description: "15 claims have been processed and submitted to insurance providers.",
-      });
-      setIsProcessingClaims(false);
-    }, 2500);
-  };
+  const statistics = [
+    { 
+      label: 'Active Patients', 
+      value: activePatients.length, 
+      change: '+3', 
+      trend: 'up',
+      icon: Users,
+      color: 'bg-blue-500/20 text-blue-200 border-blue-400/30'
+    },
+    { 
+      label: 'Critical Cases', 
+      value: criticalPatients.length, 
+      change: '-1', 
+      trend: 'down',
+      icon: AlertTriangle,
+      color: 'bg-red-500/20 text-red-200 border-red-400/30'
+    },
+    { 
+      label: 'New Admissions', 
+      value: recentAdmissions.length, 
+      change: '+2', 
+      trend: 'up',
+      icon: Calendar,
+      color: 'bg-green-500/20 text-green-200 border-green-400/30'
+    },
+    { 
+      label: 'Avg Length of Stay', 
+      value: '3.2 days', 
+      change: '-0.5', 
+      trend: 'down',
+      icon: TrendingUp,
+      color: 'bg-purple-500/20 text-purple-200 border-purple-400/30'
+    }
+  ];
 
-  const handleExportData = (dataType: string) => {
-    toast({
-      title: "Export Started",
-      description: `Exporting ${dataType} data. Download will begin shortly.`,
-    });
-    
-    // Simulate file download
-    setTimeout(() => {
-      const element = document.createElement('a');
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(`Mock ${dataType} data export`));
-      element.setAttribute('download', `${dataType.toLowerCase()}_export_${new Date().toISOString().split('T')[0]}.csv`);
-      element.style.display = 'none';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }, 1000);
-  };
+  const quickActions = [
+    { 
+      label: 'Patient Lookup', 
+      icon: Users, 
+      action: () => toast({ title: "Patient Lookup", description: "Search functionality coming soon" }),
+      color: 'bg-blue-600 hover:bg-blue-700'
+    },
+    { 
+      label: 'New Lab Order', 
+      icon: FlaskConical, 
+      action: () => toast({ title: "Lab Orders", description: "Lab ordering system coming soon" }),
+      color: 'bg-green-600 hover:bg-green-700'
+    },
+    { 
+      label: 'Radiology', 
+      icon: Activity, 
+      action: () => toast({ title: "Radiology", description: "Imaging orders coming soon" }),
+      color: 'bg-purple-600 hover:bg-purple-700'
+    },
+    { 
+      label: 'AI Assistant', 
+      icon: Brain, 
+      action: () => toast({ title: "AI Assistant", description: "AI clinical support coming soon" }),
+      color: 'bg-indigo-600 hover:bg-indigo-700'
+    }
+  ];
 
-  return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Hospital Dashboard</h1>
-            <p className="text-white/70">Real-time hospital operations overview</p>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              onClick={() => handleGenerateReport('Daily Operations')}
-              disabled={isGeneratingReport}
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-6 py-2 rounded-xl transition-all duration-300"
-            >
-              {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
-              Daily Report
-            </Button>
-            <Button 
-              onClick={handleCMSUpdate}
-              disabled={isUpdatingCMS}
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-6 py-2 rounded-xl transition-all duration-300"
-            >
-              {isUpdatingCMS ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-              Update CMS
-            </Button>
-          </div>
-        </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Active Patients</CardTitle>
-              <Users className="h-4 w-4 text-sky-300" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">156</div>
-              <p className="text-xs text-white/60">
-                +12% from last month
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Appointments Today</CardTitle>
-              <Calendar className="h-4 w-4 text-green-300" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">89</div>
-              <p className="text-xs text-white/60">
-                23 completed, 66 scheduled
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Revenue Today</CardTitle>
-              <DollarSign className="h-4 w-4 text-blue-300" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">$45,230</div>
-              <p className="text-xs text-white/60">
-                +8% from yesterday
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Bed Occupancy</CardTitle>
-              <Activity className="h-4 w-4 text-pink-300" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">85%</div>
-              <p className="text-xs text-white/60">
-                127 of 150 beds occupied
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Billing & Claims */}
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <DollarSign className="h-5 w-5 text-green-300" />
-                Billing & Claims Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-white/70">Pending Claims</span>
-                <Badge className="bg-yellow-500/20 text-yellow-200 border border-yellow-400/30">15</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-white/70">Outstanding Revenue</span>
-                <span className="text-white font-semibold">$127,450</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  onClick={handleProcessClaims}
-                  disabled={isProcessingClaims}
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300"
-                >
-                  {isProcessingClaims ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
-                  Process Claims
-                </Button>
-                <Button 
-                  onClick={() => handleExportData('Billing')}
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Data
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quality Reporting */}
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <TrendingUp className="h-5 w-5 text-sky-300" />
-                Quality & Compliance
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-white/70">Quality Score</span>
-                <Badge className="bg-green-500/20 text-green-200 border border-green-400/30">94.2%</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-white/70">CMS Measures</span>
-                <span className="text-white font-semibold">18/20 Met</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  onClick={() => handleGenerateReport('Quality Metrics')}
-                  disabled={isGeneratingReport}
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300"
-                >
-                  {isGeneratingReport ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
-                  Generate Report
-                </Button>
-                <Button 
-                  onClick={() => handleExportData('Quality')}
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export CMS
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* AI Insights */}
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+  if (!effectiveHospitalId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 flex items-center justify-center">
+        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg max-w-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Brain className="h-5 w-5 text-purple-300" />
-              AI-Powered Insights
-            </CardTitle>
+            <CardTitle className="text-white text-center">No Hospital Selected</CardTitle>
+            <CardDescription className="text-white/70 text-center">
+              Please select a hospital to access the dashboard
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                <h4 className="font-medium text-white mb-2">Readmission Risk Alert</h4>
-                <p className="text-sm text-white/70 mb-3">5 patients identified with high readmission risk</p>
-                <Button size="sm" className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-1 rounded-lg transition-all duration-300">
-                  <AlertCircle className="h-3 w-3 mr-2" />
-                  Review Cases
-                </Button>
-              </div>
-              <div className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                <h4 className="font-medium text-white mb-2">Cost Optimization</h4>
-                <p className="text-sm text-white/70 mb-3">Potential savings of $15K identified</p>
-                <Button size="sm" className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-1 rounded-lg transition-all duration-300">
-                  <TrendingUp className="h-3 w-3 mr-2" />
-                  View Details
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-white">Recent System Activities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="h-4 w-4 text-green-300" />
-                  <span className="text-white/80">Daily backup completed successfully</span>
-                </div>
-                <span className="text-xs text-white/50">2 minutes ago</span>
-              </div>
-              <div className="flex items-center justify-between p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
-                <div className="flex items-center gap-3">
-                  <Upload className="h-4 w-4 text-sky-300" />
-                  <span className="text-white/80">CMS quality measures submitted</span>
-                </div>
-                <span className="text-xs text-white/50">1 hour ago</span>
-              </div>
-              <div className="flex items-center justify-between p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-4 w-4 text-purple-300" />
-                  <span className="text-white/80">Monthly financial report generated</span>
-                </div>
-                <span className="text-xs text-white/50">3 hours ago</span>
-              </div>
-            </div>
-          </CardContent>
         </Card>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Clinical Dashboard</h1>
+            <p className="text-white/70">Real-time hospital operations and patient management</p>
+          </div>
+          <div className="flex gap-3">
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Button>
+          </div>
+        </div>
+
+        {/* EMR Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            {/* Statistics */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              {statistics.map((stat, index) => (
+                <Card key={index} className="backdrop-blur-xl bg-white/5 border border-white/20 text-white">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <stat.icon className="h-5 w-5 text-white/70" />
+                      <Badge className={`${stat.color} text-xs`}>
+                        {stat.change}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-white/70 mb-1">{stat.label}</p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+          
+          <EMRInitializationStatus hospitalId={effectiveHospitalId} />
+        </div>
+
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="bg-white/10 backdrop-blur-sm border border-white/20">
+            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/20">
+              <Activity className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="patients" className="text-white data-[state=active]:bg-white/20">
+              <Users className="h-4 w-4 mr-2" />
+              Patients
+            </TabsTrigger>
+            <TabsTrigger value="futuristic" className="text-white data-[state=active]:bg-white/20">
+              <Heart className="h-4 w-4 mr-2" />
+              Patient Tracker
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Quick Actions */}
+              <Card className="backdrop-blur-xl bg-white/5 border border-white/20 text-white">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Stethoscope className="h-5 w-5" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {quickActions.map((action, index) => (
+                    <Button
+                      key={index}
+                      onClick={action.action}
+                      className={`w-full justify-start ${action.color} text-white`}
+                    >
+                      <action.icon className="h-4 w-4 mr-2" />
+                      {action.label}
+                    </Button>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card className="backdrop-blur-xl bg-white/5 border border-white/20 text-white">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-3 p-2 bg-white/5 rounded">
+                    <div className="p-1 bg-green-600/30 rounded">
+                      <Users className="h-3 w-3 text-green-300" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-white">New patient admitted</p>
+                      <p className="text-xs text-white/60">Room 302 - 5 min ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 bg-white/5 rounded">
+                    <div className="p-1 bg-blue-600/30 rounded">
+                      <FlaskConical className="h-3 w-3 text-blue-300" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-white">Lab results available</p>
+                      <p className="text-xs text-white/60">Patient Johnson - 12 min ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 bg-white/5 rounded">
+                    <div className="p-1 bg-purple-600/30 rounded">
+                      <MessageSquare className="h-3 w-3 text-purple-300" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-white">New consultation request</p>
+                      <p className="text-xs text-white/60">Dr. Smith - 18 min ago</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="patients" className="space-y-6">
+            <PatientTracker hospitalId={effectiveHospitalId} />
+          </TabsContent>
+
+          <TabsContent value="futuristic" className="space-y-6">
+            <FuturisticPatientTracker hospitalId={effectiveHospitalId} />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Collapsible Chat Modal */}
+      <VirtualisChatModal hospitalId={effectiveHospitalId} />
     </div>
   );
 };

@@ -19,7 +19,8 @@ import {
   FileText,
   Users,
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
@@ -49,9 +50,11 @@ interface Message {
 interface VirtualisChatProps {
   hospitalId?: string;
   currentUser?: any;
+  isModal?: boolean;
+  onClose?: () => void;
 }
 
-const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
+const VirtualisChat = ({ hospitalId, currentUser, isModal = false, onClose }: VirtualisChatProps) => {
   const { toast } = useToast();
   const { callAI, isLoading: aiLoading } = useAIAssistant();
   const { data: patients } = usePatients(hospitalId);
@@ -67,8 +70,6 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
   // Mock data for demonstration
   useEffect(() => {
-    if (!hospitalId) return;
-    
     const mockMessages: Message[] = [
       {
         id: '1',
@@ -105,26 +106,10 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
           recommendedSpecialty: 'Surgery',
           acuity: 'urgent'
         }
-      },
-      {
-        id: '3',
-        content: 'Discharge planning meeting scheduled for tomorrow 10 AM for Patient Wilson.',
-        sender: 'Case Manager',
-        senderRole: 'Social Services',
-        timestamp: new Date(Date.now() - 30 * 60000),
-        acuity: 'routine',
-        patientId: 'pat-003',
-        patientName: 'Robert Wilson',
-        aiAnalysis: {
-          priority: 30,
-          keywords: ['discharge planning', 'scheduled meeting'],
-          suggestedActions: ['Confirm availability', 'Prepare discharge summary'],
-          acuity: 'routine'
-        }
       }
     ];
     setMessages(mockMessages);
-  }, [hospitalId]);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -391,131 +376,136 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     return b.timestamp.getTime() - a.timestamp.getTime();
   });
 
-  if (!hospitalId) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-      }}>
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg max-w-md">
-          <CardHeader>
-            <CardTitle className="text-white text-center">No Hospital Selected</CardTitle>
-            <CardDescription className="text-white/70 text-center">
-              Please select a hospital from the dashboard to access Virtualis Chat
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
+  const containerClass = isModal 
+    ? "h-[80vh] flex flex-col" 
+    : "min-h-screen p-6";
+
+  const backgroundStyle = isModal 
+    ? {} 
+    : { background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)' };
 
   return (
-    <div className="min-h-screen p-6" style={{
-      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-    }}>
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 backdrop-blur-sm bg-blue-600/30 rounded-lg border border-blue-400/30">
-              <Brain className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Virtualis Chat</h1>
-              <p className="text-white/70">AI-Powered Clinical Communication with Acuity-Based Smart Routing</p>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="backdrop-blur-xl bg-red-500/20 border border-red-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white/70">Critical Acuity</p>
-                    <p className="text-2xl font-bold text-white">
-                      {messages.filter(m => m.acuity === 'critical').length}
-                    </p>
-                  </div>
-                  <AlertTriangle className="h-8 w-8 text-red-300" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="backdrop-blur-xl bg-yellow-500/20 border border-yellow-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white/70">Moderate Acuity</p>
-                    <p className="text-2xl font-bold text-white">
-                      {messages.filter(m => m.acuity === 'urgent').length}
-                    </p>
-                  </div>
-                  <Clock className="h-8 w-8 text-orange-300" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="backdrop-blur-xl bg-green-500/20 border border-green-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white/70">Low Acuity</p>
-                    <p className="text-2xl font-bold text-white">
-                      {messages.filter(m => m.acuity === 'routine').length}
-                    </p>
-                  </div>
-                  <CheckCircle className="h-8 w-8 text-green-300" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white/70">AI Routed</p>
-                    <p className="text-2xl font-bold text-white">
-                      {messages.filter(m => m.recommendedSpecialty).length}
-                    </p>
-                  </div>
-                  <Brain className="h-8 w-8 text-purple-300" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Filters */}
-          <div className="flex gap-2 mb-6">
-            {['all', 'critical', 'urgent', 'mine'].map((filter) => (
-              <Button
-                key={filter}
-                variant={activeFilter === filter ? "default" : "outline"}
-                onClick={() => setActiveFilter(filter as any)}
-                className={activeFilter === filter 
-                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                  : "bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
-                }
-              >
-                {filter.charAt(0).toUpperCase() + filter.slice(1)} Messages
-                <Badge className="ml-2 bg-blue-600/50 text-white">
-                  {filter === 'all' ? messages.length : 
-                   filter === 'critical' ? messages.filter(m => m.acuity === 'critical').length :
-                   filter === 'urgent' ? messages.filter(m => m.acuity === 'urgent').length :
-                   messages.filter(m => m.sender === (currentUser?.name || 'Current User')).length}
-                </Badge>
-              </Button>
-            ))}
-          </div>
+    <div className={containerClass} style={backgroundStyle}>
+      {isModal && onClose && (
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-white">Virtualis Clinical Chat</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-white hover:bg-white/20"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
+      )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={isModal ? "flex-1 overflow-hidden" : "max-w-7xl mx-auto"}>
+        {/* Header */}
+        {!isModal && (
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 backdrop-blur-sm bg-blue-600/30 rounded-lg border border-blue-400/30">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Virtualis Chat</h1>
+                <p className="text-white/70">AI-Powered Clinical Communication with Acuity-Based Smart Routing</p>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <Card className="backdrop-blur-xl bg-red-500/20 border border-red-300/30 rounded-xl shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-white/70">Critical Acuity</p>
+                      <p className="text-2xl font-bold text-white">
+                        {messages.filter(m => m.acuity === 'critical').length}
+                      </p>
+                    </div>
+                    <AlertTriangle className="h-8 w-8 text-red-300" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="backdrop-blur-xl bg-yellow-500/20 border border-yellow-300/30 rounded-xl shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-white/70">Moderate Acuity</p>
+                      <p className="text-2xl font-bold text-white">
+                        {messages.filter(m => m.acuity === 'urgent').length}
+                      </p>
+                    </div>
+                    <Clock className="h-8 w-8 text-orange-300" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="backdrop-blur-xl bg-green-500/20 border border-green-300/30 rounded-xl shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-white/70">Low Acuity</p>
+                      <p className="text-2xl font-bold text-white">
+                        {messages.filter(m => m.acuity === 'routine').length}
+                      </p>
+                    </div>
+                    <CheckCircle className="h-8 w-8 text-green-300" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-white/70">AI Routed</p>
+                      <p className="text-2xl font-bold text-white">
+                        {messages.filter(m => m.recommendedSpecialty).length}
+                      </p>
+                    </div>
+                    <Brain className="h-8 w-8 text-purple-300" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-2 mb-6">
+              {['all', 'critical', 'urgent', 'mine'].map((filter) => (
+                <Button
+                  key={filter}
+                  variant={activeFilter === filter ? "default" : "outline"}
+                  onClick={() => setActiveFilter(filter as any)}
+                  className={activeFilter === filter 
+                    ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                    : "bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
+                  }
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)} Messages
+                  <Badge className="ml-2 bg-blue-600/50 text-white">
+                    {filter === 'all' ? messages.length : 
+                     filter === 'critical' ? messages.filter(m => m.acuity === 'critical').length :
+                     filter === 'urgent' ? messages.filter(m => m.acuity === 'urgent').length :
+                     messages.filter(m => m.sender === (currentUser?.name || 'Current User')).length}
+                  </Badge>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className={`grid ${isModal ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'} gap-6 ${isModal ? 'h-full' : ''}`}>
           {/* Messages Feed */}
-          <div className="lg:col-span-2">
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg h-[600px] flex flex-col">
+          <div className={isModal ? 'h-full' : 'lg:col-span-2'}>
+            <Card className={`backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg ${isModal ? 'h-full' : 'h-[600px]'} flex flex-col`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Brain className="h-5 w-5 text-blue-300" />
-                  AI-Prioritized Clinical Messages with Acuity Assessment
+                  AI-Prioritized Clinical Messages
                 </CardTitle>
                 <CardDescription className="text-white/70">
                   Messages sorted by acuity level and AI priority score
@@ -539,7 +529,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                           </Badge>
                           <Badge className={`text-xs font-semibold border ${getAcuityColor(message.acuity)}`}>
                             {getAcuityIcon(message.acuity)}
-                            <span className="ml-1">{message.acuity.toUpperCase()} ACUITY</span>
+                            <span className="ml-1">{message.acuity.toUpperCase()}</span>
                           </Badge>
                         </div>
                         <span className="text-xs text-white/60">
@@ -628,112 +618,57 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
             </Card>
           </div>
 
-          {/* Message Composer */}
-          <div className="space-y-6">
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-white">Send Message</CardTitle>
-                <CardDescription className="text-white/70">
-                  AI will automatically determine acuity level and suggest specialist routing
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm text-white/70 mb-2 block">Select Patient (Optional)</label>
-                  <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-                    <SelectTrigger className="bg-blue-600/20 border border-blue-400/30 text-white">
-                      <SelectValue placeholder="Choose patient for context..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
-                      <SelectItem value="">No specific patient</SelectItem>
-                      {patients?.map((patient) => (
-                        <SelectItem key={patient.id} value={patient.id}>
-                          {patient.first_name} {patient.last_name} - {patient.mrn}
-                          {patient.room_number && ` (Room ${patient.room_number})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedPatient && (
-                    <p className="text-xs text-white/60 mt-1">
-                      Patient context will help AI provide better acuity assessment and specialty recommendations
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm text-white/70 mb-2 block">Clinical Message</label>
-                  <Textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Describe the clinical situation... AI will analyze urgency, determine acuity level (Critical/Moderate/Low), and recommend appropriate specialty consultation."
-                    className="bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
-                  />
-                  <div className="flex items-center gap-2 mt-2">
-                    <Brain className="h-3 w-3 text-purple-300" />
-                    <p className="text-xs text-white/60">
-                      AI will auto-determine: Acuity Level (Critical/Moderate/Low) → Priority Score → Specialty Recommendation → On-Call Routing
-                    </p>
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || aiLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  {aiLoading ? 'AI Analyzing Acuity...' : 'Send & AI Route'}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* AI Routing Preview */}
-            {selectedPatient && patients && (
-              <Card className="backdrop-blur-xl bg-purple-500/20 border border-purple-300/30 rounded-xl shadow-lg">
+          {/* Message Composer - only show if not modal or if modal is full height */}
+          {!isModal && (
+            <div className="space-y-6">
+              <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-white text-sm flex items-center gap-2">
-                    <Brain className="h-4 w-4 text-purple-300" />
-                    Patient Context Preview
-                  </CardTitle>
+                  <CardTitle className="text-white">Send Message</CardTitle>
+                  <CardDescription className="text-white/70">
+                    AI will automatically determine acuity level and suggest specialist routing
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {(() => {
-                    const patient = patients.find(p => p.id === selectedPatient);
-                    return patient ? (
-                      <div className="text-sm text-white/80">
-                        <p><span className="text-purple-300">Name:</span> {patient.first_name} {patient.last_name}</p>
-                        <p><span className="text-purple-300">Room:</span> {patient.room_number || 'Not assigned'}</p>
-                        <p><span className="text-purple-300">Conditions:</span> {patient.medical_conditions?.join(', ') || 'None listed'}</p>
-                        <p><span className="text-purple-300">Allergies:</span> {patient.allergies?.join(', ') || 'None listed'}</p>
-                      </div>
-                    ) : null;
-                  })()}
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm text-white/70 mb-2 block">Select Patient (Optional)</label>
+                    <Select value={selectedPatient} onValueChange={setSelectedPatient}>
+                      <SelectTrigger className="bg-blue-600/20 border border-blue-400/30 text-white">
+                        <SelectValue placeholder="Choose patient for context..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1a2332] border-[#2a3441] text-white">
+                        <SelectItem value="">No specific patient</SelectItem>
+                        {patients?.map((patient) => (
+                          <SelectItem key={patient.id} value={patient.id}>
+                            {patient.first_name} {patient.last_name} - {patient.mrn}
+                            {patient.room_number && ` (Room ${patient.room_number})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-white/70 mb-2 block">Clinical Message</label>
+                    <Textarea
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Describe the clinical situation..."
+                      className="bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim() || aiLoading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    {aiLoading ? 'AI Analyzing...' : 'Send & AI Route'}
+                  </Button>
                 </CardContent>
               </Card>
-            )}
-
-            {/* Quick Actions */}
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full bg-blue-600/20 border border-blue-400/30 text-white hover:bg-blue-500/30 justify-start">
-                  <Stethoscope className="h-4 w-4 mr-2" />
-                  Emergency Consult
-                </Button>
-                <Button className="w-full bg-green-600/20 border border-green-400/30 text-white hover:bg-green-500/30 justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Discharge Planning
-                </Button>
-                <Button className="w-full bg-purple-600/20 border border-purple-400/30 text-white hover:bg-purple-500/30 justify-start">
-                  <Users className="h-4 w-4 mr-2" />
-                  Team Conference
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
