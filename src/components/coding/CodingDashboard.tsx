@@ -1,380 +1,289 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { usePatients } from "@/hooks/usePatients";
-import { useMedicalRecords } from "@/hooks/useMedicalRecords";
-import { useNavigate } from "react-router-dom";
-import { 
-  FileSearch, 
-  Brain, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  BookOpen,
-  Search,
-  Filter,
-  Download,
-  Zap,
-  Code,
-  Stethoscope
-} from "lucide-react";
-import { useAIAssistant } from "@/hooks/useAIAssistant";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/contexts/AuthContext';
+import { Brain, Code, FileText, AlertTriangle, CheckCircle, TrendingUp, Clock, DollarSign } from 'lucide-react';
+
+interface CodingRecord {
+  id: string;
+  patientName: string;
+  mrn: string;
+  admissionDate: string;
+  dischargeDate: string;
+  primaryDiagnosis: string;
+  coder: string;
+  status: 'pending' | 'in progress' | 'completed' | 'query';
+  estimatedValue: number;
+  codedValue: number | null;
+  daysInCoding: number;
+  flagged: boolean;
+}
+
+const mockCodingRecords: CodingRecord[] = [
+  {
+    id: '1',
+    patientName: 'John Smith',
+    mrn: '1234567',
+    admissionDate: '2024-03-01',
+    dischargeDate: '2024-03-05',
+    primaryDiagnosis: 'Pneumonia',
+    coder: 'Jane Doe',
+    status: 'pending',
+    estimatedValue: 5000,
+    codedValue: null,
+    daysInCoding: 2,
+    flagged: false,
+  },
+  {
+    id: '2',
+    patientName: 'Alice Johnson',
+    mrn: '7654321',
+    admissionDate: '2024-03-02',
+    dischargeDate: '2024-03-06',
+    primaryDiagnosis: 'Heart Failure',
+    coder: 'Bob Williams',
+    status: 'in progress',
+    estimatedValue: 7500,
+    codedValue: 6800,
+    daysInCoding: 3,
+    flagged: true,
+  },
+  {
+    id: '3',
+    patientName: 'Robert Brown',
+    mrn: '2345678',
+    admissionDate: '2024-03-03',
+    dischargeDate: '2024-03-07',
+    primaryDiagnosis: 'Diabetes',
+    coder: 'Jane Doe',
+    status: 'completed',
+    estimatedValue: 3000,
+    codedValue: 3200,
+    daysInCoding: 1,
+    flagged: false,
+  },
+  {
+    id: '4',
+    patientName: 'Emily Davis',
+    mrn: '8765432',
+    admissionDate: '2024-03-04',
+    dischargeDate: '2024-03-08',
+    primaryDiagnosis: 'Hypertension',
+    coder: 'Bob Williams',
+    status: 'query',
+    estimatedValue: 4000,
+    codedValue: 3800,
+    daysInCoding: 4,
+    flagged: true,
+  },
+];
 
 interface CodingDashboardProps {
-  hospitalId?: string | null;
+  hospitalId: string;
 }
 
 const CodingDashboard = ({ hospitalId }: CodingDashboardProps) => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { data: patients } = usePatients(hospitalId || undefined);
-  const { callAI, isLoading } = useAIAssistant();
-  const [selectedEncounters, setSelectedEncounters] = useState([]);
+  const { profile } = useAuth();
+  const [selectedRecord, setSelectedRecord] = useState<CodingRecord | null>(null);
+  const [showAISuggestions, setShowAISuggestions] = useState(true);
 
-  // Generate hospital-specific coding encounters
-  const generateCodingEncounters = () => {
-    if (!patients || !hospitalId) return [];
-    
-    const codingScenarios = {
-      '11111111-1111-1111-1111-111111111111': {
-        name: 'Metropolitan General Hospital',
-        services: ['Internal Medicine', 'Cardiology', 'Emergency Medicine', 'Surgery'],
-        complexityDistribution: ['High', 'Medium', 'Medium', 'Low'],
-        msdrgs: ['247', '292', '469', '871']
-      },
-      '22222222-2222-2222-2222-222222222222': {
-        name: 'Riverside Medical Center',
-        services: ['Emergency Medicine', 'Trauma Surgery', 'ICU', 'Orthopedics'],
-        complexityDistribution: ['High', 'High', 'Medium', 'Medium'],
-        msdrgs: ['469', '853', '247', '491']
-      },
-      '33333333-3333-3333-3333-333333333333': {
-        name: 'Sunset Community Hospital',
-        services: ['Family Medicine', 'Pediatrics', 'Obstetrics', 'General Surgery'],
-        complexityDistribution: ['Low', 'Low', 'Medium', 'Medium'],
-        msdrgs: ['871', '794', '765', '392']
-      },
-      '44444444-4444-4444-4444-444444444444': {
-        name: 'Bay Area Medical Complex',
-        services: ['Neurosurgery', 'Cardiac Surgery', 'Oncology', 'Transplant'],
-        complexityDistribution: ['High', 'High', 'High', 'Medium'],
-        msdrgs: ['023', '216', '469', '853']
-      },
-      '55555555-5555-5555-5555-555555555555': {
-        name: 'Texas Heart Institute',
-        services: ['Cardiology', 'Cardiac Surgery', 'Interventional Cardiology', 'Heart Transplant'],
-        complexityDistribution: ['High', 'High', 'Medium', 'High'],
-        msdrgs: ['216', '247', '266', '001']
-      }
-    };
-
-    const scenario = codingScenarios[hospitalId as keyof typeof codingScenarios];
-    if (!scenario) return [];
-
-    const priorities = ['High', 'Medium', 'Low'];
-    const coders = ['Sarah Wilson', 'Mike Chen', 'Lisa Rodriguez', 'Unassigned'];
-    
-    return patients.map((patient, index) => ({
-      id: `ENC-${hospitalId.slice(0, 8)}-${String(index + 1).padStart(3, '0')}`,
-      patient: `${patient.first_name} ${patient.last_name}`,
-      patientId: patient.id,
-      admitDate: new Date(patient.admission_date || new Date()).toISOString().split('T')[0],
-      discharge: patient.discharge_date ? new Date(patient.discharge_date).toISOString().split('T')[0] : 'Ongoing',
-      service: scenario.services[index % scenario.services.length],
-      priority: priorities[index % priorities.length],
-      coder: coders[index % coders.length],
-      complexity: scenario.complexityDistribution[index % scenario.complexityDistribution.length],
-      msdrg: scenario.msdrgs[index % scenario.msdrgs.length],
-      hospital: scenario.name,
-      mrn: patient.mrn,
-      status: index === 0 ? 'In Progress' : index === 1 ? 'Completed' : 'Pending'
-    }));
+  const handleRecordSelect = (record: CodingRecord) => {
+    setSelectedRecord(record);
   };
 
-  const codingEncounters = generateCodingEncounters();
-
-  const codingMetrics = {
-    totalEncounters: codingEncounters.length,
-    pendingCoding: codingEncounters.filter(e => e.status === 'Pending').length,
-    completedToday: codingEncounters.filter(e => e.status === 'Completed').length,
-    cdiOpportunities: Math.floor(codingEncounters.length * 0.3),
-    codingAccuracy: "97.8%",
-    avgCodingTime: "8.2 min"
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High": return "text-red-400";
-      case "Medium": return "text-yellow-400";
-      case "Low": return "text-green-400";
-      default: return "text-gray-400";
-    }
-  };
-
-  const getComplexityBadge = (complexity: string) => {
-    switch (complexity) {
-      case "High": return "glass-badge error";
-      case "Medium": return "glass-badge warning";
-      case "Low": return "glass-badge success";
-      default: return "glass-badge";
-    }
+  const handleToggleAISuggestions = () => {
+    setShowAISuggestions(!showAISuggestions);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Completed": return "text-green-400";
-      case "In Progress": return "text-blue-400";
-      case "Pending": return "text-yellow-400";
-      default: return "text-gray-400";
+      case 'pending':
+        return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'in progress':
+        return 'bg-blue-500/20 text-blue-200 border-blue-400/30';
+      case 'completed':
+        return 'bg-green-500/20 text-green-200 border-green-400/30';
+      case 'query':
+        return 'bg-red-500/20 text-red-200 border-red-400/30';
+      default:
+        return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
     }
   };
-
-  const handleAIMedicalCoding = async (encounter: any) => {
-    try {
-      const encounterData = `
-        Encounter: ${encounter.id}
-        Patient: ${encounter.patient} (MRN: ${encounter.mrn})
-        Service: ${encounter.service}
-        Admission: ${encounter.admitDate}
-        Discharge: ${encounter.discharge}
-        Complexity: ${encounter.complexity}
-        Current MS-DRG: ${encounter.msdrg}
-        Hospital: ${encounter.hospital}
-      `;
-
-      const result = await callAI({
-        type: 'medical_coding',
-        data: {
-          procedure: encounter.service,
-          diagnosis: `${encounter.service} encounter`,
-          context: encounterData
-        },
-        context: `Medical coding analysis for ${encounter.patient} at ${encounter.hospital}`
-      });
-
-      toast.success(`AI coding analysis completed for ${encounter.patient}`);
-      console.log('AI Medical Coding Result:', result);
-    } catch (error) {
-      toast.error('Failed to complete AI coding analysis');
-      console.error('AI coding error:', error);
-    }
-  };
-
-  if (!hospitalId) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-      }}>
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white max-w-md rounded-xl shadow-lg">
-          <CardContent className="p-8 text-center">
-            <Code className="h-16 w-16 text-blue-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Hospital Selected</h3>
-            <p className="text-white/70 mb-4">
-              Please select a hospital from the EMR Dashboard to view coding data.
-            </p>
-            <Button onClick={() => navigate('/emr')} className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
-              Go to EMR Dashboard
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const currentHospital = codingEncounters[0]?.hospital || 'Selected Hospital';
 
   return (
-    <div className="min-h-screen p-6 space-y-6" style={{
+    <div className="min-h-screen p-6" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">3M Coding & CDI Platform</h1>
-          <p className="text-white/60">{currentHospital} - AI-powered clinical documentation improvement</p>
-        </div>
-        <div className="flex gap-3">
-          <Button className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
-            <Download className="h-4 w-4" />
-            Export Coding Report
-          </Button>
-          <Button className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
-            <Zap className="h-4 w-4" />
-            Run 3M Encoder
-          </Button>
-        </div>
-      </div>
-
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
-              <FileSearch className="h-4 w-4" />
-              Total Encounters
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{codingMetrics.totalEncounters}</div>
-            <p className="text-xs text-blue-400">This month</p>
-          </CardContent>
-        </Card>
-
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Pending Coding
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{codingMetrics.pendingCoding}</div>
-            <p className="text-xs text-yellow-400">Requires attention</p>
-          </CardContent>
-        </Card>
-
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Completed Today
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{codingMetrics.completedToday}</div>
-            <p className="text-xs text-green-400">On track</p>
-          </CardContent>
-        </Card>
-
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
-              <Brain className="h-4 w-4" />
-              CDI Opportunities
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{codingMetrics.cdiOpportunities}</div>
-            <p className="text-xs text-blue-400">Revenue potential</p>
-          </CardContent>
-        </Card>
-
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Coding Accuracy</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{codingMetrics.codingAccuracy}</div>
-            <p className="text-xs text-green-400">Above benchmark</p>
-          </CardContent>
-        </Card>
-
-        <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Avg Coding Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{codingMetrics.avgCodingTime}</div>
-            <p className="text-xs text-green-400">Efficient workflow</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <Code className="h-12 w-12 text-purple-300 animate-pulse" />
             <div>
-              <CardTitle className="text-white">Coding Worklist - {currentHospital}</CardTitle>
-              <CardDescription className="text-white/60">Priority-based AI-enhanced encounter coding</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
-                <input 
-                  type="text" 
-                  placeholder="Search encounters..." 
-                  className="backdrop-blur-xl bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 pl-10 w-64 px-4 py-3 rounded-xl transition-all duration-200"
-                />
-              </div>
-              <Button size="sm" className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 text-white hover:bg-blue-500/30 rounded-xl">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
+              <h1 className="text-4xl font-bold text-white">
+                Medical Coding Dashboard
+              </h1>
+              <p className="text-white/80 text-lg">
+                Streamline coding workflows with AI-powered assistance
+              </p>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-white/10">
-                <TableHead className="text-white">Encounter ID</TableHead>
-                <TableHead className="text-white">Patient</TableHead>
-                <TableHead className="text-white">MRN</TableHead>
-                <TableHead className="text-white">Service</TableHead>
-                <TableHead className="text-white">Admit Date</TableHead>
-                <TableHead className="text-white">Priority</TableHead>
-                <TableHead className="text-white">Complexity</TableHead>
-                <TableHead className="text-white">MS-DRG</TableHead>
-                <TableHead className="text-white">Status</TableHead>
-                <TableHead className="text-white">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {codingEncounters.map((encounter) => (
-                <TableRow key={encounter.id} className="border-white/10 hover:bg-white/5">
-                  <TableCell className="text-white font-medium">{encounter.id}</TableCell>
-                  <TableCell className="text-white">
-                    <Button 
-                      variant="link" 
-                      className="text-blue-400 hover:text-blue-300 p-0 h-auto"
-                      onClick={() => navigate(`/patient/${encounter.patientId}`)}
-                    >
-                      {encounter.patient}
-                    </Button>
-                  </TableCell>
-                  <TableCell className="text-white font-mono text-sm">{encounter.mrn}</TableCell>
-                  <TableCell className="text-white">{encounter.service}</TableCell>
-                  <TableCell className="text-white">{encounter.admitDate}</TableCell>
-                  <TableCell className={getPriorityColor(encounter.priority)}>
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span>{encounter.priority}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getComplexityBadge(encounter.complexity)}>{encounter.complexity}</Badge>
-                  </TableCell>
-                  <TableCell className="text-white font-mono">{encounter.msdrg}</TableCell>
-                  <TableCell className={getStatusColor(encounter.status)}>
-                    {encounter.status}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAIMedicalCoding(encounter)}
-                        disabled={isLoading}
-                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white text-xs"
-                      >
-                        <Brain className="h-3 w-3 mr-1" />
-                        AI Code
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-white hover:bg-white/10 text-xs">
-                        Review
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Toggle AI Suggestions */}
+        <div className="flex items-center justify-end">
+          <Button
+            variant="outline"
+            className="bg-transparent border-purple-400/30 text-white hover:bg-purple-500/20"
+            onClick={handleToggleAISuggestions}
+          >
+            <Brain className="h-4 w-4 mr-2" />
+            {showAISuggestions ? 'Hide AI Suggestions' : 'Show AI Suggestions'}
+          </Button>
+        </div>
+
+        {/* Coding Records */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {mockCodingRecords.map((record) => (
+            <Card
+              key={record.id}
+              className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg hover:scale-[1.02] transition-all cursor-pointer"
+              onClick={() => handleRecordSelect(record)}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between text-white">
+                  {record.patientName}
+                  <Badge className={getStatusColor(record.status)}>
+                    {record.status}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-white/70">MRN</p>
+                    <p className="text-lg font-semibold text-white">{record.mrn}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white/70">Coder</p>
+                    <p className="text-lg font-semibold text-white">{record.coder}</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm text-white/70">
+                  <div className="flex justify-between">
+                    <span>Admission Date:</span>
+                    <span className="text-white">{record.admissionDate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Discharge Date:</span>
+                    <span className="text-white">{record.dischargeDate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Primary Diagnosis:</span>
+                    <span className="text-white">{record.primaryDiagnosis}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Estimated Value:</span>
+                    <span className="text-white">${record.estimatedValue}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Coded Value:</span>
+                    <span className="text-white">{record.codedValue ? `$${record.codedValue}` : 'N/A'}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-yellow-300" />
+                    <span className="text-sm text-white">Days in Coding: {record.daysInCoding}</span>
+                  </div>
+                  {record.flagged && (
+                    <AlertTriangle className="h-6 w-6 text-red-400" />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Selected Record Details */}
+        {selectedRecord && (
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-white">
+                Coding Record Details - {selectedRecord.patientName}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-white/70">MRN</p>
+                  <p className="text-lg font-semibold text-white">{selectedRecord.mrn}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-white/70">Coder</p>
+                  <p className="text-lg font-semibold text-white">{selectedRecord.coder}</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-white/70">
+                <div className="flex justify-between">
+                  <span>Admission Date:</span>
+                  <span className="text-white">{selectedRecord.admissionDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Discharge Date:</span>
+                  <span className="text-white">{selectedRecord.dischargeDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Primary Diagnosis:</span>
+                  <span className="text-white">{selectedRecord.primaryDiagnosis}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Estimated Value:</span>
+                  <span className="text-white">${selectedRecord.estimatedValue}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Coded Value:</span>
+                  <span className="text-white">{selectedRecord.codedValue ? `$${selectedRecord.codedValue}` : 'N/A'}</span>
+                </div>
+              </div>
+
+              {/* AI Suggestions */}
+              {showAISuggestions && (
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-white">
+                    <Brain className="h-5 w-5 mr-2 inline-block" />
+                    AI Coding Suggestions
+                  </h3>
+                  <div className="p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg text-white/70">
+                    Based on the patient's primary diagnosis of {selectedRecord.primaryDiagnosis}, consider the following codes:
+                    <ul className="list-disc pl-5 mt-2">
+                      <li>ICD-10: J12.9 - Pneumonia, unspecified organism</li>
+                      <li>CPT: 99214 - Office or other outpatient visit</li>
+                    </ul>
+                    <p className="mt-2">
+                      These suggestions are based on common coding practices and should be verified by a qualified coder.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" className="bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20">
+                  <FileText className="h-4 w-4 mr-2" />
+                  View Chart
+                </Button>
+                <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Update Value
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

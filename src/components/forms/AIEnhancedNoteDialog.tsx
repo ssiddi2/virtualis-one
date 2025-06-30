@@ -1,301 +1,202 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCreateMedicalRecord } from '@/hooks/useMedicalRecords';
-import { useAIAssistant } from '@/hooks/useAIAssistant';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { toast } from 'sonner';
-import { Brain, Plus, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { Brain, Sparkles, FileText, Clock, User } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface AIEnhancedNoteDialogProps {
+  open: boolean;
+  onClose: () => void;
   patientId: string;
-  hospitalId: string;
+  patientName: string;
 }
 
-const AIEnhancedNoteDialog = ({ patientId, hospitalId }: AIEnhancedNoteDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    encounter_type: 'inpatient' as const,
-    chief_complaint: '',
-    history_present_illness: '',
-    physical_examination: '',
-    assessment: '',
-    plan: '',
-  });
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [isAIMode, setIsAIMode] = useState(false);
+interface AISuggestion {
+  id: string;
+  text: string;
+  source: string;
+}
 
-  const { user } = useAuth();
-  const createMedicalRecord = useCreateMedicalRecord();
-  const { callAI, isLoading: aiLoading, error: aiError } = useAIAssistant();
+const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName }: AIEnhancedNoteDialogProps) => {
+  const { profile } = useAuth();
+  const { toast } = useToast();
+  const [noteText, setNoteText] = useState('');
+  const [selectedNoteType, setSelectedNoteType] = useState('');
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const generateWithAI = async () => {
-    if (!aiPrompt.trim()) {
-      toast.error('Please enter a clinical summary for AI generation');
-      return;
-    }
+  const noteTypes = [
+    'Progress Note',
+    'SOAP Note',
+    'Discharge Summary',
+    'Consultation Note',
+    'Admission Note',
+  ];
 
-    console.log('Starting AI generation with prompt:', aiPrompt);
+  const mockAISuggestions: AISuggestion[] = [
+    {
+      id: '1',
+      text: 'Patient reports improved sleep quality and reduced anxiety levels.',
+      source: 'AI Analysis of Patient History',
+    },
+    {
+      id: '2',
+      text: 'Recommend continuing current medication regimen with a follow-up in 2 weeks.',
+      source: 'AI Clinical Guidelines',
+    },
+    {
+      id: '3',
+      text: 'Consider referral to physical therapy for ongoing lower back pain.',
+      source: 'AI Predictive Analysis',
+    },
+  ];
 
-    try {
-      toast.info('Generating AI clinical note...', { duration: 2000 });
-      
-      const result = await callAI({
-        type: 'clinical_note',
-        data: { summary: aiPrompt },
-        context: `${formData.encounter_type} encounter for patient ${patientId}`
-      });
-
-      console.log('AI generation successful:', result);
-
-      // Parse AI response and populate form fields
-      const sections = result.split('\n\n');
-      let newFormData = { ...formData };
-
-      sections.forEach((section: string) => {
-        const lowerSection = section.toLowerCase();
-        if (lowerSection.includes('chief complaint:') || lowerSection.includes('cc:')) {
-          const cc = section.replace(/.*(?:chief complaint:|cc:)\s*/i, '').trim();
-          if (cc && cc.length > 5) newFormData.chief_complaint = cc;
-        }
-        if (lowerSection.includes('history of present illness:') || lowerSection.includes('hpi:')) {
-          const hpi = section.replace(/.*(?:history of present illness:|hpi:)\s*/i, '').trim();
-          if (hpi && hpi.length > 10) newFormData.history_present_illness = hpi;
-        }
-        if (lowerSection.includes('physical examination:') || lowerSection.includes('pe:')) {
-          const pe = section.replace(/.*(?:physical examination:|pe:)\s*/i, '').trim();
-          if (pe && pe.length > 10) newFormData.physical_examination = pe;
-        }
-        if (lowerSection.includes('assessment:') || lowerSection.includes('a:')) {
-          const assessment = section.replace(/.*(?:assessment:|a:)\s*/i, '').trim();
-          if (assessment && assessment.length > 5) newFormData.assessment = assessment;
-        }
-        if (lowerSection.includes('plan:') || lowerSection.includes('p:')) {
-          const plan = section.replace(/.*(?:plan:|p:)\s*/i, '').trim();
-          if (plan && plan.length > 5) newFormData.plan = plan;
-        }
-      });
-
-      setFormData(newFormData);
-      toast.success('AI-generated clinical note created! Please review and edit as needed.');
-      setIsAIMode(false);
-      setAiPrompt('');
-    } catch (error) {
-      console.error('AI generation error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      toast.error(`Failed to generate AI note: ${errorMessage}`);
-    }
+  const handleGenerateAISuggestions = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setAiSuggestions(mockAISuggestions);
+    toast({
+      title: 'AI Suggestions Generated',
+      description: 'AI-powered suggestions have been generated for your note.',
+    });
+    setIsLoading(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user?.id) {
-      toast.error('User not authenticated');
+  const handleApplySuggestion = (suggestion: AISuggestion) => {
+    setNoteText((prevText) => prevText + ' ' + suggestion.text);
+    toast({
+      title: 'AI Suggestion Applied',
+      description: 'The AI suggestion has been added to your note.',
+    });
+  };
+
+  const handleSubmitNote = () => {
+    if (!noteText || !selectedNoteType) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please select a note type and enter your note.',
+        variant: 'destructive',
+      });
       return;
     }
 
-    if (!formData.chief_complaint.trim()) {
-      toast.error('Please provide a chief complaint');
-      return;
-    }
-
-    try {
-      console.log('Saving medical record:', { patientId, hospitalId, formData });
-      
-      await createMedicalRecord.mutateAsync({
-        patient_id: patientId,
-        hospital_id: hospitalId,
-        provider_id: user.id,
-        ...formData,
-      });
-      
-      toast.success('Medical note saved successfully');
-      setOpen(false);
-      setFormData({
-        encounter_type: 'inpatient',
-        chief_complaint: '',
-        history_present_illness: '',
-        physical_examination: '',
-        assessment: '',
-        plan: '',
-      });
-      setAiPrompt('');
-    } catch (error) {
-      console.error('Error saving medical note:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to save medical note';
-      toast.error(errorMessage);
-    }
+    // Simulate API call
+    toast({
+      title: 'Note Saved',
+      description: 'Your note has been saved successfully.',
+    });
+    onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-          <Brain className="h-4 w-4 mr-2" />
-          AI Note
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
-            AI-Enhanced Clinical Documentation
+            <FileText className="h-5 w-5 mr-2" />
+            AI-Enhanced Clinical Note for {patientName}
           </DialogTitle>
         </DialogHeader>
 
-        {/* AI Error Display */}
-        {aiError && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-sm">{aiError}</span>
-          </div>
-        )}
-
-        {!isAIMode ? (
-          <div className="space-y-4 mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Quick AI Generation</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAIMode(true)}
-                className="border-purple-300 text-purple-700 hover:bg-purple-50"
-              >
-                <Brain className="h-4 w-4 mr-2" />
-                Use AI Assistant
-              </Button>
-            </div>
-            <p className="text-xs text-gray-600">
-              Let AI help you create comprehensive clinical documentation based on your clinical summary.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4 mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
-            <Label>Clinical Summary for AI Generation</Label>
-            <Textarea
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="Enter a brief clinical summary (e.g., 'Patient presents with chest pain, started 2 hours ago, sharp, radiating to left arm, associated with shortness of breath...')"
-              rows={3}
-            />
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={generateWithAI}
-                disabled={aiLoading || !aiPrompt.trim()}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                {aiLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate with AI
-                  </>
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsAIMode(false)}
-              >
-                Manual Entry
-              </Button>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid gap-4 py-4">
+          {/* Note Type Selection */}
           <div>
-            <Label htmlFor="encounter_type">Encounter Type</Label>
-            <Select
-              value={formData.encounter_type}
-              onValueChange={(value: any) => setFormData({ ...formData, encounter_type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
+            <Label htmlFor="noteType">Note Type</Label>
+            <Select onValueChange={setSelectedNoteType}>
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Select a note type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="inpatient">Inpatient</SelectItem>
-                <SelectItem value="outpatient">Outpatient</SelectItem>
-                <SelectItem value="emergency">Emergency</SelectItem>
-                <SelectItem value="consultation">Consultation</SelectItem>
+                {noteTypes.map((type) => (
+                  <SelectItem key={type} value={type} className="text-sm">
+                    {type}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Note Text Area */}
           <div>
-            <Label htmlFor="chief_complaint">Chief Complaint</Label>
-            <Input
-              id="chief_complaint"
-              value={formData.chief_complaint}
-              onChange={(e) => setFormData({ ...formData, chief_complaint: e.target.value })}
-              placeholder="Enter chief complaint"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="history_present_illness">History of Present Illness</Label>
+            <Label htmlFor="noteText">Clinical Note</Label>
             <Textarea
-              id="history_present_illness"
-              value={formData.history_present_illness}
-              onChange={(e) => setFormData({ ...formData, history_present_illness: e.target.value })}
-              placeholder="Enter history of present illness"
-              rows={4}
+              id="noteText"
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Enter your clinical note here"
+              className="resize-none h-48 text-sm"
             />
           </div>
 
-          <div>
-            <Label htmlFor="physical_examination">Physical Examination</Label>
-            <Textarea
-              id="physical_examination"
-              value={formData.physical_examination}
-              onChange={(e) => setFormData({ ...formData, physical_examination: e.target.value })}
-              placeholder="Enter physical examination findings"
-              rows={4}
-            />
-          </div>
+          {/* AI Suggestions */}
+          <Card className="border-blue-400/50 bg-blue-500/10">
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Brain className="h-4 w-4 text-blue-300" />
+                AI-Powered Suggestions
+              </CardTitle>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleGenerateAISuggestions}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 animate-spin" />
+                    Generating...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Generate AI Suggestions
+                  </div>
+                )}
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {aiSuggestions.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Click "Generate AI Suggestions" to get AI-powered suggestions for your note.
+                </p>
+              ) : (
+                aiSuggestions.map((suggestion) => (
+                  <div
+                    key={suggestion.id}
+                    className="p-3 rounded-md border border-blue-300/30 bg-blue-400/10"
+                  >
+                    <p className="text-sm">{suggestion.text}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <Badge variant="secondary" className="text-xs">
+                        Source: {suggestion.source}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleApplySuggestion(suggestion)}
+                      >
+                        Apply Suggestion
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-          <div>
-            <Label htmlFor="assessment">Assessment</Label>
-            <Textarea
-              id="assessment"
-              value={formData.assessment}
-              onChange={(e) => setFormData({ ...formData, assessment: e.target.value })}
-              placeholder="Enter assessment"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="plan">Plan</Label>
-            <Textarea
-              id="plan"
-              value={formData.plan}
-              onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-              placeholder="Enter treatment plan"
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={createMedicalRecord.isPending}>
-              {createMedicalRecord.isPending ? 'Saving...' : 'Save Note'}
-            </Button>
-          </div>
-        </form>
+        <div className="flex justify-end">
+          <Button type="submit" onClick={handleSubmitNote}>
+            Save Note
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

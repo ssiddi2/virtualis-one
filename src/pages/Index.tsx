@@ -45,7 +45,7 @@ const Index = () => {
           <div className="text-center text-white">
             <h2 className="text-2xl font-bold mb-4">Hospital Selection Required</h2>
             <p className="text-white/70 mb-4">Please select a hospital from the network dashboard first.</p>
-            <Button onClick={() => navigate('/emr')} className="virtualis-button">
+            <Button onClick={() => navigate('/emr')} className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold">
               Go to Hospital Network Dashboard
             </Button>
           </div>
@@ -80,7 +80,7 @@ const Index = () => {
     <div className="flex h-screen overflow-hidden" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
-      <Sidebar selectedHospitalId={selectedHospitalId} />
+      <Sidebar />
       <main className="flex-1 overflow-auto" style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>

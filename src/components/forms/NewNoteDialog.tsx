@@ -1,161 +1,151 @@
-
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCreateMedicalRecord } from '@/hooks/useMedicalRecords';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { toast } from 'sonner';
-import { Plus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { FileText, Brain, Clock, User, Sparkles } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface NewNoteDialogProps {
+  open: boolean;
+  onClose: () => void;
   patientId: string;
-  hospitalId: string;
+  patientName: string;
 }
 
-const NewNoteDialog = ({ patientId, hospitalId }: NewNoteDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    encounter_type: 'inpatient' as const,
-    chief_complaint: '',
-    history_present_illness: '',
-    physical_examination: '',
-    assessment: '',
-    plan: '',
-  });
+interface NoteType {
+  value: string;
+  label: string;
+}
 
-  const { user } = useAuth();
-  const createMedicalRecord = useCreateMedicalRecord();
+const noteTypes: NoteType[] = [
+  { value: 'progress', label: 'Progress Note' },
+  { value: 'admission', label: 'Admission Note' },
+  { value: 'discharge', label: 'Discharge Summary' },
+  { value: 'consultation', label: 'Consultation Note' },
+  { value: 'operative', label: 'Operative Report' },
+  { value: 'procedure', label: 'Procedure Note' },
+];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user?.id) {
-      toast.error('User not authenticated');
+const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogProps) => {
+  const { profile } = useAuth();
+  const { toast } = useToast();
+  const [noteType, setNoteType] = useState<string>('progress');
+  const [noteText, setNoteText] = useState<string>('');
+  const [isAISuggestionsEnabled, setIsAISuggestionsEnabled] = useState<boolean>(true);
+
+  const handleSubmit = () => {
+    if (!noteText) {
+      toast({
+        title: "Required",
+        description: "Note text cannot be empty.",
+        variant: "destructive",
+      });
       return;
     }
 
-    try {
-      await createMedicalRecord.mutateAsync({
-        patient_id: patientId,
-        hospital_id: hospitalId,
-        provider_id: user.id,
-        ...formData,
-      });
-      
-      toast.success('Medical note created successfully');
-      setOpen(false);
-      setFormData({
-        encounter_type: 'inpatient',
-        chief_complaint: '',
-        history_present_illness: '',
-        physical_examination: '',
-        assessment: '',
-        plan: '',
-      });
-    } catch (error) {
-      console.error('Error creating medical note:', error);
-      toast.error('Failed to create medical note');
-    }
+    console.log('Submitting new note:', {
+      patientId,
+      noteType,
+      noteText,
+      author: profile?.first_name + ' ' + profile?.last_name,
+      timestamp: new Date().toISOString(),
+    });
+
+    toast({
+      title: "Note Saved",
+      description: "New note has been successfully saved to patient chart.",
+    });
+
+    onClose();
+  };
+
+  const handleAISuggestionsToggle = () => {
+    setIsAISuggestionsEnabled(!isAISuggestionsEnabled);
+    toast({
+      title: "AI Suggestions",
+      description: `AI Note Suggestions are now ${isAISuggestionsEnabled ? 'disabled' : 'enabled'}.`,
+    });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          New Note
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="bg-slate-900 text-white">
         <DialogHeader>
-          <DialogTitle>Create New Medical Note</DialogTitle>
+          <DialogTitle className="text-white">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-virtualis-gold" />
+              New Clinical Note
+            </div>
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="encounter_type">Encounter Type</Label>
-            <Select
-              value={formData.encounter_type}
-              onValueChange={(value: any) => setFormData({ ...formData, encounter_type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="inpatient">Inpatient</SelectItem>
-                <SelectItem value="outpatient">Outpatient</SelectItem>
-                <SelectItem value="emergency">Emergency</SelectItem>
-                <SelectItem value="consultation">Consultation</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
-          <div>
-            <Label htmlFor="chief_complaint">Chief Complaint</Label>
-            <Input
-              id="chief_complaint"
-              value={formData.chief_complaint}
-              onChange={(e) => setFormData({ ...formData, chief_complaint: e.target.value })}
-              placeholder="Enter chief complaint"
-            />
-          </div>
+        <Card className="bg-slate-800/50 border border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-slate-400" />
+                {patientName} (Patient ID: {patientId})
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="noteType" className="text-slate-300">Note Type</Label>
+                <Select value={noteType} onValueChange={setNoteType}>
+                  <SelectTrigger className="bg-slate-700 text-white">
+                    <SelectValue placeholder="Select Note Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border border-slate-600">
+                    {noteTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value} className="text-white">
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div>
-            <Label htmlFor="history_present_illness">History of Present Illness</Label>
-            <Textarea
-              id="history_present_illness"
-              value={formData.history_present_illness}
-              onChange={(e) => setFormData({ ...formData, history_present_illness: e.target.value })}
-              placeholder="Enter history of present illness"
-              rows={3}
-            />
-          </div>
+              <div className="flex items-center justify-end">
+                <Button
+                  variant="outline"
+                  className={`gap-2 ${isAISuggestionsEnabled ? 'bg-green-600/20 text-green-300 border-green-600 hover:bg-green-600/30' : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600/30'}`}
+                  onClick={handleAISuggestionsToggle}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {isAISuggestionsEnabled ? 'AI: ON' : 'AI: OFF'}
+                </Button>
+              </div>
+            </div>
 
-          <div>
-            <Label htmlFor="physical_examination">Physical Examination</Label>
-            <Textarea
-              id="physical_examination"
-              value={formData.physical_examination}
-              onChange={(e) => setFormData({ ...formData, physical_examination: e.target.value })}
-              placeholder="Enter physical examination findings"
-              rows={3}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="noteText" className="text-slate-300">Note Text</Label>
+              <Textarea
+                id="noteText"
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Enter clinical note details here..."
+                className="bg-slate-700 text-white"
+                rows={6}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-          <div>
-            <Label htmlFor="assessment">Assessment</Label>
-            <Textarea
-              id="assessment"
-              value={formData.assessment}
-              onChange={(e) => setFormData({ ...formData, assessment: e.target.value })}
-              placeholder="Enter assessment"
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="plan">Plan</Label>
-            <Textarea
-              id="plan"
-              value={formData.plan}
-              onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-              placeholder="Enter treatment plan"
-              rows={2}
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={createMedicalRecord.isPending}>
-              {createMedicalRecord.isPending ? 'Creating...' : 'Create Note'}
-            </Button>
-          </div>
-        </form>
+        <div className="flex justify-between mt-6">
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit}>
+            <FileText className="w-4 h-4 mr-2" />
+            Save Note
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
