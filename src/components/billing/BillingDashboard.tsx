@@ -29,7 +29,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-white virtualis-gradient-text">
+          <h1 className="text-4xl font-bold text-white">
             Enhanced Revenue Cycle Management
           </h1>
           <p className="text-white/80 text-lg">
