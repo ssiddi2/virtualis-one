@@ -94,33 +94,33 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
       case 'Epic':
         return (
           <>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-white">Client ID</Label>
+                <Label className="text-white text-sm">Client ID</Label>
                 <Input
                   value={formData.client_id}
                   onChange={(e) => handleInputChange('client_id', e.target.value)}
-                  className="virtualis-input"
+                  className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                   placeholder="Epic client identifier"
                 />
               </div>
               <div>
-                <Label className="text-white">Client Secret</Label>
+                <Label className="text-white text-sm">Client Secret</Label>
                 <Input
                   type="password"
                   value={formData.client_secret}
                   onChange={(e) => handleInputChange('client_secret', e.target.value)}
-                  className="virtualis-input"
+                  className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                   placeholder="Epic client secret"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-white">FHIR R4 Endpoint</Label>
+              <Label className="text-white text-sm">FHIR R4 Endpoint</Label>
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="virtualis-input"
+                className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                 placeholder="https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/"
               />
             </div>
@@ -130,32 +130,32 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
       case 'Cerner':
         return (
           <>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-white">API Key</Label>
+                <Label className="text-white text-sm">API Key</Label>
                 <Input
                   value={formData.auth_token}
                   onChange={(e) => handleInputChange('auth_token', e.target.value)}
-                  className="virtualis-input"
+                  className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                   placeholder="Cerner API key"
                 />
               </div>
               <div>
-                <Label className="text-white">Organization ID</Label>
+                <Label className="text-white text-sm">Organization ID</Label>
                 <Input
                   value={formData.organization_id}
                   onChange={(e) => handleInputChange('organization_id', e.target.value)}
-                  className="virtualis-input"
+                  className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                   placeholder="Cerner organization identifier"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-white">FHIR Endpoint</Label>
+              <Label className="text-white text-sm">FHIR Endpoint</Label>
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="virtualis-input"
+                className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                 placeholder="https://fhir-open.cerner.com/r4/"
               />
             </div>
@@ -166,30 +166,30 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
         return (
           <>
             <div>
-              <Label className="text-white">API Endpoint</Label>
+              <Label className="text-white text-sm">API Endpoint</Label>
               <Input
                 value={formData.api_endpoint}
                 onChange={(e) => handleInputChange('api_endpoint', e.target.value)}
-                className="virtualis-input"
+                className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                 placeholder="https://api.emr-system.com/v1/"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-white">Username</Label>
+                <Label className="text-white text-sm">Username</Label>
                 <Input
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="virtualis-input"
+                  className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                 />
               </div>
               <div>
-                <Label className="text-white">Password</Label>
+                <Label className="text-white text-sm">Password</Label>
                 <Input
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="virtualis-input"
+                  className="bg-blue-500/10 border-blue-400/30 text-white text-sm h-9"
                 />
               </div>
             </div>
@@ -200,45 +200,46 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
   return (
     <>
-      <div className="p-6 space-y-6 min-h-screen">
-        <div className="flex items-center gap-4">
+      <div className="p-4 space-y-4 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div className="flex items-center gap-3">
           <Button
             onClick={onBack}
             variant="ghost"
-            className="text-white hover:bg-slate-800"
+            size="sm"
+            className="text-white hover:bg-blue-800/50"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-white virtualis-gradient-text">
+            <h1 className="text-2xl font-bold text-white">
               EMR SIMULATION CONSOLE
             </h1>
-            <p className="text-white/70 font-semibold">
+            <p className="text-blue-200 text-sm">
               {hospital.name} • {hospital.location}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-6xl">
           <div className="lg:col-span-2">
-            <Card className="virtualis-card">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Database className="h-5 w-5 text-cyan-300" />
+            <Card className="bg-blue-900/40 backdrop-blur-xl border-blue-400/30 shadow-xl">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white flex items-center gap-2 text-lg">
+                  <Database className="h-5 w-5 text-blue-300" />
                   HEALTHCARE SIMULATION CONFIG
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-white">EMR System Type</Label>
+                  <Label className="text-white text-sm">EMR System Type</Label>
                   <Select value={formData.emr_type} onValueChange={(value) => handleInputChange('emr_type', value)}>
-                    <SelectTrigger className="virtualis-input">
+                    <SelectTrigger className="bg-blue-500/10 border-blue-400/30 text-white h-9">
                       <SelectValue placeholder="Select EMR System" />
                     </SelectTrigger>
-                    <SelectContent className="virtualis-card">
+                    <SelectContent className="bg-blue-900 border-blue-400/30">
                       {emrTypes.map((emr) => (
-                        <SelectItem key={emr} value={emr}>{emr}</SelectItem>
+                        <SelectItem key={emr} value={emr} className="text-white focus:bg-blue-800">{emr}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -246,10 +247,11 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
                 {getEmrFields()}
 
-                <div className="flex gap-4">
+                <div className="flex gap-3 pt-2">
                   <Button
                     onClick={handleTestConnection}
-                    className="virtualis-button"
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <TestTube className="h-4 w-4 mr-2" />
                     START SIMULATION
@@ -257,28 +259,29 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
                   
                   <Button
                     onClick={handleSave}
-                    className="virtualis-button"
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Key className="h-4 w-4 mr-2" />
-                    SAVE CONFIGURATION
+                    SAVE CONFIG
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="space-y-6">
-            <Card className="virtualis-card">
-              <CardHeader>
-                <CardTitle className="text-white">SIMULATION STATUS</CardTitle>
+          <div className="space-y-4">
+            <Card className="bg-blue-900/40 backdrop-blur-xl border-blue-400/30 shadow-xl">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-lg">SIMULATION STATUS</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-white/70">Current Mode:</span>
+                  <span className="text-blue-200 text-sm">Current Mode:</span>
                   <Badge className={
                     testResult === 'success' 
-                      ? "virtualis-badge success" 
-                      : "virtualis-badge primary"
+                      ? "bg-green-500/20 text-green-300 border-green-400/30" 
+                      : "bg-blue-500/20 text-blue-300 border-blue-400/30"
                   }>
                     {testResult === 'success' && <CheckCircle className="h-3 w-3 mr-1" />}
                     <Database className="h-3 w-3 mr-1" />
@@ -286,13 +289,13 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
                   </Badge>
                 </div>
                 
-                <div className="text-sm text-white/60">
+                <div className="text-xs text-blue-300">
                   Last Updated: {new Date().toLocaleString()}
                 </div>
                 
                 {testResult === 'success' && (
-                  <div className="p-3 virtualis-card success">
-                    <p className="text-green-300 text-sm">
+                  <div className="p-3 bg-green-500/10 border border-green-400/30 rounded-lg">
+                    <p className="text-green-300 text-xs">
                       ✓ Healthcare simulation ready
                       <br />
                       ✓ Clinical workflows active
@@ -304,26 +307,26 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
               </CardContent>
             </Card>
 
-            <Card className="virtualis-card">
-              <CardHeader>
-                <CardTitle className="text-white">SIMULATION FEATURES</CardTitle>
+            <Card className="bg-blue-900/40 backdrop-blur-xl border-blue-400/30 shadow-xl">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-lg">SIMULATION FEATURES</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-white/80">Patient Demo Data</span>
-                  <Badge className="virtualis-badge success">Active</Badge>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-blue-200">Patient Demo Data</span>
+                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">Active</Badge>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-white/80">Clinical Workflows</span>
-                  <Badge className="virtualis-badge success">Active</Badge>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-blue-200">Clinical Workflows</span>
+                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">Active</Badge>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-white/80">AI Healthcare Assistant</span>
-                  <Badge className="virtualis-badge success">Active</Badge>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-blue-200">AI Healthcare Assistant</span>
+                  <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">Active</Badge>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-white/80">Real Integration</span>
-                  <Badge className="virtualis-badge">Demo Only</Badge>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-blue-200">Real Integration</span>
+                  <Badge className="bg-blue-500/20 text-blue-300 border-blue-400/30 text-xs">Demo Only</Badge>
                 </div>
               </CardContent>
             </Card>
