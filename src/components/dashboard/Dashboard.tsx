@@ -22,7 +22,6 @@ import {
 import { usePatients } from '@/hooks/usePatients';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import VirtualisChatModal from '@/components/clinical/VirtualisChatModal';
 import EMRInitializationStatus from './EMRInitializationStatus';
 import PatientTracker from './PatientTracker';
 import FuturisticPatientTracker from './FuturisticPatientTracker';
@@ -266,9 +265,6 @@ const Dashboard = ({ hospitalId }: DashboardProps) => {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Chat Modal - No props passed */}
-      <VirtualisChatModal />
     </div>
   );
 };
