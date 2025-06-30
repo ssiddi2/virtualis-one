@@ -1801,6 +1801,7 @@ export type Database = {
           department: string | null
           email: string
           first_name: string
+          hospital_id: string | null
           id: string
           last_name: string
           license_number: string | null
@@ -1813,6 +1814,7 @@ export type Database = {
           department?: string | null
           email: string
           first_name: string
+          hospital_id?: string | null
           id: string
           last_name: string
           license_number?: string | null
@@ -1825,6 +1827,7 @@ export type Database = {
           department?: string | null
           email?: string
           first_name?: string
+          hospital_id?: string | null
           id?: string
           last_name?: string
           license_number?: string | null
@@ -1832,7 +1835,15 @@ export type Database = {
           role?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quality_metrics: {
         Row: {
