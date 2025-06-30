@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -257,7 +256,7 @@ const Dashboard = ({ hospitalId }: DashboardProps) => {
           </TabsContent>
 
           <TabsContent value="patients" className="space-y-6">
-            <PatientTracker hospitalId={effectiveHospitalId} />
+            <PatientTracker />
           </TabsContent>
 
           <TabsContent value="futuristic" className="space-y-6">
