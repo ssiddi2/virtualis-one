@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,9 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
-import AIEnhancedNoteDialog from '@/components/forms/AIEnhancedNoteDialog';
-import NewLabOrderDialog from '@/components/forms/NewLabOrderDialog';
-import NewRadiologyOrderDialog from '@/components/forms/NewRadiologyOrderDialog';
+import AIEnhancedNoteDialogWrapper from '@/components/forms/AIEnhancedNoteDialogWrapper';
+import NewLabOrderDialogWrapper from '@/components/forms/NewLabOrderDialogWrapper';
+import NewRadiologyOrderDialogWrapper from '@/components/forms/NewRadiologyOrderDialogWrapper';
 import AIClinicalAssistantDialog from '@/components/forms/AIClinicalAssistantDialog';
 import DischargePlanningDialog from '@/components/forms/DischargePlanningDialog';
 import ChargeCaptureDialog from '@/components/billing/ChargeCaptureDialog';
@@ -63,14 +64,21 @@ const PatientClinicalWorkflow = ({ patientId, hospitalId, patientName }: Patient
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <AIEnhancedNoteDialog 
+            <AIEnhancedNoteDialogWrapper 
               patientId={patientId} 
               hospitalId={hospitalId}
+              patientName={patientName}
             />
             
-            <NewLabOrderDialog patientId={patientId} />
+            <NewLabOrderDialogWrapper 
+              patientId={patientId}
+              patientName={patientName}
+            />
             
-            <NewRadiologyOrderDialog patientId={patientId} />
+            <NewRadiologyOrderDialogWrapper 
+              patientId={patientId}
+              patientName={patientName}
+            />
             
             <Button
               onClick={handleVitalSigns}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, User, Heart, Activity, FileText, Pill, TestTube } from "lucide-react";
 import { usePatients } from "@/hooks/usePatients";
-import AIEnhancedNoteDialog from "@/components/forms/AIEnhancedNoteDialog";
+import AIEnhancedNoteDialogWrapper from "@/components/forms/AIEnhancedNoteDialogWrapper";
 
 const PatientDetails = () => {
   const { patientId } = useParams();
@@ -55,9 +55,10 @@ const PatientDetails = () => {
               MRN: {patient.mrn} • Age: {age} • Room: {patient.room_number || 'Unassigned'}
             </p>
           </div>
-          <AIEnhancedNoteDialog 
+          <AIEnhancedNoteDialogWrapper 
             patientId={patient.id} 
             hospitalId={patient.hospital_id}
+            patientName={`${patient.first_name} ${patient.last_name}`}
           />
         </div>
 

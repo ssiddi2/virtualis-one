@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +19,7 @@ import {
 } from "lucide-react";
 import { usePatients } from "@/hooks/usePatients";
 import { useHospitals } from "@/hooks/useHospitals";
-import AIEnhancedNoteDialog from "@/components/forms/AIEnhancedNoteDialog";
+import AIEnhancedNoteDialogWrapper from '@/components/forms/AIEnhancedNoteDialogWrapper';
 
 interface HospitalDashboardProps {
   hospitalId: string;
@@ -212,9 +211,10 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
                             <Badge className={`${patient.status === 'active' ? 'virtualis-badge success' : 'virtualis-badge'}`}>
                               {patient.status?.toUpperCase() || 'ACTIVE'}
                             </Badge>
-                            <AIEnhancedNoteDialog 
+                            <AIEnhancedNoteDialogWrapper 
                               patientId={patient.id} 
                               hospitalId={hospitalId}
+                              patientName={`${patient.first_name} ${patient.last_name}`}
                             />
                           </div>
                         </div>
