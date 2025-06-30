@@ -14,9 +14,9 @@ import {
   Activity,
   ClipboardList
 } from 'lucide-react';
-import AIEnhancedNoteDialog from '@/components/forms/AIEnhancedNoteDialog';
-import NewLabOrderDialog from '@/components/forms/NewLabOrderDialog';
-import NewRadiologyOrderDialog from '@/components/forms/NewRadiologyOrderDialog';
+import AIEnhancedNoteDialogWrapper from '@/components/forms/AIEnhancedNoteDialogWrapper';
+import NewLabOrderDialogWrapper from '@/components/forms/NewLabOrderDialogWrapper';
+import NewRadiologyOrderDialogWrapper from '@/components/forms/NewRadiologyOrderDialogWrapper';
 import { useToast } from '@/hooks/use-toast';
 
 interface PatientActionsPanelProps {
@@ -82,17 +82,20 @@ const PatientActionsPanel = ({ patientId, hospitalId, patientName }: PatientActi
         <CardContent className="space-y-4">
           {/* Primary Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <AIEnhancedNoteDialog 
+            <AIEnhancedNoteDialogWrapper 
               patientId={patientId} 
               hospitalId={hospitalId}
+              patientName={patientName}
             />
             
-            <NewLabOrderDialog 
+            <NewLabOrderDialogWrapper 
               patientId={patientId}
+              patientName={patientName}
             />
             
-            <NewRadiologyOrderDialog 
+            <NewRadiologyOrderDialogWrapper 
               patientId={patientId}
+              patientName={patientName}
             />
 
             {quickActions.map((action) => (

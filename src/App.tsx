@@ -119,7 +119,7 @@ const AppRoutes = () => {
       
       <Route path="/coding" element={
         <ProtectedRoute>
-          <CodingDashboard />
+          <CodingDashboard hospitalId={profile?.hospital_id || ''} />
         </ProtectedRoute>
       } />
       

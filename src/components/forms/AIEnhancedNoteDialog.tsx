@@ -15,6 +15,7 @@ interface AIEnhancedNoteDialogProps {
   onClose: () => void;
   patientId: string;
   patientName: string;
+  hospitalId: string;
 }
 
 interface AISuggestion {
@@ -23,7 +24,7 @@ interface AISuggestion {
   source: string;
 }
 
-const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName }: AIEnhancedNoteDialogProps) => {
+const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalId }: AIEnhancedNoteDialogProps) => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [noteText, setNoteText] = useState('');
