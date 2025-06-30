@@ -94,13 +94,13 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
       case 'Epic':
         return (
           <>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1">
               <div>
                 <Label className="text-white text-xs">Client ID</Label>
                 <Input
                   value={formData.client_id}
                   onChange={(e) => handleInputChange('client_id', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-6"
+                  className="bg-white/10 border-white/30 text-white text-xs h-5"
                   placeholder="Epic client ID"
                 />
               </div>
@@ -110,7 +110,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
                   type="password"
                   value={formData.client_secret}
                   onChange={(e) => handleInputChange('client_secret', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-6"
+                  className="bg-white/10 border-white/30 text-white text-xs h-5"
                 />
               </div>
             </div>
@@ -119,7 +119,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-xs h-6"
+                className="bg-white/10 border-white/30 text-white text-xs h-5"
                 placeholder="https://fhir.epic.com/..."
               />
             </div>
@@ -129,13 +129,13 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
       case 'Cerner':
         return (
           <>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1">
               <div>
                 <Label className="text-white text-xs">API Key</Label>
                 <Input
                   value={formData.auth_token}
                   onChange={(e) => handleInputChange('auth_token', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-6"
+                  className="bg-white/10 border-white/30 text-white text-xs h-5"
                 />
               </div>
               <div>
@@ -143,7 +143,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
                 <Input
                   value={formData.organization_id}
                   onChange={(e) => handleInputChange('organization_id', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-6"
+                  className="bg-white/10 border-white/30 text-white text-xs h-5"
                 />
               </div>
             </div>
@@ -152,7 +152,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-xs h-6"
+                className="bg-white/10 border-white/30 text-white text-xs h-5"
                 placeholder="https://fhir-open.cerner.com/..."
               />
             </div>
@@ -167,17 +167,17 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
               <Input
                 value={formData.api_endpoint}
                 onChange={(e) => handleInputChange('api_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-xs h-6"
+                className="bg-white/10 border-white/30 text-white text-xs h-5"
                 placeholder="https://api.healthcare-system.com/"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1">
               <div>
                 <Label className="text-white text-xs">Username</Label>
                 <Input
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-6"
+                  className="bg-white/10 border-white/30 text-white text-xs h-5"
                 />
               </div>
               <div>
@@ -186,7 +186,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-6"
+                  className="bg-white/10 border-white/30 text-white text-xs h-5"
                 />
               </div>
             </div>
@@ -220,9 +220,9 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
           </div>
         </div>
 
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-md mx-auto">
           <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-1">
               <CardTitle className="text-white flex items-center gap-2 text-sm">
                 <Database className="h-4 w-4 text-white" />
                 Clinical System Integration
@@ -234,11 +234,11 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 pt-0">
+            <CardContent className="space-y-1 pt-0">
               <div>
                 <Label className="text-white text-xs">Healthcare System Type</Label>
                 <Select value={formData.emr_type} onValueChange={(value) => handleInputChange('emr_type', value)}>
-                  <SelectTrigger className="bg-white/10 border-white/30 text-white h-6 text-xs">
+                  <SelectTrigger className="bg-white/10 border-white/30 text-white h-5 text-xs">
                     <SelectValue placeholder="Select System Type" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/30">
@@ -251,11 +251,11 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
               {getEmrFields()}
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-1">
                 <Button
                   onClick={handleTestConnection}
                   size="sm"
-                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs h-6"
+                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs h-5"
                 >
                   <TestTube className="h-3 w-3 mr-1" />
                   Test Connection
@@ -264,7 +264,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
                 <Button
                   onClick={handleSave}
                   size="sm"
-                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs h-6"
+                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs h-5"
                 >
                   <Key className="h-3 w-3 mr-1" />
                   Save Configuration
@@ -272,7 +272,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
               </div>
 
               {testResult === 'success' && (
-                <div className="p-2 bg-green-500/20 border border-green-400/40 rounded-lg">
+                <div className="p-1 bg-green-500/20 border border-green-400/40 rounded-lg">
                   <p className="text-green-300 text-xs">
                     ✓ Clinical data integration active
                     <br />
