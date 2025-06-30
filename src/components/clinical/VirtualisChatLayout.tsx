@@ -10,6 +10,9 @@ import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useSpecialties, useOnCallSchedules, usePhysicians } from '@/hooks/usePhysicians';
 import { usePatients } from '@/hooks/usePatients';
 import ChatListSidebar from './ChatListSidebar';
+import MessageCard from './MessageCard';
+import ConsultCard from './ConsultCard';
+import MessageDialog from './MessageDialog';
 import EnhancedConsultDialog from './EnhancedConsultDialog';
 import SmartRoutingDialog from './SmartRoutingDialog';
 import { 
@@ -85,6 +88,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
   const [activeThreadId, setActiveThreadId] = useState<string>('1');
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [smartRoutingOpen, setSmartRoutingOpen] = useState(false);
   const [smartRoutingData, setSmartRoutingData] = useState<any>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -505,6 +509,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       />
 
       <div className="flex-1 flex flex-col">
+        {/* Header */}
         <div className="p-4 backdrop-blur-xl bg-blue-500/20 border-b border-blue-300/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -538,8 +543,19 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
               </Button>
             </div>
           </div>
+          
+          {/* Quick Action Cards */}
+          <div className="flex gap-3 mt-4">
+            <div className="flex-1">
+              <MessageCard onOpenMessageDialog={() => setMessageDialogOpen(true)} />
+            </div>
+            <div className="flex-1">
+              <ConsultCard onOpenConsultDialog={() => setConsultDialogOpen(true)} />
+            </div>
+          </div>
         </div>
 
+        {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {sortedMessages.map((message) => (
             <div
@@ -635,6 +651,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           ))}
         </div>
 
+        {/* Input Area */}
         <div className="p-4 backdrop-blur-xl bg-blue-500/20 border-t border-blue-300/30">
           {isAnalyzing && (
             <div className="mb-3 p-2 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
@@ -674,6 +691,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         </div>
       </div>
 
+      {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6">
         {showFabOptions && (
           <div className="absolute bottom-20 right-0 space-y-3 animate-fade-in">
@@ -719,6 +737,13 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           </div>
         </Button>
       </div>
+
+      {/* Dialogs */}
+      <MessageDialog
+        open={messageDialogOpen}
+        onClose={() => setMessageDialogOpen(false)}
+        onSend={handleMessageSend}
+      />
 
       <EnhancedConsultDialog
         open={consultDialogOpen}
