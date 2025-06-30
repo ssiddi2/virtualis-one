@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,12 +28,14 @@ import { useMedications } from '@/hooks/useMedications';
 import { useProblemList } from '@/hooks/useProblemList';
 import { useAllergies } from '@/hooks/useAllergies';
 import { useClinicalOrders } from '@/hooks/useClinicalOrders';
+import { useParams } from 'react-router-dom';
 
 interface EpicStylePatientChartProps {
   patientId: string;
 }
 
-const EpicStylePatientChart = ({ patientId }: EpicStylePatientChartProps) => {
+const EpicStylePatientChart = () => {
+  const { patientId } = useParams<{ patientId: string }>();
   const [activeTab, setActiveTab] = useState('overview');
   const { data: patients } = usePatients();
   const { data: labOrders } = useLabOrders();

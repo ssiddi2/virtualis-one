@@ -1,6 +1,7 @@
+
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import Dashboard from '@/pages/Dashboard';
@@ -40,10 +41,10 @@ function App() {
               <Route path="/team-messaging" element={<TeamMessaging />} />
               <Route path="/consult-request" element={<ConsultRequestForm />} />
               
-              <Route path="/epic-chart/:patientId" element={<EpicStylePatientChart patientId={""} />} />
+              <Route path="/epic-chart/:patientId" element={<EpicStylePatientChart />} />
               <Route path="/physician-rounding" element={<PhysicianRoundingList />} />
               <Route path="/nursing-workstation" element={<NursingWorkstation />} />
-              <Route path="/cpoe/:patientId" element={<CPOESystem patientId={""} providerId={""} />} />
+              <Route path="/cpoe/:patientId" element={<CPOESystem />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
