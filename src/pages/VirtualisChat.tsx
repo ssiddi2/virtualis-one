@@ -5,15 +5,11 @@ import { useAuth } from "@/components/auth/AuthProvider";
 const VirtualisChatPage = () => {
   const { profile, user } = useAuth();
 
-  // Get the hospital ID from the user profile or user metadata
-  const effectiveHospitalId = profile?.hospital_id || user?.user_metadata?.hospital_id;
-
-  console.log('VirtualisChatPage - Hospital ID:', effectiveHospitalId);
-  console.log('VirtualisChatPage - Profile:', profile);
-  console.log('VirtualisChatPage - User:', user);
+  // Get hospital ID from user profile or use a default
+  const hospitalId = profile?.hospital_id || user?.user_metadata?.hospital_id || "44444444-4444-4444-4444-444444444444";
 
   return (
-    <VirtualisChatLayout hospitalId={effectiveHospitalId} />
+    <VirtualisChatLayout hospitalId={hospitalId} />
   );
 };
 

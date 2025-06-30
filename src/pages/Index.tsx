@@ -139,7 +139,9 @@ const Index = () => {
           <Route path="/ai-assistant" element={
             requireHospitalSelection(<CopilotComposer hospitalId={selectedHospitalId!} />)
           } />
-          <Route path="/virtualis-chat" element={<VirtualisChatPage />} />
+          <Route path="/virtualis-chat" element={
+            requireHospitalSelection(<VirtualisChatPage />)
+          } />
           <Route path="/demo" element={<Demo />} />
           <Route path="*" element={<Navigate to="/emr" replace />} />
         </Routes>
