@@ -23,7 +23,7 @@ export const useMedicationSafety = (patientId: string) => {
     queryKey: ['patient-allergies', patientId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('allergies')
+        .from('allergies_adverse_reactions')
         .select('*')
         .eq('patient_id', patientId);
       
@@ -56,7 +56,7 @@ export const useMedicationSafety = (patientId: string) => {
       )
       .map(allergy => ({
         allergen: allergy.allergen,
-        reaction: allergy.reaction || 'Unknown reaction',
+        reaction: allergy.symptoms || 'Unknown reaction',
         severity: allergy.severity || 'Unknown'
       }));
   };
@@ -124,7 +124,7 @@ export const useMedicationSafety = (patientId: string) => {
     }
 
     return {
-      iseSafe: allergyAlerts.length === 0 && interactions.filter(i => i.severity === 'high').length === 0,
+      isSafe: allergyAlerts.length === 0 && interactions.filter(i => i.severity === 'high').length === 0,
       allergyAlerts,
       interactions,
       warnings: [...allergyAlerts.map(a => `Allergy: ${a.allergen}`), ...interactions.map(i => i.description)]
