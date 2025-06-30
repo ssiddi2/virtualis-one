@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { usePatients } from '@/hooks/usePatients';
@@ -15,7 +14,6 @@ import {
   Moon,
   UserCheck,
   Stethoscope,
-  Clock,
   Send
 } from 'lucide-react';
 
@@ -27,12 +25,9 @@ interface MessageDialogProps {
 }
 
 const MessageDialog = ({ open, onClose, onSend, trigger }: MessageDialogProps) => {
-  const [selectedPatient, setSelectedPatient] = useState('');
-  const [selectedRecipient, setSelectedRecipient] = useState('');
   const [messageContent, setMessageContent] = useState('');
-  const [recipientType, setRecipientType] = useState<'physician' | 'nocturnist' | 'primary'>('physician');
+  const [selectedRecipient, setSelectedRecipient] = useState('');
 
-  const { data: patients } = usePatients();
   const { data: physicians } = usePhysicians();
   const { data: onCallSchedules } = useOnCallSchedules();
   const { toast } = useToast();
@@ -48,9 +43,7 @@ const MessageDialog = ({ open, onClose, onSend, trigger }: MessageDialogProps) =
     }
 
     const messageData = {
-      patientId: selectedPatient,
       recipientId: selectedRecipient,
-      recipientType,
       content: messageContent,
       timestamp: new Date()
     };
@@ -63,7 +56,6 @@ const MessageDialog = ({ open, onClose, onSend, trigger }: MessageDialogProps) =
     });
 
     // Reset form
-    setSelectedPatient('');
     setSelectedRecipient('');
     setMessageContent('');
     onClose();
@@ -84,7 +76,7 @@ const MessageDialog = ({ open, onClose, onSend, trigger }: MessageDialogProps) =
         <div onClick={() => {}}>
           {trigger}
         </div>
-        <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-purple-500/10 border border-blue-300/30 text-white shadow-2xl rounded-2xl">
+        <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/30 to-purple-500/20 border border-blue-300/40 text-white shadow-2xl rounded-2xl">
           <DialogHeader className="border-b border-white/20 pb-4">
             <DialogTitle className="text-white text-xl font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-cyan-300" />
@@ -92,76 +84,16 @@ const MessageDialog = ({ open, onClose, onSend, trigger }: MessageDialogProps) =
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 max-h-[60vh] overflow-y-auto">
-            {/* Patient Selection */}
-            <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
-              <CardContent className="p-4">
-                <label className="text-sm text-white/70 mb-3 block font-medium">Select Patient (Optional)</label>
-                <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-                  <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                    <SelectValue placeholder="Choose patient..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800/95 backdrop-blur-xl border-slate-600 text-white rounded-lg">
-                    <SelectItem value="none">No patient selected</SelectItem>
-                    {patients?.map((patient) => (
-                      <SelectItem key={patient.id} value={patient.id}>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          {patient.first_name} {patient.last_name} - {patient.mrn}
-                          {patient.room_number && ` (Room ${patient.room_number})`}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-
-            {/* Recipient Type Selection */}
-            <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
-              <CardContent className="p-4">
-                <label className="text-sm text-white/70 mb-3 block font-medium">Message To</label>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setRecipientType('physician')}
-                    className={`${recipientType === 'physician' 
-                      ? 'bg-blue-600/50 hover:bg-blue-600/70 border-blue-400/50' 
-                      : 'bg-white/10 hover:bg-white/20 border-white/30'
-                    } backdrop-blur-sm border rounded-lg`}
-                  >
-                    <Stethoscope className="h-4 w-4 mr-2" />
-                    Physician
-                  </Button>
-                  <Button
-                    onClick={() => setRecipientType('nocturnist')}
-                    className={`${recipientType === 'nocturnist' 
-                      ? 'bg-indigo-600/50 hover:bg-indigo-600/70 border-indigo-400/50' 
-                      : 'bg-white/10 hover:bg-white/20 border-white/30'
-                    } backdrop-blur-sm border rounded-lg`}
-                  >
-                    <Moon className="h-4 w-4 mr-2" />
-                    Nocturnist
-                  </Button>
-                  <Button
-                    onClick={() => setRecipientType('primary')}
-                    className={`${recipientType === 'primary' 
-                      ? 'bg-green-600/50 hover:bg-green-600/70 border-green-400/50' 
-                      : 'bg-white/10 hover:bg-white/20 border-white/30'
-                    } backdrop-blur-sm border rounded-lg`}
-                  >
-                    <UserCheck className="h-4 w-4 mr-2" />
-                    Primary Attending
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recipients List */}
-            <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
-              <CardContent className="p-4">
-                <h3 className="text-white font-medium mb-3">Available Recipients</h3>
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-6 space-y-6">
+              {/* Available Physicians */}
+              <div className="space-y-3">
+                <h3 className="text-sm text-blue-300 font-medium flex items-center gap-2">
+                  <Stethoscope className="h-4 w-4" />
+                  Available Physicians
+                </h3>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {recipientType === 'physician' && availablePhysicians.map((physician) => (
+                  {availablePhysicians.map((physician) => (
                     <div
                       key={physician.id}
                       className={`p-3 rounded-lg border cursor-pointer transition-colors ${
@@ -189,76 +121,92 @@ const MessageDialog = ({ open, onClose, onSend, trigger }: MessageDialogProps) =
                       </div>
                     </div>
                   ))}
-
-                  {recipientType === 'nocturnist' && nocturnists.map((physician) => (
-                    <div
-                      key={physician.id}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedRecipient === physician.id
-                          ? 'bg-indigo-600/20 border-indigo-500'
-                          : 'bg-white/5 border-white/20 hover:border-indigo-500/50'
-                      }`}
-                      onClick={() => setSelectedRecipient(physician.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Moon className="h-4 w-4 text-indigo-400" />
-                          <span className="font-medium">
-                            {physician.first_name} {physician.last_name}
-                          </span>
-                          <Badge className="bg-indigo-600/20 text-indigo-300 border-indigo-400/30 text-xs">
-                            On Call Tonight
-                          </Badge>
-                        </div>
-                        {physician.phone && (
-                          <span className="text-sm text-white/70">{physician.phone}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {recipientType === 'primary' && primaryAttending && (
-                    <div
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedRecipient === primaryAttending.id
-                          ? 'bg-green-600/20 border-green-500'
-                          : 'bg-white/5 border-white/20 hover:border-green-500/50'
-                      }`}
-                      onClick={() => setSelectedRecipient(primaryAttending.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <UserCheck className="h-4 w-4 text-green-400" />
-                          <span className="font-medium">
-                            {primaryAttending.first_name} {primaryAttending.last_name}
-                          </span>
-                          <Badge className="bg-green-600/20 text-green-300 border-green-400/30 text-xs">
-                            Primary Attending
-                          </Badge>
-                        </div>
-                        {primaryAttending.phone && (
-                          <span className="text-sm text-white/70">{primaryAttending.phone}</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Message Content */}
-            <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
-              <CardContent className="p-4">
-                <label className="text-sm text-white/70 mb-3 block font-medium">Message</label>
+              {/* Nocturnist */}
+              {nocturnists.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm text-indigo-300 font-medium flex items-center gap-2">
+                    <Moon className="h-4 w-4" />
+                    Nocturnist On Call
+                  </h3>
+                  <div className="space-y-2">
+                    {nocturnists.map((physician) => (
+                      <div
+                        key={physician.id}
+                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                          selectedRecipient === physician.id
+                            ? 'bg-indigo-600/20 border-indigo-500'
+                            : 'bg-white/5 border-white/20 hover:border-indigo-500/50'
+                        }`}
+                        onClick={() => setSelectedRecipient(physician.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Moon className="h-4 w-4 text-indigo-400" />
+                            <span className="font-medium">
+                              {physician.first_name} {physician.last_name}
+                            </span>
+                            <Badge className="bg-indigo-600/20 text-indigo-300 border-indigo-400/30 text-xs">
+                              On Call Tonight
+                            </Badge>
+                          </div>
+                          {physician.phone && (
+                            <span className="text-sm text-white/70">{physician.phone}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Primary Attending */}
+              {primaryAttending && (
+                <div className="space-y-3">
+                  <h3 className="text-sm text-green-300 font-medium flex items-center gap-2">
+                    <UserCheck className="h-4 w-4" />
+                    Primary Attending
+                  </h3>
+                  <div
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedRecipient === primaryAttending.id
+                        ? 'bg-green-600/20 border-green-500'
+                        : 'bg-white/5 border-white/20 hover:border-green-500/50'
+                    }`}
+                    onClick={() => setSelectedRecipient(primaryAttending.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="h-4 w-4 text-green-400" />
+                        <span className="font-medium">
+                          {primaryAttending.first_name} {primaryAttending.last_name}
+                        </span>
+                        <Badge className="bg-green-600/20 text-green-300 border-green-400/30 text-xs">
+                          Primary Attending
+                        </Badge>
+                      </div>
+                      {primaryAttending.phone && (
+                        <span className="text-sm text-white/70">{primaryAttending.phone}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Message Content */}
+              <div className="space-y-3">
+                <label className="text-sm text-white/70 font-medium">Message</label>
                 <Textarea
                   value={messageContent}
                   onChange={(e) => setMessageContent(e.target.value)}
                   placeholder="Type your message here..."
                   className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[100px] backdrop-blur-sm rounded-lg"
                 />
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t border-white/20">
@@ -284,8 +232,155 @@ const MessageDialog = ({ open, onClose, onSend, trigger }: MessageDialogProps) =
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-purple-500/10 border border-blue-300/30 text-white shadow-2xl rounded-2xl">
-        {/* Same content as above */}
+      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/30 to-purple-500/20 border border-blue-300/40 text-white shadow-2xl rounded-2xl">
+        <DialogHeader className="border-b border-white/20 pb-4">
+          <DialogTitle className="text-white text-xl font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-cyan-300" />
+            SEND MESSAGE
+          </DialogTitle>
+        </DialogHeader>
+
+        <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+          <CardContent className="p-6 space-y-6">
+            {/* Available Physicians */}
+            <div className="space-y-3">
+              <h3 className="text-sm text-blue-300 font-medium flex items-center gap-2">
+                <Stethoscope className="h-4 w-4" />
+                Available Physicians
+              </h3>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {availablePhysicians.map((physician) => (
+                  <div
+                    key={physician.id}
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedRecipient === physician.id
+                        ? 'bg-blue-600/20 border-blue-500'
+                        : 'bg-white/5 border-white/20 hover:border-blue-500/50'
+                    }`}
+                    onClick={() => setSelectedRecipient(physician.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-blue-400" />
+                        <span className="font-medium">
+                          {physician.first_name} {physician.last_name}
+                        </span>
+                        {physician.specialty && (
+                          <Badge className="bg-blue-600/20 text-blue-300 border-blue-400/30 text-xs">
+                            {physician.specialty.name}
+                          </Badge>
+                        )}
+                      </div>
+                      {physician.phone && (
+                        <span className="text-sm text-white/70">{physician.phone}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Nocturnist */}
+            {nocturnists.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm text-indigo-300 font-medium flex items-center gap-2">
+                  <Moon className="h-4 w-4" />
+                  Nocturnist On Call
+                </h3>
+                <div className="space-y-2">
+                  {nocturnists.map((physician) => (
+                    <div
+                      key={physician.id}
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedRecipient === physician.id
+                          ? 'bg-indigo-600/20 border-indigo-500'
+                          : 'bg-white/5 border-white/20 hover:border-indigo-500/50'
+                      }`}
+                      onClick={() => setSelectedRecipient(physician.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Moon className="h-4 w-4 text-indigo-400" />
+                          <span className="font-medium">
+                            {physician.first_name} {physician.last_name}
+                          </span>
+                          <Badge className="bg-indigo-600/20 text-indigo-300 border-indigo-400/30 text-xs">
+                            On Call Tonight
+                          </Badge>
+                        </div>
+                        {physician.phone && (
+                          <span className="text-sm text-white/70">{physician.phone}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Primary Attending */}
+            {primaryAttending && (
+              <div className="space-y-3">
+                <h3 className="text-sm text-green-300 font-medium flex items-center gap-2">
+                  <UserCheck className="h-4 w-4" />
+                  Primary Attending
+                </h3>
+                <div
+                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                    selectedRecipient === primaryAttending.id
+                      ? 'bg-green-600/20 border-green-500'
+                      : 'bg-white/5 border-white/20 hover:border-green-500/50'
+                  }`}
+                  onClick={() => setSelectedRecipient(primaryAttending.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="h-4 w-4 text-green-400" />
+                      <span className="font-medium">
+                        {primaryAttending.first_name} {primaryAttending.last_name}
+                      </span>
+                      <Badge className="bg-green-600/20 text-green-300 border-green-400/30 text-xs">
+                        Primary Attending
+                      </Badge>
+                    </div>
+                    {primaryAttending.phone && (
+                      <span className="text-sm text-white/70">{primaryAttending.phone}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Message Content */}
+            <div className="space-y-3">
+              <label className="text-sm text-white/70 font-medium">Message</label>
+              <Textarea
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                placeholder="Type your message here..."
+                className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[100px] backdrop-blur-sm rounded-lg"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-4 border-t border-white/20">
+          <Button
+            onClick={handleSend}
+            disabled={!messageContent.trim() || !selectedRecipient}
+            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white backdrop-blur-sm border border-green-400/30 rounded-lg"
+          >
+            <Send className="h-4 w-4 mr-2" />
+            Send Message
+          </Button>
+          <Button
+            onClick={onClose}
+            className="bg-white/10 hover:bg-white/20 border border-white/30 text-white backdrop-blur-sm rounded-lg"
+          >
+            Cancel
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
