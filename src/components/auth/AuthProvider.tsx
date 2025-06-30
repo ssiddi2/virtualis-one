@@ -9,7 +9,6 @@ interface AuthContextType {
   session: Session | null
   profile: any | null
   loading: boolean
-  isLoading: boolean // Add this missing property
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signUp: (email: string, password: string, userData: any) => Promise<{ error: any }>
   signOut: () => Promise<void>
@@ -149,7 +148,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     profile,
     loading,
-    isLoading: loading, // Map loading to isLoading for compatibility
     signIn,
     signUp,
     signOut,
