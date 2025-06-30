@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageSquare, Phone, Users, Activity, Brain, Stethoscope, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 import ConsolidatedConsultDialog from './ConsolidatedConsultDialog';
-import StreamlinedMessageDialog from './StreamlinedMessageDialog';
+import EnhancedMessageDialog from './EnhancedMessageDialog';
 import FloatingActionButton from './FloatingActionButton';
 import { useToast } from '@/hooks/use-toast';
 
@@ -269,7 +270,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         onClose={() => setShowConsultDialog(false)}
         hospitalId={hospitalId}
       />
-      <StreamlinedMessageDialog 
+      <EnhancedMessageDialog 
         open={showMessageDialog} 
         onClose={() => setShowMessageDialog(false)}
         hospitalId={hospitalId}
