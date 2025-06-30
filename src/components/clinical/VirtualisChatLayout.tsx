@@ -92,7 +92,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Mock chat threads with messages - now with AI analysis capability
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([
     {
       id: '1',
@@ -189,7 +188,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const activeThread = chatThreads.find(thread => thread.id === activeThreadId);
   const messages = activeThread?.messages || [];
 
-  // Sort messages by priority score and timestamp
   const sortedMessages = [...messages].sort((a, b) => {
     if (a.priorityScore !== b.priorityScore) {
       return (b.priorityScore || 0) - (a.priorityScore || 0);
@@ -224,7 +222,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
       console.log('AI analysis result received:', result);
 
-      // Parse AI response more intelligently
       const lowerResult = result.toLowerCase();
       
       let acuity: 'routine' | 'urgent' | 'critical' = 'routine';
@@ -234,23 +231,20 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         acuity = 'urgent';
       }
 
-      // Calculate priority score based on acuity and content analysis
       let priorityScore = 0;
       if (acuity === 'critical') {
-        priorityScore = Math.floor(Math.random() * 20) + 80; // 80-100
+        priorityScore = Math.floor(Math.random() * 20) + 80;
       } else if (acuity === 'urgent') {
-        priorityScore = Math.floor(Math.random() * 30) + 50; // 50-80
+        priorityScore = Math.floor(Math.random() * 30) + 50;
       } else {
-        priorityScore = Math.floor(Math.random() * 50) + 1; // 1-50
+        priorityScore = Math.floor(Math.random() * 50) + 1;
       }
 
-      // Extract medical keywords from content and AI response
       const commonMedicalTerms = ['pain', 'fever', 'breathing', 'chest', 'heart', 'blood', 'pressure', 'oxygen', 'respiratory', 'cardiac', 'neurological'];
       const medicalKeywords = commonMedicalTerms.filter(term => 
         content.toLowerCase().includes(term) || result.toLowerCase().includes(term)
       );
 
-      // Try to extract recommended specialty from AI response
       const specialtyNames = specialties?.map(s => s.name.toLowerCase()) || [
         'cardiology', 'critical care', 'emergency medicine', 'infectious disease',
         'internal medicine', 'nephrology', 'neurology', 'pulmonology', 'surgery'
@@ -277,7 +271,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           ...(acuity === 'critical' ? ['Immediate intervention needed'] : [])
         ],
         recommendedSpecialty: recommendedSpecialty || 'General Medicine',
-        confidence: Math.floor(Math.random() * 20) + 75, // 75-95% confidence
+        confidence: Math.floor(Math.random() * 20) + 75,
         reasoning: result.substring(0, 150) + (result.length > 150 ? '...' : '')
       };
 
@@ -299,7 +293,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
   const handleThreadSelect = (threadId: string) => {
     setActiveThreadId(threadId);
-    // Mark messages as read
     setChatThreads(prev => prev.map(thread => 
       thread.id === threadId 
         ? { ...thread, unreadCount: 0 }
@@ -312,11 +305,9 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
     setIsAnalyzing(true);
 
-    // Get patient context if available
     const patientContext = activeThread.patientName ? 
       `Patient: ${activeThread.patientName}` : undefined;
 
-    // Analyze message with AI
     const aiAnalysis = await analyzeMessageWithAI(newMessage, patientContext);
 
     const message: Message = {
@@ -346,9 +337,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
     setNewMessage('');
 
-    // Show smart routing if high priority
     if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
-      // Only show toast notification, no additional smart routing dialog
       toast({
         title: "High Priority Message Detected",
         description: `${aiAnalysis.acuity.toUpperCase()} priority - ${aiAnalysis.recommendedSpecialty} recommended`,
@@ -363,7 +352,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
 
   const handleNewChat = () => {
     setShowFabOptions(false);
-    // Create a new chat thread
     const newThreadId = (chatThreads.length + 1).toString();
     const newThread: ChatThread = {
       id: newThreadId,
@@ -385,7 +373,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     setShowFabOptions(false);
     setConsultDialogOpen(false);
     
-    // Analyze the clinical question with AI
     const aiAnalysis = await analyzeMessageWithAI(
       consultRequest.clinicalQuestion,
       consultRequest.patientId ? `Patient ID: ${consultRequest.patientId}` : undefined
@@ -396,7 +383,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       description: `${(aiAnalysis?.acuity || consultRequest.urgency).toUpperCase()} priority consult requested for ${consultRequest.specialty || consultRequest.provider}`,
     });
     
-    // Create a new chat thread for the consultation
     const newThreadId = (chatThreads.length + 1).toString();
     const consultMessage: Message = {
       id: Date.now().toString(),
@@ -429,7 +415,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     setChatThreads(prev => [newConsultThread, ...prev]);
     setActiveThreadId(newThreadId);
 
-    // Show smart routing for consultation
     if (aiAnalysis && (aiAnalysis.acuity === 'critical' || aiAnalysis.acuity === 'urgent')) {
       setSmartRoutingData({
         messageContent: consultRequest.clinicalQuestion,
@@ -490,7 +475,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     <div className="min-h-screen flex" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
-      {/* Chat List Sidebar */}
       <ChatListSidebar
         activeThreadId={activeThreadId}
         onThreadSelect={handleThreadSelect}
@@ -498,9 +482,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         chatThreads={chatThreads}
       />
 
-      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
         <div className="p-4 backdrop-blur-xl bg-blue-500/20 border-b border-blue-300/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -536,7 +518,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           </div>
         </div>
 
-        {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {sortedMessages.map((message) => (
             <div
@@ -588,7 +569,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
                   
                   <p className="text-white/90 mb-2">{message.content}</p>
                   
-                  {/* AI Analysis Display */}
                   {message.aiAnalysis && (
                     <div className="mt-3 p-3 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
@@ -633,7 +613,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           ))}
         </div>
 
-        {/* Message Input Area */}
         <div className="p-4 backdrop-blur-xl bg-blue-500/20 border-t border-blue-300/30">
           {isAnalyzing && (
             <div className="mb-3 p-2 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
@@ -673,11 +652,9 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         </div>
       </div>
 
-      {/* Enhanced FAB with Options */}
       <div className="fixed bottom-6 right-6">
         {showFabOptions && (
           <div className="absolute bottom-20 right-0 space-y-3 animate-fade-in">
-            {/* New Chat Option with enhanced transparency */}
             <div className="flex items-center gap-3">
               <span className="text-cyan-200/80 text-sm bg-black/40 backdrop-blur-md px-6 py-3 rounded-full border border-cyan-300/20 font-light tracking-[0.2em] shadow-2xl shadow-cyan-500/10 hover:bg-black/60 hover:border-cyan-300/30 transition-all duration-300">
                 NEW CHAT
@@ -690,7 +667,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
               </Button>
             </div>
             
-            {/* Consult Option with enhanced transparency */}
             <div className="flex items-center gap-3">
               <span className="text-purple-200/80 text-sm bg-black/40 backdrop-blur-md px-6 py-3 rounded-full border border-purple-300/20 font-light tracking-[0.2em] shadow-2xl shadow-purple-500/10 hover:bg-black/60 hover:border-purple-300/30 transition-all duration-300">
                 CONSULT
@@ -708,7 +684,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           </div>
         )}
 
-        {/* Main FAB - Enhanced transparency */}
         <Button
           onClick={() => setShowFabOptions(!showFabOptions)}
           className="backdrop-blur-xl bg-white/5 hover:bg-white/15 text-white rounded-full w-16 h-16 shadow-2xl border border-white/10 p-0 overflow-hidden group transition-all duration-300 hover:scale-110 hover:shadow-white/20"
@@ -723,14 +698,12 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         </Button>
       </div>
 
-      {/* Enhanced Consultation Dialog */}
       <EnhancedConsultDialog
         open={consultDialogOpen}
         onClose={() => setConsultDialogOpen(false)}
         onSubmit={handleConsultSubmit}
       />
 
-      {/* Smart Routing Dialog - Only for consultations */}
       {smartRoutingOpen && smartRoutingData && (
         <SmartRoutingDialog
           open={smartRoutingOpen}
