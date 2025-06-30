@@ -266,7 +266,7 @@ const Dashboard = ({ hospitalId }: DashboardProps) => {
         </Tabs>
       </div>
 
-      {/* Collapsible Chat Modal */}
+      {/* Collapsible Chat Modal - REMOVED hospitalId prop */}
       <VirtualisChatModal />
     </div>
   );

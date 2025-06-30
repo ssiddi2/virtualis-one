@@ -6,16 +6,14 @@ import { MessageSquare, Minimize2, Maximize2 } from 'lucide-react';
 import VirtualisChat from './VirtualisChat';
 import { useAuth } from '@/components/auth/AuthProvider';
 
-interface VirtualisChatModalProps {
-  hospitalId?: string;
-}
-
-const VirtualisChatModal = ({ hospitalId }: VirtualisChatModalProps) => {
+// Removed hospitalId prop completely
+const VirtualisChatModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const { profile, user } = useAuth();
 
-  const effectiveHospitalId = hospitalId || profile?.hospital_id || user?.user_metadata?.hospital_id;
+  // Get hospital ID only from auth context
+  const effectiveHospitalId = profile?.hospital_id || user?.user_metadata?.hospital_id;
 
   // V Logo SVG component
   const VLogo = () => (
