@@ -96,30 +96,30 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
           <>
             <div className="grid grid-cols-2 gap-1">
               <div>
-                <Label className="text-white text-xs">Client ID</Label>
+                <Label className="text-white text-[10px]">Client ID</Label>
                 <Input
                   value={formData.client_id}
                   onChange={(e) => handleInputChange('client_id', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-5"
+                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                   placeholder="Epic client ID"
                 />
               </div>
               <div>
-                <Label className="text-white text-xs">Client Secret</Label>
+                <Label className="text-white text-[10px]">Client Secret</Label>
                 <Input
                   type="password"
                   value={formData.client_secret}
                   onChange={(e) => handleInputChange('client_secret', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-5"
+                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-white text-xs">FHIR Endpoint</Label>
+              <Label className="text-white text-[10px]">FHIR Endpoint</Label>
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-xs h-5"
+                className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 placeholder="https://fhir.epic.com/..."
               />
             </div>
@@ -131,28 +131,28 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
           <>
             <div className="grid grid-cols-2 gap-1">
               <div>
-                <Label className="text-white text-xs">API Key</Label>
+                <Label className="text-white text-[10px]">API Key</Label>
                 <Input
                   value={formData.auth_token}
                   onChange={(e) => handleInputChange('auth_token', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-5"
+                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 />
               </div>
               <div>
-                <Label className="text-white text-xs">Organization ID</Label>
+                <Label className="text-white text-[10px]">Organization ID</Label>
                 <Input
                   value={formData.organization_id}
                   onChange={(e) => handleInputChange('organization_id', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-5"
+                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-white text-xs">FHIR Endpoint</Label>
+              <Label className="text-white text-[10px]">FHIR Endpoint</Label>
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-xs h-5"
+                className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 placeholder="https://fhir-open.cerner.com/..."
               />
             </div>
@@ -163,30 +163,30 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
         return (
           <>
             <div>
-              <Label className="text-white text-xs">API Endpoint</Label>
+              <Label className="text-white text-[10px]">API Endpoint</Label>
               <Input
                 value={formData.api_endpoint}
                 onChange={(e) => handleInputChange('api_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-xs h-5"
+                className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 placeholder="https://api.healthcare-system.com/"
               />
             </div>
             <div className="grid grid-cols-2 gap-1">
               <div>
-                <Label className="text-white text-xs">Username</Label>
+                <Label className="text-white text-[10px]">Username</Label>
                 <Input
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-5"
+                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 />
               </div>
               <div>
-                <Label className="text-white text-xs">Password</Label>
+                <Label className="text-white text-[10px]">Password</Label>
                 <Input
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-xs h-5"
+                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
                 />
               </div>
             </div>
@@ -197,7 +197,7 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
   return (
     <>
-      <div className="p-3 space-y-3 min-h-screen" style={{
+      <div className="p-2 space-y-2 min-h-screen" style={{
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <div className="flex items-center gap-2">
@@ -205,45 +205,45 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
             onClick={onBack}
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-white/20 text-sm"
+            className="text-white hover:bg-white/20 text-xs h-6 px-2"
           >
             <ArrowLeft className="h-3 w-3 mr-1" />
             Back
           </Button>
           <div>
-            <h1 className="text-lg font-bold text-white">
+            <h1 className="text-sm font-bold text-white">
               Healthcare System Integration
             </h1>
-            <p className="text-white/70 text-xs">
+            <p className="text-white/70 text-[10px]">
               {hospital.name} • {hospital.location}
             </p>
           </div>
         </div>
 
-        <div className="max-w-md mx-auto">
-          <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
-            <CardHeader className="pb-1">
-              <CardTitle className="text-white flex items-center gap-2 text-sm">
-                <Database className="h-4 w-4 text-white" />
+        <div className="max-w-xs mx-auto">
+          <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-lg">
+            <CardHeader className="pb-1 px-3 pt-2">
+              <CardTitle className="text-white flex items-center gap-2 text-xs">
+                <Database className="h-3 w-3 text-white" />
                 Clinical System Integration
                 {testResult === 'success' && (
-                  <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-xs ml-auto">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                  <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-[10px] ml-auto px-1 py-0">
+                    <CheckCircle className="h-2 w-2 mr-1" />
                     Connected
                   </Badge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1 pt-0">
+            <CardContent className="space-y-1 pt-0 px-3 pb-3">
               <div>
-                <Label className="text-white text-xs">Healthcare System Type</Label>
+                <Label className="text-white text-[10px]">Healthcare System Type</Label>
                 <Select value={formData.emr_type} onValueChange={(value) => handleInputChange('emr_type', value)}>
-                  <SelectTrigger className="bg-white/10 border-white/30 text-white h-5 text-xs">
+                  <SelectTrigger className="bg-white/10 border-white/30 text-white h-6 text-[10px] px-2">
                     <SelectValue placeholder="Select System Type" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/30">
                     {emrTypes.map((emr) => (
-                      <SelectItem key={emr} value={emr} className="text-white focus:bg-white/20 text-xs">{emr}</SelectItem>
+                      <SelectItem key={emr} value={emr} className="text-white focus:bg-white/20 text-[10px]">{emr}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -251,29 +251,29 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
               {getEmrFields()}
 
-              <div className="flex gap-2 pt-1">
+              <div className="flex gap-1 pt-1">
                 <Button
                   onClick={handleTestConnection}
                   size="sm"
-                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs h-5"
+                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-[10px] h-6 px-2"
                 >
-                  <TestTube className="h-3 w-3 mr-1" />
-                  Test Connection
+                  <TestTube className="h-2 w-2 mr-1" />
+                  Test
                 </Button>
                 
                 <Button
                   onClick={handleSave}
                   size="sm"
-                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs h-5"
+                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-[10px] h-6 px-2"
                 >
-                  <Key className="h-3 w-3 mr-1" />
-                  Save Configuration
+                  <Key className="h-2 w-2 mr-1" />
+                  Save
                 </Button>
               </div>
 
               {testResult === 'success' && (
-                <div className="p-1 bg-green-500/20 border border-green-400/40 rounded-lg">
-                  <p className="text-green-300 text-xs">
+                <div className="p-1 bg-green-500/20 border border-green-400/40 rounded-md">
+                  <p className="text-green-300 text-[10px] leading-tight">
                     ✓ Clinical data integration active
                     <br />
                     ✓ Patient care workflows enabled
