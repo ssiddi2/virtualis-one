@@ -2,10 +2,10 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import Login from '@/components/auth/Login';
+import AuthForm from '@/components/auth/AuthForm';
 
 const LoginPage = () => {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -15,12 +15,7 @@ const LoginPage = () => {
     }
   }, [user, navigate]);
 
-  const handleLogin = async (email: string, password: string, role: string) => {
-    await login(email, password, role);
-    navigate('/dashboard');
-  };
-
-  return <Login onLogin={handleLogin} />;
+  return <AuthForm />;
 };
 
 export default LoginPage;
