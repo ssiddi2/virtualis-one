@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { User, Lock, Shield } from "lucide-react";
 
 interface LoginProps {
@@ -12,16 +13,20 @@ interface LoginProps {
 }
 
 const Login = ({ onLogin }: LoginProps) => {
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !role) {
+    if (!email || !password || !role || (!isLogin && (!firstName || !lastName))) {
       toast({
         title: "Authentication Required",
         description: "Please complete all required credentials",
@@ -33,16 +38,25 @@ const Login = ({ onLogin }: LoginProps) => {
     setLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      onLogin(email, password, role);
-      toast({
-        title: "Access Granted",
-        description: `Welcome to VirtualisOne`,
-      });
+      if (isLogin) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        onLogin(email, password, role);
+        toast({
+          title: "Access Granted",
+          description: `Welcome to VirtualisOne`,
+        });
+      } else {
+        const userData = {
+          first_name: firstName,
+          last_name: lastName,
+          role: role
+        };
+        await signUp(email, password, userData);
+      }
     } catch (error) {
       toast({
-        title: "Authentication Failed",
-        description: "Access denied - Please verify credentials",
+        title: isLogin ? "Authentication Failed" : "Sign Up Failed",
+        description: isLogin ? "Access denied - Please verify credentials" : "Unable to create account - Please try again",
         variant: "destructive",
       });
     } finally {
@@ -99,12 +113,67 @@ const Login = ({ onLogin }: LoginProps) => {
                 </h1>
               </div>
               <p className="text-white/70 tech-font">
-                Secure Healthcare Portal Access
+                {isLogin ? 'Secure Healthcare Portal Access' : 'Create Your Account'}
               </p>
             </div>
 
-            {/* Login Form */}
+            {/* Auth Toggle */}
+            <div className="flex mb-6">
+              <button
+                type="button"
+                onClick={() => setIsLogin(true)}
+                className={`flex-1 py-2 px-4 text-sm font-medium rounded-l-lg transition-colors ${
+                  isLogin 
+                    ? 'bg-virtualis-gold text-white' 
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLogin(false)}
+                className={`flex-1 py-2 px-4 text-sm font-medium rounded-r-lg transition-colors ${
+                  !isLogin 
+                    ? 'bg-virtualis-gold text-white' 
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
+              {!isLogin && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName" className="text-white tech-font">First Name</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="First name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="glass-input tech-font h-12"
+                      required={!isLogin}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName" className="text-white tech-font">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="glass-input tech-font h-12"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-white tech-font">Email</Label>
                 <div className="relative">
@@ -160,30 +229,32 @@ const Login = ({ onLogin }: LoginProps) => {
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Signing In...
+                    {isLogin ? 'Signing In...' : 'Creating Account...'}
                   </div>
                 ) : (
-                  "Sign In"
+                  isLogin ? "Sign In" : "Create Account"
                 )}
               </Button>
             </form>
             
-            {/* Demo Accounts */}
-            <div className="mt-8 text-center">
-              <p className="text-white/60 text-sm tech-font mb-4">Demo Accounts:</p>
-              
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-center gap-2 text-white/50">
-                  <Shield className="h-3 w-3" />
-                  <span>admin@virtualisone.com</span>
-                </div>
+            {/* Demo Accounts - only show for login */}
+            {isLogin && (
+              <div className="mt-8 text-center">
+                <p className="text-white/60 text-sm tech-font mb-4">Demo Accounts:</p>
                 
-                <div className="flex items-center justify-center gap-2 text-white/50">
-                  <User className="h-3 w-3" />
-                  <span>doctor@virtualisone.com</span>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-center gap-2 text-white/50">
+                    <Shield className="h-3 w-3" />
+                    <span>admin@virtualisone.com</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-2 text-white/50">
+                    <User className="h-3 w-3" />
+                    <span>doctor@virtualisone.com</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
           
           <div className="text-center text-white/60 text-sm tech-font mt-6">
