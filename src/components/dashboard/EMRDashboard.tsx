@@ -70,10 +70,10 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
                       </CardTitle>
                       <div className="flex items-center gap-1 text-white/70 text-xs">
                         <MapPin className="h-2 w-2" />
-                        {hospital.location}
+                        {hospital.city}, {hospital.state}
                       </div>
                     </div>
-                    {hospital.is_connected ? (
+                    {hospital.emr_type ? (
                       <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-xs px-1 py-0">
                         <CheckCircle className="h-2 w-2 mr-1" />
                         Active
@@ -95,7 +95,7 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
                     </div>
                     <div className="flex items-center gap-1 text-white/70">
                       <Users className="h-2 w-2" />
-                      <span className="text-xs">{hospital.bed_count || 0} beds</span>
+                      <span className="text-xs">{hospital.phone || 'No phone'}</span>
                     </div>
                   </div>
                   
@@ -141,12 +141,12 @@ const EMRDashboard = ({ user, onSelectHospital }: EMRDashboardProps) => {
           </div>
         </div>
 
-        <HospitalSelector />
+        <HospitalSelector onSelectHospital={onSelectHospital} />
       </div>
 
       {showConnectionDialog && selectedHospital && (
         <EMRConnectionDialog
-          hospital={selectedHospital}
+          hospitalId={selectedHospital.id}
           user={user}
           onClose={() => setShowConnectionDialog(false)}
           onComplete={handleConnectionComplete}
