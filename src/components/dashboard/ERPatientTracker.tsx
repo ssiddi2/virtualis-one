@@ -10,12 +10,14 @@ import {
   Clock, 
   AlertTriangle, 
   User, 
-  Heart,
-  Thermometer,
-  Droplets,
-  Wind,
-  RefreshCw
+  RefreshCw,
+  Bed,
+  Phone,
+  Search,
+  Filter
 } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
 
 interface ERPatientTrackerProps {
   hospitalId?: string;
@@ -25,58 +27,103 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
   const { toast } = useToast();
   const { data: patients, isLoading } = usePatients();
   const [refreshing, setRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
 
   const mockERPatients = [
     {
       id: '1',
-      name: 'John Smith',
+      name: 'Smith, John',
+      mrn: 'MRN001234',
       age: 45,
+      gender: 'M',
       chiefComplaint: 'Chest pain',
       acuity: 2,
       arrivalTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
       room: 'ER-101',
-      vitals: { bp: '140/90', hr: 88, temp: 98.6, spo2: 96 },
-      status: 'In Treatment'
+      bed: 'A',
+      vitals: { bp: '140/90', hr: 88, temp: 98.6, spo2: 96, rr: 18 },
+      status: 'In Treatment',
+      nurse: 'Williams, S.',
+      physician: 'Dr. Johnson',
+      los: '2h 15m',
+      disposition: 'Pending'
     },
     {
       id: '2',
-      name: 'Sarah Johnson',
+      name: 'Johnson, Sarah',
+      mrn: 'MRN001235',
       age: 28,
+      gender: 'F',
       chiefComplaint: 'Severe headache',
       acuity: 3,
       arrivalTime: new Date(Date.now() - 1 * 60 * 60 * 1000),
       room: 'ER-102',
-      vitals: { bp: '120/80', hr: 72, temp: 99.1, spo2: 98 },
-      status: 'Awaiting Results'
+      bed: 'B',
+      vitals: { bp: '120/80', hr: 72, temp: 99.1, spo2: 98, rr: 16 },
+      status: 'Awaiting Results',
+      nurse: 'Thompson, M.',
+      physician: 'Dr. Wilson',
+      los: '1h 30m',
+      disposition: 'Pending'
     },
     {
       id: '3',
-      name: 'Michael Brown',
+      name: 'Brown, Michael',
+      mrn: 'MRN001236',
       age: 65,
+      gender: 'M',
       chiefComplaint: 'Difficulty breathing',
       acuity: 1,
       arrivalTime: new Date(Date.now() - 30 * 60 * 1000),
       room: 'ER-103',
-      vitals: { bp: '160/95', hr: 110, temp: 100.2, spo2: 89 },
-      status: 'Critical'
+      bed: 'C',
+      vitals: { bp: '160/95', hr: 110, temp: 100.2, spo2: 89, rr: 24 },
+      status: 'Critical',
+      nurse: 'Davis, K.',
+      physician: 'Dr. Martinez',
+      los: '30m',
+      disposition: 'ICU'
+    },
+    {
+      id: '4',
+      name: 'Wilson, Lisa',
+      mrn: 'MRN001237',
+      age: 34,
+      gender: 'F',
+      chiefComplaint: 'Minor laceration',
+      acuity: 4,
+      arrivalTime: new Date(Date.now() - 45 * 60 * 1000),
+      room: 'ER-104',
+      bed: 'D',
+      vitals: { bp: '115/75', hr: 78, temp: 98.4, spo2: 99, rr: 14 },
+      status: 'Ready for Discharge',
+      nurse: 'Garcia, R.',
+      physician: 'Dr. Brown',
+      los: '45m',
+      disposition: 'Home'
     }
   ];
 
   const getAcuityColor = (acuity: number) => {
     switch (acuity) {
-      case 1: return 'bg-red-600 text-white';
-      case 2: return 'bg-orange-600 text-white';
-      case 3: return 'bg-yellow-600 text-white';
-      case 4: return 'bg-green-600 text-white';
-      case 5: return 'bg-blue-600 text-white';
-      default: return 'bg-gray-600 text-white';
+      case 1: return 'bg-red-600 text-white hover:bg-red-700';
+      case 2: return 'bg-orange-600 text-white hover:bg-orange-700';
+      case 3: return 'bg-yellow-600 text-white hover:bg-yellow-700';
+      case 4: return 'bg-green-600 text-white hover:bg-green-700';
+      case 5: return 'bg-blue-600 text-white hover:bg-blue-700';
+      default: return 'bg-gray-600 text-white hover:bg-gray-700';
     }
   };
 
-  const getAcuityIcon = (acuity: number) => {
-    if (acuity <= 2) return <AlertTriangle className="h-4 w-4" />;
-    if (acuity <= 3) return <Clock className="h-4 w-4" />;
-    return <Activity className="h-4 w-4" />;
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'critical': return 'text-red-400 bg-red-900/20';
+      case 'in treatment': return 'text-blue-400 bg-blue-900/20';
+      case 'awaiting results': return 'text-yellow-400 bg-yellow-900/20';
+      case 'ready for discharge': return 'text-green-400 bg-green-900/20';
+      default: return 'text-gray-400 bg-gray-900/20';
+    }
   };
 
   const handleRefresh = async () => {
@@ -90,6 +137,16 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
     }, 1500);
   };
 
+  const filteredPatients = mockERPatients.filter(patient => {
+    const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         patient.mrn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         patient.room.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = selectedFilter === 'all' || 
+                         (selectedFilter === 'critical' && patient.acuity <= 2) ||
+                         (selectedFilter === 'routine' && patient.acuity > 2);
+    return matchesSearch && matchesFilter;
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center" style={{
@@ -101,145 +158,160 @@ const ERPatientTracker: React.FC<ERPatientTrackerProps> = ({ hospitalId }) => {
   }
 
   return (
-    <div className="min-h-screen p-6" style={{
+    <div className="min-h-screen p-4" style={{
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-4">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-white">Emergency Department Tracker</h1>
-            <p className="text-white/70">Real-time patient monitoring and bed management</p>
-            {hospitalId && (
-              <p className="text-white/50 text-sm">Hospital ID: {hospitalId}</p>
-            )}
+            <h1 className="text-2xl font-bold text-white">Emergency Department - Patient Tracker</h1>
+            <p className="text-white/70">Real-time patient monitoring • {new Date().toLocaleString()}</p>
           </div>
-          <Button 
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold rounded-xl"
-          >
-            {refreshing ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {refreshing ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              Refresh
+            </Button>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Patients</CardTitle>
-              <User className="h-4 w-4 text-blue-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{mockERPatients.length}</div>
-              <p className="text-xs text-white/60">Currently in ED</p>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Critical</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">
-                {mockERPatients.filter(p => p.acuity <= 2).length}
-              </div>
-              <p className="text-xs text-white/60">High priority cases</p>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Avg Wait Time</CardTitle>
-              <Clock className="h-4 w-4 text-yellow-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">45m</div>
-              <p className="text-xs text-white/60">Current average</p>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Bed Capacity</CardTitle>
-              <Activity className="h-4 w-4 text-green-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">85%</div>
-              <p className="text-xs text-white/60">17 of 20 beds occupied</p>
-            </CardContent>
-          </Card>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-white">{mockERPatients.length}</div>
+            <div className="text-xs text-white/70">Total Patients</div>
+          </div>
+          <div className="backdrop-blur-xl bg-red-500/20 border border-red-300/30 rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-white">{mockERPatients.filter(p => p.acuity <= 2).length}</div>
+            <div className="text-xs text-white/70">Critical/Urgent</div>
+          </div>
+          <div className="backdrop-blur-xl bg-green-500/20 border border-green-300/30 rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-white">15</div>
+            <div className="text-xs text-white/70">Available Beds</div>
+          </div>
+          <div className="backdrop-blur-xl bg-yellow-500/20 border border-yellow-300/30 rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-white">42m</div>
+            <div className="text-xs text-white/70">Avg Wait Time</div>
+          </div>
+          <div className="backdrop-blur-xl bg-purple-500/20 border border-purple-300/30 rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-white">3</div>
+            <div className="text-xs text-white/70">Pending Discharge</div>
+          </div>
+          <div className="backdrop-blur-xl bg-orange-500/20 border border-orange-300/30 rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-white">2</div>
+            <div className="text-xs text-white/70">Admits Pending</div>
+          </div>
         </div>
 
-        {/* Patient List */}
-        <div className="grid gap-4">
-          {mockERPatients.map((patient) => (
-            <Card key={patient.id} className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-blue-400" />
-                      <div>
-                        <h3 className="text-white font-semibold">{patient.name}</h3>
-                        <p className="text-slate-400 text-sm">Age: {patient.age} | Room: {patient.room}</p>
+        {/* Search and Filter */}
+        <div className="flex gap-4 items-center">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-white/50" />
+            <Input
+              placeholder="Search by name, MRN, or room..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-blue-600/20 border-blue-400/30 text-white placeholder:text-white/50"
+            />
+          </div>
+          <div className="flex gap-2">
+            {['all', 'critical', 'routine'].map((filter) => (
+              <Button
+                key={filter}
+                variant={selectedFilter === filter ? "default" : "outline"}
+                onClick={() => setSelectedFilter(filter)}
+                className={selectedFilter === filter 
+                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                  : "bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
+                }
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                {filter.charAt(0).toUpperCase() + filter.slice(1)}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Patient Table */}
+        <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-blue-400/30 hover:bg-blue-500/10">
+                  <TableHead className="text-white font-semibold">Acuity</TableHead>
+                  <TableHead className="text-white font-semibold">Patient</TableHead>
+                  <TableHead className="text-white font-semibold">Room/Bed</TableHead>
+                  <TableHead className="text-white font-semibold">Chief Complaint</TableHead>
+                  <TableHead className="text-white font-semibold">Arrival</TableHead>
+                  <TableHead className="text-white font-semibold">LOS</TableHead>
+                  <TableHead className="text-white font-semibold">Vitals</TableHead>
+                  <TableHead className="text-white font-semibold">Status</TableHead>
+                  <TableHead className="text-white font-semibold">Care Team</TableHead>
+                  <TableHead className="text-white font-semibold">Disposition</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPatients.map((patient) => (
+                  <TableRow 
+                    key={patient.id} 
+                    className="border-blue-400/20 hover:bg-blue-500/10 cursor-pointer"
+                  >
+                    <TableCell>
+                      <Badge className={`${getAcuityColor(patient.acuity)} font-bold text-sm px-2 py-1`}>
+                        {patient.acuity}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-white font-medium">{patient.name}</div>
+                      <div className="text-white/60 text-xs">{patient.mrn} • {patient.age}{patient.gender}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-white">
+                        <Bed className="h-4 w-4" />
+                        {patient.room}-{patient.bed}
                       </div>
-                    </div>
-                    <Badge className={`${getAcuityColor(patient.acuity)} flex items-center gap-1`}>
-                      {getAcuityIcon(patient.acuity)}
-                      Acuity {patient.acuity}
-                    </Badge>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="outline" className="text-white border-slate-600">
-                      {patient.status}
-                    </Badge>
-                    <p className="text-slate-400 text-xs mt-1">
-                      Arrived: {patient.arrivalTime.toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div className="text-center">
-                    <p className="text-slate-400 text-xs">Chief Complaint</p>
-                    <p className="text-white font-medium">{patient.chiefComplaint}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Droplets className="h-4 w-4 text-red-400" />
-                    <div>
-                      <p className="text-slate-400 text-xs">Blood Pressure</p>
-                      <p className="text-white font-medium">{patient.vitals.bp}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Heart className="h-4 w-4 text-pink-400" />
-                    <div>
-                      <p className="text-slate-400 text-xs">Heart Rate</p>
-                      <p className="text-white font-medium">{patient.vitals.hr} bpm</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Thermometer className="h-4 w-4 text-orange-400" />
-                    <div>
-                      <p className="text-slate-400 text-xs">Temperature</p>
-                      <p className="text-white font-medium">{patient.vitals.temp}°F</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Wind className="h-4 w-4 text-blue-400" />
-                    <div>
-                      <p className="text-slate-400 text-xs">Oxygen Sat</p>
-                      <p className="text-white font-medium">{patient.vitals.spo2}%</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-white text-sm">{patient.chiefComplaint}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-white text-sm">{patient.arrivalTime.toLocaleTimeString()}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-white font-medium">{patient.los}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-xs text-white space-y-1">
+                        <div>BP: {patient.vitals.bp}</div>
+                        <div>HR: {patient.vitals.hr} | SpO2: {patient.vitals.spo2}%</div>
+                        <div>T: {patient.vitals.temp}°F | RR: {patient.vitals.rr}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`${getStatusColor(patient.status)} text-xs px-2 py-1`}>
+                        {patient.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-xs text-white space-y-1">
+                        <div>MD: {patient.physician}</div>
+                        <div>RN: {patient.nurse}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-white text-sm font-medium">{patient.disposition}</div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
