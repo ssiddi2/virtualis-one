@@ -17,6 +17,17 @@ const VirtualisChatModal = ({ hospitalId }: VirtualisChatModalProps) => {
 
   const effectiveHospitalId = hospitalId || profile?.hospital_id || user?.user_metadata?.hospital_id;
 
+  // V Logo SVG component
+  const VLogo = () => (
+    <svg 
+      viewBox="0 0 100 100" 
+      className="h-6 w-6 text-white"
+      fill="currentColor"
+    >
+      <path d="M20 20 L40 60 L50 50 L60 60 L80 20 L70 20 L55 45 L50 40 L45 45 L30 20 Z" />
+    </svg>
+  );
+
   // If minimized, show as a small floating button
   if (isMinimized) {
     return (
@@ -25,7 +36,7 @@ const VirtualisChatModal = ({ hospitalId }: VirtualisChatModalProps) => {
           onClick={() => setIsMinimized(false)}
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg rounded-full h-12 w-12 p-0"
         >
-          <MessageSquare className="h-6 w-6" />
+          <VLogo />
         </Button>
       </div>
     );
@@ -40,7 +51,7 @@ const VirtualisChatModal = ({ hospitalId }: VirtualisChatModalProps) => {
             onClick={() => setIsOpen(true)}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg rounded-full h-14 w-14 p-0"
           >
-            <MessageSquare className="h-6 w-6" />
+            <VLogo />
           </Button>
         </div>
       )}
@@ -50,7 +61,7 @@ const VirtualisChatModal = ({ hospitalId }: VirtualisChatModalProps) => {
         <DialogContent className="max-w-6xl max-h-[90vh] p-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border border-purple-300/30 rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-white/20 bg-gradient-to-r from-blue-600/20 to-purple-600/20">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
+              <VLogo />
               Virtualis Clinical Chat
             </h2>
             <div className="flex gap-2">

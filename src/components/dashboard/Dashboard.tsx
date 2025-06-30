@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -267,7 +268,7 @@ const Dashboard = ({ hospitalId }: DashboardProps) => {
       </div>
 
       {/* Collapsible Chat Modal */}
-      <VirtualisChatModal hospitalId={effectiveHospitalId} />
+      <VirtualisChatModal />
     </div>
   );
 };
