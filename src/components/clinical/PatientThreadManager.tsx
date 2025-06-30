@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,7 +60,7 @@ const PatientThreadManager = ({ hospitalId, onThreadSelect, activeThreadId }: Pa
                    'Patient thread created',
       lastMessageTime: new Date(Date.now() - (index * 30 * 60000)), // Stagger times
       unreadCount: index === 0 ? 2 : index === 1 ? 1 : 0,
-      acuity: index === 0 ? 'critical' : index === 1 ? 'urgent' : 'routine',
+      acuity: (index === 0 ? 'critical' : index === 1 ? 'urgent' : 'routine') as 'critical' | 'urgent' | 'routine',
       participants: [
         'Dr. Johnson',
         'Nurse Smith',
