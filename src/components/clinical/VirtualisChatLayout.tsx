@@ -90,6 +90,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const [newMessage, setNewMessage] = useState('');
   const [showFabOptions, setShowFabOptions] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Mock chat threads with messages - now with AI analysis capability
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([
@@ -672,7 +673,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         </div>
       </div>
 
-      {/* Enhanced FAB with Options - Removed Direct Message Option */}
+      {/* Enhanced FAB with Options */}
       <div className="fixed bottom-6 right-6">
         {showFabOptions && (
           <div className="absolute bottom-20 right-0 space-y-3 animate-fade-in">
