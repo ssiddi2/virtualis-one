@@ -1,14 +1,13 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Database, Key, Link, TestTube, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import EMRConnectionSimulation from "./EMRConnectionSimulation";
 
 interface Hospital {
   id: string;
@@ -27,6 +26,7 @@ interface EMRIntegrationPanelProps {
 
 const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationPanelProps) => {
   const { toast } = useToast();
+  const [showSimulation, setShowSimulation] = useState(false);
   const [formData, setFormData] = useState({
     emr_type: hospital.emr_type || '',
     api_endpoint: '',
@@ -61,34 +61,31 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
   };
 
   const handleTestConnection = async () => {
-    setTestResult('testing');
+    // Show simulation instead of actual connection
+    setShowSimulation(true);
+  };
+
+  const handleSimulationComplete = () => {
+    setShowSimulation(false);
+    setTestResult('success');
     
-    // Simulate API test
-    setTimeout(() => {
-      const success = Math.random() > 0.3; // 70% success rate for demo
-      setTestResult(success ? 'success' : 'error');
-      
-      toast({
-        title: success ? "Connection Successful" : "Connection Failed",
-        description: success 
-          ? "EMR integration test completed successfully" 
-          : "Unable to connect to EMR system. Check credentials.",
-        variant: success ? "default" : "destructive"
-      });
-    }, 2000);
+    toast({
+      title: "Healthcare Simulation Complete",
+      description: "EMR integration simulation completed successfully",
+    });
   };
 
   const handleSave = () => {
     onSave({
       hospital_id: hospital.id,
       ...formData,
-      status: testResult === 'success' ? 'active' : 'pending',
+      status: testResult === 'success' ? 'simulated' : 'pending',
       last_updated: new Date().toISOString()
     });
     
     toast({
-      title: "Integration Saved",
-      description: `EMR integration for ${hospital.name} has been configured`,
+      title: "Configuration Saved",
+      description: `EMR simulation setup for ${hospital.name} has been configured`,
     });
   };
 
@@ -215,168 +212,149 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
   };
 
   return (
-    <div className="p-6 space-y-6 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          onClick={onBack}
-          variant="ghost"
-          className="text-white hover:bg-slate-800"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-white tech-font ai-text-glow">
-            EMR INTEGRATION CONSOLE
-          </h1>
-          <p className="text-virtualis-gold font-semibold tech-font">
-            {hospital.name} • {hospital.location}
-          </p>
+    <>
+      <div className="p-6 space-y-6 min-h-screen">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={onBack}
+            variant="ghost"
+            className="text-white hover:bg-slate-800"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-white tech-font ai-text-glow">
+              EMR SIMULATION CONSOLE
+            </h1>
+            <p className="text-virtualis-gold font-semibold tech-font">
+              {hospital.name} • {hospital.location}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Configuration Form */}
-        <div className="lg:col-span-2">
-          <Card className="ai-card">
-            <CardHeader>
-              <CardTitle className="text-white tech-font flex items-center gap-2">
-                <Database className="h-5 w-5 text-virtualis-gold" />
-                NEURAL CONNECTION CONFIG
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label className="text-white tech-font">EMR System Type</Label>
-                <Select value={formData.emr_type} onValueChange={(value) => handleInputChange('emr_type', value)}>
-                  <SelectTrigger className="ai-input tech-font">
-                    <SelectValue placeholder="Select EMR System" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-600">
-                    {emrTypes.map((emr) => (
-                      <SelectItem key={emr} value={emr}>{emr}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Configuration Form */}
+          <div className="lg:col-span-2">
+            <Card className="ai-card">
+              <CardHeader>
+                <CardTitle className="text-white tech-font flex items-center gap-2">
+                  <Database className="h-5 w-5 text-virtualis-gold" />
+                  HEALTHCARE SIMULATION CONFIG
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label className="text-white tech-font">EMR System Type</Label>
+                  <Select value={formData.emr_type} onValueChange={(value) => handleInputChange('emr_type', value)}>
+                    <SelectTrigger className="ai-input tech-font">
+                      <SelectValue placeholder="Select EMR System" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-600">
+                      {emrTypes.map((emr) => (
+                        <SelectItem key={emr} value={emr}>{emr}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {getEmrFields()}
+                {getEmrFields()}
 
-              <div>
-                <Label className="text-white tech-font">Additional Configuration (JSON)</Label>
-                <Textarea
-                  value={formData.additional_config}
-                  onChange={(e) => handleInputChange('additional_config', e.target.value)}
-                  className="ai-input tech-font min-h-[100px]"
-                  placeholder='{"timeout": 30, "retry_attempts": 3}'
-                />
-              </div>
+                <div className="flex gap-4">
+                  <Button
+                    onClick={handleTestConnection}
+                    className="ai-button-secondary tech-font"
+                  >
+                    <TestTube className="h-4 w-4 mr-2" />
+                    START SIMULATION
+                  </Button>
+                  
+                  <Button
+                    onClick={handleSave}
+                    className="ai-button tech-font"
+                  >
+                    <Key className="h-4 w-4 mr-2" />
+                    SAVE CONFIGURATION
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              <div className="flex gap-4">
-                <Button
-                  onClick={handleTestConnection}
-                  disabled={testResult === 'testing'}
-                  className="ai-button-secondary tech-font"
-                >
-                  <TestTube className="h-4 w-4 mr-2" />
-                  {testResult === 'testing' ? 'TESTING...' : 'TEST CONNECTION'}
-                </Button>
+          {/* Status Panel */}
+          <div className="space-y-6">
+            <Card className="ai-card">
+              <CardHeader>
+                <CardTitle className="text-white tech-font">SIMULATION STATUS</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-300 tech-font">Current Mode:</span>
+                  <Badge className={
+                    testResult === 'success' 
+                      ? "bg-virtualis-alert-green/20 text-virtualis-alert-green border-virtualis-alert-green" 
+                      : "bg-blue-500/20 text-blue-400 border-blue-500"
+                  }>
+                    {testResult === 'success' && <CheckCircle className="h-3 w-3 mr-1" />}
+                    <Database className="h-3 w-3 mr-1" />
+                    {testResult === 'success' ? 'SIMULATED' : 'DEMO MODE'}
+                  </Badge>
+                </div>
                 
-                <Button
-                  onClick={handleSave}
-                  className="ai-button tech-font"
-                >
-                  <Key className="h-4 w-4 mr-2" />
-                  SAVE INTEGRATION
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Status Panel */}
-        <div className="space-y-6">
-          <Card className="ai-card">
-            <CardHeader>
-              <CardTitle className="text-white tech-font">CONNECTION STATUS</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-300 tech-font">Current Status:</span>
-                <Badge className={
-                  testResult === 'success' 
-                    ? "bg-virtualis-alert-green/20 text-virtualis-alert-green border-virtualis-alert-green" 
-                    : testResult === 'error'
-                    ? "bg-virtualis-alert-red/20 text-virtualis-alert-red border-virtualis-alert-red"
-                    : "bg-slate-500/20 text-slate-400 border-slate-500"
-                }>
-                  {testResult === 'success' && <CheckCircle className="h-3 w-3 mr-1" />}
-                  {testResult === 'error' && <XCircle className="h-3 w-3 mr-1" />}
-                  {testResult === 'testing' && <Database className="h-3 w-3 mr-1 animate-spin" />}
-                  {testResult === 'idle' && <Link className="h-3 w-3 mr-1" />}
-                  {testResult === 'testing' ? 'TESTING' : 
-                   testResult === 'success' ? 'CONNECTED' : 
-                   testResult === 'error' ? 'ERROR' : 'PENDING'}
-                </Badge>
-              </div>
-              
-              <div className="text-sm text-slate-400 tech-font">
-                Last Updated: {new Date().toLocaleString()}
-              </div>
-              
-              {testResult === 'success' && (
-                <div className="p-3 bg-virtualis-alert-green/10 border border-virtualis-alert-green/30 rounded-lg">
-                  <p className="text-virtualis-alert-green text-sm tech-font">
-                    ✓ Authentication verified
-                    <br />
-                    ✓ FHIR endpoint accessible
-                    <br />
-                    ✓ Data sync ready
-                  </p>
+                <div className="text-sm text-slate-400 tech-font">
+                  Last Updated: {new Date().toLocaleString()}
                 </div>
-              )}
-              
-              {testResult === 'error' && (
-                <div className="p-3 bg-virtualis-alert-red/10 border border-virtualis-alert-red/30 rounded-lg">
-                  <p className="text-virtualis-alert-red text-sm tech-font">
-                    ✗ Connection failed
-                    <br />
-                    ✗ Check credentials
-                    <br />
-                    ✗ Verify endpoint URL
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                
+                {testResult === 'success' && (
+                  <div className="p-3 bg-virtualis-alert-green/10 border border-virtualis-alert-green/30 rounded-lg">
+                    <p className="text-virtualis-alert-green text-sm tech-font">
+                      ✓ Healthcare simulation ready
+                      <br />
+                      ✓ Clinical workflows active
+                      <br />
+                      ✓ Demo data accessible
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          <Card className="ai-card">
-            <CardHeader>
-              <CardTitle className="text-white tech-font">INTEGRATION FEATURES</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-300 tech-font">Patient Data</span>
-                <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green">Enabled</Badge>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-300 tech-font">Lab Results</span>
-                <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green">Enabled</Badge>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-300 tech-font">Medications</span>
-                <Badge className="bg-virtualis-alert-yellow/20 text-virtualis-alert-yellow">Partial</Badge>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-300 tech-font">Orders</span>
-                <Badge className="bg-slate-500/20 text-slate-400">Disabled</Badge>
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="ai-card">
+              <CardHeader>
+                <CardTitle className="text-white tech-font">SIMULATION FEATURES</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-300 tech-font">Patient Demo Data</span>
+                  <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green">Active</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-300 tech-font">Clinical Workflows</span>
+                  <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green">Active</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-300 tech-font">AI Healthcare Assistant</span>
+                  <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green">Active</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-300 tech-font">Real Integration</span>
+                  <Badge className="bg-slate-500/20 text-slate-400">Demo Only</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+
+      {showSimulation && (
+        <EMRConnectionSimulation
+          hospitalName={hospital.name}
+          emrType={formData.emr_type}
+          onComplete={handleSimulationComplete}
+        />
+      )}
+    </>
   );
 };
 
