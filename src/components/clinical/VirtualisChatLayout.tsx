@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageSquare, Phone, Users, Activity, Brain, Stethoscope, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 import ConsolidatedConsultDialog from './ConsolidatedConsultDialog';
 import StreamlinedMessageDialog from './StreamlinedMessageDialog';
+import FloatingActionButton from './FloatingActionButton';
 import { useToast } from '@/hooks/use-toast';
 
 interface VirtualisChatLayoutProps {
@@ -94,22 +94,6 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">Virtualis Clinical Communications</h1>
               <p className="text-white/70">AI-powered clinical messaging and consultation platform</p>
-            </div>
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => setShowConsultDialog(true)}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-              >
-                <Phone className="h-4 w-4 mr-2" />
-                Request Consult
-              </Button>
-              <Button 
-                onClick={() => setShowMessageDialog(true)}
-                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Send Message
-              </Button>
             </div>
           </div>
 
@@ -272,6 +256,12 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton 
+        onMessageClick={() => setShowMessageDialog(true)}
+        onConsultClick={() => setShowConsultDialog(true)}
+      />
 
       {/* Dialogs */}
       <ConsolidatedConsultDialog 
