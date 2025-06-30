@@ -74,7 +74,7 @@ const Index = () => {
                 />
               ) : (
                 <EMRDashboard 
-                  onHospitalSelect={setSelectedHospitalId}
+                  onSelectHospital={setSelectedHospitalId}
                 />
               )
             } 
