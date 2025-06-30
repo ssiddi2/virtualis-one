@@ -33,7 +33,7 @@ const CPOESystem = () => {
     // Validate medication safety
     const safety = validateMedication(medicationForm.name, medicationForm.dosage);
     
-    if (!safety.iseSafe) {
+    if (!safety.isSafe) {
       toast({
         title: "Safety Check Required",
         description: "Please review all warnings before proceeding",
