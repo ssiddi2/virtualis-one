@@ -1,9 +1,9 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Activity, Users, Calendar, FileText, AlertTriangle, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ProductionStatus from '@/components/dashboard/ProductionStatus';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -23,7 +23,7 @@ const Dashboard = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-white">Livemed EMR Dashboard</h1>
-            <p className="text-white/70">Welcome back, {user.email}</p>
+            <p className="text-white/70">Welcome back, {user.email} ({user.role})</p>
           </div>
           <div className="flex gap-3">
             <Button 
@@ -42,6 +42,9 @@ const Dashboard = () => {
             </Button>
           </div>
         </div>
+
+        {/* Production Status */}
+        <ProductionStatus />
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
