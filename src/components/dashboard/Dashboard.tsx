@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -266,7 +267,7 @@ const Dashboard = ({ hospitalId }: DashboardProps) => {
         </Tabs>
       </div>
 
-      {/* Collapsible Chat Modal - REMOVED hospitalId prop */}
+      {/* Chat Modal - No props passed */}
       <VirtualisChatModal />
     </div>
   );

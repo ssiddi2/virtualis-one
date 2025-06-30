@@ -6,7 +6,7 @@ import { MessageSquare, Minimize2, Maximize2 } from 'lucide-react';
 import VirtualisChat from './VirtualisChat';
 import { useAuth } from '@/components/auth/AuthProvider';
 
-// Removed hospitalId prop completely
+// Component with no props - gets hospital ID from auth context only
 const VirtualisChatModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
