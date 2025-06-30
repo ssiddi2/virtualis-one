@@ -43,10 +43,12 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   };
 
   const handleMessageClick = () => {
+    console.log('Opening message dialog');
     setMessageDialogOpen(true);
   };
 
   const handleConsultClick = () => {
+    console.log('Opening consult dialog');
     setConsultDialogOpen(true);
   };
 

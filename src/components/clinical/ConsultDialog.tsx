@@ -37,6 +37,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
   ];
 
   const handleNeuraConsult = () => {
+    console.log('Neural Consult initiated');
     if (!consultation.trim()) {
       toast({
         title: "Neural Input Required",
@@ -79,9 +80,9 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[#1a2332]/95 backdrop-blur-xl border-[#2a3441]/50 text-white">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border border-purple-300/40 text-white shadow-2xl rounded-2xl">
+        <DialogHeader className="border-b border-white/20 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-purple-200 to-indigo-200 bg-clip-text text-transparent">
             <Brain className="h-5 w-5 text-purple-400" />
             Neural Consultation System
           </DialogTitle>
@@ -90,18 +91,18 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Patient Neural Link */}
-          <div>
-            <label className="text-sm text-white/70 mb-2 block flex items-center gap-2">
+          <div className="space-y-2">
+            <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <User className="h-3 w-3" />
               Patient Neural Link (Optional)
             </label>
             <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-              <SelectTrigger className="bg-[#0f1922]/80 border-[#2a3441]/50 text-white backdrop-blur-sm">
+              <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
                 <SelectValue placeholder="Select patient for contextual analysis..." />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a2332]/95 border-[#2a3441]/50 text-white backdrop-blur-xl">
+              <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
                 <SelectItem value="">No patient link</SelectItem>
                 {patients?.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
@@ -114,38 +115,38 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
           </div>
 
           {/* Priority Neural Classification */}
-          <div>
-            <label className="text-sm text-white/70 mb-2 block flex items-center gap-2">
+          <div className="space-y-2">
+            <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <Target className="h-3 w-3" />
               Neural Priority Classification
             </label>
             <Select value={priority} onValueChange={(value: 'routine' | 'urgent' | 'critical') => setPriority(value)}>
-              <SelectTrigger className="bg-[#0f1922]/80 border-[#2a3441]/50 text-white backdrop-blur-sm">
+              <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a2332]/95 border-[#2a3441]/50 text-white backdrop-blur-xl">
+              <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
                 <SelectItem value="routine">Routine Analysis</SelectItem>
                 <SelectItem value="urgent">Urgent Processing</SelectItem>
                 <SelectItem value="critical">Critical Override</SelectItem>
               </SelectContent>
             </Select>
-            <Badge className={`mt-2 ${getPriorityColor(priority)} flex items-center gap-1 w-fit`}>
+            <Badge className={`mt-2 ${getPriorityColor(priority)} flex items-center gap-1 w-fit border`}>
               {getPriorityIcon(priority)}
               <span>{priority.toUpperCase()} NEURAL MODE</span>
             </Badge>
           </div>
 
           {/* Specialty Targeting */}
-          <div>
-            <label className="text-sm text-white/70 mb-2 block flex items-center gap-2">
+          <div className="space-y-2">
+            <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <Brain className="h-3 w-3" />
               Specialty Neural Target (Optional)
             </label>
             <Select value={specialty} onValueChange={setSpecialty}>
-              <SelectTrigger className="bg-[#0f1922]/80 border-[#2a3441]/50 text-white backdrop-blur-sm">
+              <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
                 <SelectValue placeholder="AI will auto-determine optimal specialty..." />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a2332]/95 border-[#2a3441]/50 text-white backdrop-blur-xl">
+              <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
                 <SelectItem value="">Auto-Neural Detection</SelectItem>
                 {specialties.map((spec) => (
                   <SelectItem key={spec} value={spec}>
@@ -157,8 +158,8 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
           </div>
 
           {/* Clinical Neural Input */}
-          <div>
-            <label className="text-sm text-white/70 mb-2 block flex items-center gap-2">
+          <div className="space-y-2">
+            <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <Cpu className="h-3 w-3" />
               Clinical Neural Input
             </label>
@@ -166,7 +167,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
               value={consultation}
               onChange={(e) => setConsultation(e.target.value)}
               placeholder="Describe clinical scenario... Neural AI will analyze symptoms, suggest differential diagnosis, and route to optimal specialist..."
-              className="bg-[#0f1922]/80 border-[#2a3441]/50 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm"
+              className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm rounded-lg"
             />
             <div className="flex items-center gap-2 mt-2">
               <Brain className="h-3 w-3 text-purple-300" />
@@ -178,7 +179,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
 
           {/* Patient Neural Context Preview */}
           {selectedPatient && patients && (
-            <div className="p-3 bg-[#0f1922]/60 backdrop-blur-sm border border-[#2a3441]/50 rounded-lg">
+            <div className="p-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <User className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-medium text-white">Neural Patient Context</span>
@@ -198,10 +199,10 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
           )}
 
           {/* Neural Action Buttons */}
-          <div className="flex gap-2 pt-4 border-t border-[#2a3441]/50">
+          <div className="flex gap-2 pt-4 border-t border-white/20">
             <Button
               onClick={handleNeuraConsult}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+              className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-0 rounded-lg"
             >
               <Send className="h-4 w-4 mr-2" />
               Initiate Neural Consult
@@ -209,7 +210,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
             <Button
               onClick={onClose}
               variant="outline"
-              className="bg-[#0f1922]/60 border-[#2a3441]/50 text-white hover:bg-[#2a3441]/30 backdrop-blur-sm"
+              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 backdrop-blur-sm rounded-lg"
             >
               Cancel
             </Button>

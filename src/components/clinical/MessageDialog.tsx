@@ -130,9 +130,9 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[#1a2332]/95 backdrop-blur-xl border-[#2a3441]/50 text-white">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/10 border border-blue-300/40 text-white shadow-2xl rounded-2xl">
+        <DialogHeader className="border-b border-white/20 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-blue-200 to-cyan-200 bg-clip-text text-transparent">
             <MessageSquare className="h-5 w-5 text-blue-400" />
             Select Team Members
           </DialogTitle>
@@ -141,7 +141,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
@@ -149,13 +149,13 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name or role..."
-              className="bg-[#0f1922]/80 border-[#2a3441]/50 text-white placeholder:text-white/60 pl-10 backdrop-blur-sm"
+              className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 pl-10 backdrop-blur-sm rounded-lg"
             />
           </div>
 
           {/* Selected Users Summary */}
           {selectedUsers.length > 0 && (
-            <div className="p-3 bg-[#0f1922]/60 backdrop-blur-sm border border-[#2a3441]/50 rounded-lg">
+            <div className="p-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="h-4 w-4 text-green-400" />
                 <span className="text-sm font-medium text-white">Selected ({selectedUsers.length})</span>
@@ -179,10 +179,10 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
               <div
                 key={user.id}
                 onClick={() => toggleUserSelection(user.id)}
-                className={`p-4 backdrop-blur-sm border rounded-lg cursor-pointer transition-all duration-200 ${
+                className={`p-4 backdrop-blur-sm border rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
                   selectedUsers.includes(user.id)
-                    ? 'bg-blue-600/30 border-blue-400/50 shadow-lg'
-                    : 'bg-[#0f1922]/60 border-[#2a3441]/50 hover:bg-[#2a3441]/30'
+                    ? 'bg-blue-600/30 border-blue-400/50 shadow-xl'
+                    : 'bg-white/5 border-white/20 hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -192,7 +192,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
                         {user.avatar}
                       </div>
-                      <div className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-[#1a2332] ${getStatusColor(user.status)}`}></div>
+                      <div className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white/20 ${getStatusColor(user.status)}`}></div>
                     </div>
 
                     {/* User Info */}
@@ -205,7 +205,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
 
                   <div className="flex items-center gap-2">
                     {/* Status Badge */}
-                    <Badge className={`text-xs ${getStatusBadge(user.status)}`}>
+                    <Badge className={`text-xs border ${getStatusBadge(user.status)}`}>
                       {user.status.toUpperCase()}
                     </Badge>
 
@@ -214,7 +214,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg"
                         onClick={(e) => {
                           e.stopPropagation();
                           toast({ title: "Calling...", description: `Calling ${user.name}` });
@@ -225,7 +225,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg"
                         onClick={(e) => {
                           e.stopPropagation();
                           toast({ title: "Video Call", description: `Starting video call with ${user.name}` });
@@ -246,11 +246,11 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 pt-4 border-t border-[#2a3441]/50">
+          <div className="flex gap-2 pt-4 border-t border-white/20">
             <Button
               onClick={handleStartConversation}
               disabled={selectedUsers.length === 0}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 border-0 rounded-lg"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Start Conversation ({selectedUsers.length})
@@ -258,7 +258,7 @@ const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
             <Button
               onClick={onClose}
               variant="outline"
-              className="bg-[#0f1922]/60 border-[#2a3441]/50 text-white hover:bg-[#2a3441]/30 backdrop-blur-sm"
+              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 backdrop-blur-sm rounded-lg"
             >
               Cancel
             </Button>
