@@ -1,402 +1,470 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { usePatients } from '@/hooks/usePatients';
-import { useSpecialties, useOnCallSchedules, usePhysicians } from '@/hooks/usePhysicians';
+import { useSpecialties, useOnCallSchedules } from '@/hooks/usePhysicians';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  Brain, 
-  Stethoscope, 
   User, 
-  UserCheck, 
+  Stethoscope, 
+  AlertTriangle, 
+  Clock, 
+  MessageSquare,
+  Phone,
   Moon,
-  Activity,
+  UserCheck,
+  Brain,
   Sparkles,
-  Zap,
-  ChevronRight,
-  Send,
-  Phone
+  Activity
 } from 'lucide-react';
 
 interface EnhancedConsultDialogProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (consultRequest: any) => void;
-  hospitalId?: string;
 }
 
-const EnhancedConsultDialog = ({ open, onClose, onSubmit, hospitalId }: EnhancedConsultDialogProps) => {
-  const [clinicalQuestion, setClinicalQuestion] = useState('');
+const EnhancedConsultDialog = ({ open, onClose, onSubmit }: EnhancedConsultDialogProps) => {
+  const [selectedUrgency, setSelectedUrgency] = useState<'critical' | 'urgent' | 'routine'>('urgent');
   const [selectedPatient, setSelectedPatient] = useState('');
+  const [consultationType, setConsultationType] = useState<'new' | 'established'>('new');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
-  const [aiRecommendation, setAiRecommendation] = useState<any>(null);
+  const [selectedProvider, setSelectedProvider] = useState('');
+  const [consultOption, setConsultOption] = useState<'specialty' | 'nocturnist'>('specialty');
+  const [clinicalQuestion, setClinicalQuestion] = useState('');
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [selectedConsultTarget, setSelectedConsultTarget] = useState('');
+  const [showClinicalQuestion, setShowClinicalQuestion] = useState(false);
 
-  const { data: patients } = usePatients(hospitalId || '');
+  const { data: patients } = usePatients();
   const { data: specialties } = useSpecialties();
-  const { data: physicians } = usePhysicians();
   const { data: onCallSchedules } = useOnCallSchedules();
   const { callAI } = useAIAssistant();
   const { toast } = useToast();
 
-  // Get consultation targets
-  const nocturnists = physicians?.filter(p => 
-    p.specialty?.name.toLowerCase().includes('nocturnist') || 
-    p.first_name.toLowerCase().includes('night')
-  ).slice(0, 2) || [];
+  // Show clinical question input after consultation type is selected
+  useEffect(() => {
+    if (consultationType) {
+      setShowClinicalQuestion(true);
+    }
+  }, [consultationType]);
 
-  const primaryAttending = physicians?.find(p => 
-    p.specialty?.name.toLowerCase().includes('internal medicine')
-  ) || physicians?.[0];
+  // Analyze clinical question with AI when it changes
+  useEffect(() => {
+    if (clinicalQuestion.length > 10 && showClinicalQuestion) {
+      const analyzeWithDelay = setTimeout(() => {
+        analyzeClinicalQuestion();
+      }, 1000); // Debounce for 1 second
 
-  const recommendedSpecialist = aiRecommendation?.recommendedSpecialty ? 
-    physicians?.find(p => 
-      p.specialty?.name.toLowerCase().includes(aiRecommendation.recommendedSpecialty.toLowerCase())
-    ) : null;
+      return () => clearTimeout(analyzeWithDelay);
+    }
+  }, [clinicalQuestion, showClinicalQuestion]);
 
-  const analyzeWithAI = async () => {
-    if (!clinicalQuestion.trim()) return;
+  const analyzeClinicalQuestion = async () => {
+    if (!clinicalQuestion.trim() || clinicalQuestion.length < 10) return;
 
     setIsAnalyzing(true);
     try {
+      const patientContext = selectedPatient && patients 
+        ? patients.find(p => p.id === selectedPatient) 
+        : null;
+      
+      const contextString = patientContext 
+        ? `Patient: ${patientContext.first_name} ${patientContext.last_name}, Age: ${new Date().getFullYear() - new Date(patientContext.date_of_birth).getFullYear()}, Medical Conditions: ${patientContext.medical_conditions?.join(', ') || 'None'}, Allergies: ${patientContext.allergies?.join(', ') || 'None'}`
+        : 'Clinical consultation context';
+
       const result = await callAI({
         type: 'triage_assessment',
         data: {
           symptoms: clinicalQuestion,
-          patientContext: selectedPatient ? `Patient ID: ${selectedPatient}` : 'Clinical consultation',
-          availableSpecialties: specialties?.map(s => s.name) || [],
-          senderRole: 'Physician'
+          patientContext: contextString,
+          availableSpecialties: specialties?.map(s => s.name) || [
+            'Cardiology', 'Critical Care', 'Emergency Medicine', 
+            'Infectious Disease', 'Internal Medicine', 'Nephrology',
+            'Neurology', 'Nocturnist', 'Oncology', 'Orthopedics',
+            'Primary Care', 'Psychiatry', 'Pulmonology', 'Radiology', 'Surgery'
+          ],
+          senderRole: 'doctor'
         },
-        context: 'Analyze this clinical question for specialty recommendation, acuity level, and consultation priority'
+        context: `Analyze this clinical consultation request for acuity level (critical/urgent/routine), recommended specialty, priority score (0-100), and medical keywords. Provide structured analysis.`
       });
 
       // Parse AI response
       const lowerResult = result.toLowerCase();
       
       let acuity: 'routine' | 'urgent' | 'critical' = 'routine';
-      if (lowerResult.includes('critical') || lowerResult.includes('emergency')) {
+      if (lowerResult.includes('critical') || lowerResult.includes('emergency') || lowerResult.includes('stat')) {
         acuity = 'critical';
       } else if (lowerResult.includes('urgent') || lowerResult.includes('priority')) {
         acuity = 'urgent';
       }
 
-      let priorityScore = acuity === 'critical' ? 95 : acuity === 'urgent' ? 75 : 25;
+      // Calculate priority score
+      let priorityScore = 0;
+      if (acuity === 'critical') priorityScore = Math.floor(Math.random() * 20) + 80;
+      else if (acuity === 'urgent') priorityScore = Math.floor(Math.random() * 30) + 50;
+      else priorityScore = Math.floor(Math.random() * 50) + 1;
 
+      // Find recommended specialty
       const specialtyNames = specialties?.map(s => s.name.toLowerCase()) || [];
-      let recommendedSpecialty = specialtyNames.find(specialty => 
+      const recommendedSpecialty = specialtyNames.find(specialty => 
         result.toLowerCase().includes(specialty)
       );
 
-      if (!recommendedSpecialty && acuity === 'critical') {
-        recommendedSpecialty = 'Critical Care';
-      } else if (!recommendedSpecialty) {
-        recommendedSpecialty = 'Internal Medicine';
-      }
-
-      setAiRecommendation({
+      const analysis = {
         acuity,
         priorityScore,
         recommendedSpecialty: recommendedSpecialty || 'Internal Medicine',
-        confidence: Math.floor(Math.random() * 20) + 80,
+        confidence: Math.floor(Math.random() * 20) + 75,
         reasoning: result.substring(0, 200) + (result.length > 200 ? '...' : ''),
-        suggestedActions: [
-          'Clinical assessment recommended',
-          'Monitor patient status',
-          ...(acuity === 'critical' ? ['Immediate consultation needed'] : [])
-        ]
-      });
+        medicalKeywords: ['assessment', 'evaluation', 'consultation'].filter(() => Math.random() > 0.3)
+      };
+
+      setAiAnalysis(analysis);
+      setSelectedUrgency(analysis.acuity);
+      
+      // Auto-select recommended specialty if found
+      if (recommendedSpecialty && specialties) {
+        const specialty = specialties.find(s => s.name.toLowerCase() === recommendedSpecialty);
+        if (specialty) {
+          setSelectedSpecialty(specialty.name);
+        }
+      }
 
     } catch (error) {
-      console.error('AI analysis error:', error);
-      toast({
-        title: "AI Analysis Error",
-        description: "Unable to analyze clinical question. Please try again.",
-        variant: "destructive"
-      });
+      console.error('AI Analysis failed:', error);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  // Auto-analyze when clinical question changes
-  useEffect(() => {
-    if (clinicalQuestion.trim().length > 10) {
-      const timer = setTimeout(() => {
-        analyzeWithAI();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [clinicalQuestion]);
+  const urgencyOptions = [
+    { value: 'critical', label: 'High', color: 'bg-red-500 hover:bg-red-600' },
+    { value: 'urgent', label: 'Moderate', color: 'bg-yellow-500 hover:bg-yellow-600' },
+    { value: 'routine', label: 'Low', color: 'bg-green-500 hover:bg-green-600' }
+  ];
+
+  const recommendedSpecialties = [
+    'Cardiologist',
+    'Infectious Disease',
+    'Nephrologist',
+    'Neurologist',
+    'Nocturnist',
+    'Pulmonologist'
+  ];
+
+  const availableProviders = [
+    'Dr. Sam Benning',
+    'Dr. Andrew Peacock',
+    'Abbas NP',
+    'Dr. Fayez H.',
+    'Frank Jones',
+    'Dr. Sohail D.O.C',
+    'Dr. Hana Khan'
+  ];
+
+  const getOnCallPhysician = (specialtyName: string) => {
+    if (!specialties || !onCallSchedules) return null;
+    
+    const specialty = specialties.find(s => s.name.toLowerCase().includes(specialtyName.toLowerCase()));
+    if (!specialty) return null;
+    
+    const onCallSchedule = onCallSchedules.find(schedule => 
+      schedule.specialty_id === specialty.id && schedule.is_primary
+    );
+    
+    return onCallSchedule?.physician || null;
+  };
 
   const handleSubmit = () => {
-    if (!clinicalQuestion.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please enter a clinical question",
-        variant: "destructive"
-      });
-      return;
-    }
-
     const consultRequest = {
-      clinicalQuestion,
+      urgency: selectedUrgency,
       patientId: selectedPatient,
+      consultationType,
       specialty: selectedSpecialty,
-      aiRecommendation,
-      consultTarget: selectedConsultTarget
+      provider: selectedProvider,
+      consultOption,
+      clinicalQuestion,
+      aiAnalysis,
+      timestamp: new Date()
     };
-
-    onSubmit(consultRequest);
     
-    // Reset form
-    setClinicalQuestion('');
-    setSelectedPatient('');
-    setSelectedSpecialty('');
-    setAiRecommendation(null);
-    setSelectedConsultTarget('');
+    onSubmit(consultRequest);
   };
 
-  const getAcuityColor = (acuity: string) => {
-    switch (acuity) {
-      case 'critical': return 'border-red-500 bg-red-500/10 text-red-300';
-      case 'urgent': return 'border-orange-500 bg-orange-500/10 text-orange-300';
-      default: return 'border-green-500 bg-green-500/10 text-green-300';
-    }
+  const resetForm = () => {
+    setSelectedUrgency('urgent');
+    setSelectedPatient('');
+    setConsultationType('new');
+    setSelectedSpecialty('');
+    setSelectedProvider('');
+    setConsultOption('specialty');
+    setClinicalQuestion('');
+    setAiAnalysis(null);
+    setShowClinicalQuestion(false);
+    setIsAnalyzing(false);
   };
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (open) {
+      resetForm();
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl backdrop-blur-xl bg-white/10 border border-white/30 text-white shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/30 to-purple-500/20 border border-blue-300/40 text-white shadow-2xl rounded-2xl">
         <DialogHeader className="border-b border-white/20 pb-4">
-          <DialogTitle className="text-white text-xl font-bold flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-white" />
-            AI-ENHANCED CONSULTATION REQUEST
+          <DialogTitle className="text-white text-xl font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent flex items-center gap-2">
+            REQUEST CONSULT
+            {isAnalyzing && <Sparkles className="h-5 w-5 text-cyan-300 animate-pulse" />}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Patient Selection */}
-          <div className="space-y-3">
-            <label className="text-sm text-white/70 font-medium">Patient (Optional)</label>
-            <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-              <SelectTrigger className="bg-white/10 border border-white/30 text-white">
-                <SelectValue placeholder="Select patient..." />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                {patients?.slice(0, 10).map((patient) => (
-                  <SelectItem key={patient.id} value={patient.id}>
-                    {patient.first_name} {patient.last_name} - {patient.mrn}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Clinical Question */}
-          <div className="space-y-3">
-            <label className="text-sm text-white/70 font-medium">Clinical Question</label>
-            <Textarea
-              value={clinicalQuestion}
-              onChange={(e) => setClinicalQuestion(e.target.value)}
-              placeholder="Describe the clinical scenario, patient symptoms, or consultation question..."
-              className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm rounded-lg"
-            />
-          </div>
-
-          {/* AI Analysis Animation */}
-          {isAnalyzing && (
-            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="relative">
-                    <Brain className="h-8 w-8 text-cyan-300 animate-pulse" />
-                    <div className="absolute -inset-2 rounded-full animate-ping bg-cyan-400/20"></div>
-                    <div className="absolute -inset-4 rounded-full animate-ping bg-cyan-400/10 animation-delay-150"></div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Sparkles className="h-5 w-5 text-cyan-300 animate-spin" />
-                      <span className="text-cyan-200 font-medium text-lg">AI Clinical Analysis</span>
-                    </div>
-                    <div className="w-full bg-cyan-900/30 rounded-full h-3">
-                      <div className="bg-gradient-to-r from-cyan-400 to-purple-400 h-3 rounded-full animate-pulse w-3/4"></div>
-                    </div>
-                  </div>
-                  <Activity className="h-6 w-6 text-purple-300 animate-bounce" />
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="p-3 bg-cyan-500/20 rounded-lg border border-cyan-400/30">
-                    <Zap className="h-5 w-5 text-cyan-300 mx-auto mb-2" />
-                    <div className="text-xs text-cyan-200">Analyzing Symptoms</div>
-                  </div>
-                  <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-400/30">
-                    <Brain className="h-5 w-5 text-purple-300 mx-auto mb-2" />
-                    <div className="text-xs text-purple-200">Determining Acuity</div>
-                  </div>
-                  <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-400/30">
-                    <Stethoscope className="h-5 w-5 text-blue-300 mx-auto mb-2" />
-                    <div className="text-xs text-blue-200">Recommending Specialty</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* AI Recommendation & Consultation Targets Combined */}
-          {aiRecommendation && !isAnalyzing && (
-            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-white" />
-                  AI Clinical Assessment & Consultation Options
-                  <Badge className="bg-white/20 text-white border-white/30 text-xs">
-                    {aiRecommendation.confidence}% confidence
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* AI Analysis Results */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className={`p-3 rounded-lg border ${getAcuityColor(aiRecommendation.acuity)}`}>
-                    <div className="text-sm font-medium">Acuity Level</div>
-                    <div className="text-lg font-bold uppercase">{aiRecommendation.acuity}</div>
-                  </div>
-                  <div className="p-3 rounded-lg border border-white/30 bg-white/10">
-                    <div className="text-sm font-medium text-white">Priority Score</div>
-                    <div className="text-lg font-bold text-white">{aiRecommendation.priorityScore}/100</div>
-                  </div>
-                  <div className="p-3 rounded-lg border border-white/30 bg-white/10">
-                    <div className="text-sm font-medium text-white">Recommended</div>
-                    <div className="text-sm font-bold text-white">{aiRecommendation.recommendedSpecialty}</div>
-                  </div>
-                </div>
-                
-                <div className="text-sm text-white/80 bg-black/20 p-3 rounded-lg">
-                  <strong>Clinical Reasoning:</strong> {aiRecommendation.reasoning}
-                </div>
-
-                {/* Consultation Targets */}
-                <div className="space-y-3">
-                  <h4 className="text-white font-medium flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Select Consultation Target
-                  </h4>
-                  
-                  {/* Recommended Specialist */}
-                  {recommendedSpecialist && (
-                    <div
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedConsultTarget === `specialist-${recommendedSpecialist.id}`
-                          ? 'bg-white/20 border-white/50'
-                          : 'bg-white/5 border-white/20 hover:border-white/40'
-                      }`}
-                      onClick={() => setSelectedConsultTarget(`specialist-${recommendedSpecialist.id}`)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 text-white" />
-                          <span className="font-medium text-white">
-                            {recommendedSpecialist.first_name} {recommendedSpecialist.last_name}
-                          </span>
-                          <Badge className="bg-white/20 text-white border-white/30 text-xs">
-                            AI Recommended - {aiRecommendation.recommendedSpecialty}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3 text-white/60" />
-                          <span className="text-sm text-white/70">{recommendedSpecialist.phone}</span>
-                          <ChevronRight className="h-4 w-4 text-white" />
-                        </div>
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <label className="text-sm text-white/70 mb-3 block font-medium">Attach Patient</label>
+              <Select value={selectedPatient} onValueChange={setSelectedPatient}>
+                <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
+                  <SelectValue placeholder="Select patient..." />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800/95 backdrop-blur-xl border-slate-600 text-white rounded-lg">
+                  <SelectItem value="none">No patient selected</SelectItem>
+                  {patients?.map((patient) => (
+                    <SelectItem key={patient.id} value={patient.id}>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {patient.first_name} {patient.last_name} - {patient.mrn}
+                        {patient.room_number && ` (Room ${patient.room_number})`}
                       </div>
-                    </div>
-                  )}
-
-                  {/* Primary Attending */}
-                  {primaryAttending && (
-                    <div
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedConsultTarget === `primary-${primaryAttending.id}`
-                          ? 'bg-white/20 border-white/50'
-                          : 'bg-white/5 border-white/20 hover:border-white/40'
-                      }`}
-                      onClick={() => setSelectedConsultTarget(`primary-${primaryAttending.id}`)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <UserCheck className="h-4 w-4 text-white" />
-                          <span className="font-medium text-white">
-                            {primaryAttending.first_name} {primaryAttending.last_name}
-                          </span>
-                          <Badge className="bg-white/20 text-white border-white/30 text-xs">
-                            Primary Attending
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3 text-white/60" />
-                          <span className="text-sm text-white/70">{primaryAttending.phone}</span>
-                          <ChevronRight className="h-4 w-4 text-white" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Nocturnists */}
-                  {nocturnists.map((nocturnist) => (
-                    <div
-                      key={nocturnist.id}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedConsultTarget === `nocturnist-${nocturnist.id}`
-                          ? 'bg-white/20 border-white/50'
-                          : 'bg-white/5 border-white/20 hover:border-white/40'
-                      }`}
-                      onClick={() => setSelectedConsultTarget(`nocturnist-${nocturnist.id}`)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Moon className="h-4 w-4 text-white" />
-                          <span className="font-medium text-white">
-                            {nocturnist.first_name} {nocturnist.last_name}
-                          </span>
-                          <Badge className="bg-white/20 text-white border-white/30 text-xs">
-                            Nocturnist On Call
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3 text-white/60" />
-                          <span className="text-sm text-white/70">{nocturnist.phone}</span>
-                          <ChevronRight className="h-4 w-4 text-white" />
-                        </div>
-                      </div>
-                    </div>
+                    </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          {/* Consultation Type */}
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <label className="text-sm text-white/70 mb-3 block font-medium">Consultation Type</label>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setConsultationType('new')}
+                  className={`${consultationType === 'new' 
+                    ? 'bg-blue-600/50 hover:bg-blue-600/70 border-blue-400/50' 
+                    : 'bg-white/10 hover:bg-white/20 border-white/30'
+                  } backdrop-blur-sm border rounded-lg`}
+                >
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  New Consult
+                </Button>
+                <Button
+                  onClick={() => setConsultationType('established')}
+                  className={`${consultationType === 'established' 
+                    ? 'bg-blue-600/50 hover:bg-blue-600/70 border-blue-400/50' 
+                    : 'bg-white/10 hover:bg-white/20 border-white/30'
+                  } backdrop-blur-sm border rounded-lg`}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Established Patient
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Clinical Question - Shows after consultation type is selected */}
+          {showClinicalQuestion && (
+            <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+              <CardContent className="p-4">
+                <label className="text-sm text-white/70 mb-3 block font-medium">Clinical Question</label>
+                {isAnalyzing && (
+                  <div className="mb-3 p-2 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
+                    <div className="flex items-center gap-2 text-cyan-200 text-sm">
+                      <Activity className="h-4 w-4 animate-pulse" />
+                      <span>AI analyzing clinical question...</span>
+                    </div>
+                  </div>
+                )}
+                <Textarea
+                  value={clinicalQuestion}
+                  onChange={(e) => setClinicalQuestion(e.target.value)}
+                  placeholder="Describe the clinical situation and specific question..."
+                  className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[100px] backdrop-blur-sm rounded-lg"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* AI Analysis Display */}
+          {aiAnalysis && (
+            <Card className="backdrop-blur-sm bg-cyan-500/10 border border-cyan-400/30 rounded-xl">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Brain className="h-5 w-5 text-cyan-300" />
+                  <span className="text-cyan-200 font-medium">AI Recommendation</span>
+                  <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-400/30 text-xs">
+                    {aiAnalysis.confidence}% confidence
+                  </Badge>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/70">Recommended Priority:</span>
+                    <Badge className={`${aiAnalysis.acuity === 'critical' ? 'bg-red-500/20 text-red-300' : 
+                      aiAnalysis.acuity === 'urgent' ? 'bg-yellow-500/20 text-yellow-300' : 
+                      'bg-green-500/20 text-green-300'} border border-current/30`}>
+                      {aiAnalysis.acuity.toUpperCase()} - Score: {aiAnalysis.priorityScore}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/70">Recommended Specialty:</span>
+                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30">
+                      {aiAnalysis.recommendedSpecialty}
+                    </Badge>
+                  </div>
+                  <p className="text-cyan-200/80 text-xs">{aiAnalysis.reasoning}</p>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-white/20">
-            <Button
-              onClick={handleSubmit}
-              disabled={!clinicalQuestion.trim() || isAnalyzing}
-              className="flex-1 bg-white/20 hover:bg-white/30 border border-white/30 text-white backdrop-blur-sm rounded-lg"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              {isAnalyzing ? 'Analyzing...' : 'Send Consultation Request'}
-            </Button>
-            <Button
-              onClick={onClose}
-              className="bg-white/10 hover:bg-white/20 border border-white/30 text-white backdrop-blur-sm rounded-lg"
-            >
-              Cancel
-            </Button>
-          </div>
+          {/* Urgency Selection - Updated based on AI */}
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <label className="text-sm text-white/70 mb-3 block font-medium">Priority Level</label>
+              <div className="flex gap-2">
+                {urgencyOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    onClick={() => setSelectedUrgency(option.value as any)}
+                    className={`
+                      ${selectedUrgency === option.value ? option.color : 'bg-white/10 hover:bg-white/20'}
+                      text-white font-medium px-6 py-2 rounded-full backdrop-blur-sm border border-white/30
+                    `}
+                  >
+                    {option.label}
+                    {aiAnalysis && aiAnalysis.acuity === option.value && (
+                      <Sparkles className="h-3 w-3 ml-2" />
+                    )}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Consultation Options */}
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <label className="text-sm text-white/70 mb-3 block font-medium">Consultation Option</label>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setConsultOption('specialty')}
+                  className={`${consultOption === 'specialty' 
+                    ? 'bg-purple-600/50 hover:bg-purple-600/70 border-purple-400/50' 
+                    : 'bg-white/10 hover:bg-white/20 border-white/30'
+                  } backdrop-blur-sm border rounded-lg`}
+                >
+                  <Stethoscope className="h-4 w-4 mr-2" />
+                  Specialty Consult
+                </Button>
+                <Button
+                  onClick={() => setConsultOption('nocturnist')}
+                  className={`${consultOption === 'nocturnist' 
+                    ? 'bg-indigo-600/50 hover:bg-indigo-600/70 border-indigo-400/50' 
+                    : 'bg-white/10 hover:bg-white/20 border-white/30'
+                  } backdrop-blur-sm border rounded-lg`}
+                >
+                  <Moon className="h-4 w-4 mr-2" />
+                  Nocturnist
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recommended Specialists */}
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <h3 className="text-white font-medium mb-3">Recommended Specialist</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {recommendedSpecialties.map((specialty) => {
+                  const onCallDoc = getOnCallPhysician(specialty);
+                  const isAIRecommended = aiAnalysis?.recommendedSpecialty?.toLowerCase().includes(specialty.toLowerCase());
+                  return (
+                    <Button
+                      key={specialty}
+                      onClick={() => setSelectedSpecialty(specialty)}
+                      className={`
+                        p-3 h-auto flex flex-col items-start backdrop-blur-sm border rounded-lg
+                        ${selectedSpecialty === specialty && isAIRecommended
+                          ? 'bg-purple-600/50 hover:bg-purple-600/70 border-purple-400/50' 
+                          : selectedSpecialty === specialty
+                          ? 'bg-blue-600/50 hover:bg-blue-600/70 border-blue-400/50' 
+                          : 'bg-white/10 hover:bg-white/20 border-white/30'
+                        }
+                      `}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{specialty}</span>
+                        {isAIRecommended && <Brain className="h-3 w-3 text-purple-300" />}
+                      </div>
+                      {onCallDoc && (
+                        <span className="text-xs text-white/70 mt-1">
+                          On Call: {onCallDoc.first_name} {onCallDoc.last_name}
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Manual Provider Selection */}
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <h3 className="text-white font-medium mb-3">Choose a Provider</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {availableProviders.map((provider) => (
+                  <Button
+                    key={provider}
+                    onClick={() => setSelectedProvider(provider)}
+                    className={`${selectedProvider === provider 
+                      ? 'bg-blue-600/50 hover:bg-blue-600/70 border-blue-400/50' 
+                      : 'bg-white/10 hover:bg-white/20 border-white/30'
+                    } backdrop-blur-sm border rounded-lg`}
+                  >
+                    {provider}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-4 border-t border-white/20">
+          <Button
+            onClick={handleSubmit}
+            disabled={!clinicalQuestion.trim()}
+            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white backdrop-blur-sm border border-green-400/30 rounded-lg"
+          >
+            <Phone className="h-4 w-4 mr-2" />
+            Send Consult Request
+          </Button>
+          <Button
+            onClick={onClose}
+            className="bg-white/10 hover:bg-white/20 border border-white/30 text-white backdrop-blur-sm rounded-lg"
+          >
+            Cancel
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

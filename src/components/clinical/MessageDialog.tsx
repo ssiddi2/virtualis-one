@@ -1,224 +1,268 @@
 
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { usePatients } from '@/hooks/usePatients';
-import { useSpecialties, useOnCallSchedules, usePhysicians } from '@/hooks/usePhysicians';
+import { Search, MessageSquare, User, Phone, Video, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  User, 
-  MessageSquare, 
-  Moon,
-  UserCheck,
-  Stethoscope,
-  Send
-} from 'lucide-react';
 
 interface MessageDialogProps {
   open: boolean;
   onClose: () => void;
-  onSend: (messageData: any) => void;
+  hospitalId?: string;
 }
 
-const MessageDialog = ({ open, onClose, onSend }: MessageDialogProps) => {
-  const [messageContent, setMessageContent] = useState('');
-  const [selectedRecipient, setSelectedRecipient] = useState('');
+// Mock user data for demonstration
+const mockUsers = [
+  {
+    id: '1',
+    name: 'Dr. Sarah Johnson',
+    role: 'Emergency Medicine',
+    status: 'online',
+    avatar: 'SJ',
+    lastSeen: 'Online now'
+  },
+  {
+    id: '2',
+    name: 'Dr. Michael Chen',
+    role: 'Cardiology',
+    status: 'online',
+    avatar: 'MC',
+    lastSeen: 'Online now'
+  },
+  {
+    id: '3',
+    name: 'Nurse Martinez',
+    role: 'ICU Nurse',
+    status: 'away',
+    avatar: 'NM',
+    lastSeen: '5 min ago'
+  },
+  {
+    id: '4',
+    name: 'Dr. Emily Rodriguez',
+    role: 'Pulmonology',
+    status: 'offline',
+    avatar: 'ER',
+    lastSeen: '1 hour ago'
+  },
+  {
+    id: '5',
+    name: 'Dr. James Wilson',
+    role: 'Surgery',
+    status: 'busy',
+    avatar: 'JW',
+    lastSeen: 'In surgery'
+  },
+  {
+    id: '6',
+    name: 'Lisa Thompson',
+    role: 'Case Manager',
+    status: 'online',
+    avatar: 'LT',
+    lastSeen: 'Online now'
+  }
+];
 
-  const { data: physicians } = usePhysicians();
-  const { data: onCallSchedules } = useOnCallSchedules();
+const MessageDialog = ({ open, onClose, hospitalId }: MessageDialogProps) => {
   const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
-  const handleSend = () => {
-    if (!messageContent.trim()) {
+  const filteredUsers = mockUsers.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'online': return 'bg-green-500';
+      case 'away': return 'bg-yellow-500';
+      case 'busy': return 'bg-red-500';
+      case 'offline': return 'bg-gray-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'online': return 'bg-green-500/20 text-green-200 border-green-400/30';
+      case 'away': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
+      case 'busy': return 'bg-red-500/20 text-red-200 border-red-400/30';
+      case 'offline': return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
+      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsers(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleStartConversation = () => {
+    if (selectedUsers.length === 0) {
       toast({
-        title: "Error",
-        description: "Please enter a message",
+        title: "Select Users",
+        description: "Please select at least one user to start a conversation",
         variant: "destructive"
       });
       return;
     }
 
-    const messageData = {
-      recipientId: selectedRecipient,
-      content: messageContent,
-      timestamp: new Date()
-    };
+    const selectedUserNames = mockUsers
+      .filter(user => selectedUsers.includes(user.id))
+      .map(user => user.name)
+      .join(', ');
 
-    onSend(messageData);
-    
     toast({
-      title: "Message Sent",
-      description: "Your message has been delivered successfully",
+      title: "Conversation Started",
+      description: `New conversation with ${selectedUserNames}`,
     });
 
-    // Reset form
-    setSelectedRecipient('');
-    setMessageContent('');
+    setSelectedUsers([]);
+    setSearchTerm('');
     onClose();
   };
 
-  const availablePhysicians = physicians?.slice(0, 6) || [];
-  const nocturnists = physicians?.filter(p => 
-    p.specialty?.name.toLowerCase().includes('nocturnist') || 
-    p.first_name.toLowerCase().includes('night')
-  ).slice(0, 2) || [];
-  const primaryAttending = physicians?.find(p => 
-    p.specialty?.name.toLowerCase().includes('internal medicine')
-  ) || physicians?.[0];
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/30 to-purple-500/20 border border-blue-300/40 text-white shadow-2xl rounded-2xl">
+      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/10 border border-blue-300/40 text-white shadow-2xl rounded-2xl">
         <DialogHeader className="border-b border-white/20 pb-4">
-          <DialogTitle className="text-white text-xl font-bold bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-cyan-300" />
-            SEND MESSAGE
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-blue-200 to-cyan-200 bg-clip-text text-transparent">
+            <MessageSquare className="h-5 w-5 text-blue-400" />
+            Select Team Members
           </DialogTitle>
+          <DialogDescription className="text-white/70">
+            Choose healthcare professionals to start a conversation
+          </DialogDescription>
         </DialogHeader>
 
-        <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
-          <CardContent className="p-6 space-y-6">
-            {/* Available Physicians */}
-            <div className="space-y-3">
-              <h3 className="text-sm text-blue-300 font-medium flex items-center gap-2">
-                <Stethoscope className="h-4 w-4" />
-                Available Physicians
-              </h3>
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {availablePhysicians.map((physician) => (
-                  <div
-                    key={physician.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors backdrop-blur-sm ${
-                      selectedRecipient === physician.id
-                        ? 'bg-blue-600/20 border-blue-500'
-                        : 'bg-white/5 border-white/20 hover:border-blue-500/50'
-                    }`}
-                    onClick={() => setSelectedRecipient(physician.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-blue-400" />
-                        <span className="font-medium">
-                          {physician.first_name} {physician.last_name}
-                        </span>
-                        {physician.specialty && (
-                          <Badge className="bg-blue-600/20 text-blue-300 border-blue-400/30 text-xs">
-                            {physician.specialty.name}
-                          </Badge>
-                        )}
-                      </div>
-                      {physician.phone && (
-                        <span className="text-sm text-white/70">{physician.phone}</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name or role..."
+              className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 pl-10 backdrop-blur-sm rounded-lg"
+            />
+          </div>
+
+          {/* Selected Users Summary */}
+          {selectedUsers.length > 0 && (
+            <div className="p-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="h-4 w-4 text-green-400" />
+                <span className="text-sm font-medium text-white">Selected ({selectedUsers.length})</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedUsers.map(userId => {
+                  const user = mockUsers.find(u => u.id === userId);
+                  return user ? (
+                    <Badge key={userId} className="bg-blue-600/30 text-blue-200 border border-blue-400/30">
+                      {user.name}
+                    </Badge>
+                  ) : null;
+                })}
               </div>
             </div>
+          )}
 
-            {/* Nocturnist */}
-            {nocturnists.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-sm text-indigo-300 font-medium flex items-center gap-2">
-                  <Moon className="h-4 w-4" />
-                  Nocturnist On Call
-                </h3>
-                <div className="space-y-2">
-                  {nocturnists.map((physician) => (
-                    <div
-                      key={physician.id}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors backdrop-blur-sm ${
-                        selectedRecipient === physician.id
-                          ? 'bg-indigo-600/20 border-indigo-500'
-                          : 'bg-white/5 border-white/20 hover:border-indigo-500/50'
-                      }`}
-                      onClick={() => setSelectedRecipient(physician.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Moon className="h-4 w-4 text-indigo-400" />
-                          <span className="font-medium">
-                            {physician.first_name} {physician.last_name}
-                          </span>
-                          <Badge className="bg-indigo-600/20 text-indigo-300 border-indigo-400/30 text-xs">
-                            On Call Tonight
-                          </Badge>
-                        </div>
-                        {physician.phone && (
-                          <span className="text-sm text-white/70">{physician.phone}</span>
-                        )}
+          {/* User List */}
+          <div className="max-h-96 overflow-y-auto space-y-2">
+            {filteredUsers.map((user) => (
+              <div
+                key={user.id}
+                onClick={() => toggleUserSelection(user.id)}
+                className={`p-4 backdrop-blur-sm border rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
+                  selectedUsers.includes(user.id)
+                    ? 'bg-blue-600/30 border-blue-400/50 shadow-xl'
+                    : 'bg-white/5 border-white/20 hover:bg-white/10'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div className="relative">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+                        {user.avatar}
                       </div>
+                      <div className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white/20 ${getStatusColor(user.status)}`}></div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Primary Attending */}
-            {primaryAttending && (
-              <div className="space-y-3">
-                <h3 className="text-sm text-green-300 font-medium flex items-center gap-2">
-                  <UserCheck className="h-4 w-4" />
-                  Primary Attending
-                </h3>
-                <div
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors backdrop-blur-sm ${
-                    selectedRecipient === primaryAttending.id
-                      ? 'bg-green-600/20 border-green-500'
-                      : 'bg-white/5 border-white/20 hover:border-green-500/50'
-                  }`}
-                  onClick={() => setSelectedRecipient(primaryAttending.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <UserCheck className="h-4 w-4 text-green-400" />
-                      <span className="font-medium">
-                        {primaryAttending.first_name} {primaryAttending.last_name}
-                      </span>
-                      <Badge className="bg-green-600/20 text-green-300 border-green-400/30 text-xs">
-                        Primary Attending
-                      </Badge>
+                    {/* User Info */}
+                    <div>
+                      <h3 className="font-medium text-white">{user.name}</h3>
+                      <p className="text-sm text-white/70">{user.role}</p>
+                      <p className="text-xs text-white/50">{user.lastSeen}</p>
                     </div>
-                    {primaryAttending.phone && (
-                      <span className="text-sm text-white/70">{primaryAttending.phone}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Status Badge */}
+                    <Badge className={`text-xs border ${getStatusBadge(user.status)}`}>
+                      {user.status.toUpperCase()}
+                    </Badge>
+
+                    {/* Quick Actions */}
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast({ title: "Calling...", description: `Calling ${user.name}` });
+                        }}
+                      >
+                        <Phone className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast({ title: "Video Call", description: `Starting video call with ${user.name}` });
+                        }}
+                      >
+                        <Video className="h-3 w-3" />
+                      </Button>
+                    </div>
+
+                    {/* Selection Indicator */}
+                    {selectedUsers.includes(user.id) && (
+                      <CheckCircle className="h-5 w-5 text-green-400" />
                     )}
                   </div>
                 </div>
               </div>
-            )}
+            ))}
+          </div>
 
-            {/* Message Content */}
-            <div className="space-y-3">
-              <label className="text-sm text-white/70 font-medium">Message</label>
-              <Textarea
-                value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
-                placeholder="Type your message here..."
-                className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[100px] backdrop-blur-sm rounded-lg"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 pt-4 border-t border-white/20">
-          <Button
-            onClick={handleSend}
-            disabled={!messageContent.trim() || !selectedRecipient}
-            className="flex-1 bg-gradient-to-r from-green-500/20 to-emerald-600/20 hover:from-green-600/30 hover:to-emerald-700/30 text-white backdrop-blur-sm border border-green-400/30 rounded-lg"
-          >
-            <Send className="h-4 w-4 mr-2" />
-            Send Message
-          </Button>
-          <Button
-            onClick={onClose}
-            className="bg-white/10 hover:bg-white/20 border border-white/30 text-white backdrop-blur-sm rounded-lg"
-          >
-            Cancel
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-4 border-t border-white/20">
+            <Button
+              onClick={handleStartConversation}
+              disabled={selectedUsers.length === 0}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 border-0 rounded-lg"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Start Conversation ({selectedUsers.length})
+            </Button>
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 backdrop-blur-sm rounded-lg"
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

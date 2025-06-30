@@ -140,7 +140,7 @@ const Index = () => {
             requireHospitalSelection(<CopilotComposer hospitalId={selectedHospitalId!} />)
           } />
           <Route path="/virtualis-chat" element={
-            requireHospitalSelection(<VirtualisChatPage />)
+            requireHospitalSelection(<VirtualisChatPage hospitalId={selectedHospitalId!} />)
           } />
           <Route path="/demo" element={<Demo />} />
           <Route path="*" element={<Navigate to="/emr" replace />} />

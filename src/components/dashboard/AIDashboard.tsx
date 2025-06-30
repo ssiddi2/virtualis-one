@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,24 +56,24 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         </div>
         
         <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Badge className="backdrop-blur-sm bg-white/20 text-white border border-white/30">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
             <Brain className="h-3 w-3 mr-1" />
             GPT-4 Powered
           </Badge>
-          <Badge className="backdrop-blur-sm bg-white/20 text-white border border-white/30">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
             <Shield className="h-3 w-3 mr-1" />
             HIPAA Compliant
           </Badge>
-          <Badge className="backdrop-blur-sm bg-white/20 text-white border border-white/30">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
             <Activity className="h-3 w-3 mr-1" />
             Clinical Decision Support
           </Badge>
-          <Badge className="backdrop-blur-sm bg-white/20 text-white border border-white/30">
+          <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
             <MessageSquare className="h-3 w-3 mr-1" />
             AI Chat Assistant
           </Badge>
           {selectedHospital && (
-            <Badge className="backdrop-blur-sm bg-white/20 text-white border border-white/30">
+            <Badge className="backdrop-blur-sm bg-blue-500/20 text-white border border-blue-300/30">
               {selectedHospital.emr_type} Integration
             </Badge>
           )}
@@ -83,24 +82,24 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
       {/* AI Features Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl">
-          <TabsTrigger value="assistant" className="text-white data-[state=active]:bg-white/20">
+        <TabsList className="grid w-full grid-cols-5 backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl">
+          <TabsTrigger value="assistant" className="text-white data-[state=active]:bg-blue-600/30">
             <MessageSquare className="h-4 w-4 mr-2" />
             AI Assistant
           </TabsTrigger>
-          <TabsTrigger value="insights" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="insights" className="text-white data-[state=active]:bg-blue-600/30">
             <Brain className="h-4 w-4 mr-2" />
             AI Insights
           </TabsTrigger>
-          <TabsTrigger value="clinical" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="clinical" className="text-white data-[state=active]:bg-blue-600/30">
             <Stethoscope className="h-4 w-4 mr-2" />
             Clinical AI
           </TabsTrigger>
-          <TabsTrigger value="coding" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="coding" className="text-white data-[state=active]:bg-blue-600/30">
             <Code className="h-4 w-4 mr-2" />
             Coding & Billing
           </TabsTrigger>
-          <TabsTrigger value="tools" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="tools" className="text-white data-[state=active]:bg-blue-600/30">
             <Activity className="h-4 w-4 mr-2" />
             AI Tools
           </TabsTrigger>
@@ -120,7 +119,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="clinical" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <DiagnosisSupport />
-            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl shadow-xl">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <FileText className="h-5 w-5 text-white" />
@@ -133,14 +132,14 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.clinical.map((feature) => (
-                    <div key={feature.name} className="p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
+                    <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                       <feature.icon className="h-5 w-5 text-white mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                   <Brain className="h-4 w-4 mr-2" />
                   Access Clinical AI Tools
                 </Button>
@@ -152,7 +151,7 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         <TabsContent value="coding" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <MedicalCodingAssistant />
-            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl shadow-xl">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-white" />
@@ -165,14 +164,14 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {aiFeatures.coding.map((feature) => (
-                    <div key={feature.name} className="p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
+                    <div key={feature.name} className="p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                       <feature.icon className="h-5 w-5 text-white mb-2" />
                       <h4 className="text-white font-medium text-sm">{feature.name}</h4>
                       <p className="text-white text-xs">{feature.description}</p>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                   <Code className="h-4 w-4 mr-2" />
                   Launch Coding Assistant
                 </Button>
@@ -183,17 +182,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
 
         <TabsContent value="tools" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl shadow-xl">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Clinical Decision Support</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-white text-2xl font-bold">98.7%</div>
                     <div className="text-white text-sm">Accuracy Rate</div>
                   </div>
-                  <Button className="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Brain className="h-4 w-4 mr-2" />
                     Launch Assistant
                   </Button>
@@ -201,17 +200,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl shadow-xl">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Drug Safety</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-white text-2xl font-bold">23</div>
                     <div className="text-white text-sm">Alerts Today</div>
                   </div>
-                  <Button className="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Shield className="h-4 w-4 mr-2" />
                     Check Interactions
                   </Button>
@@ -219,17 +218,17 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl shadow-xl">
+            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-white">Quality Metrics</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-center p-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
+                  <div className="text-center p-4 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
                     <div className="text-white text-2xl font-bold">94%</div>
                     <div className="text-white text-sm">Compliance Score</div>
                   </div>
-                  <Button className="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     <Activity className="h-4 w-4 mr-2" />
                     View Metrics
                   </Button>

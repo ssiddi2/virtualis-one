@@ -17,7 +17,6 @@ import DenialManagement from './DenialManagement';
 import PriorAuthManager from './PriorAuthManager';
 import RevenueAnalytics from './RevenueAnalytics';
 import ROICalculator from './ROICalculator';
-import BillingReportGenerator from './BillingReportGenerator';
 
 interface BillingDashboardProps {
   hospitalId: string;
@@ -25,7 +24,9 @@ interface BillingDashboardProps {
 
 const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
@@ -39,7 +40,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="virtualis-card">
+          <Card className="backdrop-blur-xl bg-green-500/20 border border-green-300/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -51,7 +52,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
             </CardContent>
           </Card>
 
-          <Card className="virtualis-card">
+          <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -63,7 +64,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
             </CardContent>
           </Card>
 
-          <Card className="virtualis-card">
+          <Card className="backdrop-blur-xl bg-yellow-500/20 border border-yellow-300/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -75,7 +76,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
             </CardContent>
           </Card>
 
-          <Card className="virtualis-card">
+          <Card className="backdrop-blur-xl bg-purple-500/20 border border-purple-300/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -90,38 +91,31 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="analytics" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 virtualis-card">
+          <TabsList className="grid w-full grid-cols-4 bg-blue-600/20 border border-blue-400/30">
             <TabsTrigger 
               value="analytics" 
-              className="data-[state=active]:bg-white/20 text-white"
+              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70"
             >
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </TabsTrigger>
             <TabsTrigger 
-              value="reports"
-              className="data-[state=active]:bg-white/20 text-white"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Reports
-            </TabsTrigger>
-            <TabsTrigger 
               value="denials"
-              className="data-[state=active]:bg-white/20 text-white"
+              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70"
             >
               <AlertTriangle className="h-4 w-4 mr-2" />
-              Denials
+              Denial Management
             </TabsTrigger>
             <TabsTrigger 
               value="prior-auth"
-              className="data-[state=active]:bg-white/20 text-white"
+              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70"
             >
               <Shield className="h-4 w-4 mr-2" />
               Prior Auth
             </TabsTrigger>
             <TabsTrigger 
               value="roi-calculator"
-              className="data-[state=active]:bg-white/20 text-white"
+              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70"
             >
               <Calculator className="h-4 w-4 mr-2" />
               ROI Calculator
@@ -130,10 +124,6 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
 
           <TabsContent value="analytics" className="mt-6">
             <RevenueAnalytics hospitalId={hospitalId} />
-          </TabsContent>
-
-          <TabsContent value="reports" className="mt-6">
-            <BillingReportGenerator hospitalId={hospitalId} />
           </TabsContent>
 
           <TabsContent value="denials" className="mt-6">

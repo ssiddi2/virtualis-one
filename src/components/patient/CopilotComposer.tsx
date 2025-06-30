@@ -129,7 +129,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
               <div className="flex items-center gap-3">
                 <Brain className="h-10 w-10 text-virtualis-gold pulse-glow" />
                 <div>
-                  <h1 className="text-4xl font-bold text-white tech-font">
+                  <h1 className="text-4xl font-bold gradient-text tech-font">
                     Clinical AI Assistant
                   </h1>
                   <p className="text-white/80 tech-font text-lg">

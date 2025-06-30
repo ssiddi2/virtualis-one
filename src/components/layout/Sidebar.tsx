@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -43,6 +42,13 @@ const Sidebar = ({ selectedHospitalId }: SidebarProps) => {
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Auto-expand sidebar when hospital is selected
+  useEffect(() => {
+    if (selectedHospitalId && isCollapsed) {
+      setIsCollapsed(false);
+    }
+  }, [selectedHospitalId, isCollapsed]);
 
   const menuItems = [
     { 

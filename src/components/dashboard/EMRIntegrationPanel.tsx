@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Database, Key, TestTube, CheckCircle } from "lucide-react";
+import { ArrowLeft, Database, Key, Link, TestTube, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import EMRConnectionSimulation from "./EMRConnectionSimulation";
 
 interface Hospital {
   id: string;
@@ -27,7 +27,6 @@ interface EMRIntegrationPanelProps {
 
 const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationPanelProps) => {
   const { toast } = useToast();
-  const [showSimulation, setShowSimulation] = useState(false);
   const [formData, setFormData] = useState({
     emr_type: hospital.emr_type || '',
     api_endpoint: '',
@@ -62,30 +61,34 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
   };
 
   const handleTestConnection = async () => {
-    setShowSimulation(true);
-  };
-
-  const handleSimulationComplete = () => {
-    setShowSimulation(false);
-    setTestResult('success');
+    setTestResult('testing');
     
-    toast({
-      title: "Healthcare Integration Complete",
-      description: "Clinical system connection established successfully",
-    });
+    // Simulate API test
+    setTimeout(() => {
+      const success = Math.random() > 0.3; // 70% success rate for demo
+      setTestResult(success ? 'success' : 'error');
+      
+      toast({
+        title: success ? "Connection Successful" : "Connection Failed",
+        description: success 
+          ? "EMR integration test completed successfully" 
+          : "Unable to connect to EMR system. Check credentials.",
+        variant: success ? "default" : "destructive"
+      });
+    }, 2000);
   };
 
   const handleSave = () => {
     onSave({
       hospital_id: hospital.id,
       ...formData,
-      status: testResult === 'success' ? 'connected' : 'pending',
+      status: testResult === 'success' ? 'active' : 'pending',
       last_updated: new Date().toISOString()
     });
     
     toast({
-      title: "Configuration Saved",
-      description: `Healthcare integration for ${hospital.name} configured`,
+      title: "Integration Saved",
+      description: `EMR integration for ${hospital.name} has been configured`,
     });
   };
 
@@ -94,33 +97,34 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
       case 'Epic':
         return (
           <>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-white text-[10px]">Client ID</Label>
+                <Label className="text-white tech-font">Client ID</Label>
                 <Input
                   value={formData.client_id}
                   onChange={(e) => handleInputChange('client_id', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
-                  placeholder="Epic client ID"
+                  className="ai-input tech-font"
+                  placeholder="Epic client identifier"
                 />
               </div>
               <div>
-                <Label className="text-white text-[10px]">Client Secret</Label>
+                <Label className="text-white tech-font">Client Secret</Label>
                 <Input
                   type="password"
                   value={formData.client_secret}
                   onChange={(e) => handleInputChange('client_secret', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
+                  className="ai-input tech-font"
+                  placeholder="Epic client secret"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-white text-[10px]">FHIR Endpoint</Label>
+              <Label className="text-white tech-font">FHIR R4 Endpoint</Label>
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
-                placeholder="https://fhir.epic.com/..."
+                className="ai-input tech-font"
+                placeholder="https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/"
               />
             </div>
           </>
@@ -129,64 +133,79 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
       case 'Cerner':
         return (
           <>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-white text-[10px]">API Key</Label>
+                <Label className="text-white tech-font">API Key</Label>
                 <Input
                   value={formData.auth_token}
                   onChange={(e) => handleInputChange('auth_token', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
+                  className="ai-input tech-font"
+                  placeholder="Cerner API key"
                 />
               </div>
               <div>
-                <Label className="text-white text-[10px]">Organization ID</Label>
+                <Label className="text-white tech-font">Organization ID</Label>
                 <Input
                   value={formData.organization_id}
                   onChange={(e) => handleInputChange('organization_id', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
+                  className="ai-input tech-font"
+                  placeholder="Cerner organization identifier"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-white text-[10px]">FHIR Endpoint</Label>
+              <Label className="text-white tech-font">FHIR Endpoint</Label>
               <Input
                 value={formData.fhir_endpoint}
                 onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
-                placeholder="https://fhir-open.cerner.com/..."
+                className="ai-input tech-font"
+                placeholder="https://fhir-open.cerner.com/r4/"
               />
             </div>
           </>
+        );
+      
+      case 'FHIR API':
+        return (
+          <div>
+            <Label className="text-white tech-font">FHIR Base URL</Label>
+            <Input
+              value={formData.fhir_endpoint}
+              onChange={(e) => handleInputChange('fhir_endpoint', e.target.value)}
+              className="ai-input tech-font"
+              placeholder="https://your-fhir-server.com/fhir/"
+            />
+          </div>
         );
       
       default:
         return (
           <>
             <div>
-              <Label className="text-white text-[10px]">API Endpoint</Label>
+              <Label className="text-white tech-font">API Endpoint</Label>
               <Input
                 value={formData.api_endpoint}
                 onChange={(e) => handleInputChange('api_endpoint', e.target.value)}
-                className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
-                placeholder="https://api.healthcare-system.com/"
+                className="ai-input tech-font"
+                placeholder="https://api.emr-system.com/v1/"
               />
             </div>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-white text-[10px]">Username</Label>
+                <Label className="text-white tech-font">Username</Label>
                 <Input
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
+                  className="ai-input tech-font"
                 />
               </div>
               <div>
-                <Label className="text-white text-[10px]">Password</Label>
+                <Label className="text-white tech-font">Password</Label>
                 <Input
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="bg-white/10 border-white/30 text-white text-[10px] h-6 px-2"
+                  className="ai-input tech-font"
                 />
               </div>
             </div>
@@ -196,54 +215,47 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
   };
 
   return (
-    <>
-      <div className="p-2 space-y-2 min-h-screen" style={{
-        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-      }}>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={onBack}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20 text-xs h-6 px-2"
-          >
-            <ArrowLeft className="h-3 w-3 mr-1" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-sm font-bold text-white">
-              Healthcare System Integration
-            </h1>
-            <p className="text-white/70 text-[10px]">
-              {hospital.name} • {hospital.location}
-            </p>
-          </div>
+    <div className="p-6 space-y-6 min-h-screen">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button
+          onClick={onBack}
+          variant="ghost"
+          className="text-white hover:bg-slate-800"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-white tech-font ai-text-glow">
+            EMR INTEGRATION CONSOLE
+          </h1>
+          <p className="text-virtualis-gold font-semibold tech-font">
+            {hospital.name} • {hospital.location}
+          </p>
         </div>
+      </div>
 
-        <div className="max-w-xs mx-auto">
-          <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-lg">
-            <CardHeader className="pb-1 px-3 pt-2">
-              <CardTitle className="text-white flex items-center gap-2 text-xs">
-                <Database className="h-3 w-3 text-white" />
-                Clinical System Integration
-                {testResult === 'success' && (
-                  <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-[10px] ml-auto px-1 py-0">
-                    <CheckCircle className="h-2 w-2 mr-1" />
-                    Connected
-                  </Badge>
-                )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Configuration Form */}
+        <div className="lg:col-span-2">
+          <Card className="ai-card">
+            <CardHeader>
+              <CardTitle className="text-white tech-font flex items-center gap-2">
+                <Database className="h-5 w-5 text-virtualis-gold" />
+                NEURAL CONNECTION CONFIG
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1 pt-0 px-3 pb-3">
+            <CardContent className="space-y-6">
               <div>
-                <Label className="text-white text-[10px]">Healthcare System Type</Label>
+                <Label className="text-white tech-font">EMR System Type</Label>
                 <Select value={formData.emr_type} onValueChange={(value) => handleInputChange('emr_type', value)}>
-                  <SelectTrigger className="bg-white/10 border-white/30 text-white h-6 text-[10px] px-2">
-                    <SelectValue placeholder="Select System Type" />
+                  <SelectTrigger className="ai-input tech-font">
+                    <SelectValue placeholder="Select EMR System" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-white/30">
+                  <SelectContent className="bg-slate-800 border-slate-600">
                     {emrTypes.map((emr) => (
-                      <SelectItem key={emr} value={emr} className="text-white focus:bg-white/20 text-[10px]">{emr}</SelectItem>
+                      <SelectItem key={emr} value={emr}>{emr}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -251,50 +263,120 @@ const EMRIntegrationPanel = ({ hospital, user, onBack, onSave }: EMRIntegrationP
 
               {getEmrFields()}
 
-              <div className="flex gap-1 pt-1">
+              <div>
+                <Label className="text-white tech-font">Additional Configuration (JSON)</Label>
+                <Textarea
+                  value={formData.additional_config}
+                  onChange={(e) => handleInputChange('additional_config', e.target.value)}
+                  className="ai-input tech-font min-h-[100px]"
+                  placeholder='{"timeout": 30, "retry_attempts": 3}'
+                />
+              </div>
+
+              <div className="flex gap-4">
                 <Button
                   onClick={handleTestConnection}
-                  size="sm"
-                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-[10px] h-6 px-2"
+                  disabled={testResult === 'testing'}
+                  className="ai-button-secondary tech-font"
                 >
-                  <TestTube className="h-2 w-2 mr-1" />
-                  Test
+                  <TestTube className="h-4 w-4 mr-2" />
+                  {testResult === 'testing' ? 'TESTING...' : 'TEST CONNECTION'}
                 </Button>
                 
                 <Button
                   onClick={handleSave}
-                  size="sm"
-                  className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-[10px] h-6 px-2"
+                  className="ai-button tech-font"
                 >
-                  <Key className="h-2 w-2 mr-1" />
-                  Save
+                  <Key className="h-4 w-4 mr-2" />
+                  SAVE INTEGRATION
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
 
+        {/* Status Panel */}
+        <div className="space-y-6">
+          <Card className="ai-card">
+            <CardHeader>
+              <CardTitle className="text-white tech-font">CONNECTION STATUS</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300 tech-font">Current Status:</span>
+                <Badge className={
+                  testResult === 'success' 
+                    ? "bg-virtualis-alert-green/20 text-virtualis-alert-green border-virtualis-alert-green" 
+                    : testResult === 'error'
+                    ? "bg-virtualis-alert-red/20 text-virtualis-alert-red border-virtualis-alert-red"
+                    : "bg-slate-500/20 text-slate-400 border-slate-500"
+                }>
+                  {testResult === 'success' && <CheckCircle className="h-3 w-3 mr-1" />}
+                  {testResult === 'error' && <XCircle className="h-3 w-3 mr-1" />}
+                  {testResult === 'testing' && <Database className="h-3 w-3 mr-1 animate-spin" />}
+                  {testResult === 'idle' && <Link className="h-3 w-3 mr-1" />}
+                  {testResult === 'testing' ? 'TESTING' : 
+                   testResult === 'success' ? 'CONNECTED' : 
+                   testResult === 'error' ? 'ERROR' : 'PENDING'}
+                </Badge>
+              </div>
+              
+              <div className="text-sm text-slate-400 tech-font">
+                Last Updated: {new Date().toLocaleString()}
+              </div>
+              
               {testResult === 'success' && (
-                <div className="p-1 bg-green-500/20 border border-green-400/40 rounded-md">
-                  <p className="text-green-300 text-[10px] leading-tight">
-                    ✓ Clinical data integration active
+                <div className="p-3 bg-virtualis-alert-green/10 border border-virtualis-alert-green/30 rounded-lg">
+                  <p className="text-virtualis-alert-green text-sm tech-font">
+                    ✓ Authentication verified
                     <br />
-                    ✓ Patient care workflows enabled
+                    ✓ FHIR endpoint accessible
                     <br />
-                    ✓ Real-time clinical updates available
+                    ✓ Data sync ready
+                  </p>
+                </div>
+              )}
+              
+              {testResult === 'error' && (
+                <div className="p-3 bg-virtualis-alert-red/10 border border-virtualis-alert-red/30 rounded-lg">
+                  <p className="text-virtualis-alert-red text-sm tech-font">
+                    ✗ Connection failed
+                    <br />
+                    ✗ Check credentials
+                    <br />
+                    ✗ Verify endpoint URL
                   </p>
                 </div>
               )}
             </CardContent>
           </Card>
+
+          <Card className="ai-card">
+            <CardHeader>
+              <CardTitle className="text-white tech-font">INTEGRATION FEATURES</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-300 tech-font">Patient Data</span>
+                <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green">Enabled</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-300 tech-font">Lab Results</span>
+                <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green">Enabled</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-300 tech-font">Medications</span>
+                <Badge className="bg-virtualis-alert-yellow/20 text-virtualis-alert-yellow">Partial</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-300 tech-font">Orders</span>
+                <Badge className="bg-slate-500/20 text-slate-400">Disabled</Badge>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-
-      {showSimulation && (
-        <EMRConnectionSimulation
-          hospitalName={hospital.name}
-          emrType={formData.emr_type}
-          onComplete={handleSimulationComplete}
-        />
-      )}
-    </>
+    </div>
   );
 };
 
