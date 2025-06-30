@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { usePatients } from '@/hooks/usePatients';
 import { useSpecialties, useOnCallSchedules } from '@/hooks/usePhysicians';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
@@ -20,7 +22,10 @@ import {
   Brain,
   Sparkles,
   Activity,
-  Send
+  Send,
+  UserPlus,
+  UserCheck,
+  Moon
 } from 'lucide-react';
 
 interface ConsolidatedConsultDialogProps {
@@ -31,8 +36,11 @@ interface ConsolidatedConsultDialogProps {
 
 const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedConsultDialogProps) => {
   const [selectedPatient, setSelectedPatient] = useState('');
+  const [consultType, setConsultType] = useState<'new' | 'established'>('new');
+  const [reasonForConsult, setReasonForConsult] = useState('');
   const [clinicalQuestion, setClinicalQuestion] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [routingOption, setRoutingOption] = useState<'on-call' | 'primary' | 'nocturnist'>('on-call');
   const [selectedProvider, setSelectedProvider] = useState('');
   const [acuity, setAcuity] = useState<'low' | 'moderate' | 'critical'>('moderate');
   const [priority, setPriority] = useState<'routine' | 'urgent' | 'critical'>('urgent');
@@ -59,16 +67,16 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
 
   // AI Analysis when clinical question changes
   useEffect(() => {
-    if (clinicalQuestion.length > 20) {
+    if (clinicalQuestion.length > 20 && reasonForConsult.length > 10) {
       const analyzeWithDelay = setTimeout(() => {
         performAIAnalysis();
       }, 1500);
       return () => clearTimeout(analyzeWithDelay);
     }
-  }, [clinicalQuestion]);
+  }, [clinicalQuestion, reasonForConsult]);
 
   const performAIAnalysis = async () => {
-    if (!clinicalQuestion.trim()) return;
+    if (!clinicalQuestion.trim() || !reasonForConsult.trim()) return;
 
     setIsAnalyzing(true);
     try {
@@ -77,18 +85,20 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
         : null;
       
       const contextString = patientContext 
-        ? `Patient: ${patientContext.first_name} ${patientContext.last_name}, Age: ${new Date().getFullYear() - new Date(patientContext.date_of_birth).getFullYear()}, Conditions: ${patientContext.medical_conditions?.join(', ') || 'None'}`
-        : '';
+        ? `Patient: ${patientContext.first_name} ${patientContext.last_name}, Age: ${new Date().getFullYear() - new Date(patientContext.date_of_birth).getFullYear()}, Conditions: ${patientContext.medical_conditions?.join(', ') || 'None'}, Consult Type: ${consultType}`
+        : `Consult Type: ${consultType}`;
+
+      const combinedQuery = `Reason: ${reasonForConsult}. Clinical Question: ${clinicalQuestion}`;
 
       const result = await callAI({
         type: 'triage_assessment',
         data: {
-          symptoms: clinicalQuestion,
+          symptoms: combinedQuery,
           patientContext: contextString,
           availableSpecialties: specialtyOptions,
           senderRole: 'doctor'
         },
-        context: `Analyze clinical consultation request for acuity (critical/urgent/routine), specialty recommendation, and priority score (0-100).`
+        context: `Analyze consultation request for acuity (critical/urgent/routine), specialty recommendation, and priority score (0-100). Consider if this is a ${consultType} consultation.`
       });
 
       // Parse AI response for recommendations
@@ -163,7 +173,34 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
     }
   };
 
+  const getRoutingIcon = (option: string) => {
+    switch (option) {
+      case 'on-call': return <Phone className="h-4 w-4" />;
+      case 'primary': return <Stethoscope className="h-4 w-4" />;
+      case 'nocturnist': return <Moon className="h-4 w-4" />;
+      default: return <Phone className="h-4 w-4" />;
+    }
+  };
+
   const handleSubmit = () => {
+    if (!selectedPatient) {
+      toast({
+        title: "Patient Required",
+        description: "Please select a patient for this consultation",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!reasonForConsult.trim()) {
+      toast({
+        title: "Reason Required",
+        description: "Please provide a reason for the consultation",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!clinicalQuestion.trim()) {
       toast({
         title: "Clinical Question Required",
@@ -173,27 +210,26 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
       return;
     }
 
+    const routingText = routingOption === 'on-call' ? 'on-call physician' : 
+                      routingOption === 'primary' ? 'primary attending' : 'nocturnist';
+
     toast({
       title: "Consultation Request Sent",
-      description: `${priority.toUpperCase()} priority consultation sent to ${selectedSpecialty || 'available specialists'}`,
+      description: `${priority.toUpperCase()} priority ${consultType} consultation routed to ${routingText} (${selectedSpecialty || 'available specialists'})`,
     });
 
-    // Reset form
-    setSelectedPatient('');
-    setClinicalQuestion('');
-    setSelectedSpecialty('');
-    setSelectedProvider('');
-    setAcuity('moderate');
-    setPriority('urgent');
-    setAiAnalysis(null);
+    resetForm();
     onClose();
   };
 
   const resetForm = () => {
     setSelectedPatient('');
+    setConsultType('new');
+    setReasonForConsult('');
     setClinicalQuestion('');
     setSelectedSpecialty('');
     setSelectedProvider('');
+    setRoutingOption('on-call');
     setAcuity('moderate');
     setPriority('urgent');
     setAiAnalysis(null);
@@ -206,7 +242,7 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border border-purple-300/40 text-white shadow-2xl rounded-2xl">
+      <DialogContent className="max-w-3xl backdrop-blur-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border border-purple-300/40 text-white shadow-2xl rounded-2xl">
         <DialogHeader className="border-b border-white/20 pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-purple-200 to-indigo-200 bg-clip-text text-transparent">
             <Stethoscope className="h-5 w-5 text-purple-400" />
@@ -221,14 +257,13 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
             <CardContent className="p-4">
               <label className="text-sm text-white/70 mb-3 block font-medium flex items-center gap-2">
                 <User className="h-3 w-3" />
-                Patient Context (Optional)
+                Patient Selection *
               </label>
               <Select value={selectedPatient} onValueChange={setSelectedPatient}>
                 <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                  <SelectValue placeholder="Select patient..." />
+                  <SelectValue placeholder="Select patient for consultation..." />
                 </SelectTrigger>
                 <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                  <SelectItem value="">No patient selected</SelectItem>
                   {patients?.map((patient) => (
                     <SelectItem key={patient.id} value={patient.id}>
                       {patient.first_name} {patient.last_name} - {patient.mrn}
@@ -240,10 +275,46 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
             </CardContent>
           </Card>
 
+          {/* Consultation Type */}
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <label className="text-sm text-white/70 mb-3 block font-medium">Consultation Type</label>
+              <RadioGroup value={consultType} onValueChange={(value: 'new' | 'established') => setConsultType(value)} className="flex gap-6">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="new" id="new" className="border-white/30 text-white" />
+                  <Label htmlFor="new" className="flex items-center gap-2 text-white cursor-pointer">
+                    <UserPlus className="h-4 w-4" />
+                    New Consultation
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="established" id="established" className="border-white/30 text-white" />
+                  <Label htmlFor="established" className="flex items-center gap-2 text-white cursor-pointer">
+                    <UserCheck className="h-4 w-4" />
+                    Established Patient
+                  </Label>
+                </div>
+              </RadioGroup>
+            </CardContent>
+          </Card>
+
+          {/* Reason for Consult */}
+          <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
+            <CardContent className="p-4">
+              <label className="text-sm text-white/70 mb-3 block font-medium">Reason for Consultation *</label>
+              <Textarea
+                value={reasonForConsult}
+                onChange={(e) => setReasonForConsult(e.target.value)}
+                placeholder="Brief reason for requesting consultation (e.g., chest pain evaluation, medication management, etc.)"
+                className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[80px] backdrop-blur-sm rounded-lg"
+              />
+            </CardContent>
+          </Card>
+
           {/* Clinical Question */}
           <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
             <CardContent className="p-4">
-              <label className="text-sm text-white/70 mb-3 block font-medium">Clinical Question</label>
+              <label className="text-sm text-white/70 mb-3 block font-medium">Clinical Question & Details *</label>
               {isAnalyzing && (
                 <div className="mb-3 p-2 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
                   <div className="flex items-center gap-2 text-cyan-200 text-sm">
@@ -255,8 +326,8 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
               <Textarea
                 value={clinicalQuestion}
                 onChange={(e) => setClinicalQuestion(e.target.value)}
-                placeholder="Describe the clinical situation and specific consultation question..."
-                className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[100px] backdrop-blur-sm rounded-lg"
+                placeholder="Detailed clinical scenario, specific questions, current findings, and any relevant history..."
+                className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm rounded-lg"
               />
             </CardContent>
           </Card>
@@ -302,9 +373,9 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                    <SelectItem value="low">Low - Stable</SelectItem>
+                    <SelectItem value="low">Low - Stable Condition</SelectItem>
                     <SelectItem value="moderate">Moderate - Needs Attention</SelectItem>
-                    <SelectItem value="critical">Critical - Immediate</SelectItem>
+                    <SelectItem value="critical">Critical - Immediate Response</SelectItem>
                   </SelectContent>
                 </Select>
                 <Badge className={`mt-2 ${getAcuityColor(acuity)} flex items-center gap-1 w-fit border font-semibold text-xs`}>
@@ -322,9 +393,9 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                    <SelectItem value="routine">Routine</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="routine">Routine - Within 24 hours</SelectItem>
+                    <SelectItem value="urgent">Urgent - Within 4 hours</SelectItem>
+                    <SelectItem value="critical">Critical - Immediate</SelectItem>
                   </SelectContent>
                 </Select>
                 <Badge className={`mt-2 ${getPriorityColor(priority)} text-xs border w-fit`}>
@@ -334,7 +405,7 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
             </Card>
           </div>
 
-          {/* Specialty & Provider Selection */}
+          {/* Specialty & Routing Selection */}
           <div className="grid grid-cols-2 gap-4">
             <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
               <CardContent className="p-4">
@@ -359,20 +430,36 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
 
             <Card className="backdrop-blur-sm bg-white/5 border border-white/20 rounded-xl">
               <CardContent className="p-4">
-                <label className="text-sm text-white/70 mb-3 block font-medium">Provider (Optional)</label>
-                <Select value={selectedProvider} onValueChange={setSelectedProvider}>
+                <label className="text-sm text-white/70 mb-3 block font-medium">Route To</label>
+                <Select value={routingOption} onValueChange={(value: 'on-call' | 'primary' | 'nocturnist') => setRoutingOption(value)}>
                   <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                    <SelectValue placeholder="Any available..." />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                    <SelectItem value="">Any available provider</SelectItem>
-                    {providerOptions.map((provider) => (
-                      <SelectItem key={provider} value={provider}>
-                        {provider}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="on-call">
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        On-Call Physician
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="primary">
+                      <div className="flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4" />
+                        Primary Attending
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="nocturnist">
+                      <div className="flex items-center gap-2">
+                        <Moon className="h-4 w-4" />
+                        Nocturnist
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
+                <Badge className="mt-2 bg-indigo-500/20 text-indigo-300 border-indigo-400/30 text-xs border w-fit flex items-center gap-1">
+                  {getRoutingIcon(routingOption)}
+                  {routingOption === 'on-call' ? 'ON-CALL' : routingOption === 'primary' ? 'PRIMARY' : 'NOCTURNIST'}
+                </Badge>
               </CardContent>
             </Card>
           </div>
@@ -384,6 +471,9 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
                 <div className="flex items-center gap-2 mb-2">
                   <User className="h-4 w-4 text-blue-400" />
                   <span className="text-sm font-medium text-white">Patient Context</span>
+                  <Badge className={`text-xs ${consultType === 'new' ? 'bg-green-500/20 text-green-300 border-green-400/30' : 'bg-blue-500/20 text-blue-300 border-blue-400/30'}`}>
+                    {consultType.toUpperCase()} CONSULT
+                  </Badge>
                 </div>
                 {(() => {
                   const patient = patients.find(p => p.id === selectedPatient);
@@ -405,10 +495,10 @@ const ConsolidatedConsultDialog = ({ open, onClose, hospitalId }: ConsolidatedCo
         <div className="flex gap-3 pt-4 border-t border-white/20">
           <Button
             onClick={handleSubmit}
-            disabled={!clinicalQuestion.trim()}
+            disabled={!selectedPatient || !reasonForConsult.trim() || !clinicalQuestion.trim()}
             className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-0 rounded-lg"
           >
-            <Phone className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 mr-2" />
             Send Consultation Request
           </Button>
           <Button
