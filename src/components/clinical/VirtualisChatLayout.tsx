@@ -350,6 +350,66 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     });
   };
 
+  const handleMessageSend = async (messageData: any) => {
+    try {
+      setMessageDialogOpen(false);
+      
+      // Analyze message with AI
+      let aiAnalysis = null;
+      try {
+        aiAnalysis = await analyzeMessageWithAI(
+          messageData.message,
+          messageData.patientId ? `Patient ID: ${messageData.patientId}` : undefined
+        );
+      } catch (error) {
+        console.error('AI Analysis failed during message send:', error);
+      }
+      
+      toast({
+        title: "Message Sent",
+        description: `Message sent to ${messageData.recipient || 'selected recipient'}`,
+      });
+      
+      const newThreadId = (chatThreads.length + 1).toString();
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        content: messageData.message,
+        sender: profile?.first_name || user?.email || 'Current User',
+        senderRole: profile?.role || 'Physician',
+        timestamp: new Date(),
+        acuity: aiAnalysis?.acuity || 'routine',
+        patientName: messageData.patientId ? 'Selected Patient' : undefined,
+        delivered: false,
+        priorityScore: aiAnalysis?.priorityScore || 25,
+        aiAnalysis
+      };
+
+      const newThread: ChatThread = {
+        id: newThreadId,
+        participants: [messageData.recipient || 'Recipient', profile?.first_name || 'Current User'],
+        lastMessage: messageData.message.substring(0, 50) + (messageData.message.length > 50 ? '...' : ''),
+        timestamp: new Date(),
+        acuity: newMessage.acuity,
+        unreadCount: 0,
+        patientName: messageData.patientId ? 'Selected Patient' : undefined,
+        specialty: messageData.specialty || 'General',
+        isGroup: false,
+        messages: [newMessage],
+        priorityScore: newMessage.priorityScore
+      };
+
+      setChatThreads(prev => [newThread, ...prev]);
+      setActiveThreadId(newThreadId);
+    } catch (error) {
+      console.error('Error in handleMessageSend:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleNewChat = () => {
     setShowFabOptions(false);
     const newThreadId = (chatThreads.length + 1).toString();
