@@ -1,11 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Send, Brain, User, Zap, Target, Cpu } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Send, Brain, User, Zap, Target, Cpu, Stethoscope, BookOpen, TrendingUp, Clock } from 'lucide-react';
 import { usePatients } from '@/hooks/usePatients';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,13 +16,17 @@ interface ConsultDialogProps {
   hospitalId?: string;
 }
 
+type Priority = 'routine' | 'urgent' | 'critical';
+
 const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
   const { toast } = useToast();
   const { data: patients } = usePatients(hospitalId);
   const [consultation, setConsultation] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('none');
-  const [priority, setPriority] = useState<'routine' | 'urgent' | 'critical'>('routine');
+  const [priority, setPriority] = useState<Priority>('routine');
   const [specialty, setSpecialty] = useState('auto');
+  const [aiRecommendations, setAiRecommendations] = useState<any[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const specialties = [
     'Cardiology',
@@ -36,6 +41,35 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
     'Anesthesiology'
   ];
 
+  // Simulate AI analysis when consultation text changes
+  useEffect(() => {
+    if (consultation.length > 50) {
+      setIsAnalyzing(true);
+      const timer = setTimeout(() => {
+        setAiRecommendations([
+          {
+            specialty: 'Cardiology',
+            confidence: 85,
+            reasoning: 'Chest pain, shortness of breath patterns suggest cardiac evaluation',
+            urgency: 'urgent',
+            expectedResponse: '15-30 minutes'
+          },
+          {
+            specialty: 'Emergency Medicine',
+            confidence: 72,
+            reasoning: 'Acute presentation requires immediate assessment',
+            urgency: 'critical',
+            expectedResponse: '5-10 minutes'
+          }
+        ]);
+        setIsAnalyzing(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setAiRecommendations([]);
+    }
+  }, [consultation]);
+
   const handleConsult = () => {
     console.log('Consult initiated');
     if (!consultation.trim()) {
@@ -47,9 +81,12 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
       return;
     }
 
+    const priorityConfig = getPriorityConfig(priority);
+    const recommendedSpecialty = aiRecommendations.length > 0 ? aiRecommendations[0].specialty : specialty;
+
     toast({
-      title: "Consultation Initiated",
-      description: `Consultation request submitted with ${priority} priority${selectedPatient !== 'none' ? ' for selected patient' : ''}`,
+      title: "AI Consultation Initiated",
+      description: `${priorityConfig.label} consultation routed to ${recommendedSpecialty}${selectedPatient !== 'none' ? ' for selected patient' : ''}`,
     });
 
     // Reset form
@@ -57,97 +94,203 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
     setSelectedPatient('none');
     setPriority('routine');
     setSpecialty('auto');
+    setAiRecommendations([]);
     onClose();
   };
 
-  const getPriorityColor = (level: string) => {
+  const getPriorityConfig = (level: Priority) => {
     switch (level) {
-      case 'critical': return 'bg-red-500/20 text-red-200 border-red-400/30';
-      case 'urgent': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
-      case 'routine': return 'bg-green-500/20 text-green-200 border-green-400/30';
-      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
+      case 'critical':
+        return {
+          color: 'bg-red-500/20 text-red-200 border-red-400/30',
+          icon: <Zap className="h-3 w-3" />,
+          label: 'CRITICAL',
+          description: 'Immediate specialist attention'
+        };
+      case 'urgent':
+        return {
+          color: 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30',
+          icon: <Target className="h-3 w-3" />,
+          label: 'URGENT',
+          description: 'Specialist response within 30 minutes'
+        };
+      case 'routine':
+        return {
+          color: 'bg-green-500/20 text-green-200 border-green-400/30',
+          icon: <Clock className="h-3 w-3" />,
+          label: 'ROUTINE',
+          description: 'Standard consultation timeline'
+        };
     }
   };
 
-  const getPriorityIcon = (level: string) => {
-    switch (level) {
-      case 'critical': return <Zap className="h-3 w-3" />;
-      case 'urgent': return <Target className="h-3 w-3" />;
-      case 'routine': return <Cpu className="h-3 w-3" />;
-      default: return <Cpu className="h-3 w-3" />;
-    }
-  };
+  const priorityConfig = getPriorityConfig(priority);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border border-purple-300/40 text-white shadow-2xl rounded-2xl">
+      <DialogContent className="max-w-3xl backdrop-blur-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border border-purple-300/40 text-white shadow-2xl rounded-2xl">
         <DialogHeader className="border-b border-white/20 pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-purple-200 to-indigo-200 bg-clip-text text-transparent">
             <Brain className="h-5 w-5 text-purple-400" />
-            Clinical Consultation System
+            AI-Powered Clinical Consultation
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            Advanced clinical consultation and specialty routing
+            Advanced clinical analysis with intelligent specialty routing and evidence-based recommendations
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-          {/* Patient Selection */}
-          <div className="space-y-2">
-            <label className="text-sm text-white/70 font-medium flex items-center gap-2">
-              <User className="h-3 w-3" />
-              Patient Selection (Optional)
-            </label>
-            <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-              <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                <SelectValue placeholder="Select patient for consultation..." />
-              </SelectTrigger>
-              <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="none">No patient selected</SelectItem>
-                {patients?.map((patient) => (
-                  <SelectItem key={patient.id} value={patient.id}>
-                    {patient.first_name} {patient.last_name} - {patient.mrn}
-                    {patient.room_number && ` (Room ${patient.room_number})`}
+        <div className="space-y-4 max-h-[75vh] overflow-y-auto">
+          {/* Priority and Patient Selection Row */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Priority Classification */}
+            <div className="space-y-2">
+              <label className="text-sm text-white/70 font-medium flex items-center gap-2">
+                <Target className="h-3 w-3" />
+                Consultation Priority
+              </label>
+              <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
+                <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
+                  <SelectItem value="routine">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3" />
+                      Routine Consultation
+                    </div>
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  <SelectItem value="urgent">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-3 w-3" />
+                      Urgent Consultation
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="critical">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-3 w-3" />
+                      Critical Consultation
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Badge className={`${priorityConfig.color} flex items-center gap-1 w-fit border`}>
+                {priorityConfig.icon}
+                <span>{priorityConfig.label}</span>
+              </Badge>
+            </div>
+
+            {/* Patient Selection */}
+            <div className="space-y-2">
+              <label className="text-sm text-white/70 font-medium flex items-center gap-2">
+                <User className="h-3 w-3" />
+                Patient Context
+              </label>
+              <Select value={selectedPatient} onValueChange={setSelectedPatient}>
+                <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
+                  <SelectValue placeholder="Select patient..." />
+                </SelectTrigger>
+                <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
+                  <SelectItem value="none">No patient selected</SelectItem>
+                  {patients?.map((patient) => (
+                    <SelectItem key={patient.id} value={patient.id}>
+                      {patient.first_name} {patient.last_name} - {patient.mrn}
+                      {patient.room_number && ` (Room ${patient.room_number})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Priority Classification */}
+          {/* Clinical Input */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
-              <Target className="h-3 w-3" />
-              Priority Classification
+              <Stethoscope className="h-3 w-3" />
+              Clinical Consultation Request
             </label>
-            <Select value={priority} onValueChange={(value: 'routine' | 'urgent' | 'critical') => setPriority(value)}>
-              <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="routine">Routine Consultation</SelectItem>
-                <SelectItem value="urgent">Urgent Consultation</SelectItem>
-                <SelectItem value="critical">Critical Consultation</SelectItem>
-              </SelectContent>
-            </Select>
-            <Badge className={`mt-2 ${getPriorityColor(priority)} flex items-center gap-1 w-fit border`}>
-              {getPriorityIcon(priority)}
-              <span>{priority.toUpperCase()} PRIORITY</span>
-            </Badge>
+            <Textarea
+              value={consultation}
+              onChange={(e) => setConsultation(e.target.value)}
+              placeholder="Describe the clinical scenario requiring consultation...
+
+Examples:
+• 65-year-old male with acute chest pain, diaphoresis, ST elevation in leads II, III, aVF
+• Post-operative patient with declining respiratory function, increased oxygen requirements
+• Complex medication interactions requiring specialist review"
+              className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm rounded-lg"
+            />
+            <div className="flex items-center gap-2 mt-2">
+              <Brain className="h-3 w-3 text-purple-300" />
+              <p className="text-xs text-white/60">
+                {isAnalyzing ? "Analyzing clinical content..." : "AI Analysis: Pattern Recognition → Differential Diagnosis → Specialty Matching → Expert Routing"}
+              </p>
+            </div>
           </div>
 
-          {/* Specialty Selection */}
+          {/* AI Recommendations */}
+          {aiRecommendations.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4 text-purple-400" />
+                <span className="text-sm font-medium text-white">AI Recommendations</span>
+                <Badge className="bg-purple-500/20 text-purple-200 border border-purple-400/30 text-xs">
+                  <TrendingUp className="h-2 w-2 mr-1" />
+                  Evidence-Based
+                </Badge>
+              </div>
+              
+              <div className="grid gap-2">
+                {aiRecommendations.map((rec, index) => (
+                  <Card key={index} className="backdrop-blur-xl bg-white/5 border border-white/20 rounded-xl">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                            <Stethoscope className="h-4 w-4 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-white">{rec.specialty}</h3>
+                            <p className="text-xs text-white/60">Expected response: {rec.expectedResponse}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-xs border ${
+                            rec.urgency === 'critical' ? 'bg-red-500/20 text-red-200 border-red-400/30' :
+                            rec.urgency === 'urgent' ? 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30' :
+                            'bg-green-500/20 text-green-200 border-green-400/30'
+                          }`}>
+                            {rec.urgency.toUpperCase()}
+                          </Badge>
+                          <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30">
+                            {rec.confidence}% Match
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-sm text-white/80">{rec.reasoning}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Manual Specialty Selection */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
-              <Brain className="h-3 w-3" />
-              Specialty Target (Optional)
+              <BookOpen className="h-3 w-3" />
+              Specialty Override (Optional)
             </label>
             <Select value={specialty} onValueChange={setSpecialty}>
               <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                <SelectValue placeholder="Auto-determine optimal specialty..." />
+                <SelectValue placeholder="Auto-detect optimal specialty..." />
               </SelectTrigger>
               <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="auto">Auto-Detection</SelectItem>
+                <SelectItem value="auto">
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-3 w-3" />
+                    AI Auto-Detection
+                  </div>
+                </SelectItem>
                 {specialties.map((spec) => (
                   <SelectItem key={spec} value={spec}>
                     {spec}
@@ -157,32 +300,12 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
             </Select>
           </div>
 
-          {/* Clinical Input */}
-          <div className="space-y-2">
-            <label className="text-sm text-white/70 font-medium flex items-center gap-2">
-              <Cpu className="h-3 w-3" />
-              Clinical Consultation Request
-            </label>
-            <Textarea
-              value={consultation}
-              onChange={(e) => setConsultation(e.target.value)}
-              placeholder="Describe clinical scenario for consultation... Include symptoms, current treatment, and specific questions for specialist..."
-              className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm rounded-lg"
-            />
-            <div className="flex items-center gap-2 mt-2">
-              <Brain className="h-3 w-3 text-purple-300" />
-              <p className="text-xs text-white/60">
-                Processing: Clinical Analysis → Differential Diagnosis → Specialty Routing → Expert Connection
-              </p>
-            </div>
-          </div>
-
           {/* Patient Context Preview */}
           {selectedPatient !== 'none' && patients && (
-            <div className="p-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl">
+            <div className="p-3 backdrop-blur-xl bg-white/5 border border-white/20 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <User className="h-4 w-4 text-blue-400" />
-                <span className="text-sm font-medium text-white">Patient Context</span>
+                <span className="text-sm font-medium text-white">Patient Context Integration</span>
               </div>
               {(() => {
                 const patient = patients.find(p => p.id === selectedPatient);
@@ -192,6 +315,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
                     <p><span className="text-blue-300">Location:</span> {patient.room_number || 'Unassigned'}</p>
                     <p><span className="text-blue-300">Conditions:</span> {patient.medical_conditions?.join(', ') || 'None documented'}</p>
                     <p><span className="text-blue-300">Allergies:</span> {patient.allergies?.join(', ') || 'None documented'}</p>
+                    <p><span className="text-blue-300">Current Meds:</span> {patient.current_medications?.join(', ') || 'None documented'}</p>
                   </div>
                 ) : null;
               })()}
@@ -205,7 +329,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
               className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-0 rounded-lg"
             >
               <Send className="h-4 w-4 mr-2" />
-              Initiate Consultation
+              Initiate AI Consultation
             </Button>
             <Button
               onClick={onClose}
