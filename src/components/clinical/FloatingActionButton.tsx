@@ -59,7 +59,7 @@ const FloatingActionButton = ({ onMessageClick, onConsultClick }: FloatingAction
                 className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white flex items-center gap-2 justify-start border-0 transition-all duration-300"
               >
                 <Stethoscope className="h-4 w-4" />
-                <span className="font-medium">Neural Consult</span>
+                <span className="font-medium">Consult</span>
                 <Badge className="ml-auto bg-purple-500/20 text-purple-200 border border-purple-400/30">
                   AI-Powered
                 </Badge>

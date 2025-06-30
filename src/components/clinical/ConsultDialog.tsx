@@ -36,20 +36,20 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
     'Anesthesiology'
   ];
 
-  const handleNeuraConsult = () => {
-    console.log('Neural Consult initiated');
+  const handleConsult = () => {
+    console.log('Consult initiated');
     if (!consultation.trim()) {
       toast({
-        title: "Neural Input Required",
-        description: "Please describe the clinical scenario for AI analysis",
+        title: "Clinical Input Required",
+        description: "Please describe the clinical scenario for consultation",
         variant: "destructive"
       });
       return;
     }
 
     toast({
-      title: "Neural Consult Initiated",
-      description: `AI analyzing case with ${priority} priority${selectedPatient ? ' for selected patient' : ''}`,
+      title: "Consultation Initiated",
+      description: `Consultation request submitted with ${priority} priority${selectedPatient ? ' for selected patient' : ''}`,
     });
 
     // Reset form
@@ -84,26 +84,26 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
         <DialogHeader className="border-b border-white/20 pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-purple-200 to-indigo-200 bg-clip-text text-transparent">
             <Brain className="h-5 w-5 text-purple-400" />
-            Neural Consultation System
+            Clinical Consultation System
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            Advanced AI-powered clinical consultation and specialty routing
+            Advanced clinical consultation and specialty routing
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-          {/* Patient Neural Link */}
+          {/* Patient Selection */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <User className="h-3 w-3" />
-              Patient Neural Link (Optional)
+              Patient Selection (Optional)
             </label>
             <Select value={selectedPatient} onValueChange={setSelectedPatient}>
               <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                <SelectValue placeholder="Select patient for contextual analysis..." />
+                <SelectValue placeholder="Select patient for consultation..." />
               </SelectTrigger>
               <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="">No patient link</SelectItem>
+                <SelectItem value="">No patient selected</SelectItem>
                 {patients?.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
                     {patient.first_name} {patient.last_name} - {patient.mrn}
@@ -114,40 +114,40 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
             </Select>
           </div>
 
-          {/* Priority Neural Classification */}
+          {/* Priority Classification */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <Target className="h-3 w-3" />
-              Neural Priority Classification
+              Priority Classification
             </label>
             <Select value={priority} onValueChange={(value: 'routine' | 'urgent' | 'critical') => setPriority(value)}>
               <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="routine">Routine Analysis</SelectItem>
-                <SelectItem value="urgent">Urgent Processing</SelectItem>
-                <SelectItem value="critical">Critical Override</SelectItem>
+                <SelectItem value="routine">Routine Consultation</SelectItem>
+                <SelectItem value="urgent">Urgent Consultation</SelectItem>
+                <SelectItem value="critical">Critical Consultation</SelectItem>
               </SelectContent>
             </Select>
             <Badge className={`mt-2 ${getPriorityColor(priority)} flex items-center gap-1 w-fit border`}>
               {getPriorityIcon(priority)}
-              <span>{priority.toUpperCase()} NEURAL MODE</span>
+              <span>{priority.toUpperCase()} PRIORITY</span>
             </Badge>
           </div>
 
-          {/* Specialty Targeting */}
+          {/* Specialty Selection */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <Brain className="h-3 w-3" />
-              Specialty Neural Target (Optional)
+              Specialty Target (Optional)
             </label>
             <Select value={specialty} onValueChange={setSpecialty}>
               <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
-                <SelectValue placeholder="AI will auto-determine optimal specialty..." />
+                <SelectValue placeholder="Auto-determine optimal specialty..." />
               </SelectTrigger>
               <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
-                <SelectItem value="">Auto-Neural Detection</SelectItem>
+                <SelectItem value="">Auto-Detection</SelectItem>
                 {specialties.map((spec) => (
                   <SelectItem key={spec} value={spec}>
                     {spec}
@@ -157,55 +157,55 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
             </Select>
           </div>
 
-          {/* Clinical Neural Input */}
+          {/* Clinical Input */}
           <div className="space-y-2">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <Cpu className="h-3 w-3" />
-              Clinical Neural Input
+              Clinical Consultation Request
             </label>
             <Textarea
               value={consultation}
               onChange={(e) => setConsultation(e.target.value)}
-              placeholder="Describe clinical scenario... Neural AI will analyze symptoms, suggest differential diagnosis, and route to optimal specialist..."
+              placeholder="Describe clinical scenario for consultation... Include symptoms, current treatment, and specific questions for specialist..."
               className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 min-h-[120px] backdrop-blur-sm rounded-lg"
             />
             <div className="flex items-center gap-2 mt-2">
               <Brain className="h-3 w-3 text-purple-300" />
               <p className="text-xs text-white/60">
-                Neural processing: Symptom Analysis → Differential Diagnosis → Specialty Routing → Expert Connection
+                Processing: Clinical Analysis → Differential Diagnosis → Specialty Routing → Expert Connection
               </p>
             </div>
           </div>
 
-          {/* Patient Neural Context Preview */}
+          {/* Patient Context Preview */}
           {selectedPatient && patients && (
             <div className="p-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <User className="h-4 w-4 text-blue-400" />
-                <span className="text-sm font-medium text-white">Neural Patient Context</span>
+                <span className="text-sm font-medium text-white">Patient Context</span>
               </div>
               {(() => {
                 const patient = patients.find(p => p.id === selectedPatient);
                 return patient ? (
                   <div className="text-sm text-white/80 space-y-1">
-                    <p><span className="text-blue-300">Neural ID:</span> {patient.first_name} {patient.last_name}</p>
+                    <p><span className="text-blue-300">Patient:</span> {patient.first_name} {patient.last_name}</p>
                     <p><span className="text-blue-300">Location:</span> {patient.room_number || 'Unassigned'}</p>
-                    <p><span className="text-blue-300">Medical Matrix:</span> {patient.medical_conditions?.join(', ') || 'Clean profile'}</p>
-                    <p><span className="text-blue-300">Allergy Flags:</span> {patient.allergies?.join(', ') || 'None detected'}</p>
+                    <p><span className="text-blue-300">Conditions:</span> {patient.medical_conditions?.join(', ') || 'None documented'}</p>
+                    <p><span className="text-blue-300">Allergies:</span> {patient.allergies?.join(', ') || 'None documented'}</p>
                   </div>
                 ) : null;
               })()}
             </div>
           )}
 
-          {/* Neural Action Buttons */}
+          {/* Action Buttons */}
           <div className="flex gap-2 pt-4 border-t border-white/20">
             <Button
-              onClick={handleNeuraConsult}
+              onClick={handleConsult}
               className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-0 rounded-lg"
             >
               <Send className="h-4 w-4 mr-2" />
-              Initiate Neural Consult
+              Initiate Consultation
             </Button>
             <Button
               onClick={onClose}
