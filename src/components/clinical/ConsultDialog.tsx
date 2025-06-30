@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Send, Brain, User, Zap, Target, Cpu } from 'lucide-react';
+import { Send, Brain, User, Zap, Target, Cpu, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 import { usePatients } from '@/hooks/usePatients';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,6 +21,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
   const [consultation, setConsultation] = useState('');
   const [selectedPatient, setSelectedPatient] = useState('none');
   const [priority, setPriority] = useState<'routine' | 'urgent' | 'critical'>('routine');
+  const [acuity, setAcuity] = useState<'low' | 'moderate' | 'critical'>('low');
   const [specialty, setSpecialty] = useState('auto');
 
   const specialties = [
@@ -49,13 +50,14 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
 
     toast({
       title: "Consultation Initiated",
-      description: `Consultation request submitted with ${priority} priority${selectedPatient !== 'none' ? ' for selected patient' : ''}`,
+      description: `Consultation request submitted with ${priority} priority and ${acuity} acuity${selectedPatient !== 'none' ? ' for selected patient' : ''}`,
     });
 
     // Reset form
     setConsultation('');
     setSelectedPatient('none');
     setPriority('routine');
+    setAcuity('low');
     setSpecialty('auto');
     onClose();
   };
@@ -78,6 +80,24 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
     }
   };
 
+  const getAcuityColor = (level: string) => {
+    switch (level) {
+      case 'critical': return 'bg-red-600/30 text-red-100 border-red-500/50';
+      case 'moderate': return 'bg-yellow-600/30 text-yellow-100 border-yellow-500/50';
+      case 'low': return 'bg-green-600/30 text-green-100 border-green-500/50';
+      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
+    }
+  };
+
+  const getAcuityIcon = (level: string) => {
+    switch (level) {
+      case 'critical': return <AlertTriangle className="h-4 w-4" />;
+      case 'moderate': return <Clock className="h-4 w-4" />;
+      case 'low': return <CheckCircle className="h-4 w-4" />;
+      default: return <CheckCircle className="h-4 w-4" />;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border border-purple-300/40 text-white shadow-2xl rounded-2xl">
@@ -87,7 +107,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
             Clinical Consultation System
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            Advanced clinical consultation and specialty routing
+            Advanced clinical consultation and specialty routing with acuity assessment
           </DialogDescription>
         </DialogHeader>
 
@@ -112,6 +132,28 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Acuity Assessment */}
+          <div className="space-y-2">
+            <label className="text-sm text-white/70 font-medium flex items-center gap-2">
+              <AlertTriangle className="h-3 w-3" />
+              Clinical Acuity Level
+            </label>
+            <Select value={acuity} onValueChange={(value: 'low' | 'moderate' | 'critical') => setAcuity(value)}>
+              <SelectTrigger className="bg-white/10 border border-white/30 text-white backdrop-blur-sm rounded-lg">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-gradient-to-br from-purple-800/95 to-indigo-800/95 border border-purple-400/50 text-white backdrop-blur-xl rounded-lg">
+                <SelectItem value="low">Low Acuity - Stable Condition</SelectItem>
+                <SelectItem value="moderate">Moderate Acuity - Requires Monitoring</SelectItem>
+                <SelectItem value="critical">Critical Acuity - Immediate Attention</SelectItem>
+              </SelectContent>
+            </Select>
+            <Badge className={`mt-2 ${getAcuityColor(acuity)} flex items-center gap-1 w-fit border font-semibold`}>
+              {getAcuityIcon(acuity)}
+              <span>{acuity.toUpperCase()} ACUITY</span>
+            </Badge>
           </div>
 
           {/* Priority Classification */}
@@ -172,7 +214,7 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
             <div className="flex items-center gap-2 mt-2">
               <Brain className="h-3 w-3 text-purple-300" />
               <p className="text-xs text-white/60">
-                Processing: Clinical Analysis → Differential Diagnosis → Specialty Routing → Expert Connection
+                Processing: Clinical Analysis → Acuity Assessment → Differential Diagnosis → Specialty Routing → Expert Connection
               </p>
             </div>
           </div>
@@ -197,6 +239,24 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
               })()}
             </div>
           )}
+
+          {/* Acuity Summary */}
+          <div className="p-3 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 backdrop-blur-sm border border-purple-400/30 rounded-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-purple-300" />
+                <span className="text-sm font-medium text-white">Consultation Summary</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className={`${getAcuityColor(acuity)} text-xs border font-semibold`}>
+                  {acuity.toUpperCase()}
+                </Badge>
+                <Badge className={`${getPriorityColor(priority)} text-xs border`}>
+                  {priority.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+          </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2 pt-4 border-t border-white/20">

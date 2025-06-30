@@ -18,7 +18,8 @@ import {
   Video,
   FileText,
   Users,
-  ArrowRight
+  ArrowRight,
+  CheckCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
@@ -135,9 +136,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
 
   const getAcuityColor = (acuity: string) => {
     switch (acuity) {
-      case 'critical': return 'bg-red-500/20 text-red-200 border-red-400/30';
-      case 'urgent': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30';
-      case 'routine': return 'bg-green-500/20 text-green-200 border-green-400/30';
+      case 'critical': return 'bg-red-600/30 text-red-100 border-red-500/50';
+      case 'urgent': return 'bg-yellow-600/30 text-yellow-100 border-yellow-500/50';
+      case 'routine': return 'bg-green-600/30 text-green-100 border-green-500/50';
       default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30';
     }
   };
@@ -316,7 +317,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
     
     toast({
       title: "Message Sent",
-      description: `AI determined ${aiAnalysis.acuity} priority with ${aiAnalysis.priority}/100 urgency score.${aiAnalysis.recommendedSpecialty ? ` Recommends ${aiAnalysis.recommendedSpecialty} consultation.` : ''}`,
+      description: `AI determined ${aiAnalysis.acuity} acuity with ${aiAnalysis.priority}/100 urgency score.${aiAnalysis.recommendedSpecialty ? ` Recommends ${aiAnalysis.recommendedSpecialty} consultation.` : ''}`,
     });
 
     // Auto-suggest routing for critical/urgent messages
@@ -420,17 +421,17 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Virtualis Chat</h1>
-              <p className="text-white/70">AI-Powered Clinical Communication with Smart Routing</p>
+              <p className="text-white/70">AI-Powered Clinical Communication with Acuity-Based Smart Routing</p>
             </div>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-red-500/20 border border-red-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Critical Messages</p>
+                    <p className="text-sm text-white/70">Critical Acuity</p>
                     <p className="text-2xl font-bold text-white">
                       {messages.filter(m => m.acuity === 'critical').length}
                     </p>
@@ -440,16 +441,30 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
+            <Card className="backdrop-blur-xl bg-yellow-500/20 border border-yellow-300/30 rounded-xl shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/70">Urgent Messages</p>
+                    <p className="text-sm text-white/70">Moderate Acuity</p>
                     <p className="text-2xl font-bold text-white">
                       {messages.filter(m => m.acuity === 'urgent').length}
                     </p>
                   </div>
                   <Clock className="h-8 w-8 text-orange-300" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="backdrop-blur-xl bg-green-500/20 border border-green-300/30 rounded-xl shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/70">Low Acuity</p>
+                    <p className="text-2xl font-bold text-white">
+                      {messages.filter(m => m.acuity === 'routine').length}
+                    </p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-300" />
                 </div>
               </CardContent>
             </Card>
@@ -464,20 +479,6 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                     </p>
                   </div>
                   <Brain className="h-8 w-8 text-purple-300" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white/70">Avg Priority</p>
-                    <p className="text-2xl font-bold text-white">
-                      {Math.round(messages.reduce((acc, m) => acc + (m.aiAnalysis?.priority || 0), 0) / messages.length) || 0}
-                    </p>
-                  </div>
-                  <Star className="h-8 w-8 text-blue-300" />
                 </div>
               </CardContent>
             </Card>
@@ -514,10 +515,10 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Brain className="h-5 w-5 text-blue-300" />
-                  AI-Prioritized Clinical Messages
+                  AI-Prioritized Clinical Messages with Acuity Assessment
                 </CardTitle>
                 <CardDescription className="text-white/70">
-                  Messages sorted by AI priority score and acuity level
+                  Messages sorted by acuity level and AI priority score
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto space-y-4">
@@ -536,9 +537,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                           <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs">
                             {message.senderRole}
                           </Badge>
-                          <Badge className={`text-xs ${getAcuityColor(message.acuity)}`}>
+                          <Badge className={`text-xs font-semibold border ${getAcuityColor(message.acuity)}`}>
                             {getAcuityIcon(message.acuity)}
-                            <span className="ml-1">{message.acuity.toUpperCase()}</span>
+                            <span className="ml-1">{message.acuity.toUpperCase()} ACUITY</span>
                           </Badge>
                         </div>
                         <span className="text-xs text-white/60">
@@ -578,6 +579,9 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                               <Star className="h-3 w-3 text-blue-300" />
                               <span className="text-xs text-blue-300">Priority: {message.aiAnalysis.priority}/100</span>
                             </div>
+                            <Badge className={`${getAcuityColor(message.aiAnalysis.acuity)} text-xs border font-semibold`}>
+                              {message.aiAnalysis.acuity.toUpperCase()}
+                            </Badge>
                           </div>
                           {message.aiAnalysis.keywords.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-1">
@@ -630,7 +634,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
               <CardHeader>
                 <CardTitle className="text-white">Send Message</CardTitle>
                 <CardDescription className="text-white/70">
-                  AI will automatically determine priority and suggest specialist routing
+                  AI will automatically determine acuity level and suggest specialist routing
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -652,7 +656,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   </Select>
                   {selectedPatient && (
                     <p className="text-xs text-white/60 mt-1">
-                      Patient context will help AI provide better specialty recommendations
+                      Patient context will help AI provide better acuity assessment and specialty recommendations
                     </p>
                   )}
                 </div>
@@ -662,13 +666,13 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Describe the clinical situation... AI will analyze urgency, determine acuity level, and recommend appropriate specialty consultation."
+                    placeholder="Describe the clinical situation... AI will analyze urgency, determine acuity level (Critical/Moderate/Low), and recommend appropriate specialty consultation."
                     className="bg-blue-600/20 border border-blue-400/30 text-white placeholder:text-white/60 min-h-[100px]"
                   />
                   <div className="flex items-center gap-2 mt-2">
                     <Brain className="h-3 w-3 text-purple-300" />
                     <p className="text-xs text-white/60">
-                      AI will auto-determine: Priority Score → Acuity Level → Specialty Recommendation → On-Call Routing
+                      AI will auto-determine: Acuity Level (Critical/Moderate/Low) → Priority Score → Specialty Recommendation → On-Call Routing
                     </p>
                   </div>
                 </div>
@@ -679,7 +683,7 @@ const VirtualisChat = ({ hospitalId, currentUser }: VirtualisChatProps) => {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  {aiLoading ? 'AI Analyzing...' : 'Send & AI Route'}
+                  {aiLoading ? 'AI Analyzing Acuity...' : 'Send & AI Route'}
                 </Button>
               </CardContent>
             </Card>
