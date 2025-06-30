@@ -82,26 +82,28 @@ const PatientChart = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white virtualis-gradient-text">Patient Chart</h1>
+            <h1 className="text-3xl font-bold text-white">Patient Chart</h1>
             <p className="text-white/70">Complete patient medical record and care overview</p>
           </div>
-          <Button className="virtualis-button">
+          <Button className="bg-white/20 hover:bg-white/30 border border-white/30 text-white">
             <FileText className="h-4 w-4 mr-2" />
             Add Note
           </Button>
         </div>
 
         {/* Patient Header Card */}
-        <Card className="virtualis-card">
+        <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-600/30 rounded-full">
+                <div className="p-3 bg-white/20 rounded-full">
                   <User className="h-8 w-8 text-white" />
                 </div>
                 <div>
@@ -115,7 +117,7 @@ const PatientChart = () => {
                   </div>
                 </div>
               </div>
-              <Badge className="virtualis-badge success">
+              <Badge className="bg-green-500/30 text-green-300 border-green-400/40">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 {patientData.status}
               </Badge>
@@ -124,15 +126,15 @@ const PatientChart = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center gap-2 text-white/80">
-                <MapPin className="h-4 w-4 text-blue-300" />
+                <MapPin className="h-4 w-4 text-white" />
                 <span>Room: {patientData.room}</span>
               </div>
               <div className="flex items-center gap-2 text-white/80">
-                <Calendar className="h-4 w-4 text-blue-300" />
+                <Calendar className="h-4 w-4 text-white" />
                 <span>Admitted: {patientData.admissionDate}</span>
               </div>
               <div className="flex items-center gap-2 text-white/80">
-                <Phone className="h-4 w-4 text-blue-300" />
+                <Phone className="h-4 w-4 text-white" />
                 <span>{patientData.phone}</span>
               </div>
             </div>
@@ -143,28 +145,28 @@ const PatientChart = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Button 
             onClick={() => handleActionClick('New Order')}
-            className="virtualis-button"
+            className="bg-white/20 hover:bg-white/30 border border-white/30 text-white"
           >
             <FileText className="h-4 w-4 mr-2" />
             New Order
           </Button>
           <Button 
             onClick={() => handleActionClick('Lab Results')}
-            className="virtualis-button"
+            className="bg-white/20 hover:bg-white/30 border border-white/30 text-white"
           >
             <Activity className="h-4 w-4 mr-2" />
             Lab Results
           </Button>
           <Button 
             onClick={() => handleActionClick('Medications')}
-            className="virtualis-button"
+            className="bg-white/20 hover:bg-white/30 border border-white/30 text-white"
           >
             <Pill className="h-4 w-4 mr-2" />
             Medications
           </Button>
           <Button 
             onClick={() => handleActionClick('Discharge Planning')}
-            className="virtualis-button"
+            className="bg-white/20 hover:bg-white/30 border border-white/30 text-white"
           >
             <User className="h-4 w-4 mr-2" />
             Discharge
@@ -173,7 +175,7 @@ const PatientChart = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 virtualis-card">
+          <TabsList className="grid w-full grid-cols-6 backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl">
             <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/20">
               Overview
             </TabsTrigger>
@@ -196,16 +198,16 @@ const PatientChart = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="virtualis-card">
+              <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-white">Current Diagnoses</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {patientData.diagnoses.map((diagnosis, index) => (
-                    <div key={index} className="p-3 virtualis-card">
+                    <div key={index} className="p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-white">{diagnosis.condition}</span>
-                        <Badge className="virtualis-badge warning">
+                        <Badge className="bg-yellow-500/30 text-yellow-300 border-yellow-400/40">
                           {diagnosis.status}
                         </Badge>
                       </div>
@@ -215,7 +217,7 @@ const PatientChart = () => {
                 </CardContent>
               </Card>
 
-              <Card className="virtualis-card">
+              <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-white">Allergies & Alerts</CardTitle>
                 </CardHeader>
@@ -235,7 +237,7 @@ const PatientChart = () => {
 
           <TabsContent value="vitals" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="virtualis-card">
+              <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -247,7 +249,7 @@ const PatientChart = () => {
                 </CardContent>
               </Card>
 
-              <Card className="virtualis-card">
+              <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -259,7 +261,7 @@ const PatientChart = () => {
                 </CardContent>
               </Card>
 
-              <Card className="virtualis-card">
+              <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -280,15 +282,15 @@ const PatientChart = () => {
           <TabsContent value="imaging" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {patientData.imaging.map((study, index) => (
-                <Card key={index} className="virtualis-card hover:shadow-xl transition-all">
+                <Card key={index} className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl hover:shadow-2xl transition-all">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${study.critical ? 'bg-red-500/20' : 'bg-purple-500/20'}`}>
+                        <div className={`p-2 rounded-lg ${study.critical ? 'bg-red-500/20' : 'bg-white/20'}`}>
                           {study.type.includes('Echo') ? (
-                            <Stethoscope className={`h-5 w-5 ${study.critical ? 'text-red-300' : 'text-purple-300'}`} />
+                            <Stethoscope className={`h-5 w-5 ${study.critical ? 'text-red-300' : 'text-white'}`} />
                           ) : (
-                            <Camera className={`h-5 w-5 ${study.critical ? 'text-red-300' : 'text-purple-300'}`} />
+                            <Camera className={`h-5 w-5 ${study.critical ? 'text-red-300' : 'text-white'}`} />
                           )}
                         </div>
                         <div>
@@ -298,12 +300,12 @@ const PatientChart = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         {study.critical && (
-                          <Badge className="virtualis-badge error text-xs">
+                          <Badge className="bg-red-500/30 text-red-300 border-red-400/40 text-xs">
                             <AlertTriangle className="h-3 w-3 mr-1" />
                             CRITICAL
                           </Badge>
                         )}
-                        <Badge className="virtualis-badge success text-xs">
+                        <Badge className="bg-green-500/30 text-green-300 border-green-400/40 text-xs">
                           {study.status.toUpperCase()}
                         </Badge>
                       </div>
@@ -311,16 +313,16 @@ const PatientChart = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="p-3 virtualis-card">
+                      <div className="p-3 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
                         <h4 className="text-white font-medium mb-2">Findings:</h4>
                         <p className="text-white/80 text-sm">{study.findings}</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" className="virtualis-button">
+                        <Button size="sm" className="bg-white/20 hover:bg-white/30 border border-white/30 text-white">
                           <Eye className="h-3 w-3 mr-1" />
                           View Images
                         </Button>
-                        <Button size="sm" className="virtualis-button">
+                        <Button size="sm" className="bg-white/20 hover:bg-white/30 border border-white/30 text-white">
                           <Download className="h-3 w-3 mr-1" />
                           Download
                         </Button>
@@ -333,20 +335,20 @@ const PatientChart = () => {
           </TabsContent>
 
           <TabsContent value="medications" className="space-y-6">
-            <Card className="virtualis-card">
+            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
               <CardHeader>
                 <CardTitle className="text-white">Current Medications</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {patientData.medications.map((medication, index) => (
-                    <div key={index} className="p-4 virtualis-card">
+                    <div key={index} className="p-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-medium text-white">{medication.name}</div>
                           <div className="text-sm text-white/70">{medication.frequency}</div>
                         </div>
-                        <Badge className="virtualis-badge success">
+                        <Badge className="bg-green-500/30 text-green-300 border-green-400/40">
                           {medication.status}
                         </Badge>
                       </div>
@@ -358,17 +360,17 @@ const PatientChart = () => {
           </TabsContent>
 
           <TabsContent value="notes" className="space-y-6">
-            <Card className="virtualis-card">
+            <Card className="backdrop-blur-xl bg-white/10 border border-white/30 shadow-xl rounded-xl">
               <CardHeader>
                 <CardTitle className="text-white">Recent Clinical Notes</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {patientData.recentNotes.map((note, index) => (
-                    <div key={index} className="p-4 virtualis-card">
+                    <div key={index} className="p-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-blue-300" />
+                          <User className="h-4 w-4 text-white" />
                           <span className="font-medium text-white">{note.provider}</span>
                         </div>
                         <div className="flex items-center gap-1 text-white/60 text-sm">
