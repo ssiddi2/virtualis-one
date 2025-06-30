@@ -7,6 +7,9 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import VirtualisChatWithPatients from './VirtualisChatWithPatients';
 import VirtualisChat from './VirtualisChat';
+import FloatingActionButton from './FloatingActionButton';
+import MessageDialog from './MessageDialog';
+import ConsultDialog from './ConsultDialog';
 import { 
   Brain,
   MessageSquare,
@@ -24,6 +27,8 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const { profile, user } = useAuth();
   const { toast } = useToast();
   const [chatMode, setChatMode] = useState<'patient-threads' | 'general-chat'>('patient-threads');
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [consultDialogOpen, setConsultDialogOpen] = useState(false);
 
   const toggleChatMode = () => {
     const newMode = chatMode === 'patient-threads' ? 'general-chat' : 'patient-threads';
@@ -35,6 +40,14 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         ? 'Conversations are now organized by patient context'
         : 'General clinical communication and team chat'
     });
+  };
+
+  const handleMessageClick = () => {
+    setMessageDialogOpen(true);
+  };
+
+  const handleConsultClick = () => {
+    setConsultDialogOpen(true);
   };
 
   if (!hospitalId) {
@@ -120,6 +133,25 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
       ) : (
         <VirtualisChat hospitalId={hospitalId} currentUser={profile || user} />
       )}
+
+      {/* Floating Action Button */}
+      <FloatingActionButton
+        onMessageClick={handleMessageClick}
+        onConsultClick={handleConsultClick}
+      />
+
+      {/* Dialogs */}
+      <MessageDialog
+        open={messageDialogOpen}
+        onClose={() => setMessageDialogOpen(false)}
+        hospitalId={hospitalId}
+      />
+
+      <ConsultDialog
+        open={consultDialogOpen}
+        onClose={() => setConsultDialogOpen(false)}
+        hospitalId={hospitalId}
+      />
     </div>
   );
 };
