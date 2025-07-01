@@ -1,5 +1,5 @@
 
-import { Home, Users, Activity, MessageSquare, Settings, Stethoscope, Calculator, TestTube, Scan, Award, Code, Brain } from "lucide-react";
+import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -42,7 +42,11 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="flex items-center gap-2 px-4 mb-8">
-            <Stethoscope className="h-8 w-8 text-virtualis-gold" />
+            <img 
+              src="/lovable-uploads/9ce8bfbd-79fd-4ea8-9589-5e4a4307b294.png" 
+              alt="Virtualis Logo" 
+              className="h-10 w-10"
+            />
             <div>
               <h2 className="text-xl font-bold text-white">VirtualisOne</h2>
               <p className="text-xs text-white/60">Healthcare Intelligence</p>

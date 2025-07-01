@@ -51,7 +51,7 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" replace />} />
       
       <Route path="/" element={
         <ProtectedRoute>

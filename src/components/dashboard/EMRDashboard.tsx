@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -138,18 +139,22 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
         background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
       }}>
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
+          {/* Header with Logo */}
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <Database className="h-12 w-12 text-sky-300 animate-pulse" />
-              <div>
-                <h1 className="text-4xl font-bold text-white">
-                  Virtualis Healthcare Network
-                </h1>
-                <p className="text-white/80 text-lg">
-                  Select a hospital to access its EMR system and begin clinical workflows
-                </p>
-              </div>
+              <img 
+                src="/lovable-uploads/96442473-7948-4431-92d6-7697bfb571e2.png" 
+                alt="VirtualisOne" 
+                className="h-20"
+              />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                Healthcare Network Command Center
+              </h1>
+              <p className="text-white/80 text-lg">
+                Select a hospital to access its EMR system and begin clinical workflows
+              </p>
             </div>
             
             <div className="flex items-center justify-center gap-4">

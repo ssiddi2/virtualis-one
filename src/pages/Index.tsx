@@ -43,6 +43,11 @@ const Index = () => {
           background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
         }}>
           <div className="text-center text-white">
+            <img 
+              src="/lovable-uploads/96442473-7948-4431-92d6-7697bfb571e2.png" 
+              alt="VirtualisOne" 
+              className="h-16 mx-auto mb-4"
+            />
             <h2 className="text-2xl font-bold mb-4">Hospital Selection Required</h2>
             <p className="text-white/70 mb-4">Please select a hospital from the network dashboard first.</p>
             <Button onClick={() => navigate('/emr')} className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold">
