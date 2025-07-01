@@ -35,6 +35,10 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
   const { data: hospitals } = useHospitals();
   const navigate = useNavigate();
   
+  console.log('EMRDashboard rendering - user:', user);
+  console.log('EMRDashboard rendering - hospitalId:', hospitalId);
+  console.log('EMRDashboard rendering - hospitals:', hospitals);
+  
   const selectedHospital = hospitalId ? hospitals?.find(h => h.id === hospitalId) : null;
 
   // Mock hospitals data if database is empty
@@ -100,6 +104,8 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
   const displayHospitals = hospitals && hospitals.length > 0 ? hospitals : mockHospitals;
 
   const handleConnectToHospital = async (hospital: any) => {
+    console.log('Connecting to hospital:', hospital);
+    
     // Show success toast
     toast({
       title: "Hospital Selected",
@@ -133,6 +139,8 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
   const getTotalPatients = () => {
     return displayHospitals.length * 1250;
   };
+
+  console.log('EMRDashboard about to render with displayHospitals:', displayHospitals);
 
   return (
     <div className="min-h-screen p-6" style={{
