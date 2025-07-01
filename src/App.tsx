@@ -17,6 +17,8 @@ import VirtualisChat from "@/pages/VirtualisChat";
 import NotFound from "@/pages/NotFound";
 import PatientDetailsPage from "@/components/patient/PatientDetailsPage";
 import CPOESystem from "@/components/clinical/CPOESystem";
+import EnhancedCPOESystem from "@/components/clinical/EnhancedCPOESystem";
+import ClinicalDocumentation from "@/components/clinical/ClinicalDocumentation";
 import BillingDashboard from "@/components/billing/BillingDashboard";
 import EnhancedLISDashboard from "@/components/laboratory/EnhancedLISDashboard";
 import PACSManager from "@/components/radiology/PACSManager";
