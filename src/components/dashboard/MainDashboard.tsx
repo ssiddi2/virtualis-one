@@ -15,7 +15,10 @@ import {
   Stethoscope,
   Building2,
   Brain,
-  Zap
+  Zap,
+  ClipboardList,
+  TestTube,
+  PlusCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -29,31 +32,62 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
   const quickActions = [
     {
       title: "Patient Management",
-      description: "Access patient records and clinical workflows",
+      description: "Access patient records and Epic-style charts",
       icon: Users,
       path: "/patients",
       color: "bg-blue-500"
     },
     {
-      title: "Clinical Workflows",
-      description: "CPOE, documentation, and clinical decision support",
-      icon: Stethoscope,
+      title: "Clinical Documentation", 
+      description: "Progress notes, SOAP notes, and clinical templates",
+      icon: FileText,
       path: "/clinical",
       color: "bg-green-500"
     },
     {
-      title: "Financial Dashboard",
-      description: "Revenue cycle and financial analytics",
-      icon: TrendingUp,
-      path: "/cfo-dashboard",
+      title: "VirtualisChat",
+      description: "AI-powered clinical communication and smart routing",
+      icon: Stethoscope,
+      path: "/virtualis-chat",
       color: "bg-purple-500"
     },
     {
-      title: "AI Insights",
-      description: "Intelligent clinical analytics and recommendations",
-      icon: Brain,
-      path: "/ai-dashboard",
+      title: "Laboratory Review",
+      description: "Lab results, pathology, and diagnostic review",
+      icon: TestTube,
+      path: "/laboratory",
       color: "bg-orange-500"
+    }
+  ];
+
+  const clinicalShortcuts = [
+    {
+      title: "New Progress Note",
+      description: "Create clinical documentation",
+      action: () => navigate("/clinical"),
+      icon: ClipboardList,
+      color: "bg-emerald-500"
+    },
+    {
+      title: "CPOE Orders",
+      description: "Computerized Provider Order Entry",
+      action: () => navigate("/clinical"),
+      icon: PlusCircle,
+      color: "bg-blue-500"
+    },
+    {
+      title: "Lab Review",
+      description: "Review pending lab results",
+      action: () => navigate("/laboratory"),
+      icon: TestTube,
+      color: "bg-amber-500"
+    },
+    {
+      title: "AI Insights",
+      description: "Clinical decision support",
+      action: () => navigate("/ai-dashboard"),
+      icon: Brain,
+      color: "bg-violet-500"
     }
   ];
 
@@ -96,10 +130,10 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/70">Today's Appointments</p>
-                <p className="text-2xl font-bold text-white">89</p>
+                <p className="text-sm text-white/70">Pending Notes</p>
+                <p className="text-2xl font-bold text-white">23</p>
               </div>
-              <Calendar className="h-8 w-8 text-green-300" />
+              <FileText className="h-8 w-8 text-green-300" />
             </div>
           </CardContent>
         </Card>
@@ -108,10 +142,10 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/70">Pending Orders</p>
-                <p className="text-2xl font-bold text-white">23</p>
+                <p className="text-sm text-white/70">Lab Reviews</p>
+                <p className="text-2xl font-bold text-white">15</p>
               </div>
-              <FileText className="h-8 w-8 text-purple-300" />
+              <TestTube className="h-8 w-8 text-purple-300" />
             </div>
           </CardContent>
         </Card>
@@ -129,7 +163,27 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Clinical Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {clinicalShortcuts.map((shortcut, index) => (
+          <Card key={index} className="backdrop-blur-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer">
+            <CardContent className="p-4">
+              <Button 
+                onClick={shortcut.action}
+                className={`w-full h-auto p-4 ${shortcut.color} hover:opacity-80 text-white flex-col gap-2`}
+              >
+                <shortcut.icon className="h-6 w-6" />
+                <div className="text-center">
+                  <div className="font-medium">{shortcut.title}</div>
+                  <div className="text-xs opacity-80">{shortcut.description}</div>
+                </div>
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Main Feature Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {quickActions.map((action, index) => (
           <Card key={index} className="backdrop-blur-xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all cursor-pointer">
@@ -157,21 +211,21 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
       {/* Recent Activity */}
       <Card className="backdrop-blur-xl bg-white/10 border border-white/20">
         <CardHeader>
-          <CardTitle className="text-white">Recent System Activity</CardTitle>
+          <CardTitle className="text-white">Recent Clinical Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
               <CheckCircle className="h-5 w-5 text-green-400" />
               <div className="flex-1">
-                <p className="text-white font-medium">EMR System Synchronized</p>
-                <p className="text-white/70 text-sm">All patient data synchronized successfully</p>
+                <p className="text-white font-medium">Progress Note Completed</p>
+                <p className="text-white/70 text-sm">Dr. Smith completed progress note for Patient #1247</p>
               </div>
               <span className="text-white/50 text-sm">2 min ago</span>
             </div>
             
             <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
-              <Activity className="h-5 w-5 text-blue-400" />
+              <TestTube className="h-5 w-5 text-blue-400" />
               <div className="flex-1">
                 <p className="text-white font-medium">New Lab Results Available</p>
                 <p className="text-white/70 text-sm">15 new lab results require physician review</p>
@@ -182,8 +236,8 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
             <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
               <Zap className="h-5 w-5 text-purple-400" />
               <div className="flex-1">
-                <p className="text-white font-medium">AI Insights Generated</p>
-                <p className="text-white/70 text-sm">New clinical recommendations available</p>
+                <p className="text-white font-medium">VirtualisChat Alert</p>
+                <p className="text-white/70 text-sm">High-priority consultation request from ICU</p>
               </div>
               <span className="text-white/50 text-sm">10 min ago</span>
             </div>

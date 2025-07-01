@@ -1,5 +1,5 @@
 
-import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain, Building2 } from "lucide-react";
+import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain, Building2, FileText, Stethoscope, ClipboardList, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -11,6 +11,16 @@ const navigation = [
   { name: "Patients", href: "/patients", icon: Users },
   { name: "Clinical", href: "/clinical", icon: Activity },
   { name: "VirtualisChat", href: "/virtualis-chat", icon: MessageSquare },
+];
+
+const clinicalTools = [
+  { name: "Clinical Documentation", href: "/documentation", icon: FileText },
+  { name: "Progress Notes", href: "/clinical", icon: ClipboardList },
+  { name: "CPOE System", href: "/cpoe", icon: PlusCircle },
+  { name: "Order Sets", href: "/clinical", icon: Stethoscope },
+];
+
+const systemTools = [
   { name: "Billing", href: "/billing", icon: Calculator },
   { name: "Laboratory", href: "/laboratory", icon: TestTube },
   { name: "Radiology", href: "/radiology", icon: Scan },
@@ -64,8 +74,58 @@ export function Sidebar({ className }: SidebarProps) {
             </div>
           )}
 
-          <div className="space-y-1">
+          {/* Main Navigation */}
+          <div className="space-y-1 mb-6">
+            <div className="px-4 mb-2">
+              <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">Main</h3>
+            </div>
             {navigation.map((item) => (
+              <Button
+                key={item.name}
+                variant={location.pathname === item.href ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start",
+                  location.pathname === item.href
+                    ? "bg-blue-600 text-white"
+                    : "text-white/70 hover:text-white hover:bg-blue-600/50"
+                )}
+                onClick={() => handleNavigation(item.href)}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.name}
+              </Button>
+            ))}
+          </div>
+
+          {/* Clinical Tools */}
+          <div className="space-y-1 mb-6">
+            <div className="px-4 mb-2">
+              <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">Clinical Tools</h3>
+            </div>
+            {clinicalTools.map((item) => (
+              <Button
+                key={item.name}
+                variant={location.pathname === item.href ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start",
+                  location.pathname === item.href
+                    ? "bg-blue-600 text-white"
+                    : "text-white/70 hover:text-white hover:bg-blue-600/50"
+                )}
+                onClick={() => handleNavigation(item.href)}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.name}
+              </Button>
+            ))}
+          </div>
+
+          {/* System Tools */}
+          <div className="space-y-1">
+            <div className="px-4 mb-2">
+              <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">System</h3>
+            </div>
+            {systemTools.map((item) => (
               <Button
                 key={item.name}
                 variant={location.pathname === item.href ? "secondary" : "ghost"}
