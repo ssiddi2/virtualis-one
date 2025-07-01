@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import LoginPage from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
 import Index from "@/pages/Index";
 import Patients from "@/pages/Patients";
 import Clinical from "@/pages/Clinical";
@@ -64,25 +63,16 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public route - Login page */}
-      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/emr" replace />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" replace />} />
       
-      {/* Redirect root to login if not authenticated, otherwise to EMR */}
-      <Route path="/" element={user ? <Navigate to="/emr" replace /> : <Navigate to="/login" replace />} />
-      
-      {/* EMR Dashboard - First screen after login */}
-      <Route path="/emr" element={
+      {/* Root route - EMR Initializing Dashboard */}
+      <Route path="/" element={user ? (
         <ProtectedRoute>
           <EMRDashboard user={profile || user} />
         </ProtectedRoute>
-      } />
+      ) : <Navigate to="/login" replace />} />
       
       {/* All other protected routes */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
-      
       <Route path="/patients" element={
         <ProtectedRoute>
           <Patients />

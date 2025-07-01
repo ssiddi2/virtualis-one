@@ -111,8 +111,8 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
       onSelectHospital(hospital.id);
     }
     
-    // Navigate directly to dashboard with hospital context
-    navigate('/dashboard', { 
+    // Navigate directly to patients page with hospital context
+    navigate('/patients', { 
       state: { 
         hospitalId: hospital.id,
         hospitalName: hospital.name 
