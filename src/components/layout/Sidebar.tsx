@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navigation = [
+  { name: "EMR Network", href: "/emr", icon: Home },
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Patients", href: "/patients", icon: Users },
   { name: "Clinical", href: "/clinical", icon: Activity },

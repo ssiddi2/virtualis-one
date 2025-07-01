@@ -23,6 +23,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useHospitals } from '@/hooks/useHospitals';
 import EMRConnectionDialog from './EMRConnectionDialog';
+import { useNavigate } from 'react-router-dom';
 
 interface EMRDashboardProps {
   hospitalId?: string;
@@ -33,6 +34,7 @@ interface EMRDashboardProps {
 const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps) => {
   const { toast } = useToast();
   const { data: hospitals } = useHospitals();
+  const navigate = useNavigate();
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectingHospital, setConnectingHospital] = useState<any>(null);
   
@@ -101,19 +103,19 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
   const displayHospitals = hospitals && hospitals.length > 0 ? hospitals : mockHospitals;
 
   const handleConnectToHospital = async (hospital: any) => {
-    if (!onSelectHospital) return;
-    
     setConnectingHospital(hospital);
     setIsConnecting(true);
   };
 
   const handleConnectionComplete = () => {
-    if (connectingHospital && onSelectHospital) {
+    if (connectingHospital) {
       toast({
         title: "EMR Connection Established",
-        description: `Successfully connected to ${connectingHospital.name}. All clinical systems are now accessible.`,
+        description: `Successfully connected to ${connectingHospital.name}. Redirecting to dashboard...`,
       });
-      onSelectHospital(connectingHospital.id);
+      
+      // Navigate to the main dashboard after successful connection
+      navigate('/dashboard');
     }
     
     setIsConnecting(false);

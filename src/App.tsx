@@ -25,6 +25,7 @@ import PACSManager from "@/components/radiology/PACSManager";
 import CMSQualityDashboard from "@/components/cms/CMSQualityDashboard";
 import CodingDashboard from "@/components/coding/CodingDashboard";
 import AIDashboard from "@/components/dashboard/AIDashboard";
+import EMRDashboard from "@/components/dashboard/EMRDashboard";
 
 const queryClient = new QueryClient();
 
@@ -51,11 +52,13 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" replace />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/emr" replace />} />
       
-      <Route path="/" element={
+      <Route path="/" element={<Navigate to="/emr" replace />} />
+      
+      <Route path="/emr" element={
         <ProtectedRoute>
-          <Index />
+          <EMRDashboard user={profile || user} />
         </ProtectedRoute>
       } />
       
