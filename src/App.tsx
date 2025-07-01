@@ -29,6 +29,7 @@ import EpicStylePatientChart from "@/components/clinical/EpicStylePatientChart";
 import MainDashboard from "@/components/dashboard/MainDashboard";
 import CFODashboard from "@/components/dashboard/CFODashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
+import AppLayout from "@/components/layout/AppLayout";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +40,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
         <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-      </div>
     );
   }
   
@@ -66,68 +66,75 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Public route - Login page */}
+      {/* Public route - Login page (no sidebar) */}
       <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/hospital-selection" replace />} />
       
       {/* Redirect root to proper workflow start */}
       <Route path="/" element={user ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/login" replace />} />
       
-      {/* Hospital Selection - First screen after login */}
+      {/* All authenticated routes wrapped in AppLayout (with sidebar) */}
       <Route 
         path="/hospital-selection" 
         element={user ? (
           <ProtectedRoute>
-            <EMRDashboard user={profile || user} />
+            <AppLayout>
+              <EMRDashboard user={profile || user} />
+            </AppLayout>
           </ProtectedRoute>
         ) : <Navigate to="/login" replace />} 
       />
       
-      {/* EMR Initializing - Hospital Dashboard with EMR connection simulation */}
       <Route 
         path="/hospital/:hospitalId" 
         element={
           <ProtectedRoute>
-            <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
+            <AppLayout>
+              <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
       
-      {/* Main Dashboard - After EMR initialization */}
       <Route 
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <MainDashboard user={profile || user} />
+            <AppLayout>
+              <MainDashboard user={profile || user} />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
       
-      {/* CFO Financial Dashboard */}
       <Route 
         path="/cfo-dashboard" 
         element={
           <ProtectedRoute>
-            <CFODashboard hospitalId={profile?.hospital_id || ''} />
+            <AppLayout>
+              <CFODashboard hospitalId={profile?.hospital_id || ''} />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
       
-      {/* Epic Style Patient Chart - RESTORED ROUTE */}
       <Route 
         path="/epic-chart/:patientId" 
         element={
           <ProtectedRoute>
-            <EpicStylePatientChart />
+            <AppLayout>
+              <EpicStylePatientChart />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
       
-      {/* All existing protected routes */}
       <Route 
         path="/patients" 
         element={
           <ProtectedRoute>
-            <Patients />
+            <AppLayout>
+              <Patients />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -136,7 +143,9 @@ const AppRoutes = () => {
         path="/patients/:patientId" 
         element={
           <ProtectedRoute>
-            <PatientDetailsPage />
+            <AppLayout>
+              <PatientDetailsPage />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -145,7 +154,9 @@ const AppRoutes = () => {
         path="/patients/:patientId/cpoe" 
         element={
           <ProtectedRoute>
-            <CPOESystem />
+            <AppLayout>
+              <CPOESystem />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -154,7 +165,9 @@ const AppRoutes = () => {
         path="/cpoe/:patientId" 
         element={
           <ProtectedRoute>
-            <EnhancedCPOESystem />
+            <AppLayout>
+              <EnhancedCPOESystem />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -163,7 +176,9 @@ const AppRoutes = () => {
         path="/documentation/:patientId" 
         element={
           <ProtectedRoute>
-            <ClinicalDocumentation />
+            <AppLayout>
+              <ClinicalDocumentation />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -172,7 +187,9 @@ const AppRoutes = () => {
         path="/clinical" 
         element={
           <ProtectedRoute>
-            <Clinical />
+            <AppLayout>
+              <Clinical />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -181,7 +198,9 @@ const AppRoutes = () => {
         path="/virtualis-chat" 
         element={
           <ProtectedRoute>
-            <VirtualisChat />
+            <AppLayout>
+              <VirtualisChat />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -190,7 +209,9 @@ const AppRoutes = () => {
         path="/billing" 
         element={
           <ProtectedRoute>
-            <BillingDashboard hospitalId={profile?.hospital_id || ''} />
+            <AppLayout>
+              <BillingDashboard hospitalId={profile?.hospital_id || ''} />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -199,7 +220,9 @@ const AppRoutes = () => {
         path="/laboratory" 
         element={
           <ProtectedRoute>
-            <EnhancedLISDashboard />
+            <AppLayout>
+              <EnhancedLISDashboard />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -208,7 +231,9 @@ const AppRoutes = () => {
         path="/radiology" 
         element={
           <ProtectedRoute>
-            <PACSManager />
+            <AppLayout>
+              <PACSManager />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -217,7 +242,9 @@ const AppRoutes = () => {
         path="/quality" 
         element={
           <ProtectedRoute>
-            <CMSQualityDashboard />
+            <AppLayout>
+              <CMSQualityDashboard />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -226,7 +253,9 @@ const AppRoutes = () => {
         path="/coding" 
         element={
           <ProtectedRoute>
-            <CodingDashboard hospitalId={profile?.hospital_id || ''} />
+            <AppLayout>
+              <CodingDashboard hospitalId={profile?.hospital_id || ''} />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -235,10 +264,12 @@ const AppRoutes = () => {
         path="/ai-dashboard" 
         element={
           <ProtectedRoute>
-            <AIDashboard 
-              user={profile || user} 
-              hospitalId={profile?.hospital_id || ''} 
-            />
+            <AppLayout>
+              <AIDashboard 
+                user={profile || user} 
+                hospitalId={profile?.hospital_id || ''} 
+              />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -247,7 +278,9 @@ const AppRoutes = () => {
         path="/demo" 
         element={
           <ProtectedRoute>
-            <Demo />
+            <AppLayout>
+              <Demo />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -256,7 +289,9 @@ const AppRoutes = () => {
         path="/settings" 
         element={
           <ProtectedRoute>
-            <Settings />
+            <AppLayout>
+              <Settings />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />
@@ -265,7 +300,9 @@ const AppRoutes = () => {
         path="/tasks" 
         element={
           <ProtectedRoute>
-            <Tasks />
+            <AppLayout>
+              <Tasks />
+            </AppLayout>
           </ProtectedRoute>
         } 
       />

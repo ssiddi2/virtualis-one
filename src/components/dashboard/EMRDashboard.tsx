@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -143,8 +142,11 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
   console.log('EMRDashboard about to render with displayHospitals:', displayHospitals);
 
   return (
-    <div className="min-h-screen p-6" style={{
-      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    <div className="space-y-8" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)',
+      minHeight: 'calc(100vh - 120px)',
+      padding: '24px',
+      borderRadius: '12px'
     }}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header with Logo */}
