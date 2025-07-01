@@ -54,12 +54,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   const { user, profile, loading } = useAuth();
 
-  // Show loading spinner while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-      }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
         <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
       </div>
     );

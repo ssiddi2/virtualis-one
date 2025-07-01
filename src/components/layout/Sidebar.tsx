@@ -1,12 +1,12 @@
 
-import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain } from "lucide-react";
+import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navigation = [
-  { name: "EMR Network", href: "/emr", icon: Home },
+  { name: "Hospital Selection", href: "/hospital-selection", icon: Building2 },
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Patients", href: "/patients", icon: Users },
   { name: "Clinical", href: "/clinical", icon: Activity },
