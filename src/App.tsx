@@ -14,7 +14,7 @@ import Settings from "@/pages/Settings";
 import Tasks from "@/pages/Tasks";
 import VirtualisChat from "@/pages/VirtualisChat";
 import NotFound from "@/pages/NotFound";
-import PatientDetailsPage from "@/components/patient/PatientDetailsPage";
+import EpicPatientWorkspace from "@/components/clinical/EpicPatientWorkspace";
 import CPOESystem from "@/components/clinical/CPOESystem";
 import EnhancedCPOESystem from "@/components/clinical/EnhancedCPOESystem";
 import ClinicalDocumentation from "@/components/clinical/ClinicalDocumentation";
@@ -137,12 +137,13 @@ const AppRoutes = () => {
         } 
       />
       
+      {/* Updated patient routes to use Epic workspace */}
       <Route 
         path="/patients/:patientId" 
         element={
           <ProtectedRoute>
             <AppLayout>
-              <PatientDetailsPage />
+              <EpicPatientWorkspace />
             </AppLayout>
           </ProtectedRoute>
         } 
@@ -172,6 +173,17 @@ const AppRoutes = () => {
       
       <Route 
         path="/documentation/:patientId" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ClinicalDocumentation />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/documentation" 
         element={
           <ProtectedRoute>
             <AppLayout>

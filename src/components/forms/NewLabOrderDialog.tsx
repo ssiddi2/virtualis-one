@@ -7,14 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { TestTube, Brain, AlertTriangle } from 'lucide-react';
+import { TestTube, Brain, Clock, User, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface LabOrder {
-  id: string;
-  name: string;
-}
 
 interface NewLabOrderDialogProps {
   open: boolean;
@@ -23,141 +19,214 @@ interface NewLabOrderDialogProps {
   patientName: string;
 }
 
-const labOrders: LabOrder[] = [
-  { id: 'cbc', name: 'Complete Blood Count (CBC)' },
-  { id: 'cmp', name: 'Comprehensive Metabolic Panel (CMP)' },
-  { id: 'lipid', name: 'Lipid Panel' },
-  { id: 'a1c', name: 'Hemoglobin A1c' },
-  { id: 'ua', name: 'Urinalysis' },
+interface LabTest {
+  code: string;
+  name: string;
+  category: string;
+}
+
+const commonLabTests: LabTest[] = [
+  { code: 'CBC', name: 'Complete Blood Count', category: 'Hematology' },
+  { code: 'BMP', name: 'Basic Metabolic Panel', category: 'Chemistry' },
+  { code: 'CMP', name: 'Comprehensive Metabolic Panel', category: 'Chemistry' },
+  { code: 'LIPID', name: 'Lipid Panel', category: 'Chemistry' },
+  { code: 'TSH', name: 'Thyroid Stimulating Hormone', category: 'Endocrine' },
+  { code: 'HBA1C', name: 'Hemoglobin A1C', category: 'Chemistry' },
+  { code: 'PT/INR', name: 'Prothrombin Time/INR', category: 'Coagulation' },
+  { code: 'TROP', name: 'Troponin I', category: 'Cardiac' },
 ];
 
 const NewLabOrderDialog = ({ open, onClose, patientId, patientName }: NewLabOrderDialogProps) => {
   const { profile } = useAuth();
   const { toast } = useToast();
-  const [selectedLabOrder, setSelectedLabOrder] = useState<string>('');
+  const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [priority, setPriority] = useState<string>('routine');
-  const [notes, setNotes] = useState<string>('');
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [clinicalIndication, setClinicalIndication] = useState<string>('');
+  const [isAIAssistEnabled, setIsAIAssistEnabled] = useState<boolean>(true);
 
-  const handleOrder = () => {
-    if (!selectedLabOrder) {
+  const handleTestToggle = (testCode: string) => {
+    setSelectedTests(prev => 
+      prev.includes(testCode) 
+        ? prev.filter(code => code !== testCode)
+        : [...prev, testCode]
+    );
+  };
+
+  const handleSubmit = () => {
+    if (selectedTests.length === 0) {
       toast({
-        title: 'Missing Information',
-        description: 'Please select a lab order to proceed.',
-        variant: 'destructive',
+        title: "Required",
+        description: "Please select at least one lab test.",
+        variant: "destructive",
       });
       return;
     }
 
-    // Simulate AI suggestions (replace with actual AI integration)
-    const suggestions = [
-      `Consider patient's history of ${patientName} for lab interpretation.`,
-      'Check for any potential drug interactions.',
-      'Monitor kidney function closely.',
-    ];
-    setAiSuggestions(suggestions);
+    console.log('Submitting lab orders:', {
+      patientId,
+      tests: selectedTests,
+      priority,
+      clinicalIndication,
+      orderedBy: profile?.id,
+      timestamp: new Date().toISOString(),
+    });
 
     toast({
-      title: 'Lab Order Placed',
-      description: `New order for ${
-        labOrders.find((order) => order.id === selectedLabOrder)?.name
-      } has been placed for ${patientName}.`,
+      title: "Lab Orders Submitted",
+      description: `${selectedTests.length} lab test(s) ordered for ${patientName}`,
     });
+
+    // Reset form
+    setSelectedTests([]);
+    setPriority('routine');
+    setClinicalIndication('');
     onClose();
   };
 
-  const handleAISuggestions = () => {
-    // Simulate AI analysis and suggestions (replace with actual AI integration)
-    const suggestions = [
-      'Monitor kidney function closely.',
-      'Check for any potential drug interactions.',
-      `Consider patient's history of ${patientName} for lab interpretation.`,
-    ];
-    setAiSuggestions(suggestions);
-
+  const handleAIAssistToggle = () => {
+    setIsAIAssistEnabled(!isAIAssistEnabled);
     toast({
-      title: 'AI Analysis Complete',
-      description: 'AI has provided suggestions for this lab order.',
+      title: "AI Assistant",
+      description: `AI Lab Ordering Assistant is now ${isAIAssistEnabled ? 'disabled' : 'enabled'}.`,
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="bg-slate-900 text-white max-w-4xl">
         <DialogHeader>
-          <DialogTitle>New Lab Order for {patientName}</DialogTitle>
+          <DialogTitle className="text-white">
+            <div className="flex items-center gap-2">
+              <TestTube className="h-5 w-5 text-purple-400" />
+              Laboratory Order Entry
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="labOrder">Lab Order</Label>
-              <Select onValueChange={setSelectedLabOrder}>
-                <SelectTrigger className="text-black">
-                  <SelectValue placeholder="Select Lab Order" />
-                </SelectTrigger>
-                <SelectContent>
-                  {labOrders.map((order) => (
-                    <SelectItem key={order.id} value={order.id}>
-                      {order.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <Card className="bg-slate-800/50 border border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-slate-400" />
+                  {patientName} (Patient ID: {patientId})
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`gap-2 ${isAIAssistEnabled ? 'bg-green-600/20 text-green-300 border-green-600 hover:bg-green-600/30' : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600/30'}`}
+                  onClick={handleAIAssistToggle}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {isAIAssistEnabled ? 'AI: ON' : 'AI: OFF'}
+                </Button>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="priority" className="text-slate-300">Priority</Label>
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger className="bg-slate-700 text-white">
+                    <SelectValue placeholder="Select Priority" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border border-slate-600">
+                    <SelectItem value="routine" className="text-white">Routine</SelectItem>
+                    <SelectItem value="urgent" className="text-white">Urgent</SelectItem>
+                    <SelectItem value="stat" className="text-white">STAT</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-slate-400" />
+                <div className="text-sm text-slate-300">
+                  <p>Expected TAT: {priority === 'stat' ? '1 hour' : priority === 'urgent' ? '4 hours' : '24 hours'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-slate-300">Select Lab Tests</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                {commonLabTests.map((test) => (
+                  <div
+                    key={test.code}
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedTests.includes(test.code)
+                        ? 'bg-purple-600/20 border-purple-400/30'
+                        : 'bg-slate-700/50 border-slate-600 hover:bg-slate-600/50'
+                    }`}
+                    onClick={() => handleTestToggle(test.code)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white font-medium">{test.name}</p>
+                        <p className="text-slate-400 text-sm">{test.code}</p>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {test.category}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
-              <Select onValueChange={setPriority} defaultValue={priority}>
-                <SelectTrigger className="text-black">
-                  <SelectValue placeholder="Select Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="routine">Routine</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
-                  <SelectItem value="stat">STAT</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="clinicalIndication" className="text-slate-300">Clinical Indication</Label>
+              <Textarea
+                id="clinicalIndication"
+                value={clinicalIndication}
+                onChange={(e) => setClinicalIndication(e.target.value)}
+                placeholder="Enter clinical reason for lab orders..."
+                className="bg-slate-700 text-white"
+                rows={3}
+              />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              placeholder="Additional notes or instructions"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </div>
+            {isAIAssistEnabled && selectedTests.length > 0 && (
+              <div className="p-3 bg-green-600/20 rounded border border-green-400/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="h-4 w-4 text-green-400" />
+                  <span className="text-green-300 font-medium">AI Recommendations</span>
+                </div>
+                <div className="text-green-100 text-sm space-y-1">
+                  <p>• Consider adding BNP if cardiac symptoms present</p>
+                  <p>• Recommend fasting for lipid panel if ordered</p>
+                  <p>• Patient's recent hemoglobin trend suggests monitoring CBC</p>
+                </div>
+              </div>
+            )}
 
-          <Button onClick={handleAISuggestions} className="bg-blue-500 text-white">
-            <Brain className="mr-2 h-4 w-4" />
-            Get AI Suggestions
+            {selectedTests.length > 0 && (
+              <div className="p-3 bg-blue-600/20 rounded border border-blue-400/30">
+                <h4 className="text-blue-200 font-medium mb-2">Selected Tests ({selectedTests.length})</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTests.map(testCode => {
+                    const test = commonLabTests.find(t => t.code === testCode);
+                    return (
+                      <Badge key={testCode} className="bg-blue-600 text-white">
+                        {test?.name || testCode}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-between mt-6">
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
           </Button>
-
-          {aiSuggestions.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  AI Suggestions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5">
-                  {aiSuggestions.map((suggestion, index) => (
-                    <li key={index}>{suggestion}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
+          <Button onClick={handleSubmit} disabled={selectedTests.length === 0}>
+            <TestTube className="w-4 h-4 mr-2" />
+            Submit Lab Orders ({selectedTests.length})
+          </Button>
         </div>
-
-        <Button type="submit" onClick={handleOrder}>
-          Place Order
-        </Button>
       </DialogContent>
     </Dialog>
   );
