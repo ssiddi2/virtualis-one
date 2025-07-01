@@ -9,7 +9,7 @@ import VirtualisChatWithPatients from './VirtualisChatWithPatients';
 import VirtualisChat from './VirtualisChat';
 import FloatingActionButton from './FloatingActionButton';
 import MessageDialog from './MessageDialog';
-import ConsultDialog from './ConsultDialog';
+import EnhancedConsultDialog from './EnhancedConsultDialog';
 import { 
   Brain,
   MessageSquare,
@@ -29,6 +29,7 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   const [chatMode, setChatMode] = useState<'patient-threads' | 'general-chat'>('patient-threads');
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
+  const [consultationRequests, setConsultationRequests] = useState<any[]>([]);
 
   // Debug logging
   console.log('VirtualisChatLayout - hospitalId:', hospitalId);
@@ -53,8 +54,24 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
   };
 
   const handleConsultClick = () => {
-    console.log('Opening consult dialog');
+    console.log('Opening enhanced consult dialog');
     setConsultDialogOpen(true);
+  };
+
+  const handleConsultSubmit = (consultRequest: any) => {
+    console.log('Processing consultation request:', consultRequest);
+    
+    // Add the consultation request to our state
+    setConsultationRequests(prev => [consultRequest, ...prev]);
+    
+    // Show success toast with detailed information
+    toast({
+      title: "Consultation Request Sent",
+      description: `${consultRequest.urgency.toUpperCase()} priority consultation for ${consultRequest.patientName} sent to ${consultRequest.recommendedSpecialty}${consultRequest.onCallPhysician ? ` (On Call: ${consultRequest.onCallPhysician})` : ''}`,
+    });
+
+    // Log for debugging
+    console.log('All consultation requests:', [...consultationRequests, consultRequest]);
   };
 
   if (!hospitalId) {
@@ -133,6 +150,13 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
             }`}>
               {chatMode === 'patient-threads' ? 'Patient Mode' : 'Team Mode'}
             </Badge>
+
+            {/* Show consultation requests count if any */}
+            {consultationRequests.length > 0 && (
+              <Badge className="bg-purple-500/20 text-purple-200 border-purple-400/30">
+                {consultationRequests.length} Consult{consultationRequests.length !== 1 ? 's' : ''}
+              </Badge>
+            )}
           </div>
         </div>
       </div>
@@ -157,10 +181,10 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         hospitalId={hospitalId}
       />
 
-      <ConsultDialog
+      <EnhancedConsultDialog
         open={consultDialogOpen}
         onClose={() => setConsultDialogOpen(false)}
-        hospitalId={hospitalId}
+        onSubmit={handleConsultSubmit}
       />
     </div>
   );
