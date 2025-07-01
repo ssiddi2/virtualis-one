@@ -50,7 +50,7 @@ const systemItems = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -59,13 +59,13 @@ export function AppSidebar() {
     isActive ? "bg-blue-600/30 text-white font-medium border-l-2 border-yellow-400" : "text-white/80 hover:bg-blue-500/20 hover:text-white";
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar className="w-64" collapsible="icon">
       <SidebarContent className="bg-blue-900/20 backdrop-blur-xl border-r border-blue-400/30">
         
         {/* Main Navigation */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-white/90 font-semibold">
-            {!collapsed && "Main Navigation"}
+            {state !== 'collapsed' && "Main Navigation"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -78,7 +78,7 @@ export function AppSidebar() {
                       className={({ isActive }) => `flex items-center gap-3 p-3 rounded-lg transition-all ${getNavCls({ isActive })}`}
                     >
                       <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {state !== 'collapsed' && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -90,7 +90,7 @@ export function AppSidebar() {
         {/* Financial & Executive */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-white/90 font-semibold">
-            {!collapsed && "Financial & Executive"}
+            {state !== 'collapsed' && "Financial & Executive"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -103,7 +103,7 @@ export function AppSidebar() {
                       className={({ isActive }) => `flex items-center gap-3 p-3 rounded-lg transition-all ${getNavCls({ isActive })}`}
                     >
                       <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {state !== 'collapsed' && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -115,7 +115,7 @@ export function AppSidebar() {
         {/* System Tools */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-white/90 font-semibold">
-            {!collapsed && "System Tools"}
+            {state !== 'collapsed' && "System Tools"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -128,7 +128,7 @@ export function AppSidebar() {
                       className={({ isActive }) => `flex items-center gap-3 p-3 rounded-lg transition-all ${getNavCls({ isActive })}`}
                     >
                       <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {state !== 'collapsed' && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -102,7 +103,7 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
     // Show success toast
     toast({
       title: "Hospital Selected",
-      description: `Connected to ${hospital.name}. Accessing EMR System...`,
+      description: `Connecting to ${hospital.name}. Initializing EMR System...`,
     });
     
     // Call the onSelectHospital callback if provided
@@ -110,11 +111,12 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
       onSelectHospital(hospital.id);
     }
     
-    // Navigate to main dashboard with hospital context
-    navigate('/dashboard', { 
+    // Navigate to HospitalDashboard (EMR Initializing screen) with hospital context
+    navigate(`/hospital/${hospital.id}`, { 
       state: { 
         hospitalId: hospital.id,
-        hospitalName: hospital.name 
+        hospitalName: hospital.name,
+        emrType: hospital.emr_type
       } 
     });
   };
@@ -278,7 +280,7 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
                     onClick={() => handleConnectToHospital(hospital)}
                     className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300"
                   >
-                    Enter Hospital System
+                    Initialize EMR System
                   </Button>
                   <Button 
                     variant="outline" 

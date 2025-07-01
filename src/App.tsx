@@ -28,6 +28,7 @@ import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import EpicStylePatientChart from "@/components/clinical/EpicStylePatientChart";
 import MainDashboard from "@/components/dashboard/MainDashboard";
 import CFODashboard from "@/components/dashboard/CFODashboard";
+import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
 
 const queryClient = new QueryClient();
 
@@ -78,7 +79,14 @@ const AppRoutes = () => {
         </ProtectedRoute>
       ) : <Navigate to="/login" replace />} />
       
-      {/* Main Dashboard - After hospital selection */}
+      {/* EMR Initializing - Hospital Dashboard with EMR connection simulation */}
+      <Route path="/hospital/:hospitalId" element={
+        <ProtectedRoute>
+          <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
+        </ProtectedRoute>
+      } />
+      
+      {/* Main Dashboard - After EMR initialization */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <MainDashboard user={profile || user} />
@@ -158,7 +166,7 @@ const AppRoutes = () => {
         <ProtectedRoute>
           <PACSManager />
         </ProtectedRoute>
-      } />
+      /> 
       
       <Route path="/quality" element={
         <ProtectedRoute>
