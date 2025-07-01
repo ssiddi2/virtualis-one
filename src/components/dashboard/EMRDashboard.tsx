@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,7 +102,7 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
     // Show success toast
     toast({
       title: "Hospital Selected",
-      description: `Connected to ${hospital.name}. Accessing hospital systems...`,
+      description: `Connected to ${hospital.name}. Accessing EMR System...`,
     });
     
     // Call the onSelectHospital callback if provided
@@ -111,8 +110,8 @@ const EMRDashboard = ({ hospitalId, user, onSelectHospital }: EMRDashboardProps)
       onSelectHospital(hospital.id);
     }
     
-    // Navigate directly to patients page with hospital context
-    navigate('/patients', { 
+    // Navigate to main dashboard with hospital context
+    navigate('/dashboard', { 
       state: { 
         hospitalId: hospital.id,
         hospitalName: hospital.name 

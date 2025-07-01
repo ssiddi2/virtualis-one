@@ -25,6 +25,9 @@ import CMSQualityDashboard from "@/components/cms/CMSQualityDashboard";
 import CodingDashboard from "@/components/coding/CodingDashboard";
 import AIDashboard from "@/components/dashboard/AIDashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
+import EpicStylePatientChart from "@/components/clinical/EpicStylePatientChart";
+import MainDashboard from "@/components/dashboard/MainDashboard";
+import CFODashboard from "@/components/dashboard/CFODashboard";
 
 const queryClient = new QueryClient();
 
@@ -63,16 +66,40 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public route - Login page */}
-      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" replace />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/hospital-selection" replace />} />
       
-      {/* Root route - EMR Initializing Dashboard */}
-      <Route path="/" element={user ? (
+      {/* Redirect root to proper workflow start */}
+      <Route path="/" element={user ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/login" replace />} />
+      
+      {/* Hospital Selection - First screen after login */}
+      <Route path="/hospital-selection" element={user ? (
         <ProtectedRoute>
           <EMRDashboard user={profile || user} />
         </ProtectedRoute>
       ) : <Navigate to="/login" replace />} />
       
-      {/* All other protected routes */}
+      {/* Main Dashboard - After hospital selection */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <MainDashboard user={profile || user} />
+        </ProtectedRoute>
+      } />
+      
+      {/* CFO Financial Dashboard */}
+      <Route path="/cfo-dashboard" element={
+        <ProtectedRoute>
+          <CFODashboard hospitalId={profile?.hospital_id || ''} />
+        </ProtectedRoute>
+      } />
+      
+      {/* Epic Style Patient Chart - RESTORED ROUTE */}
+      <Route path="/epic-chart/:patientId" element={
+        <ProtectedRoute>
+          <EpicStylePatientChart />
+        </ProtectedRoute>
+      } />
+      
+      {/* All existing protected routes */}
       <Route path="/patients" element={
         <ProtectedRoute>
           <Patients />
