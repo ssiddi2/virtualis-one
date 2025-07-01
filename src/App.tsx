@@ -81,6 +81,18 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
+      <Route path="/cpoe/:patientId" element={
+        <ProtectedRoute>
+          <EnhancedCPOESystem />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/documentation/:patientId" element={
+        <ProtectedRoute>
+          <ClinicalDocumentation />
+        </ProtectedRoute>
+      } />
+      
       <Route path="/clinical" element={
         <ProtectedRoute>
           <Clinical />
