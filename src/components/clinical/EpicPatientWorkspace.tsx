@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,9 @@ import {
   Stethoscope,
   Plus,
   ChevronRight,
-  Clock
+  Clock,
+  BookOpen,
+  ClipboardList
 } from 'lucide-react';
 import { usePatients } from '@/hooks/usePatients';
 import { useLabOrders } from '@/hooks/useLabOrders';
@@ -29,11 +30,12 @@ import { useToast } from '@/hooks/use-toast';
 import PatientChart from '@/components/patient/PatientChart';
 import NewNoteDialog from '@/components/forms/NewNoteDialog';
 import NewLabOrderDialog from '@/components/forms/NewLabOrderDialog';
+import PatientSummaryCard from '@/components/clinical/PatientSummaryCard';
 
 const EpicPatientWorkspace = () => {
   const { patientId } = useParams<{ patientId: string }>();
   const [searchParams] = useSearchParams();
-  const initialAction = searchParams.get('action') || 'chart';
+  const initialAction = searchParams.get('action') || 'summary';
   const [activeTab, setActiveTab] = useState(initialAction);
   const [showNewNoteDialog, setShowNewNoteDialog] = useState(false);
   const [showNewLabDialog, setShowNewLabDialog] = useState(false);
@@ -158,100 +160,167 @@ const EpicPatientWorkspace = () => {
         </CardContent>
       </Card>
 
-      {/* Epic-Style Tabbed Interface */}
+      {/* Epic-Style Tabbed Interface - Updated for Inpatient Rounding */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 bg-blue-600/20 border border-blue-400/30 rounded-lg">
-          <TabsTrigger value="chart" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Chart
-          </TabsTrigger>
-          <TabsTrigger value="orders" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Orders
+        <TabsList className="grid w-full grid-cols-7 bg-blue-600/20 border border-blue-400/30 rounded-lg">
+          <TabsTrigger value="summary" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <BookOpen className="h-4 w-4 mr-1" />
+            Summary
           </TabsTrigger>
           <TabsTrigger value="notes" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <FileText className="h-4 w-4 mr-1" />
             Notes
           </TabsTrigger>
-          <TabsTrigger value="labs" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Labs
-          </TabsTrigger>
           <TabsTrigger value="medications" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <Pill className="h-4 w-4 mr-1" />
             Medications
           </TabsTrigger>
+          <TabsTrigger value="labs" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TestTube className="h-4 w-4 mr-1" />
+            Labs
+          </TabsTrigger>
+          <TabsTrigger value="orders" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <ClipboardList className="h-4 w-4 mr-1" />
+            Orders
+          </TabsTrigger>
           <TabsTrigger value="imaging" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <Activity className="h-4 w-4 mr-1" />
             Imaging
+          </TabsTrigger>
+          <TabsTrigger value="chart" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <Stethoscope className="h-4 w-4 mr-1" />
+            Full Chart
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chart" className="mt-4">
-          <PatientChart />
-        </TabsContent>
-
-        <TabsContent value="orders" className="mt-4">
-          <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
-            <CardHeader>
-              <CardTitle className="text-white">Active Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-4 w-4 text-yellow-400" />
-                    <div>
-                      <p className="text-white font-medium">CBC with Differential</p>
-                      <p className="text-white/60 text-sm">Ordered: Today 8:00 AM • Status: Pending</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-white/60" />
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-4 w-4 text-blue-400" />
-                    <div>
-                      <p className="text-white font-medium">Chest X-Ray</p>
-                      <p className="text-white/60 text-sm">Ordered: Today 10:30 AM • Status: Scheduled</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-white/60" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="summary" className="mt-4">
+          <PatientSummaryCard 
+            patient={patient} 
+            allergies={allergies} 
+            activeProblems={problemList?.filter(p => p.status === 'active')} 
+            vitals={{
+              blood_pressure: '128/82',
+              heart_rate: '72',
+              temperature: '98.6',
+              oxygen_saturation: '98'
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="notes" className="mt-4">
           <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
             <CardHeader>
               <CardTitle className="text-white flex items-center justify-between">
-                Clinical Notes
+                Previous Clinical Notes - Inpatient Rounding
                 <Button 
                   onClick={() => setShowNewNoteDialog(true)}
                   className="bg-blue-600/20 border border-blue-400/30 text-white hover:bg-blue-500/30"
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  New Note
+                  New Progress Note
                 </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {patientRecords?.map((record) => (
-                <div key={record.id} className="mb-4 p-4 bg-white/5 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-white font-semibold">{record.encounter_type}</h3>
-                    <span className="text-white/60 text-sm">
-                      {new Date(record.visit_date).toLocaleDateString()}
-                    </span>
+            <CardContent className="space-y-4">
+              {patientRecords?.sort((a, b) => new Date(b.visit_date).getTime() - new Date(a.visit_date).getTime()).map((record) => (
+                <div key={record.id} className="p-4 bg-white/5 rounded-lg border border-blue-400/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-white font-semibold text-lg">{record.encounter_type}</h3>
+                      <p className="text-white/60 text-sm">
+                        {new Date(record.visit_date).toLocaleDateString()} at {new Date(record.visit_date).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    {record.ai_coding_suggestions && (
+                      <Badge className="bg-purple-600 text-white">
+                        AI Enhanced ({record.coding_confidence_score}% confidence)
+                      </Badge>
+                    )}
                   </div>
-                  {record.chief_complaint && (
-                    <p className="text-white/80 text-sm mb-2">
-                      <strong>Chief Complaint:</strong> {record.chief_complaint}
-                    </p>
-                  )}
+                  
+                  {/* Structured Note Display for Rounding */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {record.chief_complaint && (
+                      <div className="space-y-2">
+                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Chief Complaint</h4>
+                        <p className="text-white/80 text-sm">{record.chief_complaint}</p>
+                      </div>
+                    )}
+                    
+                    {record.assessment && (
+                      <div className="space-y-2">
+                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Assessment</h4>
+                        <p className="text-white/80 text-sm">{record.assessment}</p>
+                      </div>
+                    )}
+                    
+                    {record.plan && (
+                      <div className="space-y-2">
+                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Plan</h4>
+                        <p className="text-white/80 text-sm">{record.plan}</p>
+                      </div>
+                    )}
+                    
+                    {record.physical_examination && (
+                      <div className="space-y-2">
+                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Physical Exam</h4>
+                        <p className="text-white/80 text-sm">{record.physical_examination}</p>
+                      </div>
+                    )}
+                  </div>
+
                   {record.ai_coding_suggestions && (
-                    <Badge className="bg-purple-600 text-white mb-2">
-                      AI Enhanced ({record.coding_confidence_score}% confidence)
-                    </Badge>
+                    <div className="mt-4 p-3 bg-purple-600/20 rounded border border-purple-400/30">
+                      <h4 className="text-purple-200 font-medium mb-2 text-sm">AI Clinical Insights:</h4>
+                      <div className="text-purple-100 text-xs">
+                        <pre className="whitespace-pre-wrap font-mono">
+                          {JSON.stringify(record.ai_coding_suggestions, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
+              {(!patientRecords || patientRecords.length === 0) && (
+                <div className="text-center text-white/60 py-8">
+                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No clinical notes available</p>
+                  <Button 
+                    onClick={() => setShowNewNoteDialog(true)}
+                    className="mt-4 bg-blue-600/20 border border-blue-400/30 text-white hover:bg-blue-500/30"
+                  >
+                    Create First Progress Note
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="medications" className="mt-4">
+          <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
+            <CardHeader>
+              <CardTitle className="text-white">Current Medications - Inpatient</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {patientMedications?.map((med) => (
+                  <div key={med.id} className="p-3 bg-white/5 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-white font-medium">{med.medication_name}</h4>
+                      <Badge className={med.status === 'active' ? 'bg-green-600' : 'bg-gray-600'}>
+                        {med.status}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                      <p className="text-white/80"><span className="font-medium">Dose:</span> {med.dosage}</p>
+                      <p className="text-white/80"><span className="font-medium">Route:</span> {med.route}</p>
+                      <p className="text-white/80"><span className="font-medium">Frequency:</span> {med.frequency}</p>
+                      <p className="text-white/80"><span className="font-medium">Started:</span> {new Date(med.start_date).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -290,26 +359,33 @@ const EpicPatientWorkspace = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="medications" className="mt-4">
+        <TabsContent value="orders" className="mt-4">
           <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
             <CardHeader>
-              <CardTitle className="text-white">Current Medications</CardTitle>
+              <CardTitle className="text-white">Active Orders</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {patientMedications?.map((med) => (
-                  <div key={med.id} className="p-3 bg-white/5 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-white font-medium">{med.medication_name}</h4>
-                      <Badge className={med.status === 'active' ? 'bg-green-600' : 'bg-gray-600'}>
-                        {med.status}
-                      </Badge>
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-4 w-4 text-yellow-400" />
+                    <div>
+                      <p className="text-white font-medium">CBC with Differential</p>
+                      <p className="text-white/60 text-sm">Ordered: Today 8:00 AM • Status: Pending</p>
                     </div>
-                    <p className="text-white/80 text-sm">
-                      {med.dosage} {med.route} {med.frequency}
-                    </p>
                   </div>
-                ))}
+                  <ChevronRight className="h-4 w-4 text-white/60" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-4 w-4 text-blue-400" />
+                    <div>
+                      <p className="text-white font-medium">Chest X-Ray</p>
+                      <p className="text-white/60 text-sm">Ordered: Today 10:30 AM • Status: Scheduled</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-white/60" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -333,6 +409,10 @@ const EpicPatientWorkspace = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="chart" className="mt-4">
+          <PatientChart />
         </TabsContent>
       </Tabs>
 

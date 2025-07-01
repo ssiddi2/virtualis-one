@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +28,7 @@ import EpicStylePatientChart from "@/components/clinical/EpicStylePatientChart";
 import MainDashboard from "@/components/dashboard/MainDashboard";
 import CFODashboard from "@/components/dashboard/CFODashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
+import ERDashboard from "@/components/clinical/ERDashboard";
 import AppLayout from "@/components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -110,6 +110,17 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <AppLayout>
               <CFODashboard hospitalId={profile?.hospital_id || ''} />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/er-dashboard" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ERDashboard />
             </AppLayout>
           </ProtectedRoute>
         } 

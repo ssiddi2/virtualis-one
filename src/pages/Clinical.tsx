@@ -16,7 +16,8 @@ import {
   Stethoscope,
   TestTube,
   Pill,
-  Plus
+  Plus,
+  Building2
 } from "lucide-react";
 
 const Clinical = () => {
@@ -54,6 +55,13 @@ const Clinical = () => {
         </div>
         
         <div className="flex gap-3">
+          <Button 
+            onClick={() => navigate('/er-dashboard')}
+            className="bg-red-600/20 border border-red-400/30 text-white hover:bg-red-500/30"
+          >
+            <Building2 className="h-4 w-4 mr-2" />
+            ER Dashboard
+          </Button>
           <Button 
             onClick={handleTeamCommunication}
             className="bg-blue-600/20 border border-blue-400/30 text-white hover:bg-blue-500/30"
