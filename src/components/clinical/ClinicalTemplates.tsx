@@ -14,7 +14,7 @@ import {
   FileText, 
   Heart, 
   Brain,
-  Lungs,
+  Wind,
   Activity
 } from 'lucide-react';
 
@@ -130,7 +130,7 @@ PLAN:
       {
         id: 4,
         name: 'Respiratory Assessment',
-        icon: Lungs,
+        icon: Wind,
         template: `RESPIRATORY HISTORY:
 [Previous lung disease, smoking history]
 

@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,17 +22,16 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-interface EnhancedCPOESystemProps {
-  patientId: string;
-  patientName: string;
-  hospitalId: string;
-}
-
-const EnhancedCPOESystem = ({ patientId, patientName, hospitalId }: EnhancedCPOESystemProps) => {
+const EnhancedCPOESystem = () => {
+  const { patientId } = useParams<{ patientId: string }>();
   const { profile } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('medications');
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+
+  // Default values for demo purposes
+  const patientName = 'John Doe';
+  const hospitalId = profile?.hospital_id || '';
 
   const orderTypes = [
     { id: 'medications', label: 'Medications', icon: Pill, color: 'bg-blue-500' },

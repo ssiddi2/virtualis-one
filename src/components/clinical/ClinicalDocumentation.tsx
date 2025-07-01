@@ -1,9 +1,10 @@
-
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
 import ProgressNotesForm from './ProgressNotesForm';
 import NursingDocumentation from './NursingDocumentation';
 import ClinicalTemplates from './ClinicalTemplates';
@@ -15,8 +16,14 @@ interface ClinicalDocumentationProps {
   hospitalId: string;
 }
 
-const ClinicalDocumentation = ({ patientId, patientName, hospitalId }: ClinicalDocumentationProps) => {
+const ClinicalDocumentation = () => {
+  const { patientId } = useParams<{ patientId: string }>();
+  const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState('progress-notes');
+
+  // Default values for demo purposes
+  const patientName = 'John Doe';
+  const hospitalId = profile?.hospital_id || '';
 
   const documentationTypes = [
     { id: 'progress-notes', label: 'Progress Notes', icon: FileText, count: 12 },
