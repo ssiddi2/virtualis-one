@@ -20,7 +20,8 @@ import {
   Heart,
   TrendingUp,
   TrendingDown,
-  Minus
+  Minus,
+  ArrowLeft
 } from 'lucide-react';
 import { usePatients } from '@/hooks/usePatients';
 import { useLabOrders } from '@/hooks/useLabOrders';
@@ -28,7 +29,7 @@ import { useMedications } from '@/hooks/useMedications';
 import { useProblemList } from '@/hooks/useProblemList';
 import { useAllergies } from '@/hooks/useAllergies';
 import { useClinicalOrders } from '@/hooks/useClinicalOrders';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 interface EpicStylePatientChartProps {
   patientId: string;
@@ -36,20 +37,69 @@ interface EpicStylePatientChartProps {
 
 const EpicStylePatientChart = () => {
   const { patientId } = useParams<{ patientId: string }>();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const { data: patients } = usePatients();
+  
+  console.log('EpicStylePatientChart - patientId:', patientId);
+  
+  const { data: patients, isLoading: patientsLoading, error: patientsError } = usePatients();
   const { data: labOrders } = useLabOrders();
   const { data: medications } = useMedications();
   const { data: problemList } = useProblemList(patientId);
   const { data: allergies } = useAllergies(patientId);
   const { data: clinicalOrders } = useClinicalOrders(patientId);
 
+  console.log('EpicStylePatientChart - patients:', patients);
+  console.log('EpicStylePatientChart - patientsLoading:', patientsLoading);
+  console.log('EpicStylePatientChart - patientsError:', patientsError);
+
+  if (patientsLoading) {
+    return (
+      <div className="min-h-screen p-4 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <div className="text-white text-center">
+          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Loading patient chart...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (patientsError) {
+    return (
+      <div className="min-h-screen p-4 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <div className="text-white text-center">
+          <p className="text-red-300 mb-4">Error loading patient data</p>
+          <Button onClick={() => navigate('/patients')} className="bg-blue-600 hover:bg-blue-700">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Patients
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const patient = patients?.find(p => p.id === patientId);
   const patientLabOrders = labOrders?.filter(lab => lab.patient_id === patientId);
   const patientMedications = medications?.filter(med => med.patient_id === patientId);
 
   if (!patient) {
-    return <div className="p-6 text-white">Patient not found</div>;
+    return (
+      <div className="min-h-screen p-4 flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <div className="text-white text-center">
+          <p className="text-red-300 mb-4">Patient not found</p>
+          <Button onClick={() => navigate('/patients')} className="bg-blue-600 hover:bg-blue-700">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Patients
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const age = new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear();
@@ -78,6 +128,19 @@ const EpicStylePatientChart = () => {
       background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
       <div className="max-w-full mx-auto space-y-4">
+        {/* Navigation Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/patients')}
+            className="bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Patients
+          </Button>
+          <h1 className="text-2xl font-bold text-white">Epic-Style Patient Chart</h1>
+        </div>
+
         {/* Epic-Style Patient Banner */}
         <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
           <CardContent className="p-4">
