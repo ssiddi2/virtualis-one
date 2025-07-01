@@ -73,139 +73,202 @@ const AppRoutes = () => {
       <Route path="/" element={user ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/login" replace />} />
       
       {/* Hospital Selection - First screen after login */}
-      <Route path="/hospital-selection" element={user ? (
-        <ProtectedRoute>
-          <EMRDashboard user={profile || user} />
-        </ProtectedRoute>
-      ) : <Navigate to="/login" replace />} />
+      <Route 
+        path="/hospital-selection" 
+        element={user ? (
+          <ProtectedRoute>
+            <EMRDashboard user={profile || user} />
+          </ProtectedRoute>
+        ) : <Navigate to="/login" replace />} 
+      />
       
       {/* EMR Initializing - Hospital Dashboard with EMR connection simulation */}
-      <Route path="/hospital/:hospitalId" element={
-        <ProtectedRoute>
-          <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/hospital/:hospitalId" 
+        element={
+          <ProtectedRoute>
+            <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
+          </ProtectedRoute>
+        } 
+      />
       
       {/* Main Dashboard - After EMR initialization */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <MainDashboard user={profile || user} />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <MainDashboard user={profile || user} />
+          </ProtectedRoute>
+        } 
+      />
       
       {/* CFO Financial Dashboard */}
-      <Route path="/cfo-dashboard" element={
-        <ProtectedRoute>
-          <CFODashboard hospitalId={profile?.hospital_id || ''} />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/cfo-dashboard" 
+        element={
+          <ProtectedRoute>
+            <CFODashboard hospitalId={profile?.hospital_id || ''} />
+          </ProtectedRoute>
+        } 
+      />
       
       {/* Epic Style Patient Chart - RESTORED ROUTE */}
-      <Route path="/epic-chart/:patientId" element={
-        <ProtectedRoute>
-          <EpicStylePatientChart />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/epic-chart/:patientId" 
+        element={
+          <ProtectedRoute>
+            <EpicStylePatientChart />
+          </ProtectedRoute>
+        } 
+      />
       
       {/* All existing protected routes */}
-      <Route path="/patients" element={
-        <ProtectedRoute>
-          <Patients />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/patients" 
+        element={
+          <ProtectedRoute>
+            <Patients />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/patients/:patientId" element={
-        <ProtectedRoute>
-          <PatientDetailsPage />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/patients/:patientId" 
+        element={
+          <ProtectedRoute>
+            <PatientDetailsPage />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/patients/:patientId/cpoe" element={
-        <ProtectedRoute>
-          <CPOESystem />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/patients/:patientId/cpoe" 
+        element={
+          <ProtectedRoute>
+            <CPOESystem />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/cpoe/:patientId" element={
-        <ProtectedRoute>
-          <EnhancedCPOESystem />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/cpoe/:patientId" 
+        element={
+          <ProtectedRoute>
+            <EnhancedCPOESystem />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/documentation/:patientId" element={
-        <ProtectedRoute>
-          <ClinicalDocumentation />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/documentation/:patientId" 
+        element={
+          <ProtectedRoute>
+            <ClinicalDocumentation />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/clinical" element={
-        <ProtectedRoute>
-          <Clinical />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/clinical" 
+        element={
+          <ProtectedRoute>
+            <Clinical />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/virtualis-chat" element={
-        <ProtectedRoute>
-          <VirtualisChat />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/virtualis-chat" 
+        element={
+          <ProtectedRoute>
+            <VirtualisChat />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/billing" element={
-        <ProtectedRoute>
-          <BillingDashboard hospitalId={profile?.hospital_id || ''} />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/billing" 
+        element={
+          <ProtectedRoute>
+            <BillingDashboard hospitalId={profile?.hospital_id || ''} />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/laboratory" element={
-        <ProtectedRoute>
-          <EnhancedLISDashboard />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/laboratory" 
+        element={
+          <ProtectedRoute>
+            <EnhancedLISDashboard />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/radiology" element={
-        <ProtectedRoute>
-          <PACSManager />
-        </ProtectedRoute>
-      /> 
+      <Route 
+        path="/radiology" 
+        element={
+          <ProtectedRoute>
+            <PACSManager />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/quality" element={
-        <ProtectedRoute>
-          <CMSQualityDashboard />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/quality" 
+        element={
+          <ProtectedRoute>
+            <CMSQualityDashboard />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/coding" element={
-        <ProtectedRoute>
-          <CodingDashboard hospitalId={profile?.hospital_id || ''} />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/coding" 
+        element={
+          <ProtectedRoute>
+            <CodingDashboard hospitalId={profile?.hospital_id || ''} />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/ai-dashboard" element={
-        <ProtectedRoute>
-          <AIDashboard 
-            user={profile || user} 
-            hospitalId={profile?.hospital_id || ''} 
-          />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/ai-dashboard" 
+        element={
+          <ProtectedRoute>
+            <AIDashboard 
+              user={profile || user} 
+              hospitalId={profile?.hospital_id || ''} 
+            />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/demo" element={
-        <ProtectedRoute>
-          <Demo />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/demo" 
+        element={
+          <ProtectedRoute>
+            <Demo />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/settings" element={
-        <ProtectedRoute>
-          <Settings />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/settings" 
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Route path="/tasks" element={
-        <ProtectedRoute>
-          <Tasks />
-        </ProtectedRoute>
-      } />
+      <Route 
+        path="/tasks" 
+        element={
+          <ProtectedRoute>
+            <Tasks />
+          </ProtectedRoute>
+        } 
+      />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

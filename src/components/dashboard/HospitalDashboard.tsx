@@ -227,7 +227,7 @@ const HospitalDashboard = ({ hospitalId, user, onBack }: HospitalDashboardProps)
                 <div className="text-xs text-white/70">API Protocol</div>
               </div>
               <div className="text-center p-3 backdrop-blur-sm bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                <div className="text-lg font-semibold text-white">< 2s</div>
+                <div className="text-lg font-semibold text-white">{"< 2s"}</div>
                 <div className="text-xs text-white/70">Response Time</div>
               </div>
             </div>
