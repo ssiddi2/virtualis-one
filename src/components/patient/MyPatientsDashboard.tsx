@@ -60,37 +60,37 @@ const MyPatientsDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center bg-card p-6 rounded-lg border border-border mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">My Patients</h1>
-          <p className="text-white/70">Your assigned patients and clinical workflow</p>
+          <h1 className="text-2xl font-semibold text-foreground">My Patients</h1>
+          <p className="text-muted-foreground">Your assigned patients and clinical workflow</p>
         </div>
-        <div className="text-right text-white">
-          <p className="text-lg font-semibold">{myPatients.length} Active Patients</p>
-          <p className="text-sm text-white/70">Dr. {profile?.first_name} {profile?.last_name}</p>
+        <div className="text-right">
+          <p className="text-lg font-medium text-foreground">{myPatients.length} Active Patients</p>
+          <p className="text-sm text-muted-foreground">Dr. {profile?.first_name} {profile?.last_name}</p>
         </div>
       </div>
 
       {/* Critical Alerts */}
       {criticalAlerts.length > 0 && (
-        <Card className="backdrop-blur-xl bg-red-500/10 border border-red-300/30 rounded-xl">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-400" />
+        <Card className="epic-card border-critical/20 bg-critical/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-foreground flex items-center gap-2 text-sm font-medium">
+              <AlertTriangle className="h-4 w-4 text-critical" />
               Critical Alerts
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {criticalAlerts.map((alert, index) => (
-              <div key={index} className="flex items-center justify-between bg-red-500/20 p-3 rounded-lg">
-                <div className="text-white">
-                  <p className="font-medium">{alert.message}</p>
-                  <p className="text-sm text-white/60">{alert.time}</p>
+              <div key={index} className="flex items-center justify-between bg-critical/10 p-3 rounded border border-critical/20">
+                <div>
+                  <p className="font-medium text-foreground text-sm">{alert.message}</p>
+                  <p className="text-xs text-muted-foreground">{alert.time}</p>
                 </div>
                 <Button 
                   size="sm"
                   onClick={() => handleOpenChart(alert.patientId)}
-                  className="bg-red-600 hover:bg-red-700"
+                  className="epic-button-primary text-xs"
                 >
                   Review
                 </Button>
@@ -101,82 +101,82 @@ const MyPatientsDashboard = () => {
       )}
 
       {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-white/50" />
+      <div className="relative max-w-md mb-6">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search your patients..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-blue-600/20 border-blue-400/30 text-white placeholder:text-white/50"
+          className="pl-10 epic-input"
         />
       </div>
 
       {/* Patient List */}
-      <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
-        <CardHeader>
-          <CardTitle className="text-white">My Patient List</CardTitle>
+      <Card className="epic-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-foreground text-sm font-medium">My Patient List</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-blue-400/30">
-                <TableHead className="text-white">Patient</TableHead>
-                <TableHead className="text-white">Room</TableHead>
-                <TableHead className="text-white">Admission</TableHead>
-                <TableHead className="text-white">Conditions</TableHead>
-                <TableHead className="text-white">Last Note</TableHead>
-                <TableHead className="text-white">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <CardContent className="p-0">
+          <table className="epic-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Room</th>
+                <th>Admission</th>
+                <th>Conditions</th>
+                <th>Last Note</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {myPatients.map((patient) => (
-                <TableRow key={patient.id} className="border-blue-400/20 hover:bg-blue-500/10">
-                  <TableCell>
+                <tr key={patient.id}>
+                  <td>
                     <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${getUrgencyColor(patient)}`}></div>
-                      <div className="text-white">
-                        <p className="font-medium">{patient.first_name} {patient.last_name}</p>
-                        <p className="text-sm text-white/60">MRN: {patient.mrn}</p>
+                      <div className={`status-indicator ${getUrgencyColor(patient) === 'bg-red-500' ? 'status-critical' : getUrgencyColor(patient) === 'bg-yellow-500' ? 'status-warning' : 'status-normal'}`}></div>
+                      <div>
+                        <p className="font-medium text-foreground">{patient.first_name} {patient.last_name}</p>
+                        <p className="text-xs text-muted-foreground">MRN: {patient.mrn}</p>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-white">
+                  </td>
+                  <td className="text-foreground font-medium">
                     {patient.room_number || 'Not assigned'}
-                  </TableCell>
-                  <TableCell className="text-white">
+                  </td>
+                  <td>
                     <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3 text-white/50" />
-                      <span className="text-sm">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-sm text-foreground">
                         {patient.admission_date ? 
                           new Date(patient.admission_date).toLocaleDateString() : 
                           'N/A'
                         }
                       </span>
                     </div>
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td>
                     <div className="flex flex-wrap gap-1">
                       {patient.medical_conditions?.slice(0, 2).map((condition, index) => (
-                        <Badge key={index} className="bg-purple-600/20 text-purple-300 border-purple-400/30 text-xs">
+                        <Badge key={index} className="epic-badge-default text-xs">
                           {condition}
                         </Badge>
                       ))}
                       {patient.medical_conditions && patient.medical_conditions.length > 2 && (
-                        <Badge className="bg-gray-600/20 text-gray-300 border-gray-400/30 text-xs">
+                        <Badge className="epic-badge-default text-xs">
                           +{patient.medical_conditions.length - 2}
                         </Badge>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-white/60 text-sm">
+                  </td>
+                  <td className="text-muted-foreground text-sm">
                     Progress note - 2h ago
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td>
                     <div className="flex gap-1">
                       <Button 
                         size="sm"
                         onClick={() => handleOpenChart(patient.id)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white p-2"
+                        className="epic-button-primary p-2"
                         title="Open Chart"
                       >
                         <FileText className="h-3 w-3" />
@@ -184,7 +184,7 @@ const MyPatientsDashboard = () => {
                       <Button 
                         size="sm"
                         onClick={() => handleViewLabs(patient.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white p-2"
+                        className="epic-button-secondary p-2"
                         title="View Labs"
                       >
                         <TestTube className="h-3 w-3" />
@@ -192,17 +192,17 @@ const MyPatientsDashboard = () => {
                       <Button 
                         size="sm"
                         onClick={() => handleAddNote(patient.id)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white p-2"
+                        className="epic-button-secondary p-2"
                         title="Add Note"
                       >
                         <Activity className="h-3 w-3" />
                       </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </CardContent>
       </Card>
     </div>
