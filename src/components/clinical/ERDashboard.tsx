@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +21,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { usePatients } from '@/hooks/usePatients';
 import { useToast } from '@/hooks/use-toast';
+import CopilotTriggerButton from '@/components/clinical/CopilotTriggerButton';
 
 const ERDashboard = () => {
   const navigate = useNavigate();
@@ -323,6 +323,16 @@ const ERDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Floating AI Co-pilot Trigger */}
+      <CopilotTriggerButton 
+        variant="floating"
+        context={{
+          location: 'Emergency Department',
+          unit: 'ER',
+          role: 'Emergency Physician'
+        }}
+      />
     </div>
   );
 };

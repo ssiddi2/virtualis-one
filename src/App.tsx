@@ -1,9 +1,11 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import LoginPage from "@/pages/Login";
 import Index from "@/pages/Index";
 import Patients from "@/pages/Patients";
@@ -70,14 +72,16 @@ const AppRoutes = () => {
       {/* Redirect root to proper workflow start */}
       <Route path="/" element={user ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/login" replace />} />
       
-      {/* All authenticated routes wrapped in AppLayout (with sidebar) */}
+      {/* All authenticated routes wrapped in AppLayout and AICopilotProvider */}
       <Route 
         path="/hospital-selection" 
         element={user ? (
           <ProtectedRoute>
-            <AppLayout>
-              <EMRDashboard user={profile || user} />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <EMRDashboard user={profile || user} />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         ) : <Navigate to="/login" replace />} 
       />
@@ -86,9 +90,11 @@ const AppRoutes = () => {
         path="/hospital/:hospitalId" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -97,9 +103,11 @@ const AppRoutes = () => {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <MainDashboard user={profile || user} />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <MainDashboard user={profile || user} />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -108,9 +116,11 @@ const AppRoutes = () => {
         path="/cfo-dashboard" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <CFODashboard hospitalId={profile?.hospital_id || ''} />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <CFODashboard hospitalId={profile?.hospital_id || ''} />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -119,9 +129,11 @@ const AppRoutes = () => {
         path="/er-dashboard" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <ERDashboard />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <ERDashboard />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -130,9 +142,11 @@ const AppRoutes = () => {
         path="/epic-chart/:patientId" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <EpicStylePatientChart />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <EpicStylePatientChart />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -141,9 +155,11 @@ const AppRoutes = () => {
         path="/patients" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <Patients />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <Patients />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -153,9 +169,11 @@ const AppRoutes = () => {
         path="/patients/:patientId" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <EpicPatientWorkspace />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <EpicPatientWorkspace />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -164,9 +182,11 @@ const AppRoutes = () => {
         path="/patients/:patientId/cpoe" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <CPOESystem />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <CPOESystem />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -175,9 +195,11 @@ const AppRoutes = () => {
         path="/cpoe/:patientId" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <EnhancedCPOESystem />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <EnhancedCPOESystem />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -186,9 +208,11 @@ const AppRoutes = () => {
         path="/documentation/:patientId" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <ClinicalDocumentation />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <ClinicalDocumentation />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -197,9 +221,11 @@ const AppRoutes = () => {
         path="/documentation" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <ClinicalDocumentation />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <ClinicalDocumentation />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -208,9 +234,11 @@ const AppRoutes = () => {
         path="/clinical" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <Clinical />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <Clinical />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -219,9 +247,11 @@ const AppRoutes = () => {
         path="/virtualis-chat" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <VirtualisChat />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <VirtualisChat />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -230,9 +260,11 @@ const AppRoutes = () => {
         path="/billing" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <BillingDashboard hospitalId={profile?.hospital_id || ''} />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <BillingDashboard hospitalId={profile?.hospital_id || ''} />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -241,9 +273,11 @@ const AppRoutes = () => {
         path="/laboratory" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <EnhancedLISDashboard />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <EnhancedLISDashboard />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -252,9 +286,11 @@ const AppRoutes = () => {
         path="/radiology" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <PACSManager />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <PACSManager />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -263,9 +299,11 @@ const AppRoutes = () => {
         path="/quality" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <CMSQualityDashboard />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <CMSQualityDashboard />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -274,9 +312,11 @@ const AppRoutes = () => {
         path="/coding" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <CodingDashboard hospitalId={profile?.hospital_id || ''} />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <CodingDashboard hospitalId={profile?.hospital_id || ''} />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -285,12 +325,14 @@ const AppRoutes = () => {
         path="/ai-dashboard" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <AIDashboard 
-                user={profile || user} 
-                hospitalId={profile?.hospital_id || ''} 
-              />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <AIDashboard 
+                  user={profile || user} 
+                  hospitalId={profile?.hospital_id || ''} 
+                />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -299,9 +341,11 @@ const AppRoutes = () => {
         path="/demo" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <Demo />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <Demo />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -310,9 +354,11 @@ const AppRoutes = () => {
         path="/settings" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <Settings />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <Settings />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
@@ -321,9 +367,11 @@ const AppRoutes = () => {
         path="/tasks" 
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <Tasks />
-            </AppLayout>
+            <AICopilotProvider>
+              <AppLayout>
+                <Tasks />
+              </AppLayout>
+            </AICopilotProvider>
           </ProtectedRoute>
         } 
       />
