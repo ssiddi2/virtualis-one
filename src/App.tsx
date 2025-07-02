@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import LoginPage from "@/pages/Login";
@@ -31,6 +31,7 @@ import MainDashboard from "@/components/dashboard/MainDashboard";
 import CFODashboard from "@/components/dashboard/CFODashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
 import ERDashboard from "@/components/clinical/ERDashboard";
+import HospitalSelector from "@/components/dashboard/HospitalSelector";
 import AppLayout from "@/components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => {
   const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -93,11 +95,11 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <AICopilotProvider>
               <AppLayout>
-                <EMRDashboard user={profile || user} />
+                <HospitalSelector onSelectHospital={(hospitalId) => navigate(`/hospital/${hospitalId}`)} />
               </AppLayout>
             </AICopilotProvider>
           </ProtectedRoute>
-        ) : <Navigate to="/login" replace />} 
+        ) : <Navigate to="/login" replace />}
       />
       
       
