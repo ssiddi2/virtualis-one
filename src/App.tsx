@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import LoginPage from "@/pages/Login";
 import Index from "@/pages/Index";
 import Patients from "@/pages/Patients";
+import MyPatients from "@/pages/MyPatients";
 import Clinical from "@/pages/Clinical";
 import Demo from "@/pages/Demo";
 import Settings from "@/pages/Settings";
@@ -67,12 +67,26 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public route - Login page (no sidebar) */}
-      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/hospital-selection" replace />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/my-patients" replace />} />
       
-      {/* Redirect root to proper workflow start */}
-      <Route path="/" element={user ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/login" replace />} />
+      {/* Redirect root to My Patients - simplified workflow */}
+      <Route path="/" element={user ? <Navigate to="/my-patients" replace /> : <Navigate to="/login" replace />} />
       
-      {/* All authenticated routes wrapped in AppLayout and AICopilotProvider */}
+      {/* Main workflow - My Patients Dashboard */}
+      <Route 
+        path="/my-patients" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <MyPatients />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Hospital selection for admin workflow */}
       <Route 
         path="/hospital-selection" 
         element={user ? (
@@ -85,6 +99,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         ) : <Navigate to="/login" replace />} 
       />
+      
+      
       
       <Route 
         path="/hospital/:hospitalId" 

@@ -1,22 +1,6 @@
 
-import { 
-  Building2, 
-  Users, 
-  Stethoscope, 
-  DollarSign, 
-  BarChart3, 
-  Brain, 
-  FileText, 
-  Activity, 
-  Beaker, 
-  Zap, 
-  Settings, 
-  Home,
-  TrendingUp,
-  Shield
-} from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
-
+import { Home, Users, FileText, Calendar, Settings, Activity, TestTube, Zap, Hospital, DollarSign, BarChart3, MessageSquare, Brain, User, Stethoscope } from "lucide-react"
+import { NavLink, useLocation } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -26,59 +10,128 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+  useSidebar
+} from "@/components/ui/sidebar"
 
-const mainNavItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Patient Management", url: "/patients", icon: Users },
-  { title: "Clinical Workflows", url: "/clinical", icon: Stethoscope },
-];
+// Main clinical workflow items
+const clinicalItems = [
+  {
+    title: "My Patients",
+    url: "/my-patients",
+    icon: User,
+  },
+  {
+    title: "Emergency Dept",
+    url: "/er-dashboard",
+    icon: Activity,
+  },
+  {
+    title: "Documentation",
+    url: "/documentation",
+    icon: FileText,
+  },
+  {
+    title: "Laboratory",
+    url: "/laboratory",
+    icon: TestTube,
+  },
+  {
+    title: "Radiology",
+    url: "/radiology",
+    icon: Zap,
+  },
+]
 
-const financialItems = [
-  { title: "CFO Dashboard", url: "/cfo-dashboard", icon: TrendingUp },
-  { title: "Revenue Cycle", url: "/billing", icon: DollarSign },
-  { title: "AI Coding", url: "/coding", icon: Brain },
-  { title: "Quality Measures", url: "/quality", icon: Shield },
-];
+// Administrative items
+const adminItems = [
+  {
+    title: "Hospital Selection",
+    url: "/hospital-selection",
+    icon: Hospital,
+  },
+  {
+    title: "Main Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "All Patients",
+    url: "/patients",
+    icon: Users,
+  },
+  {
+    title: "Billing",
+    url: "/billing",
+    icon: DollarSign,
+  },
+  {
+    title: "Quality Measures",
+    url: "/quality",
+    icon: BarChart3,
+  },
+  {
+    title: "Medical Coding",
+    url: "/coding",
+    icon: FileText,
+  },
+]
 
-const systemItems = [
-  { title: "Laboratory", url: "/laboratory", icon: Beaker },
-  { title: "Radiology", url: "/radiology", icon: Activity },
-  { title: "AI Insights", url: "/ai-dashboard", icon: Zap },
-  { title: "Settings", url: "/settings", icon: Settings },
-];
+// AI and communication tools
+const toolsItems = [
+  {
+    title: "AI Dashboard",
+    url: "/ai-dashboard",
+    icon: Brain,
+  },
+  {
+    title: "Virtualis Chat",
+    url: "/virtualis-chat",
+    icon: MessageSquare,
+  },
+  {
+    title: "Clinical Tools",
+    url: "/clinical",
+    icon: Stethoscope,
+  },
+]
+
+// Settings and misc
+const settingsItems = [
+  {
+    title: "Tasks",
+    url: "/tasks",
+    icon: Calendar,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Settings,
+  },
+]
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const location = useLocation();
-  const currentPath = location.pathname;
+  const { state } = useSidebar()
+  const location = useLocation()
+  const currentPath = location.pathname
 
-  const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-blue-600/30 text-white font-medium border-l-2 border-yellow-400" : "text-white/80 hover:bg-blue-500/20 hover:text-white";
+  const isActive = (path: string) => currentPath === path
 
   return (
-    <Sidebar className="w-64" collapsible="icon">
-      <SidebarContent className="bg-blue-900/20 backdrop-blur-xl border-r border-blue-400/30">
-        
-        {/* Main Navigation */}
+    <Sidebar collapsible="icon">
+      <SidebarContent className="bg-slate-900 border-slate-700">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/90 font-semibold">
-            {state !== 'collapsed' && "Main Navigation"}
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-slate-300">Clinical Workflow</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
+              {clinicalItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end 
-                      className={({ isActive }) => `flex items-center gap-3 p-3 rounded-lg transition-all ${getNavCls({ isActive })}`}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {state !== 'collapsed' && <span>{item.title}</span>}
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`${isActive(item.url) ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                  >
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -87,23 +140,19 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Financial & Executive */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/90 font-semibold">
-            {state !== 'collapsed' && "Financial & Executive"}
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-slate-300">Administration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {financialItems.map((item) => (
+              {adminItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end 
-                      className={({ isActive }) => `flex items-center gap-3 p-3 rounded-lg transition-all ${getNavCls({ isActive })}`}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {state !== 'collapsed' && <span>{item.title}</span>}
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`${isActive(item.url) ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                  >
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -112,23 +161,19 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* System Tools */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/90 font-semibold">
-            {state !== 'collapsed' && "System Tools"}
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-slate-300">AI & Tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {systemItems.map((item) => (
+              {toolsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end 
-                      className={({ isActive }) => `flex items-center gap-3 p-3 rounded-lg transition-all ${getNavCls({ isActive })}`}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {state !== 'collapsed' && <span>{item.title}</span>}
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`${isActive(item.url) ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                  >
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -137,7 +182,27 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-slate-300">Settings</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {settingsItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`${isActive(item.url) ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                  >
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  );
+  )
 }
