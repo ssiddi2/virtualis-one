@@ -24,7 +24,7 @@ export const useMedicalRecords = (patientId?: string) => {
       if (error) throw error;
       return data as MedicalRecord[];
     },
-    enabled: !!patientId,
+    enabled: true, // Always enabled to fetch all records for dashboard
   });
 };
 

@@ -9,12 +9,14 @@ import { Search, FileText, TestTube, Activity, AlertTriangle, Clock } from 'luci
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePatients } from '@/hooks/usePatients';
+import { useMedicalRecords } from '@/hooks/useMedicalRecords';
 
 const MyPatientsDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { data: allPatients, isLoading } = usePatients();
+  const { data: medicalRecords } = useMedicalRecords();
 
   // Filter patients assigned to current provider
   const myPatients = allPatients?.filter(patient => 
@@ -73,7 +75,7 @@ const MyPatientsDashboard = () => {
 
       {/* Critical Alerts */}
       {criticalAlerts.length > 0 && (
-        <Card className="epic-card border-critical/20 bg-critical/5">
+        <Card className="bg-card border border-critical/20 bg-critical/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-foreground flex items-center gap-2 text-sm font-medium">
               <AlertTriangle className="h-4 w-4 text-critical" />
@@ -90,7 +92,7 @@ const MyPatientsDashboard = () => {
                 <Button 
                   size="sm"
                   onClick={() => handleOpenChart(alert.patientId)}
-                  className="epic-button-primary text-xs"
+                  className="text-xs"
                 >
                   Review
                 </Button>
@@ -107,17 +109,17 @@ const MyPatientsDashboard = () => {
           placeholder="Search your patients..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 epic-input"
+          className="pl-10 bg-background border border-input"
         />
       </div>
 
       {/* Patient List */}
-      <Card className="epic-card">
+      <Card className="bg-card border border-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-foreground text-sm font-medium">My Patient List</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="epic-table">
+          <table className="w-full border-collapse">
             <thead>
               <tr>
                 <th>Patient</th>
@@ -157,42 +159,52 @@ const MyPatientsDashboard = () => {
                   <td>
                     <div className="flex flex-wrap gap-1">
                       {patient.medical_conditions?.slice(0, 2).map((condition, index) => (
-                        <Badge key={index} className="epic-badge-default text-xs">
+                        <Badge key={index} variant="secondary" className="text-xs">
                           {condition}
                         </Badge>
                       ))}
                       {patient.medical_conditions && patient.medical_conditions.length > 2 && (
-                        <Badge className="epic-badge-default text-xs">
+                        <Badge variant="secondary" className="text-xs">
                           +{patient.medical_conditions.length - 2}
                         </Badge>
                       )}
                     </div>
                   </td>
                   <td className="text-muted-foreground text-sm">
-                    Progress note - 2h ago
+                    {(() => {
+                      const patientRecords = medicalRecords?.filter(record => record.patient_id === patient.id);
+                      const lastRecord = patientRecords?.[0];
+                      if (lastRecord) {
+                        const timeAgo = Math.floor((Date.now() - new Date(lastRecord.created_at!).getTime()) / (1000 * 60 * 60));
+                        return `${lastRecord.encounter_type} - ${timeAgo}h ago`;
+                      }
+                      return 'No recent notes';
+                    })()}
                   </td>
                   <td>
                     <div className="flex gap-1">
                       <Button 
                         size="sm"
                         onClick={() => handleOpenChart(patient.id)}
-                        className="epic-button-primary p-2"
+                        className="p-2"
                         title="Open Chart"
                       >
                         <FileText className="h-3 w-3" />
                       </Button>
                       <Button 
                         size="sm"
+                        variant="secondary"
                         onClick={() => handleViewLabs(patient.id)}
-                        className="epic-button-secondary p-2"
+                        className="p-2"
                         title="View Labs"
                       >
                         <TestTube className="h-3 w-3" />
                       </Button>
                       <Button 
                         size="sm"
+                        variant="secondary"
                         onClick={() => handleAddNote(patient.id)}
-                        className="epic-button-secondary p-2"
+                        className="p-2"
                         title="Add Note"
                       >
                         <Activity className="h-3 w-3" />

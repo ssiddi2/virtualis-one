@@ -3,63 +3,59 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Epic-Style Clean Interface Design System */
+/* Medical Dashboard Dark Theme */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* Clean Epic-Style Theme - White Background with Navy Accents */
-    --background: 0 0% 100%;
-    --foreground: 222 84% 5%;
+    /* Original Dark Theme */
+    --background: 222 84% 4%;
+    --foreground: 210 40% 98%;
 
-    /* Card System - Clean white with subtle borders */
-    --card: 0 0% 100%;
-    --card-foreground: 222 84% 5%;
+    --card: 222 84% 4%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 5%;
+    --popover: 222 84% 4%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Primary - Epic Navy Blue */
-    --primary: 222 47% 11%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 84% 4%;
 
-    /* Secondary - Light gray backgrounds */
-    --secondary: 210 40% 98%;
-    --secondary-foreground: 222 84% 5%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 98%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    /* Accent - Epic blue highlight */
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 217 32% 17%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 60%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 212 95% 68%;
 
     --radius: 8px;
 
-    /* Sidebar - Epic dark navy */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 27%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 25% 27%;
-    --sidebar-ring: 217 91% 60%;
+    /* Sidebar colors */
+    --sidebar-background: 222 84% 4%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 212 95% 68%;
+    --sidebar-primary-foreground: 222 84% 4%;
+    --sidebar-accent: 217 32% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 32% 17%;
+    --sidebar-ring: 212 95% 68%;
 
-    /* Status colors - Epic style */
+    /* Status colors */
     --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
+    --success-foreground: 210 40% 98%;
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 210 40% 98%;
     --critical: 0 84% 60%;
-    --critical-foreground: 0 0% 100%;
+    --critical-foreground: 210 40% 98%;
   }
 }
 
