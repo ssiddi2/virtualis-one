@@ -31,6 +31,8 @@ import PatientChart from '@/components/patient/PatientChart';
 import NewNoteDialog from '@/components/forms/NewNoteDialog';
 import NewLabOrderDialog from '@/components/forms/NewLabOrderDialog';
 import PatientSummaryCard from '@/components/clinical/PatientSummaryCard';
+import EpicLabResultsTable from './EpicLabResultsTable';
+import EpicClinicalNotes from './EpicClinicalNotes';
 
 const EpicPatientWorkspace = () => {
   const { patientId } = useParams<{ patientId: string }>();
@@ -208,93 +210,7 @@ const EpicPatientWorkspace = () => {
         </TabsContent>
 
         <TabsContent value="notes" className="mt-4">
-          <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center justify-between">
-                Previous Clinical Notes - Inpatient Rounding
-                <Button 
-                  onClick={() => setShowNewNoteDialog(true)}
-                  className="bg-blue-600/20 border border-blue-400/30 text-white hover:bg-blue-500/30"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  New Progress Note
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {patientRecords?.sort((a, b) => new Date(b.visit_date).getTime() - new Date(a.visit_date).getTime()).map((record) => (
-                <div key={record.id} className="p-4 bg-white/5 rounded-lg border border-blue-400/30">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="text-white font-semibold text-lg">{record.encounter_type}</h3>
-                      <p className="text-white/60 text-sm">
-                        {new Date(record.visit_date).toLocaleDateString()} at {new Date(record.visit_date).toLocaleTimeString()}
-                      </p>
-                    </div>
-                    {record.ai_coding_suggestions && (
-                      <Badge className="bg-purple-600 text-white">
-                        AI Enhanced ({record.coding_confidence_score}% confidence)
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {/* Structured Note Display for Rounding */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {record.chief_complaint && (
-                      <div className="space-y-2">
-                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Chief Complaint</h4>
-                        <p className="text-white/80 text-sm">{record.chief_complaint}</p>
-                      </div>
-                    )}
-                    
-                    {record.assessment && (
-                      <div className="space-y-2">
-                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Assessment</h4>
-                        <p className="text-white/80 text-sm">{record.assessment}</p>
-                      </div>
-                    )}
-                    
-                    {record.plan && (
-                      <div className="space-y-2">
-                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Plan</h4>
-                        <p className="text-white/80 text-sm">{record.plan}</p>
-                      </div>
-                    )}
-                    
-                    {record.physical_examination && (
-                      <div className="space-y-2">
-                        <h4 className="text-white font-medium text-sm border-b border-blue-400/30 pb-1">Physical Exam</h4>
-                        <p className="text-white/80 text-sm">{record.physical_examination}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {record.ai_coding_suggestions && (
-                    <div className="mt-4 p-3 bg-purple-600/20 rounded border border-purple-400/30">
-                      <h4 className="text-purple-200 font-medium mb-2 text-sm">AI Clinical Insights:</h4>
-                      <div className="text-purple-100 text-xs">
-                        <pre className="whitespace-pre-wrap font-mono">
-                          {JSON.stringify(record.ai_coding_suggestions, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {(!patientRecords || patientRecords.length === 0) && (
-                <div className="text-center text-white/60 py-8">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No clinical notes available</p>
-                  <Button 
-                    onClick={() => setShowNewNoteDialog(true)}
-                    className="mt-4 bg-blue-600/20 border border-blue-400/30 text-white hover:bg-blue-500/30"
-                  >
-                    Create First Progress Note
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <EpicClinicalNotes patientId={patientId} />
         </TabsContent>
 
         <TabsContent value="medications" className="mt-4">
@@ -326,37 +242,7 @@ const EpicPatientWorkspace = () => {
         </TabsContent>
 
         <TabsContent value="labs" className="mt-4">
-          <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center justify-between">
-                Laboratory Results
-                <Button 
-                  onClick={() => setShowNewLabDialog(true)}
-                  className="bg-purple-600/20 border border-purple-400/30 text-white hover:bg-purple-500/30"
-                >
-                  <TestTube className="h-4 w-4 mr-1" />
-                  Order Lab
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {patientLabOrders?.map((lab) => (
-                  <div key={lab.id} className="p-3 bg-white/5 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-white font-medium">{lab.test_name}</h4>
-                      <Badge className={lab.status === 'completed' ? 'bg-green-600' : 'bg-yellow-600'}>
-                        {lab.status}
-                      </Badge>
-                    </div>
-                    <p className="text-white/60 text-sm">
-                      Ordered: {lab.ordered_at ? new Date(lab.ordered_at).toLocaleDateString() : 'N/A'}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <EpicLabResultsTable patientId={patientId} />
         </TabsContent>
 
         <TabsContent value="orders" className="mt-4">

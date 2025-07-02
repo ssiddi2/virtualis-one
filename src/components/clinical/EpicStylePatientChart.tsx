@@ -30,6 +30,8 @@ import { useProblemList } from '@/hooks/useProblemList';
 import { useAllergies } from '@/hooks/useAllergies';
 import { useClinicalOrders } from '@/hooks/useClinicalOrders';
 import { useParams, useNavigate } from 'react-router-dom';
+import EpicLabResultsTable from './EpicLabResultsTable';
+import EpicClinicalNotes from './EpicClinicalNotes';
 
 interface EpicStylePatientChartProps {
   patientId: string;
@@ -204,6 +206,10 @@ const EpicStylePatientChart = () => {
               <Shield className="h-4 w-4 mr-2" />
               Allergies
             </TabsTrigger>
+            <TabsTrigger value="notes" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Notes
+            </TabsTrigger>
             <TabsTrigger value="labs" className="text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Activity className="h-4 w-4 mr-2" />
               Labs
@@ -360,62 +366,11 @@ const EpicStylePatientChart = () => {
           </TabsContent>
 
           <TabsContent value="labs" className="space-y-4">
-            <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30 rounded-xl">
-              <CardHeader>
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
-                  Laboratory Results
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-blue-400/30">
-                      <TableHead className="text-white">Test</TableHead>
-                      <TableHead className="text-white">Result</TableHead>
-                      <TableHead className="text-white">Reference Range</TableHead>
-                      <TableHead className="text-white">Status</TableHead>
-                      <TableHead className="text-white">Date</TableHead>
-                      <TableHead className="text-white">Trend</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {patientLabOrders?.map((lab) => (
-                      <TableRow key={lab.id} className="border-blue-400/20 hover:bg-blue-500/10">
-                        <TableCell className="text-white font-medium">{lab.test_name}</TableCell>
-                        <TableCell className="text-white">
-                          {lab.results ? JSON.stringify(lab.results) : 'Pending'}
-                        </TableCell>
-                        <TableCell className="text-white">
-                          {lab.reference_ranges ? JSON.stringify(lab.reference_ranges) : 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={lab.abnormal_flags?.length ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}>
-                            {lab.abnormal_flags?.length ? 'Abnormal' : lab.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-white">
-                          {lab.completed_at ? new Date(lab.completed_at).toLocaleDateString() : 'Pending'}
-                        </TableCell>
-                        <TableCell>
-                          {lab.results && lab.reference_ranges && getResultTrend(
-                            parseFloat(JSON.stringify(lab.results)), 
-                            JSON.stringify(lab.reference_ranges)
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {(!patientLabOrders || patientLabOrders.length === 0) && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center text-white/60">
-                          No lab results available
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+            <EpicLabResultsTable patientId={patientId} />
+          </TabsContent>
+
+          <TabsContent value="notes" className="space-y-4">
+            <EpicClinicalNotes patientId={patientId} />
           </TabsContent>
 
           <TabsContent value="medications" className="space-y-4">
