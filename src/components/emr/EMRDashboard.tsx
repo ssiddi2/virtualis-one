@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import PageTransition from '@/components/ui/page-transition';
 import { 
   Users, 
   FileText, 
@@ -110,17 +111,18 @@ const EMRDashboard = () => {
                       hospitalId === '3' ? 'Children\'s Hospital' : 'University Medical';
 
   return (
-    <div className="min-h-screen p-6" style={{
-      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-    }}>
-      <div className="max-w-7xl mx-auto space-y-6">
+    <PageTransition>
+      <div className="min-h-screen p-6" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <div className="max-w-7xl mx-auto space-y-6 stagger-children">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button 
               onClick={() => navigate('/hospital-selection')}
               variant="outline"
-              className="bg-transparent border-blue-400/30 text-white hover:bg-blue-500/20"
+              className="glass-button text-white hover-scale focus-ring"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Hospitals
@@ -165,13 +167,15 @@ const EMRDashboard = () => {
         )}
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="clinical-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-blue-300" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 stagger-children">
+          <Card className="clinical-card hover-lift">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600/20 rounded-lg">
+                  <Users className="h-8 w-8 text-blue-300" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{activePatients.length}</p>
+                  <p className="text-3xl font-bold text-white mb-1">{activePatients.length}</p>
                   <p className="text-white/70 text-sm">Active Patients</p>
                 </div>
               </div>
@@ -216,25 +220,25 @@ const EMRDashboard = () => {
         </div>
 
         {/* EMR Modules */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
           {emrModules.map((module) => {
             const IconComponent = module.icon;
             return (
-              <Card key={module.id} className="clinical-card hover:bg-white/10 transition-colors cursor-pointer"
+              <Card key={module.id} className="clinical-card-interactive hover-glow"
                     onClick={() => navigate(module.path)}>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center">
-                        <IconComponent className="h-6 w-6 text-blue-300" />
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-blue-600/20 rounded-xl flex items-center justify-center hover-scale">
+                        <IconComponent className="h-7 w-7 text-blue-300" />
                       </div>
                       <div>
-                        <CardTitle className="text-white text-lg">{module.name}</CardTitle>
+                        <CardTitle className="text-white text-lg mb-1">{module.name}</CardTitle>
                         <p className="text-white/60 text-sm">{module.description}</p>
                       </div>
                     </div>
                     {module.count !== undefined && (
-                      <Badge className={getStatusColor(module.status)}>
+                      <Badge className={`${getStatusColor(module.status)} animate-bounce-gentle`}>
                         {module.count}
                       </Badge>
                     )}
@@ -254,7 +258,7 @@ const EMRDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button 
                 onClick={() => navigate(`/emr/${hospitalId}/patients`)}
-                className="h-16 bg-blue-600 hover:bg-blue-700 text-white flex-col"
+                className="h-16 bg-blue-600 hover:bg-blue-700 text-white flex-col hover-lift focus-ring"
               >
                 <Activity className="h-6 w-6 mb-2" />
                 Start Rounds
@@ -278,8 +282,9 @@ const EMRDashboard = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 

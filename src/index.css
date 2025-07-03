@@ -86,30 +86,42 @@
 
 /* Epic-Style Clinical Components */
 @layer components {
-  /* Clinical cards with backdrop blur */
+  /* Enhanced clinical cards */
   .clinical-card {
-    @apply backdrop-blur-xl bg-white/10 border border-white/30 rounded-xl text-white;
+    @apply backdrop-blur-xl bg-white/8 border border-white/25 rounded-xl text-white transition-smooth shadow-lg;
   }
 
   .clinical-card:hover {
-    @apply bg-white/15 transition-all duration-200;
+    @apply bg-white/12 border-white/35 transform -translate-y-1 shadow-xl shadow-blue-500/10;
   }
 
-  /* Epic-style table for labs */
+  .clinical-card-interactive {
+    @apply clinical-card cursor-pointer focus-ring;
+  }
+
+  .clinical-card-interactive:hover {
+    @apply bg-white/15 border-white/40 transform -translate-y-2 shadow-2xl shadow-blue-500/20;
+  }
+
+  /* Enhanced Epic-style table */
   .epic-lab-table {
-    @apply w-full border-collapse bg-white/5 rounded-lg overflow-hidden;
+    @apply w-full border-collapse bg-white/5 rounded-lg overflow-hidden shadow-lg;
   }
 
   .epic-lab-table th {
-    @apply bg-white/10 px-4 py-3 text-left text-sm font-medium text-white border-b border-white/20;
+    @apply bg-white/15 px-4 py-4 text-left text-sm font-semibold text-white border-b border-white/30 sticky top-0 z-10;
   }
 
   .epic-lab-table td {
-    @apply px-4 py-2 text-sm text-white border-b border-white/10;
+    @apply px-4 py-3 text-sm text-white border-b border-white/10 transition-fast;
   }
 
   .epic-lab-table tr:hover {
-    @apply bg-white/5;
+    @apply bg-white/8 transform scale-[1.01] shadow-md;
+  }
+
+  .epic-lab-table tbody tr {
+    @apply transition-smooth;
   }
 
   /* Lab result color coding */
@@ -184,47 +196,107 @@
     @apply bg-red-400;
   }
 
-  /* Quick action buttons */
+  /* Enhanced quick action buttons */
   .quick-action-btn {
-    @apply px-3 py-2 text-sm font-medium rounded-lg border transition-all duration-200;
+    @apply px-4 py-2 text-sm font-medium rounded-lg border transition-smooth shadow-sm focus-ring;
   }
 
   .quick-action-primary {
-    @apply bg-blue-600/20 border-blue-400/30 text-white hover:bg-blue-500/30;
+    @apply bg-blue-600/20 border-blue-400/30 text-white hover:bg-blue-500/40 hover:border-blue-300/50 hover:shadow-md hover:shadow-blue-500/20;
   }
 
   .quick-action-secondary {
-    @apply bg-purple-600/20 border-purple-400/30 text-white hover:bg-purple-500/30;
+    @apply bg-purple-600/20 border-purple-400/30 text-white hover:bg-purple-500/40 hover:border-purple-300/50 hover:shadow-md hover:shadow-purple-500/20;
   }
 
   .quick-action-success {
-    @apply bg-green-600/20 border-green-400/30 text-white hover:bg-green-500/30;
+    @apply bg-green-600/20 border-green-400/30 text-white hover:bg-green-500/40 hover:border-green-300/50 hover:shadow-md hover:shadow-green-500/20;
+  }
+
+  .quick-action-critical {
+    @apply bg-red-600/20 border-red-400/30 text-white hover:bg-red-500/40 hover:border-red-300/50 hover:shadow-md hover:shadow-red-500/20;
   }
 }
 
 /* Enhanced Animation Effects */
 @layer utilities {
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
+  /* Transition utilities */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite alternate;
+  .transition-fast {
+    transition: all 0.15s ease-out;
   }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+  .transition-slow {
+    transition: all 0.5s ease-out;
   }
 
-  @keyframes pulse-glow {
-    0% { 
-      box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
-    }
-    100% { 
-      box-shadow: 
-        0 0 30px rgba(255, 193, 7, 0.6), 
-        0 0 60px rgba(255, 193, 7, 0.2);
-    }
+  /* Interactive utilities */
+  .hover-lift {
+    @apply transition-smooth hover:transform hover:-translate-y-1 hover:shadow-xl;
   }
+
+  .hover-scale {
+    @apply transition-smooth hover:transform hover:scale-105;
+  }
+
+  .hover-glow {
+    @apply transition-smooth hover:shadow-[0_0_30px_rgba(66,153,225,0.4)];
+  }
+
+  /* Loading states */
+  .loading-shimmer {
+    @apply relative overflow-hidden bg-white/10;
+  }
+
+  .loading-shimmer::before {
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer;
+    content: '';
+  }
+
+  /* Glass morphism effects */
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/5 border border-white/20 rounded-xl;
+  }
+
+  .glass-button {
+    @apply backdrop-blur-sm bg-white/10 border border-white/30 rounded-lg transition-smooth hover:bg-white/20 hover:border-white/40;
+  }
+
+  /* Focus states */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent;
+  }
+
+  /* Smooth scrolling */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+
+  /* Text gradients */
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent;
+  }
+
+  /* Page transitions */
+  .page-enter {
+    @apply animate-fade-in;
+  }
+
+  .page-exit {
+    @apply animate-fade-out;
+  }
+
+  /* Stagger animations for lists */
+  .stagger-children > * {
+    @apply animate-fade-in;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
 }

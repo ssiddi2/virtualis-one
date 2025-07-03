@@ -34,6 +34,8 @@ import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
 import ERDashboard from "@/components/clinical/ERDashboard";
 import HospitalSelector from "@/components/dashboard/HospitalSelector";
 import AppLayout from "@/components/layout/AppLayout";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import PageTransition from "@/components/ui/page-transition";
 
 const queryClient = new QueryClient();
 
@@ -42,8 +44,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
-        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <LoadingSpinner size="lg" text="Loading EMR System..." />
       </div>
     );
   }
@@ -61,8 +65,10 @@ const AppRoutes = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a1628]">
-        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <LoadingSpinner size="lg" text="Initializing EMR..." />
       </div>
     );
   }
