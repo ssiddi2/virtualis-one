@@ -88,11 +88,16 @@
 @layer components {
   /* Enhanced clinical cards */
   .clinical-card {
-    @apply backdrop-blur-xl bg-white/8 border border-white/25 rounded-xl text-white transition-smooth shadow-lg;
+    @apply backdrop-blur-xl border rounded-xl text-white transition-smooth shadow-lg;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
   }
 
   .clinical-card:hover {
-    @apply bg-white/12 border-white/35 transform -translate-y-1 shadow-xl shadow-blue-500/10;
+    @apply transform -translate-y-1 shadow-xl;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
   }
 
   .clinical-card-interactive {
@@ -100,24 +105,32 @@
   }
 
   .clinical-card-interactive:hover {
-    @apply bg-white/15 border-white/40 transform -translate-y-2 shadow-2xl shadow-blue-500/20;
+    @apply transform -translate-y-2 shadow-2xl;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.2), 0 10px 40px -10px rgba(0, 0, 0, 0.2);
   }
 
   /* Enhanced Epic-style table */
   .epic-lab-table {
-    @apply w-full border-collapse bg-white/5 rounded-lg overflow-hidden shadow-lg;
+    @apply w-full border-collapse rounded-lg overflow-hidden shadow-lg;
+    background-color: rgba(255, 255, 255, 0.05);
   }
 
   .epic-lab-table th {
-    @apply bg-white/15 px-4 py-4 text-left text-sm font-semibold text-white border-b border-white/30 sticky top-0 z-10;
+    @apply px-4 py-4 text-left text-sm font-semibold text-white sticky top-0 z-10;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   }
 
   .epic-lab-table td {
-    @apply px-4 py-3 text-sm text-white border-b border-white/10 transition-fast;
+    @apply px-4 py-3 text-sm text-white transition-fast;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .epic-lab-table tr:hover {
-    @apply bg-white/8 transform scale-[1.01] shadow-md;
+    @apply transform scale-[1.01] shadow-md;
+    background-color: rgba(255, 255, 255, 0.08);
   }
 
   .epic-lab-table tbody tr {
@@ -138,16 +151,25 @@
   }
 
   .lab-value-critical {
-    @apply text-red-500 font-bold bg-red-900/20 px-2 py-1 rounded;
+    @apply text-red-500 font-bold px-2 py-1 rounded;
+    background-color: rgba(153, 27, 27, 0.2);
   }
 
   /* Navigation tabs */
   .clinical-tabs {
-    @apply grid grid-cols-3 md:grid-cols-5 gap-2 bg-white/10 p-2 rounded-lg border border-white/20;
+    @apply grid grid-cols-3 md:grid-cols-5 gap-2 p-2 rounded-lg border;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   .clinical-tab {
-    @apply px-3 py-2 text-sm font-medium text-white/80 rounded transition-all hover:bg-white/10 hover:text-white;
+    @apply px-3 py-2 text-sm font-medium rounded transition-all;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .clinical-tab:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
   }
 
   .clinical-tab.active {
@@ -156,19 +178,23 @@
 
   /* Expandable notes */
   .clinical-note {
-    @apply bg-white/5 border border-white/20 rounded-lg p-4 transition-all duration-200;
+    @apply rounded-lg p-4 transition-all duration-200;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .clinical-note:hover {
-    @apply bg-white/10;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   .clinical-note-header {
-    @apply flex items-center justify-between mb-3 pb-2 border-b border-white/20;
+    @apply flex items-center justify-between mb-3 pb-2;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .clinical-note-content {
-    @apply space-y-3 text-white/90;
+    @apply space-y-3;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .clinical-note-section {
@@ -202,19 +228,51 @@
   }
 
   .quick-action-primary {
-    @apply bg-blue-600/20 border-blue-400/30 text-white hover:bg-blue-500/40 hover:border-blue-300/50 hover:shadow-md hover:shadow-blue-500/20;
+    @apply text-white;
+    background-color: rgba(37, 99, 235, 0.2);
+    border-color: rgba(96, 165, 250, 0.3);
+  }
+
+  .quick-action-primary:hover {
+    background-color: rgba(59, 130, 246, 0.4);
+    border-color: rgba(147, 197, 253, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
   }
 
   .quick-action-secondary {
-    @apply bg-purple-600/20 border-purple-400/30 text-white hover:bg-purple-500/40 hover:border-purple-300/50 hover:shadow-md hover:shadow-purple-500/20;
+    @apply text-white;
+    background-color: rgba(147, 51, 234, 0.2);
+    border-color: rgba(196, 181, 253, 0.3);
+  }
+
+  .quick-action-secondary:hover {
+    background-color: rgba(168, 85, 247, 0.4);
+    border-color: rgba(196, 181, 253, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(168, 85, 247, 0.2);
   }
 
   .quick-action-success {
-    @apply bg-green-600/20 border-green-400/30 text-white hover:bg-green-500/40 hover:border-green-300/50 hover:shadow-md hover:shadow-green-500/20;
+    @apply text-white;
+    background-color: rgba(22, 163, 74, 0.2);
+    border-color: rgba(74, 222, 128, 0.3);
+  }
+
+  .quick-action-success:hover {
+    background-color: rgba(34, 197, 94, 0.4);
+    border-color: rgba(74, 222, 128, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.2);
   }
 
   .quick-action-critical {
-    @apply bg-red-600/20 border-red-400/30 text-white hover:bg-red-500/40 hover:border-red-300/50 hover:shadow-md hover:shadow-red-500/20;
+    @apply text-white;
+    background-color: rgba(220, 38, 38, 0.2);
+    border-color: rgba(248, 113, 113, 0.3);
+  }
+
+  .quick-action-critical:hover {
+    background-color: rgba(239, 68, 68, 0.4);
+    border-color: rgba(248, 113, 113, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
   }
 }
 
@@ -248,21 +306,32 @@
 
   /* Loading states */
   .loading-shimmer {
-    @apply relative overflow-hidden bg-white/10;
+    @apply relative overflow-hidden;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   .loading-shimmer::before {
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer;
+    @apply absolute inset-0 animate-shimmer;
     content: '';
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   }
 
   /* Glass morphism effects */
   .glass-card {
-    @apply backdrop-blur-xl bg-white/5 border border-white/20 rounded-xl;
+    @apply backdrop-blur-xl rounded-xl;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .glass-button {
-    @apply backdrop-blur-sm bg-white/10 border border-white/30 rounded-lg transition-smooth hover:bg-white/20 hover:border-white/40;
+    @apply backdrop-blur-sm rounded-lg transition-smooth;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
   }
 
   /* Focus states */
