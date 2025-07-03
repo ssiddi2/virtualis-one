@@ -28,8 +28,9 @@ interface LabTest {
 const EpicLabResultsTable = ({ patientId }: { patientId?: string }) => {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('7d');
 
-  // Mock lab data with 3+ dates as requested
+  // Comprehensive lab data organized by panels
   const mockLabData: LabTest[] = [
+    // CBC with Differential
     {
       name: 'WBC',
       code: 'WBC',
@@ -37,6 +38,17 @@ const EpicLabResultsTable = ({ patientId }: { patientId?: string }) => {
         { value: 8.2, unit: 'K/μL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '4.5-11.0' },
         { value: 12.5, unit: 'K/μL', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '4.5-11.0' },
         { value: 15.8, unit: 'K/μL', timestamp: '2024-01-13T08:00:00Z', status: 'critical', referenceRange: '4.5-11.0' },
+        { value: 18.2, unit: 'K/μL', timestamp: '2024-01-12T08:00:00Z', status: 'critical', referenceRange: '4.5-11.0' },
+      ]
+    },
+    {
+      name: 'RBC',
+      code: 'RBC',
+      values: [
+        { value: 4.5, unit: 'M/μL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '4.2-5.4' },
+        { value: 3.8, unit: 'M/μL', timestamp: '2024-01-14T08:00:00Z', status: 'low', referenceRange: '4.2-5.4' },
+        { value: 3.2, unit: 'M/μL', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '4.2-5.4' },
+        { value: 3.0, unit: 'M/μL', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '4.2-5.4' },
       ]
     },
     {
@@ -46,6 +58,17 @@ const EpicLabResultsTable = ({ patientId }: { patientId?: string }) => {
         { value: 12.8, unit: 'g/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '12.0-16.0' },
         { value: 11.2, unit: 'g/dL', timestamp: '2024-01-14T08:00:00Z', status: 'low', referenceRange: '12.0-16.0' },
         { value: 10.1, unit: 'g/dL', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '12.0-16.0' },
+        { value: 9.8, unit: 'g/dL', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '12.0-16.0' },
+      ]
+    },
+    {
+      name: 'Hematocrit',
+      code: 'HCT',
+      values: [
+        { value: 38.5, unit: '%', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '36-46' },
+        { value: 33.2, unit: '%', timestamp: '2024-01-14T08:00:00Z', status: 'low', referenceRange: '36-46' },
+        { value: 30.1, unit: '%', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '36-46' },
+        { value: 29.8, unit: '%', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '36-46' },
       ]
     },
     {
@@ -55,26 +78,21 @@ const EpicLabResultsTable = ({ patientId }: { patientId?: string }) => {
         { value: 245, unit: 'K/μL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '150-450' },
         { value: 289, unit: 'K/μL', timestamp: '2024-01-14T08:00:00Z', status: 'normal', referenceRange: '150-450' },
         { value: 312, unit: 'K/μL', timestamp: '2024-01-13T08:00:00Z', status: 'normal', referenceRange: '150-450' },
+        { value: 298, unit: 'K/μL', timestamp: '2024-01-12T08:00:00Z', status: 'normal', referenceRange: '150-450' },
       ]
     },
     {
-      name: 'BUN',
-      code: 'BUN',
+      name: 'Neutrophils',
+      code: 'NEUT',
       values: [
-        { value: 18, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '7-20' },
-        { value: 24, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '7-20' },
-        { value: 28, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '7-20' },
+        { value: 65, unit: '%', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '50-70' },
+        { value: 82, unit: '%', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '50-70' },
+        { value: 88, unit: '%', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '50-70' },
+        { value: 90, unit: '%', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '50-70' },
       ]
     },
-    {
-      name: 'Creatinine',
-      code: 'CREAT',
-      values: [
-        { value: 1.1, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '0.7-1.3' },
-        { value: 1.4, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '0.7-1.3' },
-        { value: 1.6, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '0.7-1.3' },
-      ]
-    },
+    
+    // Basic Metabolic Panel (BMP)
     {
       name: 'Sodium',
       code: 'NA',
@@ -82,6 +100,7 @@ const EpicLabResultsTable = ({ patientId }: { patientId?: string }) => {
         { value: 138, unit: 'mmol/L', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '136-145' },
         { value: 142, unit: 'mmol/L', timestamp: '2024-01-14T08:00:00Z', status: 'normal', referenceRange: '136-145' },
         { value: 140, unit: 'mmol/L', timestamp: '2024-01-13T08:00:00Z', status: 'normal', referenceRange: '136-145' },
+        { value: 139, unit: 'mmol/L', timestamp: '2024-01-12T08:00:00Z', status: 'normal', referenceRange: '136-145' },
       ]
     },
     {
@@ -91,6 +110,185 @@ const EpicLabResultsTable = ({ patientId }: { patientId?: string }) => {
         { value: 4.2, unit: 'mmol/L', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '3.5-5.1' },
         { value: 2.8, unit: 'mmol/L', timestamp: '2024-01-14T08:00:00Z', status: 'critical', referenceRange: '3.5-5.1' },
         { value: 3.1, unit: 'mmol/L', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '3.5-5.1' },
+        { value: 2.9, unit: 'mmol/L', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '3.5-5.1' },
+      ]
+    },
+    {
+      name: 'Chloride',
+      code: 'CL',
+      values: [
+        { value: 102, unit: 'mmol/L', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '98-107' },
+        { value: 105, unit: 'mmol/L', timestamp: '2024-01-14T08:00:00Z', status: 'normal', referenceRange: '98-107' },
+        { value: 103, unit: 'mmol/L', timestamp: '2024-01-13T08:00:00Z', status: 'normal', referenceRange: '98-107' },
+        { value: 104, unit: 'mmol/L', timestamp: '2024-01-12T08:00:00Z', status: 'normal', referenceRange: '98-107' },
+      ]
+    },
+    {
+      name: 'CO2',
+      code: 'CO2',
+      values: [
+        { value: 24, unit: 'mmol/L', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '22-28' },
+        { value: 20, unit: 'mmol/L', timestamp: '2024-01-14T08:00:00Z', status: 'low', referenceRange: '22-28' },
+        { value: 19, unit: 'mmol/L', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '22-28' },
+        { value: 18, unit: 'mmol/L', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '22-28' },
+      ]
+    },
+    {
+      name: 'BUN',
+      code: 'BUN',
+      values: [
+        { value: 18, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '7-20' },
+        { value: 24, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '7-20' },
+        { value: 28, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '7-20' },
+        { value: 32, unit: 'mg/dL', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '7-20' },
+      ]
+    },
+    {
+      name: 'Creatinine',
+      code: 'CREAT',
+      values: [
+        { value: 1.1, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '0.7-1.3' },
+        { value: 1.4, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '0.7-1.3' },
+        { value: 1.6, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '0.7-1.3' },
+        { value: 1.8, unit: 'mg/dL', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '0.7-1.3' },
+      ]
+    },
+    {
+      name: 'Glucose',
+      code: 'GLU',
+      values: [
+        { value: 95, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '70-99' },
+        { value: 135, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '70-99' },
+        { value: 142, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '70-99' },
+        { value: 128, unit: 'mg/dL', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '70-99' },
+      ]
+    },
+    
+    // Comprehensive Metabolic Panel (CMP) additions
+    {
+      name: 'Total Protein',
+      code: 'TP',
+      values: [
+        { value: 7.2, unit: 'g/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '6.0-8.3' },
+        { value: 6.8, unit: 'g/dL', timestamp: '2024-01-14T08:00:00Z', status: 'normal', referenceRange: '6.0-8.3' },
+        { value: 6.5, unit: 'g/dL', timestamp: '2024-01-13T08:00:00Z', status: 'normal', referenceRange: '6.0-8.3' },
+        { value: 6.2, unit: 'g/dL', timestamp: '2024-01-12T08:00:00Z', status: 'normal', referenceRange: '6.0-8.3' },
+      ]
+    },
+    {
+      name: 'Albumin',
+      code: 'ALB',
+      values: [
+        { value: 4.1, unit: 'g/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '3.5-5.0' },
+        { value: 3.2, unit: 'g/dL', timestamp: '2024-01-14T08:00:00Z', status: 'low', referenceRange: '3.5-5.0' },
+        { value: 3.0, unit: 'g/dL', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '3.5-5.0' },
+        { value: 2.8, unit: 'g/dL', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '3.5-5.0' },
+      ]
+    },
+    {
+      name: 'Total Bilirubin',
+      code: 'TBIL',
+      values: [
+        { value: 0.8, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '0.3-1.2' },
+        { value: 2.1, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '0.3-1.2' },
+        { value: 2.8, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '0.3-1.2' },
+        { value: 3.2, unit: 'mg/dL', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '0.3-1.2' },
+      ]
+    },
+    {
+      name: 'ALT',
+      code: 'ALT',
+      values: [
+        { value: 28, unit: 'U/L', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '7-35' },
+        { value: 85, unit: 'U/L', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '7-35' },
+        { value: 112, unit: 'U/L', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '7-35' },
+        { value: 128, unit: 'U/L', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '7-35' },
+      ]
+    },
+    {
+      name: 'AST',
+      code: 'AST',
+      values: [
+        { value: 32, unit: 'U/L', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '8-40' },
+        { value: 92, unit: 'U/L', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '8-40' },
+        { value: 118, unit: 'U/L', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '8-40' },
+        { value: 135, unit: 'U/L', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '8-40' },
+      ]
+    },
+    
+    // Additional important labs
+    {
+      name: 'Magnesium',
+      code: 'MG',
+      values: [
+        { value: 2.1, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '1.7-2.2' },
+        { value: 1.4, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'low', referenceRange: '1.7-2.2' },
+        { value: 1.2, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '1.7-2.2' },
+        { value: 1.1, unit: 'mg/dL', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '1.7-2.2' },
+      ]
+    },
+    {
+      name: 'Phosphorus',
+      code: 'PHOS',
+      values: [
+        { value: 3.8, unit: 'mg/dL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '2.5-4.5' },
+        { value: 2.1, unit: 'mg/dL', timestamp: '2024-01-14T08:00:00Z', status: 'low', referenceRange: '2.5-4.5' },
+        { value: 1.9, unit: 'mg/dL', timestamp: '2024-01-13T08:00:00Z', status: 'low', referenceRange: '2.5-4.5' },
+        { value: 1.8, unit: 'mg/dL', timestamp: '2024-01-12T08:00:00Z', status: 'low', referenceRange: '2.5-4.5' },
+      ]
+    },
+    
+    // Cardiac markers
+    {
+      name: 'Troponin I',
+      code: 'TROP-I',
+      values: [
+        { value: 0.02, unit: 'ng/mL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '<0.04' },
+        { value: 0.8, unit: 'ng/mL', timestamp: '2024-01-14T08:00:00Z', status: 'critical', referenceRange: '<0.04' },
+        { value: 1.2, unit: 'ng/mL', timestamp: '2024-01-13T08:00:00Z', status: 'critical', referenceRange: '<0.04' },
+        { value: 1.8, unit: 'ng/mL', timestamp: '2024-01-12T08:00:00Z', status: 'critical', referenceRange: '<0.04' },
+      ]
+    },
+    {
+      name: 'Troponin T',
+      code: 'TROP-T',
+      values: [
+        { value: 0.01, unit: 'ng/mL', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '<0.01' },
+        { value: 0.15, unit: 'ng/mL', timestamp: '2024-01-14T08:00:00Z', status: 'critical', referenceRange: '<0.01' },
+        { value: 0.22, unit: 'ng/mL', timestamp: '2024-01-13T08:00:00Z', status: 'critical', referenceRange: '<0.01' },
+        { value: 0.28, unit: 'ng/mL', timestamp: '2024-01-12T08:00:00Z', status: 'critical', referenceRange: '<0.01' },
+      ]
+    },
+    
+    // Coagulation studies
+    {
+      name: 'PT',
+      code: 'PT',
+      values: [
+        { value: 12.5, unit: 'sec', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '11-13' },
+        { value: 18.2, unit: 'sec', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '11-13' },
+        { value: 22.1, unit: 'sec', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '11-13' },
+        { value: 25.8, unit: 'sec', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '11-13' },
+      ]
+    },
+    {
+      name: 'INR',
+      code: 'INR',
+      values: [
+        { value: 1.1, unit: '', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '0.8-1.1' },
+        { value: 1.8, unit: '', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '0.8-1.1' },
+        { value: 2.2, unit: '', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '0.8-1.1' },
+        { value: 2.6, unit: '', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '0.8-1.1' },
+      ]
+    },
+    {
+      name: 'PTT',
+      code: 'PTT',
+      values: [
+        { value: 28, unit: 'sec', timestamp: '2024-01-15T08:00:00Z', status: 'normal', referenceRange: '25-35' },
+        { value: 42, unit: 'sec', timestamp: '2024-01-14T08:00:00Z', status: 'high', referenceRange: '25-35' },
+        { value: 48, unit: 'sec', timestamp: '2024-01-13T08:00:00Z', status: 'high', referenceRange: '25-35' },
+        { value: 52, unit: 'sec', timestamp: '2024-01-12T08:00:00Z', status: 'high', referenceRange: '25-35' },
       ]
     },
   ];

@@ -27,6 +27,7 @@ import CodingDashboard from "@/components/coding/CodingDashboard";
 import AIDashboard from "@/components/dashboard/AIDashboard";
 import EMRDashboard from "@/components/dashboard/EMRDashboard";
 import EpicStylePatientChart from "@/components/clinical/EpicStylePatientChart";
+import ComprehensivePatientChart from "@/components/clinical/ComprehensivePatientChart";
 import MainDashboard from "@/components/dashboard/MainDashboard";
 import CFODashboard from "@/components/dashboard/CFODashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
@@ -157,12 +158,12 @@ const AppRoutes = () => {
       />
       
       <Route 
-        path="/epic-chart/:patientId" 
+        path="/patient-chart/:patientId" 
         element={
           <ProtectedRoute>
             <AICopilotProvider>
               <AppLayout>
-                <EpicStylePatientChart />
+                <ComprehensivePatientChart />
               </AppLayout>
             </AICopilotProvider>
           </ProtectedRoute>

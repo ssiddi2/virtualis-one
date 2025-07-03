@@ -23,7 +23,7 @@ const PatientListEnhanced = () => {
   const handleQuickAction = (patientId: string, action: string) => {
     switch (action) {
       case 'chart':
-        navigate(`/epic-chart/${patientId}`);
+        navigate(`/patient-chart/${patientId}`);
         break;
       case 'note':
         navigate(`/documentation/${patientId}`);
@@ -35,7 +35,7 @@ const PatientListEnhanced = () => {
         navigate(`/laboratory?patient=${patientId}`);
         break;
       default:
-        navigate(`/patients/${patientId}`);
+        navigate(`/patient-chart/${patientId}`);
     }
   };
 
@@ -121,7 +121,7 @@ const PatientListEnhanced = () => {
                           size="sm"
                           onClick={() => handleQuickAction(patient.id, 'chart')}
                           className="bg-blue-600 hover:bg-blue-700 text-white p-2"
-                          title="Epic Chart"
+                          title="Patient Chart"
                         >
                           <User className="h-3 w-3" />
                         </Button>

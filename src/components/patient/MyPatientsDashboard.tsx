@@ -33,7 +33,7 @@ const MyPatientsDashboard = () => {
   ];
 
   const handleOpenChart = (patientId: string) => {
-    navigate(`/epic-chart/${patientId}`);
+    navigate(`/patient-chart/${patientId}`);
   };
 
   const handleViewLabs = (patientId: string) => {
