@@ -67,8 +67,8 @@ const MyPatientsDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center clinical-card p-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">My Patients</h1>
-          <p className="text-white/70">Your assigned patients and clinical workflow</p>
+          <h1 className="text-2xl font-semibold text-white">Patient List</h1>
+          <p className="text-white/70">Click any patient to open their chart</p>
         </div>
         <div className="text-right">
           <p className="text-lg font-medium text-white">{myPatients.length} Active Patients</p>
@@ -119,7 +119,7 @@ const MyPatientsDashboard = () => {
       {/* Patient List */}
       <Card className="clinical-card">
         <CardHeader className="pb-3">
-          <CardTitle className="text-white text-sm font-medium">My Patient List</CardTitle>
+          <CardTitle className="text-white text-sm font-medium">Active Patients - Click to Open Chart</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <table className="epic-lab-table">

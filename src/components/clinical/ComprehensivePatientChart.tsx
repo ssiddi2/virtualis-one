@@ -24,7 +24,7 @@ import { useMedications } from '@/hooks/useMedications';
 import { useProblemList } from '@/hooks/useProblemList';
 import { useAllergies } from '@/hooks/useAllergies';
 import { useParams, useNavigate } from 'react-router-dom';
-import EpicLabResultsTable from './EpicLabResultsTable';
+import EpicLabResultsVertical from './EpicLabResultsVertical';
 import EpicClinicalNotes from './EpicClinicalNotes';
 import EpicImagingResults from './EpicImagingResults';
 
@@ -239,7 +239,7 @@ const ComprehensivePatientChart = () => {
           </TabsContent>
 
           <TabsContent value="labs" className="mt-4">
-            <EpicLabResultsTable patientId={patientId} />
+            <EpicLabResultsVertical patientId={patientId} />
           </TabsContent>
 
           <TabsContent value="imaging" className="mt-4">

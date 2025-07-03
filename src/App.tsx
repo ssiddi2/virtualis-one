@@ -25,7 +25,7 @@ import PACSManager from "@/components/radiology/PACSManager";
 import CMSQualityDashboard from "@/components/cms/CMSQualityDashboard";
 import CodingDashboard from "@/components/coding/CodingDashboard";
 import AIDashboard from "@/components/dashboard/AIDashboard";
-import EMRDashboard from "@/components/dashboard/EMRDashboard";
+import EMRDashboard from "@/components/emr/EMRDashboard";
 import EpicStylePatientChart from "@/components/clinical/EpicStylePatientChart";
 import ComprehensivePatientChart from "@/components/clinical/ComprehensivePatientChart";
 import MainDashboard from "@/components/dashboard/MainDashboard";
@@ -96,24 +96,96 @@ const AppRoutes = () => {
         path="/hospital-selection" 
         element={user ? (
           <ProtectedRoute>
-            <AICopilotProvider>
-              <AppLayout>
-                <HospitalSelector onSelectHospital={(hospitalId) => navigate(`/hospital/${hospitalId}`)} />
-              </AppLayout>
-            </AICopilotProvider>
+            <HospitalSelector onSelectHospital={(hospitalId) => navigate(`/emr/${hospitalId}`)} />
           </ProtectedRoute>
         ) : <Navigate to="/login" replace />}
       />
       
-      
-      
+      {/* EMR Dashboard after hospital selection */}
       <Route 
-        path="/hospital/:hospitalId" 
+        path="/emr/:hospitalId" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <EMRDashboard />
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* EMR Module Routes */}
+      <Route 
+        path="/emr/:hospitalId/patients" 
         element={
           <ProtectedRoute>
             <AICopilotProvider>
               <AppLayout>
-                <HospitalDashboard hospitalId="" user={profile || user} onBack={() => {}} />
+                <MyPatients />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/emr/:hospitalId/laboratory" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <EnhancedLISDashboard />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/emr/:hospitalId/radiology" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <PACSManager />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/emr/:hospitalId/documentation" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <ClinicalDocumentation />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/emr/:hospitalId/cpoe" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <EnhancedCPOESystem />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/emr/:hospitalId/clinical" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <Clinical />
               </AppLayout>
             </AICopilotProvider>
           </ProtectedRoute>
