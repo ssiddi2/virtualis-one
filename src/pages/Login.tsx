@@ -11,13 +11,17 @@ const LoginPage = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/my-patients');
     }
   }, [user, navigate]);
 
   const handleLogin = async (email: string, password: string, role: string) => {
     await login(email, password, role);
-    navigate('/dashboard');
+    if (role === 'admin') {
+      navigate('/hospital-selection');
+    } else {
+      navigate('/my-patients');
+    }
   };
 
   return <Login onLogin={handleLogin} />;

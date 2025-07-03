@@ -90,12 +90,16 @@ const PatientListEnhanced = () => {
                   <TableHead className="text-white">MRN</TableHead>
                   <TableHead className="text-white">Room</TableHead>
                   <TableHead className="text-white">Status</TableHead>
-                  <TableHead className="text-white">Clinical Actions</TableHead>
+                  <TableHead className="text-white">Chart Access</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPatients.map((patient) => (
-                  <TableRow key={patient.id} className="border-blue-400/20 hover:bg-blue-500/10">
+                 {filteredPatients.map((patient) => (
+                  <TableRow 
+                    key={patient.id} 
+                    className="border-blue-400/20 hover:bg-blue-500/20 cursor-pointer transition-colors"
+                    onClick={() => handleQuickAction(patient.id, 'chart')}
+                  >
                     <TableCell>
                       <div className="text-white font-medium">
                         {patient.first_name} {patient.last_name}
@@ -116,39 +120,8 @@ const PatientListEnhanced = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button 
-                          size="sm"
-                          onClick={() => handleQuickAction(patient.id, 'chart')}
-                          className="bg-blue-600 hover:bg-blue-700 text-white p-2"
-                          title="Patient Chart"
-                        >
-                          <User className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleQuickAction(patient.id, 'note')}
-                          className="bg-green-600 hover:bg-green-700 text-white p-2"
-                          title="Progress Note"
-                        >
-                          <FileText className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleQuickAction(patient.id, 'cpoe')}
-                          className="bg-purple-600 hover:bg-purple-700 text-white p-2"
-                          title="CPOE Orders"
-                        >
-                          <PlusCircle className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleQuickAction(patient.id, 'labs')}
-                          className="bg-orange-600 hover:bg-orange-700 text-white p-2"
-                          title="Lab Review"
-                        >
-                          <TestTube className="h-3 w-3" />
-                        </Button>
+                      <div className="text-sm text-white/80">
+                        Click anywhere to open chart
                       </div>
                     </TableCell>
                   </TableRow>

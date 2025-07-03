@@ -130,12 +130,16 @@ const MyPatientsDashboard = () => {
                 <th className="text-white">Admission</th>
                 <th className="text-white">Conditions</th>
                 <th className="text-white">Last Note</th>
-                <th className="text-white">Actions</th>
+                <th className="text-white">Chart Access</th>
               </tr>
             </thead>
             <tbody>
               {myPatients.map((patient) => (
-                <tr key={patient.id}>
+                <tr 
+                  key={patient.id} 
+                  className="cursor-pointer hover:bg-white/10 transition-colors"
+                  onClick={() => handleOpenChart(patient.id)}
+                >
                   <td className="text-white">
                     <div className="flex items-center gap-3">
                       <div className={`status-indicator ${getUrgencyColor(patient) === 'bg-red-500' ? 'status-critical' : getUrgencyColor(patient) === 'bg-yellow-500' ? 'status-warning' : 'status-normal'}`}></div>
@@ -185,31 +189,8 @@ const MyPatientsDashboard = () => {
                     })()}
                   </td>
                   <td className="text-white">
-                    <div className="flex gap-1">
-                      <Button 
-                        size="sm"
-                        onClick={() => handleOpenChart(patient.id)}
-                        className="quick-action-btn quick-action-primary p-2"
-                        title="Open Chart"
-                      >
-                        <FileText className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        size="sm"
-                        onClick={() => handleViewLabs(patient.id)}
-                        className="quick-action-btn quick-action-secondary p-2"
-                        title="View Labs"
-                      >
-                        <TestTube className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        size="sm"
-                        onClick={() => handleAddNote(patient.id)}
-                        className="quick-action-btn quick-action-success p-2"
-                        title="Add Note"
-                      >
-                        <Activity className="h-3 w-3" />
-                      </Button>
+                    <div className="text-sm text-white/80">
+                      Click to open chart
                     </div>
                   </td>
                 </tr>

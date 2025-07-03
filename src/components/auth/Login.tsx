@@ -65,7 +65,9 @@ const Login = ({ onLogin }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a1628] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
         {/* Logo and Messaging Section */}
         <div className="flex flex-col items-center text-center space-y-8">
@@ -103,7 +105,7 @@ const Login = ({ onLogin }: LoginProps) => {
 
         {/* Authentication Form Section */}
         <div className="w-full max-w-md mx-auto lg:mx-0">
-          <div className="glass-card p-8">
+          <div className="clinical-card p-8">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="flex items-center gap-2 justify-center mb-4">
@@ -155,7 +157,7 @@ const Login = ({ onLogin }: LoginProps) => {
                       placeholder="First name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="glass-input tech-font h-12"
+                      className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 rounded-lg tech-font h-12"
                       required={!isLogin}
                     />
                   </div>
@@ -167,7 +169,7 @@ const Login = ({ onLogin }: LoginProps) => {
                       placeholder="Last name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="glass-input tech-font h-12"
+                      className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 rounded-lg tech-font h-12"
                       required={!isLogin}
                     />
                   </div>
@@ -184,7 +186,7 @@ const Login = ({ onLogin }: LoginProps) => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="glass-input tech-font pl-10 h-12"
+                    className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 rounded-lg tech-font pl-10 h-12"
                     required
                   />
                 </div>
@@ -200,7 +202,7 @@ const Login = ({ onLogin }: LoginProps) => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="glass-input tech-font pl-10 h-12"
+                    className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 rounded-lg tech-font pl-10 h-12"
                     required
                   />
                 </div>
@@ -209,10 +211,10 @@ const Login = ({ onLogin }: LoginProps) => {
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-white tech-font">Role</Label>
                 <Select value={role} onValueChange={setRole} required>
-                  <SelectTrigger className="glass-input tech-font h-12">
+                  <SelectTrigger className="bg-white/10 border border-white/30 text-white rounded-lg tech-font h-12">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
-                  <SelectContent className="glass-card border-white/20">
+                  <SelectContent className="clinical-card border-white/20">
                     <SelectItem value="physician" className="text-white tech-font">Physician</SelectItem>
                     <SelectItem value="nurse" className="text-white tech-font">Nurse</SelectItem>
                     <SelectItem value="biller" className="text-white tech-font">Billing Manager</SelectItem>
@@ -223,7 +225,7 @@ const Login = ({ onLogin }: LoginProps) => {
 
               <Button 
                 type="submit" 
-                className="w-full glass-button tech-font h-12 text-base font-semibold mt-6"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white tech-font h-12 text-base font-semibold mt-6"
                 disabled={loading}
               >
                 {loading ? (

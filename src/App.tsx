@@ -73,7 +73,9 @@ const AppRoutes = () => {
       <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/my-patients" replace />} />
       
       {/* Redirect root to My Patients - simplified workflow */}
-      <Route path="/" element={user ? <Navigate to="/my-patients" replace /> : <Navigate to="/login" replace />} />
+      <Route path="/" element={user ? (
+        profile?.role === 'admin' ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/my-patients" replace />
+      ) : <Navigate to="/login" replace />} />
       
       {/* Main workflow - My Patients Dashboard */}
       <Route 
