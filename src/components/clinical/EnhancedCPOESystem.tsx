@@ -11,6 +11,7 @@ import LabOrderForm from './LabOrderForm';
 import ImagingOrderForm from './ImagingOrderForm';
 import NursingOrderForm from './NursingOrderForm';
 import OrderSetsLibrary from './OrderSetsLibrary';
+import AIOrderAssistant from './AIOrderAssistant';
 import { 
   Pill, 
   TestTube, 
@@ -19,14 +20,16 @@ import {
   ClipboardList,
   AlertTriangle,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Brain,
+  Sparkles
 } from 'lucide-react';
 
 const EnhancedCPOESystem = () => {
   const { patientId } = useParams<{ patientId: string }>();
   const { profile } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('medications');
+  const [activeTab, setActiveTab] = useState('ai-assistant');
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
 
   // Default values for demo purposes
@@ -34,6 +37,7 @@ const EnhancedCPOESystem = () => {
   const hospitalId = profile?.hospital_id || '';
 
   const orderTypes = [
+    { id: 'ai-assistant', label: 'AI Assistant', icon: Brain, color: 'bg-blue-600' },
     { id: 'medications', label: 'Medications', icon: Pill, color: 'bg-blue-500' },
     { id: 'laboratory', label: 'Laboratory', icon: TestTube, color: 'bg-green-500' },
     { id: 'imaging', label: 'Imaging', icon: Scan, color: 'bg-purple-500' },
@@ -151,6 +155,13 @@ const EnhancedCPOESystem = () => {
           {/* Order Forms */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsContent value="ai-assistant">
+                <AIOrderAssistant
+                  patientId={patientId || ''}
+                  onAcceptSuggestion={(suggestion) => handleOrderSubmit(suggestion, 'AI Suggested')}
+                />
+              </TabsContent>
+              
               <TabsContent value="medications">
                 <MedicationOrderForm
                   patientId={patientId}

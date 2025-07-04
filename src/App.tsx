@@ -28,6 +28,7 @@ import AIDashboard from "@/components/dashboard/AIDashboard";
 import EMRDashboard from "@/components/emr/EMRDashboard";
 import EpicStylePatientChart from "@/components/clinical/EpicStylePatientChart";
 import ComprehensivePatientChart from "@/components/clinical/ComprehensivePatientChart";
+import EpicPatientWorkflowCenter from "@/components/clinical/EpicPatientWorkflowCenter";
 import MainDashboard from "@/components/dashboard/MainDashboard";
 import CFODashboard from "@/components/dashboard/CFODashboard";
 import HospitalDashboard from "@/components/dashboard/HospitalDashboard";
@@ -76,12 +77,10 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public route - Login page (no sidebar) */}
-      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/my-patients" replace />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/hospital-selection" replace />} />
       
-      {/* Redirect root to My Patients - simplified workflow */}
-      <Route path="/" element={user ? (
-        profile?.role === 'admin' ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/my-patients" replace />
-      ) : <Navigate to="/login" replace />} />
+      {/* All authenticated users must select hospital first */}
+      <Route path="/" element={user ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/login" replace />} />
       
       {/* Main workflow - My Patients Dashboard */}
       <Route 
@@ -97,12 +96,12 @@ const AppRoutes = () => {
         } 
       />
       
-      {/* Hospital selection for admin workflow */}
+      {/* Hospital selection - required for ALL users */}
       <Route 
         path="/hospital-selection" 
         element={user ? (
           <ProtectedRoute>
-            <HospitalSelector onSelectHospital={(hospitalId) => navigate(`/emr/${hospitalId}`)} />
+            <HospitalSelector onSelectHospital={(hospitalId) => navigate('/my-patients')} />
           </ProtectedRoute>
         ) : <Navigate to="/login" replace />}
       />
@@ -242,9 +241,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AICopilotProvider>
-              <AppLayout>
-                <ComprehensivePatientChart />
-              </AppLayout>
+              <EpicPatientWorkflowCenter />
             </AICopilotProvider>
           </ProtectedRoute>
         } 

@@ -17,11 +17,8 @@ const LoginPage = () => {
 
   const handleLogin = async (email: string, password: string, role: string) => {
     await login(email, password, role);
-    if (role === 'admin') {
-      navigate('/hospital-selection');
-    } else {
-      navigate('/my-patients');
-    }
+    // ALL users must select hospital first - no exceptions
+    navigate('/hospital-selection');
   };
 
   return <Login onLogin={handleLogin} />;
