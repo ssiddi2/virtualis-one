@@ -5,16 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Hospital, Wifi, Clock, Search, Users, Activity, Brain, Database } from "lucide-react";
+import { Hospital, Wifi, Clock, Search, Users, Activity, Brain, Database, Eye } from "lucide-react";
 import { EnhancedHospital } from "@/types/hospital";
 import { mockHospitals } from "@/data/mockHospitals";
 import { getStatusBadge, getConnectionHealthBadge, getApiHealthBadge } from "@/utils/hospitalHelpers";
+import HospitalDetailsModal from "./HospitalDetailsModal";
 
 const HospitalSelector = ({ onSelectHospital }: { onSelectHospital: (hospitalId: string) => void }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [emrFilter, setEmrFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
+  const [selectedHospital, setSelectedHospital] = useState<EnhancedHospital | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const filteredHospitals = mockHospitals
     .filter(hospital => {
@@ -169,14 +172,27 @@ const HospitalSelector = ({ onSelectHospital }: { onSelectHospital: (hospitalId:
                 </div>
               )}
               
-              <Button 
-                onClick={() => onSelectHospital(hospital.id)}
-                className="w-full virtualis-button"
-                disabled={hospital.status === 'maintenance' || hospital.status === 'offline'}
-              >
-                {hospital.status === 'maintenance' ? 'Under Maintenance' : 
-                 hospital.status === 'offline' ? 'System Offline' : 'Enter Session'}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => {
+                    setSelectedHospital(hospital);
+                    setShowDetailsModal(true);
+                  }}
+                  variant="outline"
+                  className="flex-1 bg-slate-700/50 border-slate-600 text-white hover:bg-slate-600"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Details
+                </Button>
+                <Button 
+                  onClick={() => onSelectHospital(hospital.id)}
+                  className="flex-1 virtualis-button"
+                  disabled={hospital.status === 'maintenance' || hospital.status === 'offline'}
+                >
+                  {hospital.status === 'maintenance' ? 'Maintenance' : 
+                   hospital.status === 'offline' ? 'Offline' : 'Enter'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -189,6 +205,12 @@ const HospitalSelector = ({ onSelectHospital }: { onSelectHospital: (hospitalId:
           <p className="text-slate-500">Try adjusting your search or filter criteria</p>
         </div>
       )}
+
+      <HospitalDetailsModal 
+        hospital={selectedHospital}
+        open={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+      />
     </div>
   );
 };
