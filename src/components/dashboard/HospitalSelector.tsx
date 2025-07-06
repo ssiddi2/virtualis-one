@@ -5,86 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Hospital, Wifi, Clock, Search } from "lucide-react";
-
-interface Hospital {
-  id: string;
-  name: string;
-  location: string;
-  emrType: string;
-  status: 'online' | 'degraded' | 'maintenance';
-  tokenExpiry: string;
-  apiHealth: 'healthy' | 'warning';
-}
-
-const mockHospitals: Hospital[] = [
-  {
-    id: '1',
-    name: 'St. Mary\'s General Hospital',
-    location: 'Downtown Campus',
-    emrType: 'Epic',
-    status: 'online',
-    tokenExpiry: '45 min',
-    apiHealth: 'healthy'
-  },
-  {
-    id: '2',
-    name: 'Regional Medical Center',
-    location: 'North Campus',
-    emrType: 'Cerner',
-    status: 'degraded',
-    tokenExpiry: '4 hrs',
-    apiHealth: 'warning'
-  },
-  {
-    id: '3',
-    name: 'Children\'s Hospital',
-    location: 'Pediatric Wing',
-    emrType: 'Allscripts',
-    status: 'online',
-    tokenExpiry: '2 hrs',
-    apiHealth: 'healthy'
-  },
-  {
-    id: '4',
-    name: 'University Medical',
-    location: 'Teaching Hospital',
-    emrType: 'Epic',
-    status: 'maintenance',
-    tokenExpiry: '1 hr',
-    apiHealth: 'warning'
-  }
-];
+import { Hospital, Wifi, Clock, Search, Users, Activity, Brain, Database } from "lucide-react";
+import { EnhancedHospital } from "@/types/hospital";
+import { mockHospitals } from "@/data/mockHospitals";
+import { getStatusBadge, getConnectionHealthBadge, getApiHealthBadge } from "@/utils/hospitalHelpers";
 
 const HospitalSelector = ({ onSelectHospital }: { onSelectHospital: (hospitalId: string) => void }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [emrFilter, setEmrFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'online':
-        return <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green border-virtualis-alert-green">Online</Badge>;
-      case 'degraded':
-        return <Badge className="bg-virtualis-alert-yellow/20 text-virtualis-alert-yellow border-virtualis-alert-yellow">Degraded</Badge>;
-      case 'maintenance':
-        return <Badge className="bg-virtualis-alert-red/20 text-virtualis-alert-red border-virtualis-alert-red">Maintenance</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
-
-  const getApiHealthBadge = (health: string) => {
-    switch (health) {
-      case 'healthy':
-        return <Badge className="bg-virtualis-alert-green/20 text-virtualis-alert-green border-virtualis-alert-green">Healthy</Badge>;
-      case 'warning':
-        return <Badge className="bg-virtualis-alert-yellow/20 text-virtualis-alert-yellow border-virtualis-alert-yellow">Warning</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
 
   const filteredHospitals = mockHospitals
     .filter(hospital => {
@@ -187,23 +117,65 @@ const HospitalSelector = ({ onSelectHospital }: { onSelectHospital: (hospitalId:
             </CardHeader>
             
             <CardContent className="space-y-4">
+              {/* Basic Metrics Row */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-virtualis-gold" />
+                  <span className="text-slate-300">{hospital.activePatients}/{hospital.totalPatients}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-virtualis-gold" />
+                  <span className="text-slate-300">{hospital.systemLoad}% Load</span>
+                </div>
+              </div>
+
+              {/* Advanced Metrics */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-virtualis-gold" />
                   <span className="text-slate-300">Token: {hospital.tokenExpiry}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Wifi className="h-4 w-4 text-virtualis-gold" />
-                  {getApiHealthBadge(hospital.apiHealth)}
+                  <Database className="h-4 w-4 text-virtualis-gold" />
+                  <span className="text-slate-300">{hospital.uptime}% Uptime</span>
                 </div>
               </div>
+
+              {/* Health Status Row */}
+              <div className="grid grid-cols-2 gap-2">
+                {getConnectionHealthBadge(hospital.connectionHealth)}
+                {getApiHealthBadge(hospital.apiHealth)}
+              </div>
+
+              {/* Virtualis Features */}
+              {hospital.virtualisEnabled && (
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm text-blue-300">
+                    Virtualis AI ({hospital.virtualisFeatures.filter(f => f.enabled).length}/{hospital.virtualisFeatures.length})
+                  </span>
+                  <Badge className="bg-blue-600/20 text-blue-300 border-blue-400/30 text-xs">
+                    Score: {hospital.overallScore}
+                  </Badge>
+                </div>
+              )}
+
+              {/* Alerts */}
+              {hospital.criticalAlerts > 0 && (
+                <div className="bg-red-900/20 border border-red-400/30 rounded p-2">
+                  <span className="text-red-300 text-xs">
+                    {hospital.criticalAlerts} Critical Alert{hospital.criticalAlerts > 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
               
               <Button 
                 onClick={() => onSelectHospital(hospital.id)}
                 className="w-full virtualis-button"
-                disabled={hospital.status === 'maintenance'}
+                disabled={hospital.status === 'maintenance' || hospital.status === 'offline'}
               >
-                {hospital.status === 'maintenance' ? 'Under Maintenance' : 'Enter Session'}
+                {hospital.status === 'maintenance' ? 'Under Maintenance' : 
+                 hospital.status === 'offline' ? 'System Offline' : 'Enter Session'}
               </Button>
             </CardContent>
           </Card>
