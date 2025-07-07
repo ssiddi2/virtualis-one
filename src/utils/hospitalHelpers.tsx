@@ -26,6 +26,16 @@ export const getStatusBadge = (status: HospitalStatus) => {
         <X className="w-3 h-3 mr-1" />
         Offline
       </Badge>;
+    case 'emergency':
+      return <Badge className={`${baseClass} bg-red-700/20 text-red-200 border-red-500/30`}>
+        <AlertTriangle className="w-3 h-3 mr-1 animate-pulse" />
+        Emergency
+      </Badge>;
+    case 'testing':
+      return <Badge className={`${baseClass} bg-purple-600/20 text-purple-300 border-purple-400/30`}>
+        <Settings className="w-3 h-3 mr-1" />
+        Testing
+      </Badge>;
     default:
       return <Badge variant="outline">Unknown</Badge>;
   }
@@ -54,6 +64,11 @@ export const getConnectionHealthBadge = (health: ConnectionHealth) => {
         <Wifi className="w-3 h-3 mr-1" />
         Poor
       </Badge>;
+    case 'critical':
+      return <Badge className={`${baseClass} bg-red-700/20 text-red-200 border-red-500/30`}>
+        <AlertTriangle className="w-3 h-3 mr-1 animate-pulse" />
+        Critical
+      </Badge>;
     default:
       return <Badge variant="outline">Unknown</Badge>;
   }
@@ -72,10 +87,15 @@ export const getApiHealthBadge = (health: APIHealth) => {
         <AlertTriangle className="w-3 h-3 mr-1" />
         Warning
       </Badge>;
-    case 'error':
+    case 'critical':
       return <Badge className={`${baseClass} bg-red-600/20 text-red-300 border-red-400/30`}>
         <X className="w-3 h-3 mr-1" />
-        Error
+        Critical
+      </Badge>;
+    case 'unknown':
+      return <Badge className={`${baseClass} bg-gray-600/20 text-gray-300 border-gray-400/30`}>
+        <X className="w-3 h-3 mr-1" />
+        Unknown
       </Badge>;
     default:
       return <Badge variant="outline">Unknown</Badge>;

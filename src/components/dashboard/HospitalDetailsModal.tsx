@@ -169,8 +169,10 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
           </DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="overview">
-          <TabsList className="grid grid-cols-4 bg-slate-800 mb-4">
+          <TabsList className="grid grid-cols-6 bg-slate-800 mb-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="copilot">AI Copilot</TabsTrigger>
@@ -182,6 +184,107 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
               <MetricCard icon={Activity} label="Uptime" value={`${hospital.uptime}%`} />
               <MetricCard icon={Clock} label="Response Time" value={`${hospital.responseTime}ms`} />
               <MetricCard icon={Shield} label="Data Quality" value={`${hospital.dataQuality}%`} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="system">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">Modules & Integrations</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {hospital.supportedModules?.slice(0, 3).map((module, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <span className="text-white">{module.name}</span>
+                      <div className="flex gap-2">
+                        {getStatusBadge(module.status, module.status)}
+                        <span className="text-slate-400 text-xs">{module.version}</span>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+              
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">AI Capabilities</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {hospital.aiCapabilities?.slice(0, 3).map((ai, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <span className="text-white">{ai.name}</span>
+                      <div className="flex gap-2">
+                        <Badge className={`text-xs ${ai.enabled ? 'bg-green-600/20 text-green-300' : 'bg-gray-600/20 text-gray-300'}`}>
+                          {ai.confidence}% confidence
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">Performance Metrics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {hospital.performanceMetrics?.slice(0, 4).map((metric, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <span className="text-white">{metric.metric}</span>
+                      <div className="flex gap-2 items-center">
+                        <span className="text-virtualis-gold">{metric.value}{metric.unit}</span>
+                        <Badge className={`text-xs ${
+                          metric.status === 'good' ? 'bg-green-600/20 text-green-300' :
+                          metric.status === 'warning' ? 'bg-yellow-600/20 text-yellow-300' :
+                          'bg-red-600/20 text-red-300'
+                        }`}>
+                          {metric.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+              
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">System Health</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white">Backup Status:</span>
+                    <Badge className={`text-xs ${
+                      hospital.backupStatus?.status === 'successful' ? 'bg-green-600/20 text-green-300' :
+                      hospital.backupStatus?.status === 'failed' ? 'bg-red-600/20 text-red-300' :
+                      'bg-yellow-600/20 text-yellow-300'
+                    }`}>
+                      {hospital.backupStatus?.status}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white">DR Status:</span>
+                    <Badge className={`text-xs ${
+                      hospital.disasterRecovery?.status === 'passed' ? 'bg-green-600/20 text-green-300' :
+                      'bg-yellow-600/20 text-yellow-300'
+                    }`}>
+                      {hospital.disasterRecovery?.status}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white">Storage:</span>
+                    <span className="text-virtualis-gold">{hospital.storageUsed}GB / {hospital.storageLimit}GB</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white">Active Users:</span>
+                    <span className="text-virtualis-gold">{hospital.activeUsers} / {hospital.userCount}</span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -199,11 +302,11 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
                   </div>
                   <div className="flex justify-between text-white">
                     <span>Last Audit:</span>
-                    <span>{mockAuditCompliance.lastAudit}</span>
+                    <span>{hospital.auditCompliance?.lastAudit || mockAuditCompliance.lastAudit}</span>
                   </div>
                   <div className="flex justify-between text-white">
                     <span>Score:</span>
-                    <span>{mockAuditCompliance.score}/100</span>
+                    <span>{hospital.auditCompliance?.score || mockAuditCompliance.score}/100</span>
                   </div>
                 </CardContent>
               </Card>
@@ -212,7 +315,7 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
                   <CardTitle className="text-white">Certifications</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {mockCertifications.map((cert, i) => (
+                  {(hospital.certifications && hospital.certifications.length > 0 ? hospital.certifications : mockCertifications).map((cert, i) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span className="text-white">{cert.name}</span>
                       {getStatusBadge(cert.status, cert.status)}
@@ -225,7 +328,15 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
 
           <TabsContent value="contacts">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockContacts.map((c, i) => <ContactCard key={i} contact={c} />)}
+              {(hospital.contacts && hospital.contacts.length > 0 ? hospital.contacts : mockContacts).map((c, i) => (
+                <ContactCard key={i} contact={{
+                  name: c.name,
+                  role: c.role,
+                  email: c.email,
+                  phone: c.phone,
+                  availability: c.availability
+                }} />
+              ))}
             </div>
           </TabsContent>
 
