@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -62,6 +61,12 @@
     --lab-low: 212 95% 68%;
     --lab-normal: 142 76% 36%;
     --lab-critical: 0 100% 50%;
+
+    /* Virtualis brand colors */
+    --virtualis-gold: 42 85% 60%;
+    --virtualis-blue: 212 95% 68%;
+    --virtualis-purple: 260 85% 70%;
+    --virtualis-green: 142 76% 36%;
   }
 }
 
@@ -86,6 +91,38 @@
 
 /* Epic-Style Clinical Components */
 @layer components {
+  /* Virtualis branded components */
+  .virtualis-card {
+    @apply backdrop-blur-xl border rounded-xl text-white transition-smooth shadow-lg;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .virtualis-card:hover {
+    @apply transform -translate-y-1 shadow-xl;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+  }
+
+  .virtualis-button {
+    @apply px-4 py-2 rounded-lg font-medium transition-smooth text-background;
+    background: linear-gradient(135deg, hsl(var(--virtualis-gold)) 0%, hsl(42 80% 55%) 100%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .virtualis-button:hover {
+    @apply transform -translate-y-0.5 shadow-lg;
+    background: linear-gradient(135deg, hsl(42 80% 55%) 0%, hsl(var(--virtualis-gold)) 100%);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .virtualis-modal {
+    @apply backdrop-blur-xl rounded-2xl text-white;
+    background-color: rgba(30, 40, 80, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
   /* Enhanced clinical cards */
   .clinical-card {
     @apply backdrop-blur-xl border rounded-xl text-white transition-smooth shadow-lg;

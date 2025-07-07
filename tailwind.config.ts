@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -26,17 +25,16 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#fbbf24',
-					foreground: '#ffffff'
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				accent: {
-					DEFAULT: '#fbbf24',
-					foreground: '#ffffff',
-					hover: '#f59e0b'
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -76,20 +74,17 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Livemed Brand Colors - Light Theme
-				livemed: {
-					'blue-light': '#4a6fa5',
-					'blue-medium': '#6b8db5', 
-					'blue-accent': '#5a7fb0',
-					'yellow': '#fbbf24',
-					'orange': '#f97316',
-					'glass': 'rgba(96, 140, 190, 0.2)',
-					'glass-border': 'rgba(96, 140, 190, 0.4)',
+				// Virtualis brand colors
+				virtualis: {
+					gold: 'hsl(var(--virtualis-gold))',
+					blue: 'hsl(var(--virtualis-blue))',
+					purple: 'hsl(var(--virtualis-purple))',
+					green: 'hsl(var(--virtualis-green))'
 				}
 			},
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
-				livemed: ['Inter', 'system-ui', 'sans-serif'],
+				virtualis: ['Inter', 'system-ui', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
