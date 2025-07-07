@@ -68,6 +68,7 @@ import { mockHospitals } from '@/data/mockHospitals';
 import { getStatusBadge, getConnectionHealthBadge, getApiHealthBadge } from '@/utils/hospitalHelpers';
 import { useToast } from '@/hooks/use-toast';
 import { HospitalDetailModal } from './HospitalDetailsModal';
+import EMRConnectionModal from '@/components/emr/EMRConnectionModal';
 
 const HospitalSelector: React.FC<HospitalSelectorProps> = ({ 
   onSelectHospital, 
@@ -91,6 +92,8 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(30);
   const [showHospitalDetails, setShowHospitalDetails] = useState<string | null>(null);
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
+  const [selectedHospitalForConnection, setSelectedHospitalForConnection] = useState<EnhancedHospital | null>(null);
 
   // Enhanced mock hospitals
   const enhancedHospitals: EnhancedHospital[] = mockHospitals;
@@ -142,8 +145,25 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
         return newSet;
       });
     } else {
-      onSelectHospital(hospitalId);
+      // Find the selected hospital and show connection modal
+      const hospital = enhancedHospitals.find(h => h.id === hospitalId);
+      if (hospital) {
+        setSelectedHospitalForConnection(hospital);
+        setShowConnectionModal(true);
+      }
     }
+  };
+
+  const handleConnectionComplete = () => {
+    if (selectedHospitalForConnection) {
+      onSelectHospital(selectedHospitalForConnection.id);
+      setSelectedHospitalForConnection(null);
+    }
+  };
+
+  const handleConnectionModalClose = () => {
+    setShowConnectionModal(false);
+    setSelectedHospitalForConnection(null);
   };
 
   const handleConnectionTest = async (hospitalId: string) => {
@@ -682,6 +702,14 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
             setShowHospitalDetails={setShowHospitalDetails}
           />
         ))}
+
+        {/* EMR Connection Modal */}
+        <EMRConnectionModal
+          isOpen={showConnectionModal}
+          onClose={handleConnectionModalClose}
+          hospital={selectedHospitalForConnection}
+          onConnectionComplete={handleConnectionComplete}
+        />
       </div>
     </div>
   );
