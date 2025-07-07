@@ -1,453 +1,314 @@
-import React from "react";
-import {
-  Hospital, Wifi, Clock, Shield, Activity, Users, Brain, Mail, Phone,
-  AlertTriangle, CheckCircle, Settings, ChevronDown
-} from "lucide-react";
-import {
-  Card, CardContent, CardHeader, CardTitle
-} from "@/components/ui/card";
+import React from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { EnhancedHospital } from "@/types/hospital";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Hospital, 
+  Users, 
+  Activity, 
+  Clock, 
+  Shield, 
+  Brain, 
+  CheckCircle, 
+  X, 
+  TrendingUp, 
+  TrendingDown, 
+  Mail, 
+  Phone 
+} from 'lucide-react';
+import { EnhancedHospital } from '@/types/hospital';
 
-// Reusable Badge Generator
-const getStatusBadge = (label: string, status: string) => {
-  const colors: Record<string, string> = {
-    online: 'bg-green-600/20 text-green-300 border-green-400/30',
-    degraded: 'bg-yellow-600/20 text-yellow-300 border-yellow-400/30',
-    offline: 'bg-red-600/20 text-red-300 border-red-400/30',
-    maintenance: 'bg-blue-600/20 text-blue-300 border-blue-400/30',
-    default: 'bg-slate-600/20 text-slate-300 border-slate-400/30'
-  }
-  return <Badge className={`${colors[status] || colors.default} px-2 py-1 rounded-full text-xs font-medium border`}>{label}</Badge>
+interface HospitalDetailModalProps {
+  hospital: EnhancedHospital;
+  showHospitalDetails: string | null;
+  setShowHospitalDetails: (id: string | null) => void;
 }
 
-interface MetricCardProps {
-  icon: React.ElementType;
-  label: string;
-  value: string | number;
-}
-
-const MetricCard: React.FC<MetricCardProps> = ({ icon: Icon, label, value }) => (
-  <Card className="virtualis-card">
-    <CardContent className="p-4 text-center">
-      <Icon className="h-6 w-6 mx-auto mb-2 text-virtualis-gold" />
-      <div className="text-2xl font-bold text-white">{value}</div>
-      <div className="text-xs text-slate-400">{label}</div>
-    </CardContent>
-  </Card>
-)
-
-interface ContactCardProps {
-  contact: {
-    name: string;
-    role: string;
-    email: string;
-    phone: string;
-    availability: string;
-  };
-}
-
-const ContactCard: React.FC<ContactCardProps> = ({ contact }) => (
-  <Card className="virtualis-card">
-    <CardContent className="p-4">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 bg-virtualis-gold/20 rounded-full flex items-center justify-center">
-          <Users className="h-5 w-5 text-virtualis-gold" />
-        </div>
-        <div>
-          <div className="text-white font-medium">{contact.name}</div>
-          <div className="text-slate-400 text-sm">{contact.role}</div>
-        </div>
-      </div>
-      <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 text-white">
-          <Mail className="h-3 w-3 text-slate-400" /> {contact.email}
-        </div>
-        <div className="flex items-center gap-2 text-white">
-          <Phone className="h-3 w-3 text-slate-400" /> {contact.phone}
-        </div>
-        <div className="flex items-center gap-2 text-white">
-          <Clock className="h-3 w-3 text-slate-400" /> {contact.availability}
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-)
-
-interface AICopilotPanelProps {
-  aiData?: {
-    summary?: string;
-    orders?: string[];
-  };
-}
-
-const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ aiData }) => (
-  <Card className="virtualis-card">
-    <CardHeader>
-      <CardTitle className="text-white text-lg flex items-center gap-2">
-        <Brain className="h-5 w-5 text-purple-400" /> Virtualis AI Copilot
-      </CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-2 text-sm text-white/80">
-      {aiData?.summary && (
-        <div className="text-white">
-          <p className="font-medium">Suggested Note:</p>
-          <p className="text-sm italic">"{aiData.summary}"</p>
-        </div>
-      )}
-      {aiData?.orders && (
-        <div>
-          <p className="font-medium">Suggested Orders:</p>
-          <ul className="list-disc list-inside">
-            {aiData.orders.map((order, i) => <li key={i}>{order}</li>)}
-          </ul>
-        </div>
-      )}
-    </CardContent>
-  </Card>
-)
-
-interface HospitalDetailsModalProps {
-  hospital: EnhancedHospital | null;
-  open: boolean;
-  onClose: () => void;
-}
-
-const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, open, onClose }) => {
-  if (!hospital) return null;
-
-  // Mock data for features not in the current hospital type
-  const mockContacts = [
-    {
-      name: "Dr. Sarah Johnson",
-      role: "Chief Medical Officer",
-      email: "sarah.johnson@hospital.org",
-      phone: "(555) 123-4567",
-      availability: "24/7 On-Call"
-    },
-    {
-      name: "Mark Thompson",
-      role: "IT Director",
-      email: "mark.thompson@hospital.org", 
-      phone: "(555) 234-5678",
-      availability: "Mon-Fri 8AM-6PM"
-    }
-  ];
-
-  const mockCertifications = [
-    { name: "HIPAA Compliance", status: "online" },
-    { name: "SOC 2 Type II", status: "online" },
-    { name: "HITECH Compliance", status: "online" }
-  ];
-
-  const mockAuditCompliance = {
-    lastAudit: "2024-01-15",
-    score: 95
-  };
-
-  const mockAIData = {
-    summary: "High-performing facility with excellent patient outcomes. AI suggests optimizing workflow during peak hours.",
-    orders: [
-      "Schedule maintenance during low-traffic periods",
-      "Increase staffing for evening shifts",
-      "Review medication dispensing protocols"
-    ]
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl virtualis-modal">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Hospital className="h-5 w-5 text-virtualis-gold" /> {hospital.name}
-            {getStatusBadge(hospital.status, hospital.status)}
-          </DialogTitle>
-        </DialogHeader>
-        <Tabs defaultValue="overview">
-          <TabsList className="grid grid-cols-6 bg-slate-800 mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="contacts">Contacts</TabsTrigger>
-            <TabsTrigger value="copilot">AI Copilot</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <MetricCard icon={Users} label="Active Patients" value={hospital.activePatients} />
-              <MetricCard icon={Activity} label="Uptime" value={`${hospital.uptime}%`} />
-              <MetricCard icon={Clock} label="Response Time" value={`${hospital.responseTime}ms`} />
-              <MetricCard icon={Shield} label="Data Quality" value={`${hospital.dataQuality}%`} />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="system">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">Virtualis Features</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {hospital.virtualisFeatures?.map((feature, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span className="text-white">{feature.name}</span>
-                      <div className="flex gap-2 items-center">
-                        <Badge className={`text-xs ${feature.enabled ? 'bg-green-600/20 text-green-300' : 'bg-gray-600/20 text-gray-300'}`}>
-                          {feature.usage}% usage
-                        </Badge>
-                        <span className="text-slate-400 text-xs">v{feature.version}</span>
-                      </div>
+export const HospitalDetailModal: React.FC<HospitalDetailModalProps> = ({ 
+  hospital, 
+  showHospitalDetails, 
+  setShowHospitalDetails 
+}) => (
+  <Dialog open={showHospitalDetails === hospital.id} onOpenChange={() => setShowHospitalDetails(null)}>
+    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700 text-white">
+      <DialogHeader>
+        <DialogTitle className="text-2xl flex items-center gap-3">
+          <Hospital className="h-6 w-6 text-yellow-400" />
+          {hospital.name}
+        </DialogTitle>
+        <DialogDescription className="text-slate-300">
+          {hospital.location} • {hospital.address}, {hospital.city}, {hospital.state} {hospital.zipCode}
+        </DialogDescription>
+      </DialogHeader>
+      
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 bg-slate-800">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="virtualis">Virtualis AI</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="contacts">Contacts</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-4 text-center">
+                <Users className="h-6 w-6 mx-auto mb-2 text-blue-400" />
+                <div className="text-2xl font-bold text-white">{hospital.activePatients}</div>
+                <div className="text-xs text-slate-400">Active Patients</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-4 text-center">
+                <Activity className="h-6 w-6 mx-auto mb-2 text-green-400" />
+                <div className="text-2xl font-bold text-white">{hospital.uptime}%</div>
+                <div className="text-xs text-slate-400">Uptime</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-4 text-center">
+                <Clock className="h-6 w-6 mx-auto mb-2 text-yellow-400" />
+                <div className="text-2xl font-bold text-white">{hospital.responseTime}ms</div>
+                <div className="text-xs text-slate-400">Response Time</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-4 text-center">
+                <Shield className="h-6 w-6 mx-auto mb-2 text-purple-400" />
+                <div className="text-2xl font-bold text-white">{hospital.dataQuality}%</div>
+                <div className="text-xs text-slate-400">Data Quality</div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">System Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">EMR System:</span>
+                  <span className="text-white font-medium">{hospital.emrType} {hospital.emrVersion}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Authentication:</span>
+                  <span className="text-white">{hospital.authMethod}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">FHIR Version:</span>
+                  <span className="text-white">{hospital.fhirVersion || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Last Sync:</span>
+                  <span className="text-white">{hospital.lastSync}</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">Resource Usage</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-400">CPU Usage</span>
+                    <span className="text-white">{hospital.systemLoad}%</span>
+                  </div>
+                  <Progress value={hospital.systemLoad} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-400">Storage</span>
+                    <span className="text-white">{hospital.storageUsed}TB / {hospital.storageLimit}TB</span>
+                  </div>
+                  <Progress value={(hospital.storageUsed / hospital.storageLimit) * 100} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-400">Users</span>
+                    <span className="text-white">{hospital.activeUsers} / {hospital.userCount}</span>
+                  </div>
+                  <Progress value={(hospital.activeUsers / hospital.userCount) * 100} className="h-2" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="performance" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {hospital.performanceMetrics.map((metric, index) => (
+              <Card key={index} className="bg-slate-800 border-slate-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-slate-400 text-sm">{metric.metric}</span>
+                    <div className="flex items-center gap-1">
+                      {metric.trend === 'up' && <TrendingUp className="h-3 w-3 text-green-400" />}
+                      {metric.trend === 'down' && <TrendingDown className="h-3 w-3 text-red-400" />}
+                      {metric.trend === 'stable' && <div className="h-3 w-3 rounded-full bg-yellow-400" />}
                     </div>
-                  ))}
+                  </div>
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {metric.value} {metric.unit}
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    Benchmark: {metric.benchmark} {metric.unit}
+                  </div>
+                  <Badge className={
+                    metric.status === 'good' ? 'bg-green-600/20 text-green-300' :
+                    metric.status === 'warning' ? 'bg-yellow-600/20 text-yellow-300' :
+                    'bg-red-600/20 text-red-300'
+                  }>
+                    {metric.status}
+                  </Badge>
                 </CardContent>
               </Card>
-              
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">AI Capabilities</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {hospital.aiCapabilities?.map((ai, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span className="text-white">{ai.name}</span>
-                      <div className="flex gap-2">
-                        <Badge className={`text-xs ${ai.enabled ? 'bg-green-600/20 text-green-300' : 'bg-gray-600/20 text-gray-300'}`}>
-                          {ai.confidence}% confidence
-                        </Badge>
-                      </div>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="virtualis" className="space-y-4">
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-400" />
+                Virtualis AI Status
+                {hospital.virtualisEnabled ? (
+                  <Badge className="bg-green-600/20 text-green-300 border-green-400/30">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Enabled
+                  </Badge>
+                ) : (
+                  <Badge className="bg-red-600/20 text-red-300 border-red-400/30">
+                    <X className="w-3 h-3 mr-1" />
+                    Disabled
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {hospital.virtualisFeatures.map((feature, index) => (
+                  <div key={index} className="bg-slate-700 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-medium">{feature.name}</span>
+                      <Badge className={
+                        feature.status === 'active' ? 'bg-green-600/20 text-green-300' :
+                        feature.status === 'updating' ? 'bg-yellow-600/20 text-yellow-300' :
+                        'bg-gray-600/20 text-gray-300'
+                      }>
+                        {feature.status}
+                      </Badge>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">Supported Modules</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {hospital.supportedModules?.map((module, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span className="text-white">{module.name}</span>
-                      <div className="flex gap-2">
-                        {getStatusBadge(module.status, module.status)}
-                        <span className="text-slate-400 text-xs">{module.version}</span>
-                      </div>
+                    <div className="text-sm text-slate-400 mb-2">
+                      Version: {feature.version} • Updated: {feature.lastUpdate}
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-              
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">Integrations</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {hospital.integrations?.map((integration, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span className="text-white">{integration.system}</span>
-                      <div className="flex gap-2">
-                        {getStatusBadge(integration.status, integration.status)}
-                        <span className="text-slate-400 text-xs">{integration.recordCount.toLocaleString()}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">Usage:</span>
+                      <div className="flex-1">
+                        <Progress value={feature.usage} className="h-2" />
                       </div>
+                      <span className="text-xs text-white">{feature.usage}%</span>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="performance">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">Performance Metrics</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {hospital.performanceMetrics?.map((metric, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span className="text-white">{metric.metric}</span>
-                      <div className="flex gap-2 items-center">
-                        <span className="text-virtualis-gold">{metric.value}{metric.unit}</span>
-                        <Badge className={`text-xs ${
-                          metric.status === 'good' ? 'bg-green-600/20 text-green-300' :
-                          metric.status === 'warning' ? 'bg-yellow-600/20 text-yellow-300' :
-                          'bg-red-600/20 text-red-300'
-                        }`}>
-                          {metric.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-              
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">System Requirements</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {hospital.systemRequirements?.map((req, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm">
-                      <span className="text-white">{req.component}</span>
-                      <div className="flex gap-2 items-center">
-                        <span className="text-virtualis-gold">{req.current}</span>
-                        <Badge className={`text-xs ${
-                          req.status === 'met' ? 'bg-green-600/20 text-green-300' :
-                          req.status === 'warning' ? 'bg-yellow-600/20 text-yellow-300' :
-                          'bg-red-600/20 text-red-300'
-                        }`}>
-                          {req.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">System Health</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="security" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white">Security Level</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge className={
+                  hospital.securityLevel === 'high' ? 'bg-green-600/20 text-green-300' :
+                  hospital.securityLevel === 'medium' ? 'bg-yellow-600/20 text-yellow-300' :
+                  'bg-red-600/20 text-red-300'
+                }>
+                  {hospital.securityLevel.toUpperCase()}
+                </Badge>
+                <div className="mt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-white">Backup Status:</span>
-                    <Badge className={`text-xs ${
-                      hospital.backupStatus?.status === 'successful' ? 'bg-green-600/20 text-green-300' :
-                      hospital.backupStatus?.status === 'failed' ? 'bg-red-600/20 text-red-300' :
+                    <span className="text-slate-400">Compliance Status:</span>
+                    <span className="text-white">{hospital.complianceStatus}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Last Audit:</span>
+                    <span className="text-white">{hospital.auditCompliance.lastAudit}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Audit Score:</span>
+                    <span className="text-white">{hospital.auditCompliance.score}/100</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white">Certifications</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {hospital.certifications.map((cert, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-white text-sm">{cert.name}</span>
+                    <Badge className={
+                      cert.status === 'active' ? 'bg-green-600/20 text-green-300' :
+                      cert.status === 'expired' ? 'bg-red-600/20 text-red-300' :
                       'bg-yellow-600/20 text-yellow-300'
-                    }`}>
-                      {hospital.backupStatus?.status}
+                    }>
+                      {cert.status}
                     </Badge>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white">DR Status:</span>
-                    <Badge className={`text-xs ${
-                      hospital.disasterRecovery?.status === 'passed' ? 'bg-green-600/20 text-green-300' :
-                      'bg-yellow-600/20 text-yellow-300'
-                    }`}>
-                      {hospital.disasterRecovery?.status}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white">Storage:</span>
-                    <span className="text-virtualis-gold">{hospital.storageUsed}TB / {hospital.storageLimit}TB</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white">Active Users:</span>
-                    <span className="text-virtualis-gold">{hospital.activeUsers} / {hospital.userCount}</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">Recommendations & Issues</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  {hospital.recommendations?.length > 0 && (
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="contacts" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {hospital.contacts.map((contact, index) => (
+              <Card key={index} className="bg-slate-800 border-slate-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-blue-600/20 rounded-full flex items-center justify-center">
+                      <Users className="h-5 w-5 text-blue-400" />
+                    </div>
                     <div>
-                      <p className="text-blue-300 font-medium mb-2">Recommendations:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        {hospital.recommendations.map((rec, i) => (
-                          <li key={i} className="text-blue-200">{rec}</li>
-                        ))}
-                      </ul>
+                      <div className="text-white font-medium">{contact.name}</div>
+                      <div className="text-slate-400 text-sm">{contact.role}</div>
                     </div>
-                  )}
-                  {hospital.warnings?.length > 0 && (
-                    <div>
-                      <p className="text-yellow-300 font-medium mb-2">Warnings:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        {hospital.warnings.map((warning, i) => (
-                          <li key={i} className="text-yellow-200">{warning}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {hospital.criticalIssues?.length > 0 && (
-                    <div>
-                      <p className="text-red-300 font-medium mb-2">Critical Issues:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        {hospital.criticalIssues.map((issue, i) => (
-                          <li key={i} className="text-red-200">{issue}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="security">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">Security & Compliance</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  {getStatusBadge(hospital.securityLevel, hospital.securityLevel)}
-                  <div className="flex justify-between text-white">
-                    <span>Compliance:</span>
-                    <span>{hospital.complianceStatus}</span>
                   </div>
-                  <div className="flex justify-between text-white">
-                    <span>Last Audit:</span>
-                    <span>{hospital.auditCompliance?.lastAudit || mockAuditCompliance.lastAudit}</span>
-                  </div>
-                  <div className="flex justify-between text-white">
-                    <span>Score:</span>
-                    <span>{hospital.auditCompliance?.score || mockAuditCompliance.score}/100</span>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-3 w-3 text-slate-400" />
+                      <span className="text-white">{contact.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-3 w-3 text-slate-400" />
+                      <span className="text-white">{contact.phone}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3 text-slate-400" />
+                      <span className="text-white">{contact.availability}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="virtualis-card">
-                <CardHeader>
-                  <CardTitle className="text-white">Certifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {(hospital.certifications && hospital.certifications.length > 0 ? hospital.certifications : mockCertifications).map((cert, i) => (
-                    <div key={i} className="flex justify-between text-sm">
-                      <span className="text-white">{cert.name}</span>
-                      {getStatusBadge(cert.status, cert.status)}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="contacts">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(hospital.contacts && hospital.contacts.length > 0 ? hospital.contacts : mockContacts).map((c, i) => (
-                <ContactCard key={i} contact={{
-                  name: c.name,
-                  role: c.role,
-                  email: c.email,
-                  phone: c.phone,
-                  availability: c.availability
-                }} />
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="copilot">
-            <AICopilotPanel aiData={mockAIData} />
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-export default HospitalDetailsModal;
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </DialogContent>
+  </Dialog>
+);

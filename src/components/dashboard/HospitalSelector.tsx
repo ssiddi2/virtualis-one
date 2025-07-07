@@ -67,6 +67,7 @@ import { HospitalSelectorProps, EnhancedHospital } from '@/types/hospital';
 import { mockHospitals } from '@/data/mockHospitals';
 import { getStatusBadge, getConnectionHealthBadge, getApiHealthBadge } from '@/utils/hospitalHelpers';
 import { useToast } from '@/hooks/use-toast';
+import { HospitalDetailModal } from './HospitalDetailsModal';
 
 const HospitalSelector: React.FC<HospitalSelectorProps> = ({ 
   onSelectHospital, 
@@ -314,118 +315,15 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
             {showConnectionTest[hospital.id] ? 'Testing...' : 'Test'}
           </Button>
           
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline"
-                size="sm"
-                className="flex-1 bg-slate-700/50 border-slate-600 text-white hover:bg-slate-600"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Details
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="virtualis-modal max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-white">{hospital.name} - Detailed Information</DialogTitle>
-                <DialogDescription className="text-slate-300">
-                  Comprehensive hospital system status and metrics
-                </DialogDescription>
-              </DialogHeader>
-              
-              <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="performance">Performance</TabsTrigger>
-                  <TabsTrigger value="ai">AI Features</TabsTrigger>
-                  <TabsTrigger value="security">Security</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="overview" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <h4 className="text-white font-medium">Basic Information</h4>
-                      <div className="space-y-1 text-sm text-slate-300">
-                        <p><span className="text-slate-400">Location:</span> {hospital.address}</p>
-                        <p><span className="text-slate-400">Phone:</span> {hospital.phone}</p>
-                        <p><span className="text-slate-400">Email:</span> {hospital.email}</p>
-                        <p><span className="text-slate-400">EMR Version:</span> {hospital.emrType} {hospital.emrVersion}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="text-white font-medium">System Status</h4>
-                      <div className="space-y-2">
-                        {getStatusBadge(hospital.status)}
-                        {getConnectionHealthBadge(hospital.connectionHealth)}
-                        {getApiHealthBadge(hospital.apiHealth)}
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="performance" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    {hospital.performanceMetrics.map((metric, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-300">{metric.metric}</span>
-                          <span className="text-white">{metric.value}{metric.unit}</span>
-                        </div>
-                        <Progress 
-                          value={metric.status === 'good' ? 80 : metric.status === 'warning' ? 60 : 30} 
-                          className="h-2" 
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="ai" className="space-y-4">
-                  <div className="space-y-4">
-                    <h4 className="text-white font-medium">Virtualis AI Features</h4>
-                    {hospital.virtualisFeatures.map((feature, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
-                        <div>
-                          <p className="text-white text-sm font-medium">{feature.name}</p>
-                          <p className="text-slate-400 text-xs">v{feature.version} - Usage: {feature.usage}%</p>
-                        </div>
-                        <Badge className={feature.enabled ? "bg-green-600/20 text-green-300" : "bg-gray-600/20 text-gray-400"}>
-                          {feature.enabled ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="security" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <h4 className="text-white font-medium">Security Level</h4>
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-virtualis-gold" />
-                        <span className="text-slate-300 capitalize">{hospital.securityLevel}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="text-white font-medium">Compliance</h4>
-                      <div className="space-y-1">
-                        {hospital.certifications.map((cert, index) => (
-                          <div key={index} className="flex justify-between text-sm">
-                            <span className="text-slate-300">{cert.name}</span>
-                            <Badge className={cert.status === 'active' ? "bg-green-600/20 text-green-300" : "bg-red-600/20 text-red-300"}>
-                              {cert.status}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={() => setShowHospitalDetails(hospital.id)}
+            variant="outline"
+            size="sm"
+            className="flex-1 bg-slate-700/50 border-slate-600 text-white hover:bg-slate-600"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Details
+          </Button>
           
           <Button 
             onClick={() => handleHospitalSelect(hospital.id)}
@@ -562,6 +460,15 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
             }
           </p>
         </div>
+      )}
+
+      {/* Hospital Detail Modal */}
+      {showHospitalDetails && (
+        <HospitalDetailModal
+          hospital={enhancedHospitals.find(h => h.id === showHospitalDetails)!}
+          showHospitalDetails={showHospitalDetails}
+          setShowHospitalDetails={setShowHospitalDetails}
+        />
       )}
     </div>
   );
