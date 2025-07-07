@@ -36,6 +36,11 @@ export const getStatusBadge = (status: HospitalStatus) => {
         <Settings className="w-3 h-3 mr-1" />
         Testing
       </Badge>;
+    case 'emergency':
+      return <Badge className={`${baseClass} bg-red-700/20 text-red-200 border-red-500/30`}>
+        <AlertTriangle className="w-3 h-3 mr-1 animate-pulse" />
+        Emergency
+      </Badge>;
     default:
       return <Badge variant="outline">Unknown</Badge>;
   }

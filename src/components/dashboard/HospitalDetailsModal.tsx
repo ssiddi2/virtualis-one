@@ -188,13 +188,52 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
           </TabsContent>
 
           <TabsContent value="system">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">Virtualis Features</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {hospital.virtualisFeatures?.map((feature, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <span className="text-white">{feature.name}</span>
+                      <div className="flex gap-2 items-center">
+                        <Badge className={`text-xs ${feature.enabled ? 'bg-green-600/20 text-green-300' : 'bg-gray-600/20 text-gray-300'}`}>
+                          {feature.usage}% usage
+                        </Badge>
+                        <span className="text-slate-400 text-xs">v{feature.version}</span>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+              
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">AI Capabilities</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {hospital.aiCapabilities?.map((ai, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <span className="text-white">{ai.name}</span>
+                      <div className="flex gap-2">
+                        <Badge className={`text-xs ${ai.enabled ? 'bg-green-600/20 text-green-300' : 'bg-gray-600/20 text-gray-300'}`}>
+                          {ai.confidence}% confidence
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="virtualis-card">
                 <CardHeader>
-                  <CardTitle className="text-white">Modules & Integrations</CardTitle>
+                  <CardTitle className="text-white">Supported Modules</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {hospital.supportedModules?.slice(0, 3).map((module, i) => (
+                  {hospital.supportedModules?.map((module, i) => (
                     <div key={i} className="flex justify-between items-center text-sm">
                       <span className="text-white">{module.name}</span>
                       <div className="flex gap-2">
@@ -208,16 +247,15 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
               
               <Card className="virtualis-card">
                 <CardHeader>
-                  <CardTitle className="text-white">AI Capabilities</CardTitle>
+                  <CardTitle className="text-white">Integrations</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {hospital.aiCapabilities?.slice(0, 3).map((ai, i) => (
+                  {hospital.integrations?.map((integration, i) => (
                     <div key={i} className="flex justify-between items-center text-sm">
-                      <span className="text-white">{ai.name}</span>
+                      <span className="text-white">{integration.system}</span>
                       <div className="flex gap-2">
-                        <Badge className={`text-xs ${ai.enabled ? 'bg-green-600/20 text-green-300' : 'bg-gray-600/20 text-gray-300'}`}>
-                          {ai.confidence}% confidence
-                        </Badge>
+                        {getStatusBadge(integration.status, integration.status)}
+                        <span className="text-slate-400 text-xs">{integration.recordCount.toLocaleString()}</span>
                       </div>
                     </div>
                   ))}
@@ -227,13 +265,13 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
           </TabsContent>
 
           <TabsContent value="performance">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <Card className="virtualis-card">
                 <CardHeader>
                   <CardTitle className="text-white">Performance Metrics</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {hospital.performanceMetrics?.slice(0, 4).map((metric, i) => (
+                  {hospital.performanceMetrics?.map((metric, i) => (
                     <div key={i} className="flex justify-between items-center text-sm">
                       <span className="text-white">{metric.metric}</span>
                       <div className="flex gap-2 items-center">
@@ -251,6 +289,31 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
                 </CardContent>
               </Card>
               
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">System Requirements</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {hospital.systemRequirements?.map((req, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <span className="text-white">{req.component}</span>
+                      <div className="flex gap-2 items-center">
+                        <span className="text-virtualis-gold">{req.current}</span>
+                        <Badge className={`text-xs ${
+                          req.status === 'met' ? 'bg-green-600/20 text-green-300' :
+                          req.status === 'warning' ? 'bg-yellow-600/20 text-yellow-300' :
+                          'bg-red-600/20 text-red-300'
+                        }`}>
+                          {req.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="virtualis-card">
                 <CardHeader>
                   <CardTitle className="text-white">System Health</CardTitle>
@@ -277,12 +340,50 @@ const HospitalDetailsModal: React.FC<HospitalDetailsModalProps> = ({ hospital, o
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-white">Storage:</span>
-                    <span className="text-virtualis-gold">{hospital.storageUsed}GB / {hospital.storageLimit}GB</span>
+                    <span className="text-virtualis-gold">{hospital.storageUsed}TB / {hospital.storageLimit}TB</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-white">Active Users:</span>
                     <span className="text-virtualis-gold">{hospital.activeUsers} / {hospital.userCount}</span>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card className="virtualis-card">
+                <CardHeader>
+                  <CardTitle className="text-white">Recommendations & Issues</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  {hospital.recommendations?.length > 0 && (
+                    <div>
+                      <p className="text-blue-300 font-medium mb-2">Recommendations:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        {hospital.recommendations.map((rec, i) => (
+                          <li key={i} className="text-blue-200">{rec}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {hospital.warnings?.length > 0 && (
+                    <div>
+                      <p className="text-yellow-300 font-medium mb-2">Warnings:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        {hospital.warnings.map((warning, i) => (
+                          <li key={i} className="text-yellow-200">{warning}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {hospital.criticalIssues?.length > 0 && (
+                    <div>
+                      <p className="text-red-300 font-medium mb-2">Critical Issues:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        {hospital.criticalIssues.map((issue, i) => (
+                          <li key={i} className="text-red-200">{issue}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

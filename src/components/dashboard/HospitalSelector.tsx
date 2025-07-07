@@ -151,13 +151,23 @@ const HospitalSelector = ({ onSelectHospital }: { onSelectHospital: (hospitalId:
               </div>
 
               {/* Virtualis Features */}
-              {hospital.virtualisEnabled && (
+              {hospital.virtualisEnabled ? (
                 <div className="flex items-center gap-2">
                   <Brain className="h-4 w-4 text-blue-400" />
                   <span className="text-sm text-blue-300">
                     Virtualis AI ({hospital.virtualisFeatures.filter(f => f.enabled).length}/{hospital.virtualisFeatures.length})
                   </span>
                   <Badge className="bg-blue-600/20 text-blue-300 border-blue-400/30 text-xs">
+                    Score: {hospital.overallScore}
+                  </Badge>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-400">
+                    Virtualis AI Disabled
+                  </span>
+                  <Badge className="bg-gray-600/20 text-gray-400 border-gray-500/30 text-xs">
                     Score: {hospital.overallScore}
                   </Badge>
                 </div>
