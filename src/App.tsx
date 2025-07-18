@@ -10,6 +10,7 @@ import Index from "@/pages/Index";
 import Patients from "@/pages/Patients";
 import MyPatients from "@/pages/MyPatients";
 import Clinical from "@/pages/Clinical";
+import CPOE from "@/pages/CPOE";
 import Demo from "@/pages/Demo";
 import Settings from "@/pages/Settings";
 import Tasks from "@/pages/Tasks";
@@ -314,12 +315,12 @@ const AppRoutes = () => {
       />
       
       <Route 
-        path="/documentation" 
+        path="/cpoe" 
         element={
           <ProtectedRoute>
             <AICopilotProvider>
               <AppLayout>
-                <ClinicalDocumentation />
+                <CPOE />
               </AppLayout>
             </AICopilotProvider>
           </ProtectedRoute>

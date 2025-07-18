@@ -1,5 +1,5 @@
 
-import { Home, Users, FileText, Calendar, Settings, Activity, TestTube, Zap, Hospital, DollarSign, BarChart3, MessageSquare, Brain, User, Stethoscope } from "lucide-react"
+import { Home, Users, FileText, Calendar, Settings, Activity, TestTube, Zap, Hospital, DollarSign, BarChart3, MessageSquare, Brain, User, Stethoscope, PlusCircle, ClipboardList } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import {
   Sidebar,
@@ -13,7 +13,7 @@ import {
   useSidebar
 } from "@/components/ui/sidebar"
 
-// Main clinical workflow items
+// Primary clinical workflow items
 const clinicalItems = [
   {
     title: "My Patients",
@@ -26,10 +26,19 @@ const clinicalItems = [
     icon: Activity,
   },
   {
-    title: "Documentation",
-    url: "/documentation",
-    icon: FileText,
+    title: "CPOE System",
+    url: "/cpoe",
+    icon: PlusCircle,
   },
+  {
+    title: "All Patients",
+    url: "/patients",
+    icon: Users,
+  },
+]
+
+// Secondary clinical tools
+const clinicalToolsItems = [
   {
     title: "Laboratory",
     url: "/laboratory",
@@ -39,6 +48,11 @@ const clinicalItems = [
     title: "Radiology",
     url: "/radiology",
     icon: Zap,
+  },
+  {
+    title: "Clinical Tools",
+    url: "/clinical",
+    icon: Stethoscope,
   },
 ]
 
@@ -53,11 +67,6 @@ const adminItems = [
     title: "Main Dashboard",
     url: "/dashboard",
     icon: Home,
-  },
-  {
-    title: "All Patients",
-    url: "/patients",
-    icon: Users,
   },
   {
     title: "Billing",
@@ -87,11 +96,6 @@ const toolsItems = [
     title: "Virtualis Chat",
     url: "/virtualis-chat",
     icon: MessageSquare,
-  },
-  {
-    title: "Clinical Tools",
-    url: "/clinical",
-    icon: Stethoscope,
   },
 ]
 
@@ -141,6 +145,27 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
+          <SidebarGroupLabel className="text-slate-300">Clinical Tools</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {clinicalToolsItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`${isActive(item.url) ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+                  >
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel className="text-slate-300">Administration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -162,7 +187,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-slate-300">AI & Tools</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-slate-300">AI & Communication</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {toolsItems.map((item) => (
