@@ -1,5 +1,5 @@
 
-import { Home, Users, FileText, Calendar, Settings, Activity, TestTube, Zap, Hospital, DollarSign, BarChart3, MessageSquare, Brain, User, Stethoscope, PlusCircle, ClipboardList } from "lucide-react"
+import { Home, Users, FileText, Calendar, Settings, Activity, TestTube, Zap, Hospital, DollarSign, BarChart3, MessageSquare, Brain, User, Stethoscope, PlusCircle, ClipboardList, Shield } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import {
   Sidebar,
@@ -53,6 +53,11 @@ const clinicalToolsItems = [
     title: "Clinical Tools",
     url: "/clinical",
     icon: Stethoscope,
+  },
+  {
+    title: "EMR Certification",
+    url: "/certification",
+    icon: Shield,
   },
 ]
 

@@ -15,6 +15,7 @@ import Demo from "@/pages/Demo";
 import Settings from "@/pages/Settings";
 import Tasks from "@/pages/Tasks";
 import VirtualisChat from "@/pages/VirtualisChat";
+import Certification from "@/pages/Certification";
 import NotFound from "@/pages/NotFound";
 import EpicPatientWorkspace from "@/components/clinical/EpicPatientWorkspace";
 import CPOESystem from "@/components/clinical/CPOESystem";
@@ -467,6 +468,19 @@ const AppRoutes = () => {
             <AICopilotProvider>
               <AppLayout>
                 <Tasks />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/certification" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <Certification />
               </AppLayout>
             </AICopilotProvider>
           </ProtectedRoute>
