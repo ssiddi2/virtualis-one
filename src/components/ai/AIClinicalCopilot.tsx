@@ -15,10 +15,13 @@ import {
   Activity,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
+  Zap
 } from 'lucide-react';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useToast } from '@/hooks/use-toast';
+import { useAmbientEMR } from '@/hooks/useAmbientEMR';
+import AmbientControlPanel from '@/components/ambient/AmbientControlPanel';
 
 interface Message {
   id: string;
@@ -54,8 +57,10 @@ const AIClinicalCopilot = ({
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showAmbientPanel, setShowAmbientPanel] = useState(false);
   const { callAI, isLoading } = useAIAssistant();
   const { toast } = useToast();
+  const { isConnected: isAmbientConnected } = useAmbientEMR();
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -265,16 +270,32 @@ What can I help you with?`,
               </div>
               
               <div className="flex items-center gap-2">
+                {isAmbientConnected && (
+                  <Badge className="bg-green-500/20 text-green-400 border-green-400/30">
+                    <Zap className="h-3 w-3 mr-1" />
+                    Ambient
+                  </Badge>
+                )}
                 <Badge className="bg-green-500/20 text-green-400 border-green-400/30">
                   <Activity className="h-3 w-3 mr-1" />
                   Online
                 </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAmbientPanel(!showAmbientPanel)}
+                  className="text-white/60 hover:text-white hover:bg-white/5"
+                >
+                  <Zap className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
-            {/* Messages Area */}
-            <div className="relative flex-1 p-6">
-              <ScrollArea className="h-[calc(80vh-200px)]">
+            {/* Main Content Area */}
+            <div className="flex h-[calc(80vh-200px)]">
+              {/* Messages Area */}
+              <div className="flex-1 p-6">
+                <ScrollArea className="h-full">
                 <div className="space-y-4">
                   {messages.map((message) => (
                     <div
@@ -363,6 +384,14 @@ What can I help you with?`,
                 </div>
                 <div ref={messagesEndRef} />
               </ScrollArea>
+              </div>
+
+              {/* Ambient Control Panel */}
+              {showAmbientPanel && (
+                <div className="w-80 border-l border-white/10 p-4">
+                  <AmbientControlPanel />
+                </div>
+              )}
             </div>
 
             {/* Input Area */}
