@@ -27,7 +27,11 @@ const Demo = () => {
   };
 
   if (activeView === 'production') {
-    return <ProductionDemo />;
+    return (
+      <div className="min-h-screen p-6">
+        <ProductionDemo />
+      </div>
+    );
   }
 
   if (activeView === 'diagrams') {

@@ -40,6 +40,7 @@ import HospitalSelector from "@/components/dashboard/HospitalSelector";
 import AppLayout from "@/components/layout/AppLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import PageTransition from "@/components/ui/page-transition";
+import { BetaOnboarding } from "@/components/onboarding/BetaOnboarding";
 
 const queryClient = new QueryClient();
 
@@ -487,6 +488,10 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      
+      
+      {/* Beta Signup Route - Public */}
+      <Route path="/beta-signup" element={<BetaOnboarding />} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
