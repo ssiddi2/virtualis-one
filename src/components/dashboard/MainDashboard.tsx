@@ -1,5 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { WelcomeTour } from '@/components/onboarding/WelcomeTour';
+import { ProductionReadyBanner } from '@/components/dashboard/ProductionReadyBanner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,14 @@ interface MainDashboardProps {
 
 const MainDashboard = ({ user }: MainDashboardProps) => {
   const navigate = useNavigate();
+  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
+
+  useEffect(() => {
+    const tourCompleted = localStorage.getItem('medflow_tour_completed');
+    if (!tourCompleted) {
+      setTimeout(() => setShowWelcomeTour(true), 1000);
+    }
+  }, []);
   
   const quickActions = [
     {
@@ -93,6 +103,14 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
 
   return (
     <div className="space-y-8">
+      <ProductionReadyBanner />
+      
+      <WelcomeTour 
+        isOpen={showWelcomeTour} 
+        onClose={() => setShowWelcomeTour(false)}
+        userRole={user?.role}
+      />
+      
       {/* Welcome Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-6">
@@ -104,10 +122,10 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
         </div>
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">
-            Welcome to Virtualis Healthcare Platform
+            Welcome to MedFlow AI
           </h1>
           <p className="text-white/80 text-lg">
-            Your integrated healthcare command center is ready
+            Your AI-first EMR platform is ready for clinical operations
           </p>
         </div>
       </div>

@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { ProductionDemo } from "@/components/demo/ProductionDemo";
+import TechnicalDiagrams from "@/components/demo/TechnicalDiagrams";
+import IntegrationGuide from "@/components/demo/IntegrationGuide";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TechnicalDiagrams from "@/components/demo/TechnicalDiagrams";
-import IntegrationGuide from "@/components/demo/IntegrationGuide";
 import { 
   FileText, 
   Code, 
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 
 const Demo = () => {
-  const [activeView, setActiveView] = useState<'overview' | 'diagrams' | 'guide'>('overview');
+  const [activeView, setActiveView] = useState<'production' | 'diagrams' | 'guide'>('production');
 
   const downloadResource = (resource: string) => {
     // Simulate download
@@ -24,6 +25,10 @@ const Demo = () => {
   const openExternalLink = (url: string) => {
     window.open(url, '_blank');
   };
+
+  if (activeView === 'production') {
+    return <ProductionDemo />;
+  }
 
   if (activeView === 'diagrams') {
     return <TechnicalDiagrams />;
@@ -480,7 +485,7 @@ const Demo = () => {
 
         <div className="mt-8 text-center">
           <Button 
-            onClick={() => setActiveView('overview')}
+            onClick={() => setActiveView('production')}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300"
           >
             Back to Main Demo

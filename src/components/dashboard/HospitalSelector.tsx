@@ -64,7 +64,7 @@ import {
 } from "lucide-react";
 
 import { HospitalSelectorProps, EnhancedHospital } from '@/types/hospital';
-import { mockHospitals } from '@/data/mockHospitals';
+import { mockHospitals } from '@/data/demoHospitals';
 import { getStatusBadge, getConnectionHealthBadge, getApiHealthBadge } from '@/utils/hospitalHelpers';
 import { useToast } from '@/hooks/use-toast';
 import { HospitalDetailModal } from './HospitalDetailsModal';
