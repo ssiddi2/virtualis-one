@@ -9,6 +9,7 @@ import DiagnosisSupport from '@/components/ai/DiagnosisSupport';
 import AIInsightsDashboard from '@/components/ai/AIInsightsDashboard';
 import AIWorkflowDashboard from '@/components/ai/AIWorkflowDashboard';
 import VirtualisChatLayout from '@/components/clinical/VirtualisChatLayout';
+import AmbientQuickAccess from '@/components/ambient/AmbientQuickAccess';
 import { useHospitals } from '@/hooks/useHospitals';
 
 interface AIDashboardProps {
@@ -106,7 +107,12 @@ const AIDashboard = ({ user, hospitalId }: AIDashboardProps) => {
         </TabsList>
 
         <TabsContent value="assistant" className="space-y-6">
-          <VirtualisChatLayout hospitalId={hospitalId} />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+            <AmbientQuickAccess className="lg:col-span-1" />
+            <div className="lg:col-span-3">
+              <VirtualisChatLayout hospitalId={hospitalId} />
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">

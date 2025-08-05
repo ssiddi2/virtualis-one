@@ -98,6 +98,12 @@ const toolsItems = [
     icon: Brain,
   },
   {
+    title: "Ambient EMR",
+    url: "/ai-dashboard",
+    icon: Zap,
+    badge: "Voice AI",
+  },
+  {
     title: "Virtualis Chat",
     url: "/virtualis-chat",
     icon: MessageSquare,
@@ -204,6 +210,11 @@ export function AppSidebar() {
                     <NavLink to={item.url}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
+                      {item.badge && (
+                        <span className="ml-auto px-2 py-1 text-xs bg-amber-600/20 text-amber-300 border border-amber-400/30 rounded-full animate-pulse">
+                          {item.badge}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

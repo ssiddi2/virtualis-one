@@ -285,16 +285,25 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
           {getApiHealthBadge(hospital.apiHealth)}
         </div>
 
-        {/* Virtualis Features */}
+        {/* Virtualis Features with Ambient Mode */}
         {hospital.virtualisEnabled ? (
-          <div className="flex items-center gap-2">
-            <Brain className="h-4 w-4 text-blue-400" />
-            <span className="text-sm text-blue-300">
-              Virtualis AI ({hospital.virtualisFeatures.filter(f => f.enabled).length}/{hospital.virtualisFeatures.length})
-            </span>
-            <Badge className="bg-blue-600/20 text-blue-300 border-blue-400/30 text-xs">
-              Score: {hospital.overallScore}
-            </Badge>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Brain className="h-4 w-4 text-blue-400" />
+              <span className="text-sm text-blue-300">
+                Virtualis AI ({hospital.virtualisFeatures.filter(f => f.enabled).length}/{hospital.virtualisFeatures.length})
+              </span>
+              <Badge className="bg-blue-600/20 text-blue-300 border-blue-400/30 text-xs">
+                Score: {hospital.overallScore}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-amber-400" />
+              <span className="text-sm text-amber-300">Ambient EMR Ready</span>
+              <Badge className="bg-amber-600/20 text-amber-300 border-amber-400/30 text-xs animate-pulse">
+                Voice AI
+              </Badge>
+            </div>
           </div>
         ) : (
           <div className="flex items-center gap-2">

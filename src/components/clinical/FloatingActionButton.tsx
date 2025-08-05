@@ -3,14 +3,15 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Stethoscope, Plus, X, Zap, AlertTriangle, Clock } from 'lucide-react';
+import { MessageSquare, Stethoscope, Plus, X, Zap, AlertTriangle, Clock, Mic } from 'lucide-react';
 
 interface FloatingActionButtonProps {
   onMessageClick: () => void;
   onConsultClick: () => void;
+  onAmbientClick?: () => void;
 }
 
-const FloatingActionButton = ({ onMessageClick, onConsultClick }: FloatingActionButtonProps) => {
+const FloatingActionButton = ({ onMessageClick, onConsultClick, onAmbientClick }: FloatingActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleFAB = () => {
@@ -27,6 +28,12 @@ const FloatingActionButton = ({ onMessageClick, onConsultClick }: FloatingAction
   const handleConsultClick = () => {
     console.log('Consult button clicked');
     onConsultClick();
+    setIsOpen(false);
+  };
+
+  const handleAmbientClick = () => {
+    console.log('Ambient EMR button clicked');
+    onAmbientClick?.();
     setIsOpen(false);
   };
 
@@ -65,6 +72,29 @@ const FloatingActionButton = ({ onMessageClick, onConsultClick }: FloatingAction
               </div>
             </CardContent>
           </Card>
+
+          {/* Ambient EMR Option - New Voice AI Feature */}
+          {onAmbientClick && (
+            <Card className="backdrop-blur-xl bg-amber-500/20 border border-amber-300/30 rounded-xl shadow-2xl hover:bg-amber-500/30 transition-all duration-300">
+              <CardContent className="p-3">
+                <Button
+                  onClick={handleAmbientClick}
+                  className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white flex items-center gap-2 justify-start border-0 transition-all duration-300 hover:scale-105"
+                >
+                  <Mic className="h-4 w-4" />
+                  <span className="font-medium">Ambient EMR</span>
+                  <Badge className="ml-auto bg-amber-500/20 text-amber-200 border border-amber-400/30 flex items-center gap-1 animate-pulse">
+                    <Zap className="h-3 w-3" />
+                    Voice AI
+                  </Badge>
+                </Button>
+                <div className="text-xs text-white/70 mt-1 flex items-center gap-1">
+                  <div className="h-1 w-1 bg-amber-400 rounded-full animate-pulse"></div>
+                  Voice commands • Hands-free workflow • Real-time documentation
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Consult Option - Enhanced with AI Features */}
           <Card className="backdrop-blur-xl bg-purple-500/20 border border-purple-300/30 rounded-xl shadow-2xl hover:bg-purple-500/30 transition-all duration-300">
