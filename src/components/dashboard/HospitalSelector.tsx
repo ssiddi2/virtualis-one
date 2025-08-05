@@ -69,6 +69,7 @@ import { getStatusBadge, getConnectionHealthBadge, getApiHealthBadge } from '@/u
 import { useToast } from '@/hooks/use-toast';
 import { HospitalDetailModal } from './HospitalDetailsModal';
 import EMRConnectionModal from '@/components/emr/EMRConnectionModal';
+import SimpleHospitalSelector from './SimpleHospitalSelector';
 
 const HospitalSelector: React.FC<HospitalSelectorProps> = ({ 
   onSelectHospital, 
@@ -77,6 +78,31 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
   filterByRole = true,
   emergencyMode = false
 }) => {
+  const [useSimpleMode, setUseSimpleMode] = useState(!showAdvancedMetrics);
+
+  // If simple mode is enabled, use the SimpleHospitalSelector
+  if (useSimpleMode) {
+    return (
+      <div>
+        <div className="fixed top-4 right-4 z-50">
+          <Button
+            onClick={() => setUseSimpleMode(false)}
+            variant="outline"
+            size="sm"
+            className="bg-background/80 backdrop-blur-sm"
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Advanced View
+          </Button>
+        </div>
+        <SimpleHospitalSelector 
+          onSelectHospital={onSelectHospital}
+          emergencyMode={emergencyMode}
+        />
+      </div>
+    );
+  }
+
   const { toast } = useToast();
 
   // State Management
@@ -371,6 +397,18 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900">
       <div className="p-6 space-y-6">
+        {/* Simple Mode Toggle */}
+        <div className="fixed top-4 right-4 z-50">
+          <Button
+            onClick={() => setUseSimpleMode(true)}
+            variant="outline"
+            size="sm"
+            className="bg-background/80 backdrop-blur-sm"
+          >
+            Simple View
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-3 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
