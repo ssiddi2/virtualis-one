@@ -12,8 +12,8 @@ interface WelcomeTourProps {
 
 const tourSteps = [
   {
-    title: "Welcome to MedFlow AI",
-    content: "The first AI-native EMR designed for modern healthcare teams. Get up and running in minutes, not months.",
+    title: "Welcome to Virtualis",
+    content: "AI-powered clinical workflow assistant designed for modern healthcare teams. Get intelligent support in seconds.",
     icon: <Sparkles className="h-8 w-8 text-primary" />,
     features: ["Instant deployment", "AI-powered workflows", "Zero IT overhead"]
   },
@@ -53,7 +53,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, userR
   };
 
   const complete = () => {
-    localStorage.setItem('medflow_tour_completed', 'true');
+    localStorage.setItem('virtualis_tour_completed', 'true');
     onClose();
   };
 

@@ -33,7 +33,7 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
 
   useEffect(() => {
-    const tourCompleted = localStorage.getItem('medflow_tour_completed');
+    const tourCompleted = localStorage.getItem('virtualis_tour_completed');
     if (!tourCompleted) {
       setTimeout(() => setShowWelcomeTour(true), 1000);
     }
@@ -122,7 +122,7 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
         </div>
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">
-            Welcome to MedFlow AI
+            Welcome to Virtualis
           </h1>
           <p className="text-white/80 text-lg">
             Your AI-first EMR platform is ready for clinical operations
