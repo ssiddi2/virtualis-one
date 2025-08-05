@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AmbientVoiceProcessor } from '@/utils/AmbientVoiceProcessor';
+import { WakeWordDetector } from '@/utils/WakeWordDetector';
+import { ClinicalContextManager } from '@/utils/ClinicalContextManager';
+import { VoiceCommandLibrary } from '@/utils/VoiceCommandLibrary';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,11 +14,16 @@ interface AmbientMessage {
   function_call?: any;
 }
 
-export const useAmbientEMR = () => {
+export const useAmbientEMR = (specialty?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [wakeWordActive, setWakeWordActive] = useState(false);
   const [messages, setMessages] = useState<AmbientMessage[]>([]);
   const [processor, setProcessor] = useState<AmbientVoiceProcessor | null>(null);
+  const [wakeWordDetector, setWakeWordDetector] = useState<WakeWordDetector | null>(null);
+  const [contextManager, setContextManager] = useState<ClinicalContextManager | null>(null);
+  const [commandLibrary, setCommandLibrary] = useState<VoiceCommandLibrary | null>(null);
+  const [currentContext, setCurrentContext] = useState<any>({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -35,9 +43,10 @@ export const useAmbientEMR = () => {
       handleAmbientFunction(data.function);
     }
 
-    // Handle transcripts
+    // Handle transcripts with voice command processing
     if (data.type === 'response.audio_transcript.delta') {
       console.log('Transcript:', data.delta);
+      processVoiceCommand(data.delta);
     }
 
     // Handle voice activity
@@ -47,6 +56,82 @@ export const useAmbientEMR = () => {
       setIsListening(false);
     }
   }, []);
+
+  const processVoiceCommand = useCallback((transcript: string) => {
+    if (!commandLibrary || !contextManager) return;
+
+    // Check for room changes
+    const roomNumber = contextManager.parseRoomFromCommand(transcript);
+    if (roomNumber) {
+      contextManager.updateRoom(roomNumber);
+      toast({
+        title: "Room Changed",
+        description: `Switched to room ${roomNumber}`,
+      });
+      return;
+    }
+
+    // Check for workflow changes
+    const workflowType = contextManager.parseWorkflowFromCommand(transcript);
+    if (workflowType) {
+      contextManager.updateWorkflowType(workflowType);
+      toast({
+        title: "Workflow Updated",
+        description: `Switched to ${workflowType} workflow`,
+      });
+    }
+
+    // Match voice commands
+    const commandMatch = commandLibrary.matchCommand(transcript);
+    if (commandMatch) {
+      executeVoiceCommand(commandMatch.command, commandMatch.params);
+    }
+  }, [commandLibrary, contextManager, toast]);
+
+  const executeVoiceCommand = useCallback((command: any, params?: any) => {
+    const result = command.action(params);
+    
+    switch (result.type) {
+      case 'navigate':
+        navigate(result.destination);
+        toast({
+          title: "Navigation",
+          description: `Opening ${result.destination.replace('/', '')}${result.section ? ` - ${result.section}` : ''}`,
+        });
+        break;
+      
+      case 'switch_room':
+        if (contextManager) {
+          contextManager.updateRoom(result.room);
+        }
+        break;
+      
+      case 'create_note':
+        toast({
+          title: "Creating Note",
+          description: `Creating ${result.noteType} note`,
+        });
+        break;
+      
+      case 'create_order':
+        toast({
+          title: "Processing Order",
+          description: `${result.priority ? result.priority + ' ' : ''}${result.orderType} order: ${result.details || result.medication || result.test}`,
+        });
+        break;
+      
+      case 'emergency_response':
+        toast({
+          title: "Emergency Response",
+          description: `Initiating ${result.codeType} protocol`,
+          variant: "destructive"
+        });
+        break;
+      
+      default:
+        console.log('Unhandled command result:', result);
+    }
+  }, [navigate, toast, contextManager]);
 
   const handleAmbientFunction = useCallback((functionCall: any) => {
     console.log('Handling ambient function:', functionCall);
@@ -103,8 +188,53 @@ export const useAmbientEMR = () => {
     }
   }, [navigate, toast]);
 
+  const startWakeWordDetection = useCallback(async () => {
+    try {
+      const detector = new WakeWordDetector(() => {
+        startAmbientMode();
+      });
+      
+      await detector.start();
+      setWakeWordDetector(detector);
+      setWakeWordActive(true);
+      
+      toast({
+        title: "Wake Word Active",
+        description: "Say 'Hey Virtualis' to activate ambient mode",
+      });
+    } catch (error) {
+      console.error('Failed to start wake word detection:', error);
+      toast({
+        title: "Wake Word Failed",
+        description: "Could not start wake word detection",
+        variant: "destructive"
+      });
+    }
+  }, []);
+
+  const stopWakeWordDetection = useCallback(() => {
+    wakeWordDetector?.stop();
+    setWakeWordDetector(null);
+    setWakeWordActive(false);
+    
+    toast({
+      title: "Wake Word Stopped",
+      description: "Wake word detection disabled",
+    });
+  }, [wakeWordDetector, toast]);
+
   const startAmbientMode = useCallback(async () => {
     try {
+      // Initialize context manager
+      const contextMgr = new ClinicalContextManager((context) => {
+        setCurrentContext(context);
+      });
+      setContextManager(contextMgr);
+
+      // Initialize command library
+      const cmdLibrary = new VoiceCommandLibrary(specialty);
+      setCommandLibrary(cmdLibrary);
+
       const voiceProcessor = new AmbientVoiceProcessor(
         handleMessage,
         setIsListening
@@ -126,13 +256,16 @@ export const useAmbientEMR = () => {
         variant: "destructive"
       });
     }
-  }, [handleMessage, toast]);
+  }, [handleMessage, toast, specialty]);
 
   const stopAmbientMode = useCallback(() => {
     processor?.disconnect();
     setProcessor(null);
     setIsConnected(false);
     setIsListening(false);
+    setContextManager(null);
+    setCommandLibrary(null);
+    setCurrentContext({});
 
     toast({
       title: "Ambient EMR Stopped",
@@ -142,21 +275,63 @@ export const useAmbientEMR = () => {
 
   const sendVoiceCommand = useCallback((command: string) => {
     processor?.sendTextMessage(command);
-  }, [processor]);
+    // Also process through command library
+    processVoiceCommand(command);
+  }, [processor, processVoiceCommand]);
+
+  const updateClinicalContext = useCallback((contextUpdate: any) => {
+    if (contextManager) {
+      Object.entries(contextUpdate).forEach(([key, value]) => {
+        switch (key) {
+          case 'room':
+            contextManager.updateRoom(value as string);
+            break;
+          case 'patient':
+            contextManager.updatePatient(value);
+            break;
+          case 'unit':
+            contextManager.updateUnit(value as string);
+            break;
+          case 'workflow':
+            contextManager.updateWorkflowType(value as any);
+            break;
+          case 'role':
+            contextManager.updatePhysicianRole(value as any);
+            break;
+          case 'specialty':
+            contextManager.updateSpecialty(value as string);
+            break;
+        }
+      });
+    }
+  }, [contextManager]);
+
+  const getAvailableCommands = useCallback(() => {
+    return commandLibrary?.getCommandHelp() || '';
+  }, [commandLibrary]);
 
   useEffect(() => {
     return () => {
       processor?.disconnect();
+      wakeWordDetector?.stop();
     };
-  }, [processor]);
+  }, [processor, wakeWordDetector]);
 
   return {
     isConnected,
     isListening,
+    wakeWordActive,
     messages,
+    currentContext,
     startAmbientMode,
     stopAmbientMode,
+    startWakeWordDetection,
+    stopWakeWordDetection,
     sendVoiceCommand,
-    processor
+    updateClinicalContext,
+    getAvailableCommands,
+    processor,
+    contextManager,
+    commandLibrary
   };
 };
