@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import VirtualisChatWithPatients from './VirtualisChatWithPatients';
 import VirtualisChat from './VirtualisChat';
 import FloatingActionButton from './FloatingActionButton';
@@ -53,10 +54,16 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
     setMessageDialogOpen(true);
   };
 
-  const handleConsultClick = () => {
-    console.log('Opening enhanced consult dialog');
-    setConsultDialogOpen(true);
-  };
+const handleConsultClick = () => {
+  console.log('Opening enhanced consult dialog');
+  setConsultDialogOpen(true);
+};
+
+const navigate = useNavigate();
+const handleAmbientClick = () => {
+  console.log('Navigating to Ambient AI page');
+  navigate('/ambient');
+};
 
   const handleConsultSubmit = (consultRequest: any) => {
     console.log('Processing consultation request:', consultRequest);
@@ -168,11 +175,12 @@ const VirtualisChatLayout = ({ hospitalId }: VirtualisChatLayoutProps) => {
         <VirtualisChat hospitalId={hospitalId} currentUser={profile || user} />
       )}
 
-      {/* Floating Action Button */}
-      <FloatingActionButton
-        onMessageClick={handleMessageClick}
-        onConsultClick={handleConsultClick}
-      />
+{/* Floating Action Button */}
+<FloatingActionButton
+  onMessageClick={handleMessageClick}
+  onConsultClick={handleConsultClick}
+  onAmbientClick={handleAmbientClick}
+/>
 
       {/* Dialogs */}
       <MessageDialog

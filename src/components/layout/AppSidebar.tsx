@@ -97,12 +97,12 @@ const toolsItems = [
     url: "/ai-dashboard",
     icon: Brain,
   },
-  {
-    title: "Ambient EMR",
-    url: "/ai-dashboard",
-    icon: Zap,
-    badge: "Voice AI",
-  },
+{
+  title: "Ambient EMR",
+  url: "/ambient",
+  icon: Zap,
+  badge: "Voice AI",
+},
   {
     title: "Virtualis Chat",
     url: "/virtualis-chat",

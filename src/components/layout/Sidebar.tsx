@@ -1,15 +1,17 @@
 
-import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain, Building2, FileText, Stethoscope, ClipboardList, PlusCircle } from "lucide-react";
+import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain, Building2, FileText, Stethoscope, ClipboardList, PlusCircle, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import AmbientStatusIndicator from "@/components/ambient/AmbientStatusIndicator";
 
 const navigation = [
   { name: "Hospital Selection", href: "/hospital-selection", icon: Building2 },
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Patients", href: "/patients", icon: Users },
   { name: "Clinical", href: "/clinical", icon: Activity },
+  { name: "Ambient AI", href: "/ambient", icon: Mic },
   { name: "VirtualisChat", href: "/virtualis-chat", icon: MessageSquare },
 ];
 
@@ -73,6 +75,17 @@ export function Sidebar({ className }: SidebarProps) {
               </div>
             </div>
           )}
+
+          {/* Ambient Status - Quick Access */}
+          <div className="px-4 mb-6">
+            <div onClick={() => handleNavigation('/ambient')} className="inline-block cursor-pointer">
+              <AmbientStatusIndicator 
+                isConnected={true}
+                wakeWordActive={true}
+                className="border border-amber-400/30"
+              />
+            </div>
+          </div>
 
           {/* Main Navigation */}
           <div className="space-y-1 mb-6">
@@ -143,15 +156,22 @@ export function Sidebar({ className }: SidebarProps) {
             ))}
           </div>
 
-          <div className="mt-8 px-4">
-            <Button
-              variant="outline"
-              className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
-              onClick={handleLogout}
-            >
-              Sign Out
-            </Button>
-          </div>
+<div className="mt-8 px-4 space-y-2">
+  <Button
+    variant="outline"
+    className="w-full border-blue-500/40 text-blue-200 hover:bg-blue-500/10"
+    onClick={() => handleNavigation('/ambient')}
+  >
+    Quick Start: Ambient AI
+  </Button>
+  <Button
+    variant="outline"
+    className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
+    onClick={handleLogout}
+  >
+    Sign Out
+  </Button>
+</div>
         </div>
       </div>
     </div>

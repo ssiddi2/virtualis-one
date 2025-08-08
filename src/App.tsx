@@ -17,6 +17,7 @@ import Settings from "@/pages/Settings";
 import Tasks from "@/pages/Tasks";
 import VirtualisChat from "@/pages/VirtualisChat";
 import Certification from "@/pages/Certification";
+import Ambient from "@/pages/Ambient";
 import NotFound from "@/pages/NotFound";
 import EpicPatientWorkspace from "@/components/clinical/EpicPatientWorkspace";
 import CPOESystem from "@/components/clinical/CPOESystem";
@@ -431,6 +432,19 @@ const AppRoutes = () => {
                   user={profile || user} 
                   hospitalId={profile?.hospital_id || ''} 
                 />
+              </AppLayout>
+            </AICopilotProvider>
+          </ProtectedRoute>
+        } 
+      />
+      
+<Route 
+        path="/ambient" 
+        element={
+          <ProtectedRoute>
+            <AICopilotProvider>
+              <AppLayout>
+                <Ambient />
               </AppLayout>
             </AICopilotProvider>
           </ProtectedRoute>
