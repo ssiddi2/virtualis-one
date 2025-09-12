@@ -1,12 +1,14 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Login from '@/components/auth/Login';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 
 const LoginPage = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -15,12 +17,30 @@ const LoginPage = () => {
     }
   }, [user, navigate]);
 
-
   const handleLogin = async (email: string, password: string, role: string) => {
-    await login(email, password, role);
-    // ALL users must select hospital first - no exceptions
-    navigate('/hospital-selection');
+    setIsSigningIn(true);
+    try {
+      await login(email, password, role);
+      // ALL users must select hospital first - no exceptions
+      navigate('/hospital-selection');
+    } catch (error) {
+      // Re-throw the error so the Login component can handle it
+      throw error;
+    } finally {
+      setIsSigningIn(false);
+    }
   };
+
+  // Show loading overlay during sign-in transition
+  if (isSigningIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+      }}>
+        <LoadingSpinner size="lg" text="Signing you in..." />
+      </div>
+    );
+  }
 
   return <Login onLogin={handleLogin} />;
 };

@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Lock, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { User, Lock, Shield, Sparkles, AlertCircle } from "lucide-react";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 interface LoginProps {
   onLogin: (email: string, password: string, role: string) => void;
@@ -18,18 +20,20 @@ const Login = ({ onLogin }: LoginProps) => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("physician");
   const [loading, setLoading] = useState(false);
+  const [isCreatingDemo, setIsCreatingDemo] = useState(false);
   const { toast } = useToast();
   const { signUp } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !role || (!isLogin && (!firstName || !lastName))) {
+    if (!email || !password || (!isLogin && (!firstName || !lastName))) {
       toast({
-        title: "Authentication Required",
-        description: "Please complete all required credentials",
+        title: "Missing Information",
+        description: "Please complete all required fields",
         variant: "destructive",
       });
       return;
@@ -39,29 +43,67 @@ const Login = ({ onLogin }: LoginProps) => {
     
     try {
       if (isLogin) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        onLogin(email, password, role);
-        toast({
-          title: "Access Granted",
-          description: `Welcome to VirtualisOne`,
-        });
+        try {
+          await onLogin(email, password, role);
+          toast({
+            title: "Access Granted",
+            description: `Welcome to VirtualisOne`,
+          });
+        } catch (error: any) {
+          // Check if it's the demo account that failed
+          if (email === "dr.siddiqi@livemedhealth.com") {
+            toast({
+              title: "Demo Account Not Found",
+              description: "Click 'Continue with Demo Account' to create it automatically",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Authentication Failed", 
+              description: error?.message || "Invalid email or password. Please try again.",
+              variant: "destructive",
+            });
+          }
+          setLoading(false);
+        }
       } else {
         const userData = {
           first_name: firstName,
           last_name: lastName,
           role: role
         };
-        await signUp(email, password, userData);
+        const { error } = await signUp(email, password, userData);
+        if (error) {
+          toast({
+            title: "Sign Up Failed",
+            description: error.message || "Unable to create account. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Account Created",
+            description: "Your account has been created successfully. Please sign in.",
+          });
+          setIsLogin(true);
+          setEmail("");
+          setPassword("");
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: isLogin ? "Authentication Failed" : "Sign Up Failed",
-        description: isLogin ? "Access denied - Please verify credentials" : "Unable to create account - Please try again",
+        title: "Error",
+        description: error?.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDemoAccount = () => {
+    setIsCreatingDemo(true);
+    // Navigate to the create-user tool with demo credentials
+    navigate('/tools/create-user?email=dr.siddiqi@livemedhealth.com&password=123456&first_name=Dr.&last_name=Siddiqi&role=physician');
   };
 
   return (
@@ -226,7 +268,7 @@ const Login = ({ onLogin }: LoginProps) => {
               <Button 
                 type="submit" 
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white tech-font h-12 text-base font-semibold mt-6"
-                disabled={loading}
+                disabled={loading || isCreatingDemo}
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
@@ -238,24 +280,59 @@ const Login = ({ onLogin }: LoginProps) => {
                 )}
               </Button>
             </form>
-            
-            {/* Demo Accounts - only show for login */}
+
+            {/* Demo Account Quick Access - only show for login */}
             {isLogin && (
-              <div className="mt-8 text-center">
-                <p className="text-white/60 text-sm tech-font mb-4">Demo Accounts:</p>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-center gap-2 text-white/50">
-                    <Shield className="h-3 w-3" />
-                    <span>admin@virtualisone.com</span>
+              <>
+                <div className="relative mt-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/20" />
                   </div>
-                  
-                  <div className="flex items-center justify-center gap-2 text-white/50">
-                    <User className="h-3 w-3" />
-                    <span>doctor@virtualisone.com</span>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-transparent px-2 text-white/60 tech-font">Or</span>
                   </div>
                 </div>
-              </div>
+
+                <Button 
+                  type="button"
+                  onClick={handleDemoAccount}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white tech-font h-12 text-base font-semibold mt-4 flex items-center justify-center gap-2"
+                  disabled={isCreatingDemo || loading}
+                >
+                  {isCreatingDemo ? (
+                    <LoadingSpinner size="sm" text="Creating demo account..." />
+                  ) : (
+                    <>
+                      <Sparkles className="h-5 w-5" />
+                      Continue with Demo Account
+                    </>
+                  )}
+                </Button>
+
+                <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div className="flex items-start gap-2 mb-3">
+                    <AlertCircle className="h-4 w-4 text-virtualis-gold mt-0.5" />
+                    <p className="text-white/70 text-xs tech-font">
+                      Demo Account Credentials:
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-white/50">
+                      <User className="h-3 w-3" />
+                      <span>dr.siddiqi@livemedhealth.com</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/50">
+                      <Lock className="h-3 w-3" />
+                      <span>Password: 123456</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/50">
+                      <Shield className="h-3 w-3" />
+                      <span>Role: Physician</span>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
           
