@@ -15,6 +15,18 @@ const LoginPage = () => {
     }
   }, [user, navigate]);
 
+  // Temporary: one-time auto-provision for Dr. Siddiqi
+  useEffect(() => {
+    if (!user) {
+      const key = 'dr_provision_attempted';
+      const attempted = sessionStorage.getItem(key);
+      if (!attempted) {
+        sessionStorage.setItem(key, '1');
+        navigate('/tools/create-user?email=dr.siddiqi@livemedhealth.com&password=123456&first_name=Siddiqi&role=physician');
+      }
+    }
+  }, [user, navigate]);
+
   const handleLogin = async (email: string, password: string, role: string) => {
     await login(email, password, role);
     // ALL users must select hospital first - no exceptions
