@@ -54,16 +54,28 @@ serve(async (req) => {
     });
 
     if (createError) {
-      // If user already exists, return a specific message
-      if (createError.message?.toLowerCase().includes("already registered")) {
+      const msg = (createError.message || "").toLowerCase();
+      // If user already exists, treat as success so the client can sign in
+      if (msg.includes("already registered") || msg.includes("user already exists")) {
         return new Response(JSON.stringify({ ok: true, message: "User already exists" }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      console.error("Create user error:", createError);
-      return new Response(JSON.stringify({ error: createError.message }), {
-        status: 400,
+
+      // Improve diagnostics for common internal DB issues
+      const diagnostic = {
+        code: createError.code || "unexpected_failure",
+        status: createError.status || 500,
+        message: createError.message,
+        hint:
+          msg.includes("database error creating new user")
+            ? "Auth admin.createUser failed in the backend. If you recently added DB triggers/functions that reference other tables (e.g. hospitals), ensure those tables exist and functions don’t error."
+            : undefined,
+      };
+      console.error("Create user error:", diagnostic);
+      return new Response(JSON.stringify({ error: diagnostic }), {
+        status: diagnostic.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
