@@ -18,7 +18,7 @@ const LoginPage = () => {
   // Temporary: one-time auto-provision for Dr. Siddiqi
   useEffect(() => {
     if (!user) {
-      const key = 'dr_provision_attempted';
+      const key = 'dr_provision_attempted_v2';
       const attempted = sessionStorage.getItem(key);
       if (!attempted) {
         sessionStorage.setItem(key, '1');
