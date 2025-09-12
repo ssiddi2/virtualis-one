@@ -42,6 +42,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import PageTransition from "@/components/ui/page-transition";
 import { BetaOnboarding } from "@/components/onboarding/BetaOnboarding";
+import ToolsCreateUser from "@/pages/ToolsCreateUser";
 
 const queryClient = new QueryClient();
 
@@ -504,6 +505,9 @@ const AppRoutes = () => {
       />
       
       
+      {/* Tools: one-off account creation (temporary/public) */}
+      <Route path="/tools/create-user" element={<ToolsCreateUser />} />
+
       {/* Beta Signup Route - Public */}
       <Route path="/beta-signup" element={<BetaOnboarding />} />
       
