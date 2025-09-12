@@ -3,8 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Login from '@/components/auth/Login';
-// Temporarily import to create account - remove after use
-import '@/utils/createUserAccount';
 
 const LoginPage = () => {
   const { user, login } = useAuth();
