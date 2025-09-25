@@ -8,6 +8,8 @@ import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import LoginPage from "@/pages/Login";
 import Index from "@/pages/Index";
+import DemoConnect from "@/pages/DemoConnect";
+import DemoDashboard from "@/pages/DemoDashboard";
 import Patients from "@/pages/Patients";
 import MyPatients from "@/pages/MyPatients";
 import Clinical from "@/pages/Clinical";
