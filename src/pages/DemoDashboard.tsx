@@ -22,6 +22,7 @@ import {
   BrainCircuit
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { usePatients } from "@/hooks/usePatients";
 
 interface HospitalData {
   id: string;
@@ -36,7 +37,7 @@ interface HospitalData {
 const DemoDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patients } = usePatients();
+  const { data: patients } = usePatients();
   
   const [selectedHospital, setSelectedHospital] = useState<string>("metro-general");
   const [hospitals] = useState<HospitalData[]>([
