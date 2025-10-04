@@ -19,7 +19,7 @@ export const AlisAIFloatingButton = ({
   className,
 }: AlisAIFloatingButtonProps) => {
   return (
-    <div className={cn('flex items-center gap-2 p-2 bg-background/95 backdrop-blur border rounded-full shadow-lg', className)}>
+    <div className={cn('flex items-center gap-2 p-2 backdrop-blur-xl bg-background/70 border border-white/20 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300', className)}>
       <img 
         src="/lovable-uploads/alis-ai-logo.png" 
         alt="Alis AI" 

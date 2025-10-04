@@ -130,11 +130,11 @@ export const AlisAIFloatingPanel = () => {
         width: isExpanded ? '600px' : '380px',
         maxHeight: isExpanded ? '700px' : '500px',
       }}
-      className="shadow-2xl border-2"
+      className="backdrop-blur-xl bg-background/80 shadow-2xl border border-white/20 overflow-hidden animate-scale-in"
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between p-3 border-b bg-muted/50 cursor-move"
+        className="flex items-center justify-between p-3 border-b border-white/10 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 backdrop-blur-sm cursor-move"
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center gap-2">
