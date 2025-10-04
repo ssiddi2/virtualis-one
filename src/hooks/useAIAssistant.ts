@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AIRequest {
-  type: 'clinical_note' | 'diagnosis_support' | 'medical_coding' | 'medication_check' | 'care_plan' | 'claims_review' | 'triage_assessment';
+  type: 'clinical_note' | 'clinical_note_with_emr_data' | 'diagnosis_support' | 'medical_coding' | 'medication_check' | 'care_plan' | 'claims_review' | 'triage_assessment';
   data: any;
   context?: string;
 }

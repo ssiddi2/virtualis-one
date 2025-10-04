@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Brain, FileText, Loader2, Save, ArrowLeft, Zap, Stethoscope, Users, Database, Hospital } from "lucide-react";
+import { Brain, FileText, Loader2, Save, ArrowLeft, Zap, Stethoscope, Users, Database, Hospital, Mic, Keyboard } from "lucide-react";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
+import { usePatientClinicalData } from "@/hooks/usePatientClinicalData";
+import EMRDataPreview from "./EMRDataPreview";
+import AlisVoiceNoteCreator from "@/components/ambient/AlisVoiceNoteCreator";
 
 interface CopilotComposerProps {
   patientId?: string;
@@ -21,8 +25,13 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
   const [summary, setSummary] = useState("");
   const [generatedNote, setGeneratedNote] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [inputMode, setInputMode] = useState<'manual' | 'voice' | 'quick'>('manual');
+  const [selectedEMRData, setSelectedEMRData] = useState<string[]>(['vitals', 'medications', 'labs', 'imaging', 'problems', 'allergies']);
   const { toast } = useToast();
   const { callAI, isLoading } = useAIAssistant();
+  
+  // Fetch comprehensive EMR data
+  const { data: clinicalData, isLoading: isLoadingEMR } = usePatientClinicalData(patientId);
 
   const noteTypes = [
     { value: "hp", label: "History & Physical Examination", icon: "🩺" },
@@ -50,11 +59,26 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
     }
 
     try {
-      console.log('Generating note with AI...', { noteType, summary });
+      console.log('Generating note with AI and EMR data...', { noteType, summary, hasEMRData: !!clinicalData });
+
+      // Filter EMR data based on selection
+      const filteredEMRData = clinicalData ? {
+        patient: clinicalData.patient,
+        vitalSigns: selectedEMRData.includes('vitals') ? clinicalData.vitalSigns : [],
+        medications: selectedEMRData.includes('medications') ? clinicalData.medications : [],
+        labOrders: selectedEMRData.includes('labs') ? clinicalData.labOrders : [],
+        radiologyOrders: selectedEMRData.includes('imaging') ? clinicalData.radiologyOrders : [],
+        problemList: selectedEMRData.includes('problems') ? clinicalData.problemList : [],
+        allergies: selectedEMRData.includes('allergies') ? clinicalData.allergies : [],
+      } : null;
 
       const result = await callAI({
-        type: 'clinical_note',
-        data: { summary },
+        type: 'clinical_note_with_emr_data',
+        data: { 
+          noteType,
+          manualSummary: summary,
+          emrData: filteredEMRData 
+        },
         context: `${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"} for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"}`
       });
 
@@ -63,7 +87,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
       
       toast({
         title: "Clinical Documentation Generated",
-        description: `AI-assisted note ready for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"} EMR integration`,
+        description: `AI-assisted note with EMR data ready for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"} EMR integration`,
       });
     } catch (error) {
       console.error('AI generation error:', error);
@@ -73,6 +97,25 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleVoiceNoteCreated = (note: string, voiceNoteType: string) => {
+    setGeneratedNote(note);
+    setNoteType(voiceNoteType);
+    setInputMode('manual'); // Switch back to manual for review
+    
+    toast({
+      title: "Voice Note Structured",
+      description: "Your voice documentation has been converted to a clinical note.",
+    });
+  };
+
+  const toggleEMRData = (dataType: string) => {
+    setSelectedEMRData(prev =>
+      prev.includes(dataType)
+        ? prev.filter(d => d !== dataType)
+        : [...prev, dataType]
+    );
   };
 
   const saveNote = async () => {
@@ -207,6 +250,15 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
           </Card>
         </div>
 
+        {/* EMR Data Preview */}
+        {clinicalData && (
+          <EMRDataPreview
+            data={clinicalData}
+            selectedData={selectedEMRData}
+            onToggleData={toggleEMRData}
+          />
+        )}
+
         {/* Documentation Generator */}
         <Card className="glass-card">
           <CardHeader>
@@ -216,6 +268,24 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Input Mode Selector */}
+            <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as any)}>
+              <TabsList className="grid w-full grid-cols-3 glass-nav-item">
+                <TabsTrigger value="manual" className="flex items-center gap-2">
+                  <Keyboard className="h-4 w-4" />
+                  Manual Entry
+                </TabsTrigger>
+                <TabsTrigger value="voice" className="flex items-center gap-2">
+                  <Mic className="h-4 w-4" />
+                  Voice Dictation
+                </TabsTrigger>
+                <TabsTrigger value="quick" className="flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  Quick Summary
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="manual" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-white font-medium tech-font">Documentation Type</Label>
@@ -257,38 +327,80 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
               </p>
             </div>
 
-            <div className="flex gap-3">
-              <Button
-                onClick={generateNote}
-                disabled={isLoading || !noteType || !summary.trim()}
-                className="glass-button flex-1 md:flex-none"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    AI Processing Clinical Data...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Generate Clinical Documentation
-                  </>
-                )}
-              </Button>
-              
-              {generatedNote && (
+                <div className="flex gap-3">
+                  <Button
+                    onClick={generateNote}
+                    disabled={isLoading || !noteType || !summary.trim()}
+                    className="glass-button flex-1 md:flex-none"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        AI Processing Clinical Data...
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="h-4 w-4 mr-2" />
+                        Generate with EMR Data
+                      </>
+                    )}
+                  </Button>
+                  
+                  {generatedNote && (
+                    <Button
+                      onClick={() => {
+                        setNoteType("");
+                        setSummary("");
+                        setGeneratedNote("");
+                      }}
+                      className="glass-nav-item border-white/20 hover:border-virtualis-gold/50 text-white"
+                    >
+                      Clear & Start New
+                    </Button>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="voice" className="space-y-4 mt-4">
+                <AlisVoiceNoteCreator
+                  patientId={patientId}
+                  onNoteCreated={handleVoiceNoteCreated}
+                />
+              </TabsContent>
+
+              <TabsContent value="quick" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label className="text-white font-medium tech-font">Quick Clinical Summary</Label>
+                  <Textarea
+                    placeholder="Brief summary (e.g., '45yo M with chest pain, ruled out MI, stable vitals'). AI will expand with full EMR context..."
+                    value={summary}
+                    onChange={(e) => setSummary(e.target.value)}
+                    className="glass-input min-h-[80px]"
+                  />
+                  <p className="text-white/60 text-sm tech-font">
+                    ✨ AI will automatically expand your brief summary using comprehensive EMR data
+                  </p>
+                </div>
+                
                 <Button
-                  onClick={() => {
-                    setNoteType("");
-                    setSummary("");
-                    setGeneratedNote("");
-                  }}
-                  className="glass-nav-item border-white/20 hover:border-virtualis-gold/50 text-white"
+                  onClick={generateNote}
+                  disabled={isLoading || !noteType || !summary.trim()}
+                  className="glass-button w-full"
                 >
-                  Clear & Start New
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Expanding with EMR Data...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Quick Generate
+                    </>
+                  )}
                 </Button>
-              )}
-            </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 

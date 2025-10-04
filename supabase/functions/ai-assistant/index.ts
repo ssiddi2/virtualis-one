@@ -34,6 +34,75 @@ serve(async (req) => {
         userPrompt = `Generate a detailed clinical note based on: ${data.summary}. Patient context: ${context || 'Standard adult patient visit'}. Format as proper SOAP note with clear sections.`;
         break;
 
+      case 'clinical_note_with_emr_data':
+        systemPrompt = `You are an expert clinical AI assistant with access to comprehensive EMR data. Generate professional medical documentation that intelligently integrates patient data from:
+- Recent vital signs and trends
+- Active medications and potential interactions
+- Lab results and abnormal findings
+- Imaging studies and interpretations
+- Active problem list and chronic conditions
+- Known allergies and adverse reactions
+- Recent nursing assessments
+- Previous visit documentation
+
+Synthesize this information into a cohesive SOAP note that:
+1. References relevant data points naturally within the narrative
+2. Highlights abnormal findings and clinical concerns
+3. Shows trends over time when applicable
+4. Maintains professional medical terminology
+5. Ensures clinical accuracy and completeness
+
+If the user provides voice transcript or manual summary, use that as the primary narrative and enhance it with EMR data context.`;
+        
+        const emrContext = data.emrData ? `
+EMR DATA AVAILABLE:
+${data.emrData.vitalSigns?.length > 0 ? `\nRecent Vitals (most recent first):
+${data.emrData.vitalSigns.slice(0, 3).map((v: any) => 
+  `- ${new Date(v.recorded_at).toLocaleDateString()}: BP ${v.blood_pressure_systolic}/${v.blood_pressure_diastolic}, HR ${v.heart_rate}, RR ${v.respiratory_rate}, Temp ${v.temperature}°F, SpO2 ${v.oxygen_saturation}%`
+).join('\n')}` : ''}
+
+${data.emrData.medications?.length > 0 ? `\nActive Medications:
+${data.emrData.medications.map((m: any) => 
+  `- ${m.medication_name} ${m.dosage} ${m.route} ${m.frequency} (started ${new Date(m.start_date).toLocaleDateString()})`
+).join('\n')}` : ''}
+
+${data.emrData.labOrders?.length > 0 ? `\nRecent Lab Results:
+${data.emrData.labOrders.slice(0, 5).map((l: any) => 
+  `- ${l.test_name} (${l.status}): ${l.results ? JSON.stringify(l.results) : 'Pending'}`
+).join('\n')}` : ''}
+
+${data.emrData.radiologyOrders?.length > 0 ? `\nRecent Imaging:
+${data.emrData.radiologyOrders.slice(0, 3).map((r: any) => 
+  `- ${r.study_type} of ${r.body_part} (${r.status}): ${r.findings || 'Results pending'}`
+).join('\n')}` : ''}
+
+${data.emrData.problemList?.length > 0 ? `\nActive Problems:
+${data.emrData.problemList.map((p: any) => 
+  `- ${p.problem_name} (${p.icd10_code || 'No code'}) - ${p.status}`
+).join('\n')}` : ''}
+
+${data.emrData.allergies?.length > 0 ? `\nAllergies:
+${data.emrData.allergies.map((a: any) => 
+  `- ${a.allergen}: ${a.reaction_type} (${a.severity}) - ${a.symptoms}`
+).join('\n')}` : ''}
+
+${data.emrData.patient ? `\nPatient Demographics:
+- Name: ${data.emrData.patient.first_name} ${data.emrData.patient.last_name}
+- DOB: ${data.emrData.patient.date_of_birth}
+- MRN: ${data.emrData.patient.mrn}
+- Status: ${data.emrData.patient.status}` : ''}
+` : '';
+
+        userPrompt = `Generate a comprehensive ${data.noteType || 'progress'} note incorporating the following:
+
+${data.voiceTranscript ? `VOICE TRANSCRIPT:\n${data.voiceTranscript}\n` : ''}
+${data.manualSummary ? `CLINICAL SUMMARY:\n${data.manualSummary}\n` : ''}
+
+${emrContext}
+
+Create a well-structured SOAP note that synthesizes the clinical narrative with relevant EMR data. Highlight abnormal findings, trends, and clinically significant information.`;
+        break;
+
       case 'diagnosis_support':
         systemPrompt = `You are a clinical decision support AI. Provide differential diagnosis suggestions based on symptoms and patient data. Include likelihood assessment and recommended next steps. Always emphasize that this is for educational/support purposes only and final diagnosis must be made by qualified healthcare professionals.`;
         userPrompt = `Based on these symptoms and findings: ${data.symptoms}, provide differential diagnosis suggestions with clinical reasoning and recommended diagnostic workup.`;

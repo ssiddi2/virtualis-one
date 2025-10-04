@@ -129,6 +129,41 @@ Be helpful, concise, and medically accurate. Always confirm critical orders. Whe
                   },
                   required: ["order_type", "details"]
                 }
+              },
+              {
+                type: "function",
+                name: "create_clinical_note_from_voice",
+                description: "Structure voice input into clinical note format with proper SOAP sections",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    noteType: { 
+                      type: "string",
+                      enum: ["progress_note", "soap_note", "admission_note", "discharge_summary", "consultation_note"]
+                    },
+                    chiefComplaint: { 
+                      type: "string",
+                      description: "Main reason for visit or encounter"
+                    },
+                    hpi: { 
+                      type: "string",
+                      description: "History of present illness - detailed narrative"
+                    },
+                    examination: { 
+                      type: "string",
+                      description: "Physical examination findings"
+                    },
+                    assessment: { 
+                      type: "string",
+                      description: "Clinical assessment and diagnosis"
+                    },
+                    plan: { 
+                      type: "string",
+                      description: "Treatment plan and follow-up"
+                    }
+                  },
+                  required: ["noteType", "chiefComplaint", "hpi", "assessment", "plan"]
+                }
               }
             ],
             tool_choice: "auto",
