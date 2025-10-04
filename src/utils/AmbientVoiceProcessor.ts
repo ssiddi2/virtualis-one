@@ -178,7 +178,7 @@ export class AmbientVoiceProcessor {
       this.audioContext = new AudioContext({ sampleRate: 24000 });
       this.audioQueue = new AudioQueue(this.audioContext);
 
-      const wsUrl = `wss://ourfwvlbeokoxfgftyrs.functions.supabase.co/ambient-voice-processor`;
+      const wsUrl = `wss://ourfwvlbeokoxfgftyrs.supabase.co/functions/v1/ambient-voice-processor`;
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
