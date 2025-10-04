@@ -98,10 +98,10 @@ const toolsItems = [
     icon: Brain,
   },
 {
-  title: "Ambient EMR",
+  title: "Alis AI",
   url: "/ambient",
   icon: Zap,
-  badge: "Voice AI",
+  badge: "Voice",
 },
   {
     title: "Virtualis Chat",

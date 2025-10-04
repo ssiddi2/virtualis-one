@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { AlisAIProvider } from "@/contexts/AlisAIContext";
+import { AlisAIFloatingPanel } from "@/components/ambient/AlisAIFloatingPanel";
 import LoginPage from "@/pages/Login";
 import Index from "@/pages/Index";
 import DemoConnect from "@/pages/DemoConnect";
@@ -523,11 +525,14 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <TooltipProvider>
-            <AppRoutes />
-            <Toaster />
-            <Sonner />
-          </TooltipProvider>
+          <AlisAIProvider>
+            <TooltipProvider>
+              <AppRoutes />
+              <AlisAIFloatingPanel />
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+          </AlisAIProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

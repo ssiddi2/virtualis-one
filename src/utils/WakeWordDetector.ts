@@ -3,7 +3,7 @@ export class WakeWordDetector {
   private stream: MediaStream | null = null;
   private processor: ScriptProcessorNode | null = null;
   private isListening = false;
-  private wakeWords = ['hey virtualis', 'virtualis', 'ambient emr'];
+  private wakeWords = ['hey alis', 'alis', 'hey doctor'];
   private confidenceBuffer: number[] = [];
   private transcriptionBuffer = '';
 

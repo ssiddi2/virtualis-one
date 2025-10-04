@@ -1,7 +1,8 @@
 
 import { useEffect } from "react";
-import AmbientQuickAccess from "@/components/ambient/AmbientQuickAccess";
+import { AlisAIActivator } from '@/components/ambient/AlisAIActivator';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles } from "lucide-react";
 
 const Ambient = () => {
   useEffect(() => {
@@ -15,34 +16,94 @@ const Ambient = () => {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{
-      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
-    }}>
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/lovable-uploads/1ef8d41d-9742-4ba5-89ff-e9d7b4a2a999.png" alt="Virtualis icon" className="h-10 w-10" />
-            <div>
-              <h1 className="text-2xl font-bold text-white">Ambient AI</h1>
-              <p className="text-white/70 text-sm">Voice-controlled clinical workflow and documentation</p>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-8 text-center space-y-4">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src="/lovable-uploads/alis-ai-logo.png" alt="Alis AI" className="h-16 w-16" />
           </div>
-        </header>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Alis AI
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Voice-controlled ambient clinical AI assistant
+          </p>
+        </div>
 
-        <AmbientQuickAccess className="shadow-lg" />
+        <div className="space-y-6">
+          <AlisAIActivator />
 
-        <Card className="bg-slate-900 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white text-base">Getting started</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-6 text-sm text-white/80 space-y-2">
-              <li>Click “Start Ambient Mode”, then say “Hey Virtualis” to wake.</li>
-              <li>Try: “Go to room 312”, “Open CPOE”, “Create a progress note”.</li>
-              <li>Open Controls to enable Wake Word and manage context.</li>
-            </ul>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Getting started with Alis
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">1</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Activate Alis AI</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Click the "Activate" button above to enable the floating assistant panel
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">2</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Connect to voice</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Open the floating panel and click "Connect" to start voice mode
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">3</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Use voice commands</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Say "Hey Alis" followed by commands like "Show patient chart" or "Order labs"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">4</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Navigate freely</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Alis stays with you as you navigate through patient charts, maintaining context
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium mb-2">Example Commands:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• "Show patient chart for room 312"</li>
+                  <li>• "Create a progress note"</li>
+                  <li>• "Order CBC and metabolic panel"</li>
+                  <li>• "Check medication list"</li>
+                  <li>• "View vital signs"</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
