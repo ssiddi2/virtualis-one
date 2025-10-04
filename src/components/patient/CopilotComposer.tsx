@@ -25,7 +25,8 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
   const [summary, setSummary] = useState("");
   const [generatedNote, setGeneratedNote] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [inputMode, setInputMode] = useState<'manual' | 'voice' | 'quick'>('manual');
+  const [inputMode, setInputMode] = useState<'manual' | 'voice' | 'quick' | 'auto'>('manual');
+  const [voiceNote, setVoiceNote] = useState("");
   const [selectedEMRData, setSelectedEMRData] = useState<string[]>(['vitals', 'medications', 'labs', 'imaging', 'problems', 'allergies']);
   const { toast } = useToast();
   const { callAI, isLoading } = useAIAssistant();
@@ -49,7 +50,8 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
   };
 
   const generateNote = async () => {
-    if (!noteType || !summary.trim()) {
+    // Auto mode doesn't require summary
+    if (inputMode !== 'auto' && (!noteType || !summary.trim())) {
       toast({
         title: "Required Information Missing",
         description: "Please select documentation type and provide clinical summary",
@@ -58,8 +60,17 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
       return;
     }
 
+    if (inputMode === 'auto' && !noteType) {
+      toast({
+        title: "Documentation Type Required",
+        description: "Please select a documentation type",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      console.log('Generating note with AI and EMR data...', { noteType, summary, hasEMRData: !!clinicalData });
+      console.log('Generating note with AI and EMR data...', { noteType, summary, hasEMRData: !!clinicalData, mode: inputMode });
 
       // Filter EMR data based on selection
       const filteredEMRData = clinicalData ? {
@@ -70,25 +81,48 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
         radiologyOrders: selectedEMRData.includes('imaging') ? clinicalData.radiologyOrders : [],
         problemList: selectedEMRData.includes('problems') ? clinicalData.problemList : [],
         allergies: selectedEMRData.includes('allergies') ? clinicalData.allergies : [],
+        nursingAssessments: selectedEMRData.includes('nursing') ? clinicalData.nursingAssessments : [],
+        medicalRecords: selectedEMRData.includes('previous') ? clinicalData.medicalRecords : [],
       } : null;
 
-      const result = await callAI({
-        type: 'clinical_note_with_emr_data',
-        data: { 
-          noteType,
-          manualSummary: summary,
-          emrData: filteredEMRData 
-        },
-        context: `${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"} for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"}`
-      });
+      // Use different AI request type for auto-generate
+      if (inputMode === 'auto') {
+        const result = await callAI({
+          type: 'auto_generate_from_emr_only',
+          data: { 
+            noteType,
+            emrData: filteredEMRData 
+          },
+          context: `Auto-generating ${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"} from EMR data only`
+        });
 
-      console.log('AI result received:', result);
-      setGeneratedNote(result);
-      
-      toast({
-        title: "Clinical Documentation Generated",
-        description: `AI-assisted note with EMR data ready for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"} EMR integration`,
-      });
+        console.log('Auto-generated note received:', result);
+        setGeneratedNote(result);
+        
+        toast({
+          title: "Note Auto-Generated",
+          description: "Review required - note generated from EMR data only",
+        });
+      } else {
+        const result = await callAI({
+          type: 'clinical_note_with_emr_data',
+          data: { 
+            noteType,
+            manualSummary: inputMode === 'manual' || inputMode === 'quick' ? summary : undefined,
+            voiceTranscript: inputMode === 'voice' ? voiceNote : undefined,
+            emrData: filteredEMRData 
+          },
+          context: `${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"} for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"}`
+        });
+
+        console.log('AI result received:', result);
+        setGeneratedNote(result);
+        
+        toast({
+          title: "Clinical Documentation Generated",
+          description: `AI-assisted note with EMR data ready for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"} EMR integration`,
+        });
+      }
     } catch (error) {
       console.error('AI generation error:', error);
       toast({
@@ -100,6 +134,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
   };
 
   const handleVoiceNoteCreated = (note: string, voiceNoteType: string) => {
+    setVoiceNote(note);
     setGeneratedNote(note);
     setNoteType(voiceNoteType);
     setInputMode('manual'); // Switch back to manual for review
@@ -270,7 +305,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
           <CardContent className="space-y-6">
             {/* Input Mode Selector */}
             <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as any)}>
-              <TabsList className="grid w-full grid-cols-3 glass-nav-item">
+              <TabsList className="grid w-full grid-cols-4 glass-nav-item">
                 <TabsTrigger value="manual" className="flex items-center gap-2">
                   <Keyboard className="h-4 w-4" />
                   Manual Entry
@@ -282,6 +317,10 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
                 <TabsTrigger value="quick" className="flex items-center gap-2">
                   <Zap className="h-4 w-4" />
                   Quick Summary
+                </TabsTrigger>
+                <TabsTrigger value="auto" className="flex items-center gap-2">
+                  <Brain className="h-4 w-4" />
+                  Auto-Generate
                 </TabsTrigger>
               </TabsList>
 
@@ -396,6 +435,100 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
                     <>
                       <Zap className="h-4 w-4 mr-2" />
                       Quick Generate
+                    </>
+                  )}
+                </Button>
+              </TabsContent>
+
+              <TabsContent value="auto" className="space-y-4 mt-4">
+                <div className="p-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
+                  <div className="flex items-start gap-3">
+                    <Brain className="h-6 w-6 text-virtualis-gold mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-bold text-white tech-font mb-2 text-lg">
+                        Auto-Generate from EMR Data
+                      </h4>
+                      <p className="text-white/80 text-sm mb-3">
+                        AI will automatically generate a comprehensive clinical note based purely on available EMR data, 
+                        previous notes, vital signs trends, lab results, and clinical documentation.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-white/70">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                          <span>No manual input required</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                          <span>Synthesizes all EMR data</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                          <span>Identifies trends & patterns</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                          <span>Requires physician review</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {clinicalData && (
+                  <div className="glass-card p-4">
+                    <h4 className="text-white font-medium tech-font mb-3 flex items-center gap-2">
+                      <Database className="h-4 w-4 text-virtualis-gold" />
+                      EMR Data Completeness
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-white/80">Available Data</span>
+                        <span className="text-white font-bold">{clinicalData.completeness}%</span>
+                      </div>
+                      <div className="w-full bg-black/30 rounded-full h-3 border border-white/10">
+                        <div 
+                          className="h-full rounded-full bg-gradient-to-r from-virtualis-gold to-yellow-400 transition-all duration-500"
+                          style={{ width: `${clinicalData.completeness}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-white/60 tech-font">
+                        {clinicalData.completeness >= 70 
+                          ? '✓ Sufficient data for high-quality auto-generation' 
+                          : '⚠️ Limited data available - note may be incomplete'}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                      <div className="glass-badge primary">
+                        <span>Vitals: {clinicalData.vitalSigns.length}</span>
+                      </div>
+                      <div className="glass-badge primary">
+                        <span>Meds: {clinicalData.medications.length}</span>
+                      </div>
+                      <div className="glass-badge primary">
+                        <span>Labs: {clinicalData.labOrders.length}</span>
+                      </div>
+                      <div className="glass-badge primary">
+                        <span>Notes: {clinicalData.medicalRecords.length}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <Button 
+                  onClick={generateNote} 
+                  disabled={isLoading || !clinicalData || !noteType}
+                  className="glass-button w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Auto-Generating from EMR...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="w-4 h-4 mr-2" />
+                      Auto-Generate Clinical Note
                     </>
                   )}
                 </Button>

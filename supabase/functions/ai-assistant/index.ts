@@ -103,6 +103,95 @@ ${emrContext}
 Create a well-structured SOAP note that synthesizes the clinical narrative with relevant EMR data. Highlight abnormal findings, trends, and clinically significant information.`;
         break;
 
+      case 'auto_generate_from_emr_only':
+        const autoEmrData = data.emrData;
+        
+        systemPrompt = `You are an expert clinical AI assistant specializing in autonomous progress note generation from comprehensive EMR data.
+
+Your task is to generate a ${data.noteType || 'progress'} note based ONLY on available EMR data and previous clinical documentation. This note should:
+
+1. Synthesize all available data into a cohesive clinical narrative
+2. Identify trends and patterns in vital signs, lab results, and clinical course
+3. Highlight concerning findings or areas requiring attention
+4. Provide a data-driven assessment based on objective findings
+5. Suggest a reasonable plan based on the clinical trajectory
+6. Follow SOAP format (Subjective, Objective, Assessment, Plan)
+7. Note data limitations - clearly indicate when information is unavailable
+
+CRITICAL: This is an AUTO-GENERATED note. You must:
+- Base all content on available EMR data
+- Clearly mark sections where data is insufficient
+- Use cautious language ("appears", "suggests", "consistent with")
+- Add disclaimer at end: "⚠️ AUTO-GENERATED from EMR data - requires physician review and attestation"
+
+Available Comprehensive EMR Data:`;
+
+        const autoContext = `
+Patient: ${autoEmrData.patient?.first_name} ${autoEmrData.patient?.last_name}
+MRN: ${autoEmrData.patient?.mrn}
+DOB: ${autoEmrData.patient?.date_of_birth}
+Admission: ${autoEmrData.patient?.admission_date ? new Date(autoEmrData.patient.admission_date).toLocaleDateString() : 'N/A'}
+Location: Room ${autoEmrData.patient?.room_number || 'N/A'}, Bed ${autoEmrData.patient?.bed_number || 'N/A'}
+
+${autoEmrData.vitalSigns?.length > 0 ? `VITAL SIGNS TREND (${autoEmrData.vitalSigns.length} recent readings):
+${autoEmrData.vitalSigns.slice(0, 5).map((v: any) => 
+  `- ${new Date(v.recorded_at).toLocaleString()}: BP ${v.blood_pressure_systolic}/${v.blood_pressure_diastolic}, HR ${v.heart_rate}, RR ${v.respiratory_rate}, Temp ${v.temperature}°F, SpO2 ${v.oxygen_saturation}%${v.pain_scale ? ', Pain ' + v.pain_scale + '/10' : ''}`
+).join('\n')}` : 'No recent vital signs available'}
+
+${autoEmrData.medications?.length > 0 ? `ACTIVE MEDICATIONS (${autoEmrData.medications.length} medications):
+${autoEmrData.medications.map((m: any) => 
+  `- ${m.medication_name} ${m.dosage} ${m.route} ${m.frequency}${m.indication ? ' for ' + m.indication : ''}`
+).join('\n')}` : 'No active medications'}
+
+${autoEmrData.labOrders?.length > 0 ? `LABORATORY RESULTS (${autoEmrData.labOrders.length} orders):
+${autoEmrData.labOrders.slice(0, 10).map((l: any) => 
+  `- ${l.test_name}: ${l.status}${l.results ? ' - ' + JSON.stringify(l.results) : ''} (ordered ${new Date(l.ordered_at).toLocaleDateString()})`
+).join('\n')}` : 'No recent lab orders'}
+
+${autoEmrData.radiologyOrders?.length > 0 ? `IMAGING STUDIES (${autoEmrData.radiologyOrders.length} studies):
+${autoEmrData.radiologyOrders.slice(0, 5).map((r: any) => 
+  `- ${r.study_type} of ${r.body_part} (${r.modality}): ${r.status}
+  ${r.findings ? 'Findings: ' + r.findings : ''}
+  ${r.impression ? 'Impression: ' + r.impression : ''}`
+).join('\n\n')}` : 'No recent imaging studies'}
+
+${autoEmrData.problemList?.length > 0 ? `ACTIVE PROBLEM LIST (${autoEmrData.problemList.length} problems):
+${autoEmrData.problemList.map((p: any) => 
+  `- ${p.problem_name} (${p.icd10_code || 'no code'}) - ${p.status}${p.severity ? ', Severity: ' + p.severity : ''}${p.onset_date ? ', Since: ' + new Date(p.onset_date).toLocaleDateString() : ''}`
+).join('\n')}` : 'No active problems documented'}
+
+${autoEmrData.allergies?.length > 0 ? `ALLERGIES & ADVERSE REACTIONS (${autoEmrData.allergies.length} allergies):
+${autoEmrData.allergies.map((a: any) => 
+  `- ${a.allergen}: ${a.reaction_type}, Severity: ${a.severity}${a.symptoms ? ', Symptoms: ' + a.symptoms : ''}`
+).join('\n')}` : 'No known allergies'}
+
+${autoEmrData.nursingAssessments?.length > 0 ? `RECENT NURSING ASSESSMENTS (${autoEmrData.nursingAssessments.length} assessments):
+${autoEmrData.nursingAssessments.slice(0, 3).map((n: any) => 
+  `[${new Date(n.created_at).toLocaleDateString()}] ${n.assessment_type}: ${JSON.stringify(n.assessment_data).substring(0, 200)}...`
+).join('\n\n')}` : 'No recent nursing assessments'}
+
+${autoEmrData.medicalRecords?.length > 0 ? `PREVIOUS CLINICAL NOTES (${autoEmrData.medicalRecords.length} notes):
+${autoEmrData.medicalRecords.slice(0, 3).map((r: any) => 
+  `[${new Date(r.visit_date).toLocaleDateString()}] ${r.encounter_type}:
+  Chief Complaint: ${r.chief_complaint || 'Not documented'}
+  Assessment: ${r.assessment || 'Not documented'}
+  Plan: ${r.plan || 'Not documented'}`
+).join('\n\n---\n\n')}` : 'No previous notes available'}
+`;
+
+        userPrompt = `${autoContext}
+
+Generate a comprehensive ${data.noteType || 'progress'} note that:
+1. Summarizes the patient's current clinical status based on all available data
+2. Identifies trends (improving, stable, declining) in vital signs and clinical parameters
+3. Notes any concerning findings, abnormal values, or red flags
+4. Provides a data-driven assessment of the clinical situation
+5. Suggests appropriate next steps in the plan based on the data
+6. Clearly indicates what critical information is missing or unavailable
+
+Structure as a proper SOAP note. Remember to add the auto-generated disclaimer at the end.`;
+        break;
+
       case 'diagnosis_support':
         systemPrompt = `You are a clinical decision support AI. Provide differential diagnosis suggestions based on symptoms and patient data. Include likelihood assessment and recommended next steps. Always emphasize that this is for educational/support purposes only and final diagnosis must be made by qualified healthcare professionals.`;
         userPrompt = `Based on these symptoms and findings: ${data.symptoms}, provide differential diagnosis suggestions with clinical reasoning and recommended diagnostic workup.`;
