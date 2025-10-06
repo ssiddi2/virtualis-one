@@ -77,24 +77,31 @@ class AudioQueue {
   private async playNext() {
     if (this.queue.length === 0) {
       this.isPlaying = false;
+      console.log('🎵 Audio queue empty, playback stopped');
       return;
     }
 
     this.isPlaying = true;
     const audioData = this.queue.shift()!;
+    console.log(`🔊 Playing audio chunk (${audioData.length} bytes), ${this.queue.length} remaining in queue`);
 
     try {
       const wavData = this.createWavFromPCM(audioData);
       const audioBuffer = await this.audioContext.decodeAudioData(wavData.buffer);
       
+      console.log(`🎵 Audio decoded: ${audioBuffer.duration.toFixed(2)}s, ${audioBuffer.sampleRate}Hz`);
+      
       const source = this.audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(this.audioContext.destination);
       
-      source.onended = () => this.playNext();
+      source.onended = () => {
+        console.log('✅ Audio chunk finished playing');
+        this.playNext();
+      };
       source.start(0);
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error('❌ Error playing audio:', error);
       this.playNext();
     }
   }
@@ -188,17 +195,22 @@ export class AmbientVoiceProcessor {
 
       this.ws.onmessage = async (event) => {
         const data = JSON.parse(event.data);
-        console.log('Received message:', data.type);
+        console.log('📨 Received message:', data.type);
 
         if (data.type === 'response.audio.delta') {
+          console.log('🎵 Audio chunk received, size:', data.delta?.length || 0);
           const binaryString = atob(data.delta);
           const bytes = new Uint8Array(binaryString.length);
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
+          console.log('🔊 Adding audio to playback queue');
           await this.audioQueue?.addToQueue(bytes);
+        } else if (data.type === 'response.audio.done') {
+          console.log('✅ Audio playback complete');
         } else if (data.type === 'response.function_call_arguments.done') {
           // Handle function calls for EMR navigation and documentation
+          console.log('⚡ Function call:', data);
           this.handleFunctionCall(data);
         }
 

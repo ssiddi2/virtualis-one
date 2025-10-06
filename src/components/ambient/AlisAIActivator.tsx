@@ -1,12 +1,45 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAlisAI } from '@/contexts/AlisAIContext';
-import { Mic, Sparkles } from 'lucide-react';
+import { useAmbientEMR } from '@/hooks/useAmbientEMR';
+import { Mic, Sparkles, Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 export const AlisAIActivator = () => {
-  const { isActive, setActive } = useAlisAI();
+  const { isActive, setActive, setMinimized } = useAlisAI();
+  const { startAmbientMode } = useAmbientEMR();
+  const { toast } = useToast();
+  const [isActivating, setIsActivating] = useState(false);
 
   if (isActive) return null;
+
+  const handleActivate = async () => {
+    setIsActivating(true);
+    try {
+      // Activate the floating panel
+      setActive(true);
+      setMinimized(false);
+      
+      // Auto-connect to ambient mode
+      await startAmbientMode();
+      
+      toast({
+        title: "Alis AI Activated",
+        description: "Voice-controlled clinical assistant is ready",
+      });
+    } catch (error) {
+      console.error('Failed to activate Alis AI:', error);
+      toast({
+        title: "Activation Failed",
+        description: "Could not start ambient mode. Please try again.",
+        variant: "destructive",
+      });
+      setActive(false);
+    } finally {
+      setIsActivating(false);
+    }
+  };
 
   return (
     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
@@ -27,15 +60,25 @@ export const AlisAIActivator = () => {
           Activate Alis AI for voice-controlled documentation, real-time clinical support, and ambient order entry.
         </p>
         <Button
-          onClick={() => setActive(true)}
+          onClick={handleActivate}
           className="w-full"
           size="lg"
+          disabled={isActivating}
         >
-          <Mic className="mr-2 h-4 w-4" />
-          Activate Alis AI
+          {isActivating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Starting Alis...
+            </>
+          ) : (
+            <>
+              <Mic className="mr-2 h-4 w-4" />
+              Start Alis AI
+            </>
+          )}
         </Button>
         <p className="text-xs text-center text-muted-foreground">
-          Say "Hey Alis" to wake the assistant
+          Automatically connects when you activate
         </p>
       </CardContent>
     </Card>

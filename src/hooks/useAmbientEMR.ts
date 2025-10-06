@@ -17,6 +17,8 @@ interface AmbientMessage {
 export const useAmbientEMR = (specialty?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentAction, setCurrentAction] = useState<string>('');
   const [wakeWordActive, setWakeWordActive] = useState(false);
   const [messages, setMessages] = useState<AmbientMessage[]>([]);
   const [processor, setProcessor] = useState<AmbientVoiceProcessor | null>(null);
@@ -54,6 +56,22 @@ export const useAmbientEMR = (specialty?: string) => {
       setIsListening(true);
     } else if (data.type === 'input_audio_buffer.speech_stopped') {
       setIsListening(false);
+    }
+
+    // Handle AI speaking status
+    if (data.type === 'response.audio.delta') {
+      setIsSpeaking(true);
+      console.log('🔊 AI is speaking (audio delta received)');
+    } else if (data.type === 'response.audio.done') {
+      setIsSpeaking(false);
+      console.log('✅ AI finished speaking');
+    }
+
+    // Handle function execution
+    if (data.type === 'response.function_call_arguments.done') {
+      const functionName = JSON.parse(data.arguments || '{}');
+      setCurrentAction(`Executing: ${functionName.section || functionName.order_type || 'action'}`);
+      setTimeout(() => setCurrentAction(''), 3000);
     }
   }, []);
 
@@ -320,6 +338,8 @@ export const useAmbientEMR = (specialty?: string) => {
   return {
     isConnected,
     isListening,
+    isSpeaking,
+    currentAction,
     wakeWordActive,
     messages,
     currentContext,

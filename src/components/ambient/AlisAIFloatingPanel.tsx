@@ -1,27 +1,29 @@
 import { useState, useEffect } from 'react';
-import { X, Minus, Maximize2, GripVertical } from 'lucide-react';
+import { X, Minus, Maximize2, GripVertical, TestTube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useAlisAI } from '@/contexts/AlisAIContext';
 import { useAmbientEMR } from '@/hooks/useAmbientEMR';
 import { AlisAIFloatingButton } from './AlisAIFloatingButton';
-import AmbientStatusIndicator from './AmbientStatusIndicator';
+import { ConversationThread } from './ConversationThread';
+import { StatusBar } from './StatusBar';
+import { useToast } from '@/components/ui/use-toast';
 
 export const AlisAIFloatingPanel = () => {
   const { isActive, isMinimized, isExpanded, currentContext, setActive, setMinimized, setExpanded } = useAlisAI();
   const {
     isConnected,
     isListening,
+    isSpeaking,
     messages,
-    startAmbientMode,
+    currentAction,
     stopAmbientMode,
     sendVoiceCommand,
     getAvailableCommands,
   } = useAmbientEMR();
+  const { toast } = useToast();
 
   const [position, setPosition] = useState({ x: window.innerWidth - 400, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -77,12 +79,25 @@ export const AlisAIFloatingPanel = () => {
 
   if (!isActive) return null;
 
-  const handleToggleConnection = async () => {
-    if (isConnected) {
-      await stopAmbientMode();
-    } else {
-      await startAmbientMode();
-    }
+  const handleDisconnect = async () => {
+    await stopAmbientMode();
+    setActive(false);
+  };
+
+  const handleTestCommand = () => {
+    sendVoiceCommand("Hello Alis, please tell me the current time and confirm you can hear me");
+    toast({
+      title: "Test Command Sent",
+      description: "Testing Alis AI response",
+    });
+  };
+
+  const getStatusType = () => {
+    if (!isConnected) return 'disconnected';
+    if (currentAction) return 'executing';
+    if (isSpeaking) return 'speaking';
+    if (isListening) return 'listening';
+    return 'processing';
   };
 
   const getContextDisplay = () => {
@@ -113,7 +128,7 @@ export const AlisAIFloatingPanel = () => {
           isListening={isListening}
           isConnected={isConnected}
           onExpand={() => setMinimized(false)}
-          onToggle={handleToggleConnection}
+          onToggle={handleDisconnect}
         />
       </div>
     );
@@ -147,10 +162,7 @@ export const AlisAIFloatingPanel = () => {
         </div>
         
         <div className="flex items-center gap-1">
-          <AmbientStatusIndicator
-            isConnected={isConnected}
-            isListening={isListening}
-          />
+          <StatusBar status={getStatusType()} action={currentAction} />
           <Button
             size="icon"
             variant="ghost"
@@ -171,7 +183,7 @@ export const AlisAIFloatingPanel = () => {
             size="icon"
             variant="ghost"
             className="h-7 w-7"
-            onClick={() => setActive(false)}
+            onClick={handleDisconnect}
           >
             <X className="h-3 w-3" />
           </Button>
@@ -187,101 +199,103 @@ export const AlisAIFloatingPanel = () => {
         </TabsList>
 
         <TabsContent value="activity" className="p-3">
-          <ScrollArea className={cn('w-full', isExpanded ? 'h-[600px]' : 'h-[380px]')}>
-            <div className="space-y-2">
-              {messages.length === 0 ? (
-                <div className="text-center text-sm text-muted-foreground py-8">
-                  <p>No activity yet</p>
-                  <p className="text-xs mt-1">Say "Hey Alis" to start</p>
-                </div>
-              ) : (
-                messages.slice().reverse().map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={cn(
-                      'p-2 rounded text-xs',
-                      msg.type === 'transcript' && 'bg-primary/10',
-                      msg.type === 'function_call' && 'bg-accent/10',
-                      msg.type === 'voice_activity' && 'bg-muted/50'
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <Badge variant="outline" className="text-xs">
-                        {msg.type}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(msg.timestamp).toLocaleTimeString()}
-                      </span>
-                    </div>
-                    <p className="text-sm">{msg.content}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+          <ConversationThread messages={messages} isExpanded={isExpanded} />
         </TabsContent>
 
-        <TabsContent value="commands" className="p-3">
-          <ScrollArea className={cn('w-full', isExpanded ? 'h-[600px]' : 'h-[380px]')}>
-            <div className="space-y-2">
-              <div className="text-xs text-muted-foreground mb-2">
-                Available voice commands:
-              </div>
-              <div className="text-xs text-muted-foreground whitespace-pre-wrap">
-                {getAvailableCommands()}
-              </div>
+        <TabsContent value="commands" className="p-3 space-y-4">
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium">Quick Test:</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={handleTestCommand}
+              disabled={!isConnected}
+            >
+              <TestTube className="mr-2 h-3 w-3" />
+              Test Alis Response
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium">Clinical Commands:</p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sendVoiceCommand('show patient chart')}
+                disabled={!isConnected}
+              >
+                Patient Chart
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sendVoiceCommand('create progress note')}
+                disabled={!isConnected}
+              >
+                Progress Note
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sendVoiceCommand('order labs')}
+                disabled={!isConnected}
+              >
+                Order Labs
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sendVoiceCommand('view medications')}
+                disabled={!isConnected}
+              >
+                Medications
+              </Button>
             </div>
-          </ScrollArea>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium">Available Commands:</p>
+            <div className="text-xs text-muted-foreground whitespace-pre-wrap bg-muted/30 p-3 rounded-md max-h-[200px] overflow-auto">
+              {getAvailableCommands()}
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="control" className="p-3">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Ambient Mode</span>
+            <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Connection Status</span>
+                <StatusBar status={getStatusType()} action={currentAction} />
+              </div>
+              
+              {isConnected && (
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• Voice input: Active</p>
+                  <p>• Audio output: {isSpeaking ? 'Speaking' : 'Ready'}</p>
+                  <p>• Context: {getContextDisplay()}</p>
+                </div>
+              )}
+
               <Button
-                variant={isConnected ? 'destructive' : 'default'}
+                variant="destructive"
                 size="sm"
-                onClick={handleToggleConnection}
+                className="w-full"
+                onClick={handleDisconnect}
               >
-                {isConnected ? 'Disconnect' : 'Connect'}
+                Disconnect & Close
               </Button>
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Quick Commands:</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => sendVoiceCommand('show patient chart')}
-                  disabled={!isConnected}
-                >
-                  Patient Chart
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => sendVoiceCommand('create progress note')}
-                  disabled={!isConnected}
-                >
-                  Progress Note
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => sendVoiceCommand('order labs')}
-                  disabled={!isConnected}
-                >
-                  Order Labs
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => sendVoiceCommand('view medications')}
-                  disabled={!isConnected}
-                >
-                  Medications
-                </Button>
+              <p className="text-xs text-muted-foreground font-medium">Troubleshooting:</p>
+              <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-md space-y-1">
+                <p>• Check browser console for audio logs</p>
+                <p>• Ensure microphone permissions granted</p>
+                <p>• Try the test button in Commands tab</p>
+                <p>• Look for "Speaking" status when AI responds</p>
               </div>
             </div>
           </div>
