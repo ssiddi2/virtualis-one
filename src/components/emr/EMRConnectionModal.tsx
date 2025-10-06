@@ -48,47 +48,20 @@ const EMRConnectionModal: React.FC<EMRConnectionModalProps> = ({
 
   const connectionStages: ConnectionStage[] = [
     {
-      id: 'auth',
-      label: 'Authentication',
-      description: 'Establishing secure connection protocols',
+      id: 'secure',
+      label: 'Secure Connection',
+      description: `Authenticating with ${hospital?.emrType} and establishing secure handshake`,
       icon: <Shield className="h-5 w-5" />,
-      duration: 2000,
+      duration: 1500,
       progress: 0,
       status: 'pending'
     },
     {
-      id: 'handshake',
-      label: 'EMR Handshake',
-      description: `Connecting to ${hospital?.emrType} systems`,
-      icon: <Database className="h-5 w-5" />,
-      duration: 3000,
-      progress: 0,
-      status: 'pending'
-    },
-    {
-      id: 'sync',
-      label: 'Data Synchronization',
-      description: 'Syncing patient data and medical records',
-      icon: <Activity className="h-5 w-5" />,
-      duration: 2500,
-      progress: 0,
-      status: 'pending'
-    },
-    {
-      id: 'ai_calibration',
-      label: 'AI Calibration',
-      description: 'Initializing Virtualis AI clinical support',
+      id: 'initialize',
+      label: 'Initializing Workspace',
+      description: 'Syncing data and activating Virtualis AI features',
       icon: <Brain className="h-5 w-5" />,
-      duration: 2000,
-      progress: 0,
-      status: 'pending'
-    },
-    {
-      id: 'ready',
-      label: 'System Ready',
-      description: 'EMR connection established successfully',
-      icon: <CheckCircle className="h-5 w-5" />,
-      duration: 1000,
+      duration: 1500,
       progress: 0,
       status: 'pending'
     }

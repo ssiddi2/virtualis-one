@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Hospital, 
   Search,
@@ -44,6 +47,8 @@ const SimpleHospitalSelector: React.FC<HospitalSelectorProps> = ({
   const [showHospitalDetails, setShowHospitalDetails] = useState<string | null>(null);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
   const [selectedHospitalForConnection, setSelectedHospitalForConnection] = useState<EnhancedHospital | null>(null);
+  const [rememberHospital, setRememberHospital] = useState(false);
+  const { user } = useAuth();
 
   // Filtered hospitals based on role and filters
   const filteredHospitals = useMemo(() => {
@@ -73,10 +78,28 @@ const SimpleHospitalSelector: React.FC<HospitalSelectorProps> = ({
     setShowConnectionModal(true);
   };
 
-  const handleConnectionComplete = () => {
+  const handleConnectionComplete = async () => {
     if (selectedHospitalForConnection) {
+      // Save hospital preference if remember is checked
+      if (rememberHospital && user) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ hospital_id: selectedHospitalForConnection.id })
+            .eq('id', user.id);
+          
+          toast({
+            title: "Hospital Saved",
+            description: `${selectedHospitalForConnection.name} will be your default hospital`,
+          });
+        } catch (error) {
+          console.error('Failed to save hospital preference:', error);
+        }
+      }
+      
       onSelectHospital(selectedHospitalForConnection.id);
       setSelectedHospitalForConnection(null);
+      setRememberHospital(false);
     }
   };
 
@@ -337,15 +360,31 @@ const SimpleHospitalSelector: React.FC<HospitalSelectorProps> = ({
         )}
 
         {showConnectionModal && selectedHospitalForConnection && (
-          <EMRConnectionModal
-            hospital={selectedHospitalForConnection}
-            isOpen={showConnectionModal}
-            onClose={() => {
-              setShowConnectionModal(false);
-              setSelectedHospitalForConnection(null);
-            }}
-            onConnectionComplete={handleConnectionComplete}
-          />
+          <div>
+            <div className="mb-4 flex items-center space-x-2 justify-center">
+              <Checkbox 
+                id="remember-hospital" 
+                checked={rememberHospital}
+                onCheckedChange={(checked) => setRememberHospital(checked as boolean)}
+              />
+              <Label 
+                htmlFor="remember-hospital" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Remember this hospital for next time
+              </Label>
+            </div>
+            <EMRConnectionModal
+              hospital={selectedHospitalForConnection}
+              isOpen={showConnectionModal}
+              onClose={() => {
+                setShowConnectionModal(false);
+                setSelectedHospitalForConnection(null);
+                setRememberHospital(false);
+              }}
+              onConnectionComplete={handleConnectionComplete}
+            />
+          </div>
         )}
       </div>
     </div>
