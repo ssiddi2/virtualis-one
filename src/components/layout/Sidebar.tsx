@@ -56,7 +56,7 @@ export function Sidebar({ className }: SidebarProps) {
         <div className="px-3 py-2">
           <div className="flex items-center gap-2 px-4 mb-8">
             <img 
-              src="/lovable-uploads/alis-ai-logo.png" 
+              src="/lovable-uploads/9ce8bfbd-79fd-4ea8-9589-5e4a4307b294.png" 
               alt="Virtualis Logo" 
               className="h-10 w-10"
             />
