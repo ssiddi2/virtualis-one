@@ -9,7 +9,7 @@ import { useAmbientEMR } from '@/hooks/useAmbientEMR';
 import { AlisAIFloatingButton } from './AlisAIFloatingButton';
 import { ConversationThread } from './ConversationThread';
 import { StatusBar } from './StatusBar';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export const AlisAIFloatingPanel = () => {
   const { isActive, isMinimized, isExpanded, currentContext, setActive, setMinimized, setExpanded } = useAlisAI();
@@ -23,7 +23,6 @@ export const AlisAIFloatingPanel = () => {
     sendVoiceCommand,
     getAvailableCommands,
   } = useAmbientEMR();
-  const { toast } = useToast();
 
   const [position, setPosition] = useState({ x: window.innerWidth - 400, y: 100 });
   const [isDragging, setIsDragging] = useState(false);

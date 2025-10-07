@@ -8,6 +8,7 @@ export class AudioRecorder {
 
   async start() {
     try {
+      console.log('[AudioRecorder] 🎤 Requesting microphone access...');
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: 24000,
@@ -17,28 +18,43 @@ export class AudioRecorder {
           autoGainControl: true
         }
       });
-      
+
+      console.log('[AudioRecorder] 🎵 Creating AudioContext at 24kHz...');
       this.audioContext = new AudioContext({
         sampleRate: 24000,
       });
-      
+
+      console.log('[AudioRecorder] ✓ Actual sample rate:', this.audioContext.sampleRate, 'Hz');
+
       this.source = this.audioContext.createMediaStreamSource(this.stream);
       this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
-      
+
       this.processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
-        this.onAudioData(new Float32Array(inputData));
+        const audioData = new Float32Array(inputData);
+        
+        // Calculate audio energy to verify we're capturing sound
+        const energy = audioData.reduce((sum, val) => sum + Math.abs(val), 0) / audioData.length;
+        
+        if (energy > 0.001) {
+          console.log('[AudioRecorder] 📊 Audio chunk:', audioData.length, 'samples, energy:', energy.toFixed(4));
+        }
+        
+        this.onAudioData(audioData);
       };
-      
+
       this.source.connect(this.processor);
       this.processor.connect(this.audioContext.destination);
+
+      console.log('[AudioRecorder] ✓ Started successfully');
     } catch (error) {
-      console.error('Error accessing microphone:', error);
+      console.error('[AudioRecorder] ✗ Error accessing microphone:', error);
       throw error;
     }
   }
 
   stop() {
+    console.log('[AudioRecorder] Stopping...');
     if (this.source) {
       this.source.disconnect();
       this.source = null;
@@ -55,6 +71,7 @@ export class AudioRecorder {
       this.audioContext.close();
       this.audioContext = null;
     }
+    console.log('[AudioRecorder] ✓ Stopped');
   }
 }
 
@@ -69,6 +86,7 @@ class AudioQueue {
 
   async addToQueue(audioData: Uint8Array) {
     this.queue.push(audioData);
+    console.log('[AudioQueue] ➕ Added chunk, queue size:', this.queue.length);
     if (!this.isPlaying) {
       await this.playNext();
     }
@@ -77,41 +95,43 @@ class AudioQueue {
   private async playNext() {
     if (this.queue.length === 0) {
       this.isPlaying = false;
-      console.log('🎵 Audio queue empty, playback stopped');
+      console.log('[AudioQueue] ✓ Queue empty, playback stopped');
       return;
     }
 
     this.isPlaying = true;
     const audioData = this.queue.shift()!;
-    console.log(`🔊 Playing audio chunk (${audioData.length} bytes), ${this.queue.length} remaining in queue`);
+    console.log(`[AudioQueue] 🔊 Playing chunk (${audioData.length} bytes), ${this.queue.length} remaining`);
 
     try {
       const wavData = this.createWavFromPCM(audioData);
       const audioBuffer = await this.audioContext.decodeAudioData(wavData.buffer);
       
-      console.log(`🎵 Audio decoded: ${audioBuffer.duration.toFixed(2)}s, ${audioBuffer.sampleRate}Hz`);
+      console.log(`[AudioQueue] ✓ Decoded: ${audioBuffer.duration.toFixed(2)}s @ ${audioBuffer.sampleRate}Hz`);
       
       const source = this.audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(this.audioContext.destination);
       
       source.onended = () => {
-        console.log('✅ Audio chunk finished playing');
+        console.log('[AudioQueue] ✓ Chunk finished');
         this.playNext();
       };
       source.start(0);
     } catch (error) {
-      console.error('❌ Error playing audio:', error);
+      console.error('[AudioQueue] ✗ Error playing audio:', error);
       this.playNext();
     }
   }
 
   private createWavFromPCM(pcmData: Uint8Array): Uint8Array {
+    // Convert bytes to 16-bit samples (little-endian)
     const int16Data = new Int16Array(pcmData.length / 2);
     for (let i = 0; i < pcmData.length; i += 2) {
       int16Data[i / 2] = (pcmData[i + 1] << 8) | pcmData[i];
     }
     
+    // Create WAV header
     const wavHeader = new ArrayBuffer(44);
     const view = new DataView(wavHeader);
     
@@ -147,18 +167,31 @@ class AudioQueue {
     
     return wavArray;
   }
+
+  clear() {
+    this.queue = [];
+    this.isPlaying = false;
+    console.log('[AudioQueue] Cleared');
+  }
 }
 
 export const encodeAudioForAPI = (float32Array: Float32Array): string => {
+  // Convert Float32Array to Int16Array (PCM16 format - little-endian)
   const int16Array = new Int16Array(float32Array.length);
+  
   for (let i = 0; i < float32Array.length; i++) {
+    // Clamp value between -1 and 1
     const s = Math.max(-1, Math.min(1, float32Array[i]));
+    // Convert to 16-bit PCM
     int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
   }
   
+  // Create Uint8Array from Int16Array buffer (preserves little-endian byte order)
   const uint8Array = new Uint8Array(int16Array.buffer);
+  
+  // Convert to base64 in chunks to avoid stack overflow
   let binary = '';
-  const chunkSize = 0x8000;
+  const chunkSize = 0x8000; // 32KB chunks
   
   for (let i = 0; i < uint8Array.length; i += chunkSize) {
     const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
@@ -182,61 +215,74 @@ export class AmbientVoiceProcessor {
 
   async connect() {
     try {
+      console.log('[AmbientVoice] 🔌 Connecting...');
+      
       this.audioContext = new AudioContext({ sampleRate: 24000 });
       this.audioQueue = new AudioQueue(this.audioContext);
 
       const wsUrl = `wss://ourfwvlbeokoxfgftyrs.supabase.co/functions/v1/ambient-voice-processor`;
+      console.log('[AmbientVoice] 🌐 WebSocket URL:', wsUrl);
+      
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('Connected to ambient voice processor');
+        console.log('[AmbientVoice] ✓ Connected to ambient voice processor');
         this.startAudioRecording();
       };
 
       this.ws.onmessage = async (event) => {
         const data = JSON.parse(event.data);
-        console.log('📨 Received message:', data.type);
+        console.log('[AmbientVoice] 📨 Message:', data.type);
 
+        // Handle audio playback
         if (data.type === 'response.audio.delta') {
-          console.log('🎵 Audio chunk received, size:', data.delta?.length || 0);
+          console.log('[AmbientVoice] 🎵 Audio chunk received:', data.delta?.length || 0, 'chars');
           const binaryString = atob(data.delta);
           const bytes = new Uint8Array(binaryString.length);
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-          console.log('🔊 Adding audio to playback queue');
+          console.log('[AmbientVoice] 🔊 Adding', bytes.length, 'bytes to queue');
           await this.audioQueue?.addToQueue(bytes);
         } else if (data.type === 'response.audio.done') {
-          console.log('✅ Audio playback complete');
+          console.log('[AmbientVoice] ✓ Audio response complete');
         } else if (data.type === 'response.function_call_arguments.done') {
-          // Handle function calls for EMR navigation and documentation
-          console.log('⚡ Function call:', data);
+          console.log('[AmbientVoice] ⚡ Function call:', data);
           this.handleFunctionCall(data);
         }
 
+        // Forward all messages to handler
         this.onMessage(data);
       };
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('[AmbientVoice] ✗ WebSocket error:', error);
       };
 
       this.ws.onclose = () => {
-        console.log('WebSocket closed');
+        console.log('[AmbientVoice] 🔌 WebSocket closed');
         this.cleanup();
       };
 
     } catch (error) {
-      console.error('Failed to connect to ambient voice processor:', error);
+      console.error('[AmbientVoice] ✗ Failed to connect:', error);
       throw error;
     }
   }
 
   private async startAudioRecording() {
     try {
+      console.log('[AmbientVoice] 🎤 Starting audio recording...');
+      
       this.audioRecorder = new AudioRecorder((audioData) => {
         if (this.ws?.readyState === WebSocket.OPEN) {
           const encoded = encodeAudioForAPI(audioData);
+          
+          // Only log occasionally to avoid spam
+          if (Math.random() < 0.01) {
+            console.log('[AmbientVoice] 📤 Sending audio:', audioData.length, 'samples →', encoded.length, 'base64 chars');
+          }
+          
           this.ws.send(JSON.stringify({
             type: 'input_audio_buffer.append',
             audio: encoded
@@ -247,9 +293,9 @@ export class AmbientVoiceProcessor {
       await this.audioRecorder.start();
       this.isListening = true;
       this.onListeningChange(true);
-      console.log('Audio recording started');
+      console.log('[AmbientVoice] ✓ Audio recording started');
     } catch (error) {
-      console.error('Failed to start audio recording:', error);
+      console.error('[AmbientVoice] ✗ Failed to start audio recording:', error);
       throw error;
     }
   }
@@ -258,7 +304,7 @@ export class AmbientVoiceProcessor {
     const { call_id, arguments: args } = data;
     const parsedArgs = JSON.parse(args);
     
-    console.log('Function call:', parsedArgs);
+    console.log('[AmbientVoice] 📋 Function call parsed:', parsedArgs);
     
     // Emit navigation events or documentation events
     this.onMessage({
@@ -270,6 +316,8 @@ export class AmbientVoiceProcessor {
 
   sendTextMessage(text: string) {
     if (this.ws?.readyState === WebSocket.OPEN) {
+      console.log('[AmbientVoice] 💬 Sending text message:', text);
+      
       const event = {
         type: 'conversation.item.create',
         item: {
@@ -285,18 +333,22 @@ export class AmbientVoiceProcessor {
   }
 
   disconnect() {
+    console.log('[AmbientVoice] 🔌 Disconnecting...');
     this.cleanup();
   }
 
   private cleanup() {
     this.audioRecorder?.stop();
     this.audioRecorder = null;
+    this.audioQueue?.clear();
+    this.audioQueue = null;
     this.ws?.close();
     this.ws = null;
     this.audioContext?.close();
     this.audioContext = null;
     this.isListening = false;
     this.onListeningChange(false);
+    console.log('[AmbientVoice] ✓ Cleanup complete');
   }
 
   get isConnected() {

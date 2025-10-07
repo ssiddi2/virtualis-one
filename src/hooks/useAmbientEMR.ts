@@ -3,7 +3,7 @@ import { AmbientVoiceProcessor } from '@/utils/AmbientVoiceProcessor';
 import { WakeWordDetector } from '@/utils/WakeWordDetector';
 import { ClinicalContextManager } from '@/utils/ClinicalContextManager';
 import { VoiceCommandLibrary } from '@/utils/VoiceCommandLibrary';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 interface AmbientMessage {
@@ -26,52 +26,115 @@ export const useAmbientEMR = (specialty?: string) => {
   const [contextManager, setContextManager] = useState<ClinicalContextManager | null>(null);
   const [commandLibrary, setCommandLibrary] = useState<VoiceCommandLibrary | null>(null);
   const [currentContext, setCurrentContext] = useState<any>({});
-  const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleMessage = useCallback((data: any) => {
+  const addMessage = useCallback((msgData: Partial<AmbientMessage>) => {
     const message: AmbientMessage = {
-      id: Date.now().toString(),
-      type: data.type,
-      content: data.content || data.delta,
+      id: Date.now().toString() + Math.random(),
+      type: msgData.type || 'unknown',
+      content: msgData.content || '',
       timestamp: new Date(),
-      function_call: data.function
+      function_call: msgData.function_call
     };
-
+    
     setMessages(prev => [...prev, message]);
+  }, []);
 
-    // Handle ambient function calls
-    if (data.type === 'ambient_function_call') {
-      handleAmbientFunction(data.function);
+  const handleMessage = useCallback((data: any) => {
+    console.log('[useAmbientEMR] 📨 Message:', data.type);
+    
+    // Handle transcription completed
+    if (data.type === 'conversation.item.input_audio_transcription.completed') {
+      const transcript = data.transcript || '';
+      console.log('[useAmbientEMR] ✓ Transcription:', transcript);
+      addMessage({
+        type: 'user_speech',
+        content: transcript,
+      });
     }
 
-    // Handle transcripts with voice command processing
-    if (data.type === 'response.audio_transcript.delta') {
-      console.log('Transcript:', data.delta);
-      processVoiceCommand(data.delta);
+    // Handle transcription failure - CRITICAL FOR DEBUGGING
+    if (data.type === 'conversation.item.input_audio_transcription.failed') {
+      console.error('[useAmbientEMR] ✗ Transcription failed:', data);
+      toast({
+        title: "Audio Issue",
+        description: "Having trouble hearing you. Try speaking louder or check your microphone.",
+        variant: "destructive",
+      });
+      addMessage({
+        type: 'system_error',
+        content: 'Transcription failed - please try again',
+      });
     }
 
-    // Handle voice activity
+    // Handle voice activity detection
     if (data.type === 'input_audio_buffer.speech_started') {
+      console.log('[useAmbientEMR] 🎤 Speech started');
       setIsListening(true);
-    } else if (data.type === 'input_audio_buffer.speech_stopped') {
+    }
+
+    if (data.type === 'input_audio_buffer.speech_stopped') {
+      console.log('[useAmbientEMR] 🎤 Speech stopped');
       setIsListening(false);
     }
 
     // Handle AI speaking status
     if (data.type === 'response.audio.delta') {
       setIsSpeaking(true);
-      console.log('🔊 AI is speaking (audio delta received)');
-    } else if (data.type === 'response.audio.done') {
-      setIsSpeaking(false);
-      console.log('✅ AI finished speaking');
     }
 
-    // Handle function execution
+    if (data.type === 'response.audio.done') {
+      console.log('[useAmbientEMR] 🔊 AI finished speaking');
+      setTimeout(() => setIsSpeaking(false), 500);
+    }
+
+    // Handle AI text transcript
+    if (data.type === 'response.audio_transcript.delta') {
+      const delta = data.delta || '';
+      addMessage({
+        type: 'assistant_speech',
+        content: delta,
+      });
+    }
+
+    // Handle function calls
     if (data.type === 'response.function_call_arguments.done') {
-      const functionName = JSON.parse(data.arguments || '{}');
-      setCurrentAction(`Executing: ${functionName.section || functionName.order_type || 'action'}`);
-      setTimeout(() => setCurrentAction(''), 3000);
+      const functionName = data.name || 'action';
+      console.log('[useAmbientEMR] ⚡ Function call:', functionName);
+      setCurrentAction(functionName);
+      addMessage({
+        type: 'ambient_function_call',
+        content: `Executing: ${functionName}`,
+        function_call: data,
+      });
+
+      executeFunctionCall(data);
+    }
+
+    // Handle response complete
+    if (data.type === 'response.done') {
+      console.log('[useAmbientEMR] ✓ Response complete');
+      setCurrentAction('');
+    }
+
+    // Process voice commands from transcript
+    if (data.type === 'response.audio_transcript.delta') {
+      processVoiceCommand(data.delta);
+    }
+
+    // Handle ambient function calls
+    if (data.type === 'ambient_function_call') {
+      handleAmbientFunction(data.function);
+    }
+  }, []);
+
+  const executeFunctionCall = useCallback((data: any) => {
+    try {
+      const functionArgs = JSON.parse(data.arguments || '{}');
+      console.log('[useAmbientEMR] 🔧 Executing function:', functionArgs);
+      handleAmbientFunction(functionArgs);
+    } catch (error) {
+      console.error('[useAmbientEMR] ✗ Failed to execute function:', error);
     }
   }, []);
 
@@ -104,7 +167,7 @@ export const useAmbientEMR = (specialty?: string) => {
     if (commandMatch) {
       executeVoiceCommand(commandMatch.command, commandMatch.params);
     }
-  }, [commandLibrary, contextManager, toast]);
+  }, [commandLibrary, contextManager]);
 
   const executeVoiceCommand = useCallback((command: any, params?: any) => {
     const result = command.action(params);
@@ -147,12 +210,12 @@ export const useAmbientEMR = (specialty?: string) => {
         break;
       
       default:
-        console.log('Unhandled command result:', result);
+        console.log('[useAmbientEMR] Unhandled command result:', result);
     }
-  }, [navigate, toast, contextManager]);
+  }, [navigate, contextManager]);
 
   const handleAmbientFunction = useCallback((functionCall: any) => {
-    console.log('Handling ambient function:', functionCall);
+    console.log('[useAmbientEMR] 🎯 Handling ambient function:', functionCall);
 
     switch (functionCall.section || functionCall.order_type || functionCall.note_type) {
       case 'patient_chart':
@@ -202,9 +265,9 @@ export const useAmbientEMR = (specialty?: string) => {
         break;
 
       default:
-        console.log('Unhandled function call:', functionCall);
+        console.log('[useAmbientEMR] Unhandled function call:', functionCall);
     }
-  }, [navigate, toast]);
+  }, [navigate]);
 
   const startWakeWordDetection = useCallback(async () => {
     try {
@@ -221,7 +284,7 @@ export const useAmbientEMR = (specialty?: string) => {
         description: "Say 'Hey Virtualis' to activate ambient mode",
       });
     } catch (error) {
-      console.error('Failed to start wake word detection:', error);
+      console.error('[useAmbientEMR] ✗ Failed to start wake word:', error);
       toast({
         title: "Wake Word Failed",
         description: "Could not start wake word detection",
@@ -239,10 +302,12 @@ export const useAmbientEMR = (specialty?: string) => {
       title: "Wake Word Stopped",
       description: "Wake word detection disabled",
     });
-  }, [wakeWordDetector, toast]);
+  }, [wakeWordDetector]);
 
   const startAmbientMode = useCallback(async () => {
     try {
+      console.log('[useAmbientEMR] 🚀 Starting ambient mode...');
+      
       // Initialize context manager
       const contextMgr = new ClinicalContextManager((context) => {
         setCurrentContext(context);
@@ -262,36 +327,46 @@ export const useAmbientEMR = (specialty?: string) => {
       setProcessor(voiceProcessor);
       setIsConnected(true);
 
+      console.log('[useAmbientEMR] ✓ Ambient mode active');
       toast({
-        title: "Ambient EMR Active",
-        description: "Voice-controlled EMR is now listening",
+        title: "Alis AI Connected",
+        description: "Listening for your voice commands",
       });
+
+      return true;
     } catch (error) {
-      console.error('Failed to start ambient mode:', error);
+      console.error('[useAmbientEMR] ✗ Failed to start ambient mode:', error);
       toast({
         title: "Connection Failed",
-        description: "Could not connect to ambient voice processor",
+        description: error instanceof Error ? error.message : "Could not connect to ambient voice processor",
         variant: "destructive"
       });
+      return false;
     }
-  }, [handleMessage, toast, specialty]);
+  }, [handleMessage, specialty]);
 
   const stopAmbientMode = useCallback(() => {
+    console.log('[useAmbientEMR] 🛑 Stopping ambient mode...');
+    
     processor?.disconnect();
     setProcessor(null);
     setIsConnected(false);
     setIsListening(false);
+    setIsSpeaking(false);
+    setCurrentAction('');
     setContextManager(null);
     setCommandLibrary(null);
     setCurrentContext({});
 
+    console.log('[useAmbientEMR] ✓ Stopped');
     toast({
-      title: "Ambient EMR Stopped",
-      description: "Voice control has been disabled",
+      title: "Alis AI Disconnected",
+      description: "Voice mode deactivated",
     });
-  }, [processor, toast]);
+  }, [processor]);
 
   const sendVoiceCommand = useCallback((command: string) => {
+    console.log('[useAmbientEMR] 💬 Sending command:', command);
     processor?.sendTextMessage(command);
     // Also process through command library
     processVoiceCommand(command);

@@ -4,12 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAlisAI } from '@/contexts/AlisAIContext';
 import { useAmbientEMR } from '@/hooks/useAmbientEMR';
 import { Mic, Sparkles, Loader2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export const AlisAIActivator = () => {
   const { isActive, setActive, setMinimized } = useAlisAI();
   const { startAmbientMode } = useAmbientEMR();
-  const { toast } = useToast();
   const [isActivating, setIsActivating] = useState(false);
 
   if (isActive) return null;
