@@ -9,6 +9,12 @@ export class AudioRecorder {
   async start() {
     try {
       console.log('[AudioRecorder] 🎤 Requesting microphone access...');
+      
+      // Get available audio devices for debugging
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices.filter(d => d.kind === 'audioinput');
+      console.log('[AudioRecorder] 🎙️ Available microphones:', audioInputs.length);
+      
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: 24000,
@@ -19,12 +25,27 @@ export class AudioRecorder {
         }
       });
 
+      // Log audio track settings
+      const audioTrack = this.stream.getAudioTracks()[0];
+      const settings = audioTrack.getSettings();
+      console.log('[AudioRecorder] 🔧 Audio track settings:', {
+        sampleRate: settings.sampleRate,
+        channelCount: settings.channelCount,
+        echoCancellation: settings.echoCancellation,
+        noiseSuppression: settings.noiseSuppression,
+        autoGainControl: settings.autoGainControl
+      });
+
       console.log('[AudioRecorder] 🎵 Creating AudioContext at 24kHz...');
       this.audioContext = new AudioContext({
         sampleRate: 24000,
       });
 
       console.log('[AudioRecorder] ✓ Actual sample rate:', this.audioContext.sampleRate, 'Hz');
+      
+      if (this.audioContext.sampleRate !== 24000) {
+        console.warn('[AudioRecorder] ⚠️ Sample rate mismatch! Expected 24000, got', this.audioContext.sampleRate);
+      }
 
       this.source = this.audioContext.createMediaStreamSource(this.stream);
       this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
@@ -35,9 +56,15 @@ export class AudioRecorder {
         
         // Calculate audio energy to verify we're capturing sound
         const energy = audioData.reduce((sum, val) => sum + Math.abs(val), 0) / audioData.length;
+        const peak = Math.max(...Array.from(audioData).map(Math.abs));
         
         if (energy > 0.001) {
-          console.log('[AudioRecorder] 📊 Audio chunk:', audioData.length, 'samples, energy:', energy.toFixed(4));
+          console.log('[AudioRecorder] 📊 Audio chunk:', {
+            samples: audioData.length,
+            energy: energy.toFixed(4),
+            peak: peak.toFixed(4),
+            sampleRate: this.audioContext?.sampleRate
+          });
         }
         
         this.onAudioData(audioData);
@@ -46,9 +73,16 @@ export class AudioRecorder {
       this.source.connect(this.processor);
       this.processor.connect(this.audioContext.destination);
 
-      console.log('[AudioRecorder] ✓ Started successfully');
+      console.log('[AudioRecorder] ✓ Started successfully - ready to capture audio');
     } catch (error) {
       console.error('[AudioRecorder] ✗ Error accessing microphone:', error);
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          throw new Error('Microphone permission denied. Please allow microphone access.');
+        } else if (error.name === 'NotFoundError') {
+          throw new Error('No microphone found. Please connect a microphone.');
+        }
+      }
       throw error;
     }
   }
@@ -291,7 +325,13 @@ export class AmbientVoiceProcessor {
             
             // Only log occasionally to avoid spam
             if (this.audioChunkCount++ % 10 === 0) {
-              console.log('[AmbientVoice] 📤 Sending audio:', audioData.length, 'samples →', encoded.length, 'base64 chars');
+              console.log('[AmbientVoice] 📤 Sending audio chunk:', {
+                samples: audioData.length,
+                base64Length: encoded.length,
+                energy: energy.toFixed(4),
+                timeSinceLastSend: now - this.lastAudioSendTime,
+                chunkCount: this.audioChunkCount
+              });
             }
             
             this.ws.send(JSON.stringify({
@@ -300,6 +340,8 @@ export class AmbientVoiceProcessor {
             }));
             
             this.lastAudioSendTime = now;
+          } else if (energy <= 0.001 && this.audioChunkCount++ % 100 === 0) {
+            console.log('[AmbientVoice] 🔇 Silence detected, not sending (energy:', energy.toFixed(6), ')');
           }
         }
       });
@@ -307,7 +349,7 @@ export class AmbientVoiceProcessor {
       await this.audioRecorder.start();
       this.isListening = true;
       this.onListeningChange(true);
-      console.log('[AmbientVoice] ✓ Audio recording started');
+      console.log('[AmbientVoice] ✓ Audio recording started - speak to test');
     } catch (error) {
       console.error('[AmbientVoice] ✗ Failed to start audio recording:', error);
       throw error;

@@ -55,15 +55,28 @@ export const useAmbientEMR = (specialty?: string) => {
 
     // Handle transcription failure - CRITICAL FOR DEBUGGING
     if (data.type === 'conversation.item.input_audio_transcription.failed') {
-      console.error('[useAmbientEMR] ✗ Transcription failed:', data);
+      console.error('[useAmbientEMR] ✗ Transcription failed:', JSON.stringify(data, null, 2));
+      
+      const errorMessage = data.error?.message || 'Unknown error';
+      let userMessage = "Having trouble hearing you.";
+      
+      if (errorMessage.includes('429')) {
+        userMessage = "Rate limit exceeded. Please wait a moment and try again.";
+      } else if (errorMessage.includes('audio format')) {
+        userMessage = "Audio format issue. Check console for details.";
+      } else {
+        userMessage = "Audio transcription failed. Try speaking louder or checking your microphone.";
+      }
+      
       toast({
-        title: "Audio Issue",
-        description: "Having trouble hearing you. Try speaking louder or check your microphone.",
+        title: "Transcription Error",
+        description: userMessage,
         variant: "destructive",
       });
+      
       addMessage({
         type: 'system_error',
-        content: 'Transcription failed - please try again',
+        content: `Transcription failed: ${errorMessage}`,
       });
     }
 
@@ -329,6 +342,11 @@ export const useAmbientEMR = (specialty?: string) => {
     try {
       console.log('[useAmbientEMR] 🚀 Starting ambient mode...');
       
+      toast({
+        title: "Connecting...",
+        description: "Starting Alis AI voice interface",
+      });
+      
       // Initialize context manager
       const contextMgr = new ClinicalContextManager((context) => {
         setCurrentContext(context);
@@ -344,22 +362,33 @@ export const useAmbientEMR = (specialty?: string) => {
         setIsListening
       );
 
+      console.log('[useAmbientEMR] 🔌 Connecting to voice processor...');
       await voiceProcessor.connect();
       setProcessor(voiceProcessor);
       setIsConnected(true);
 
-      console.log('[useAmbientEMR] ✓ Ambient mode active');
+      console.log('[useAmbientEMR] ✓ Ambient mode active - ready to listen');
       toast({
         title: "Alis AI Connected",
-        description: "Listening for your voice commands",
+        description: "I'm listening! Start speaking to test the connection.",
       });
 
       return true;
     } catch (error) {
       console.error('[useAmbientEMR] ✗ Failed to start ambient mode:', error);
+      
+      let errorMessage = "Could not connect to ambient voice processor";
+      if (error instanceof Error) {
+        if (error.message.includes('microphone')) {
+          errorMessage = error.message;
+        } else if (error.message.includes('permission')) {
+          errorMessage = "Microphone permission denied. Please allow access.";
+        }
+      }
+      
       toast({
         title: "Connection Failed",
-        description: error instanceof Error ? error.message : "Could not connect to ambient voice processor",
+        description: errorMessage,
         variant: "destructive"
       });
       return false;

@@ -32,7 +32,7 @@ export const AlisAIFloatingButton = ({
       <img 
         src="/lovable-uploads/alis-ai-logo.png" 
         alt="Alis AI" 
-        className="h-8 w-8 relative z-10"
+        className="h-10 w-10 rounded-full shadow-lg shadow-primary/30 ring-2 ring-primary/20 relative z-10"
       />
       
       <div className="flex items-center gap-1 relative z-10">
