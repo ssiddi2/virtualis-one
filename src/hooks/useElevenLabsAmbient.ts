@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useConversation } from '@11labs/react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ElevenLabsMessage {
   id: string;
@@ -12,7 +13,6 @@ export interface ElevenLabsMessage {
 export const useElevenLabsAmbient = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [messages, setMessages] = useState<ElevenLabsMessage[]>([]);
   const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
   
@@ -20,6 +20,7 @@ export const useElevenLabsAmbient = () => {
     onConnect: () => {
       console.log('[ElevenLabs] ✓ Connected');
       setIsConnected(true);
+      setIsListening(true);
       toast.success('Alis AI Connected', {
         description: 'Voice assistant is ready to help',
       });
@@ -28,41 +29,28 @@ export const useElevenLabsAmbient = () => {
       console.log('[ElevenLabs] ✗ Disconnected');
       setIsConnected(false);
       setIsListening(false);
-      setIsSpeaking(false);
     },
     onMessage: (message) => {
       console.log('[ElevenLabs] Message:', message);
       
-      // Handle different message types
-      if (message.type === 'user_transcript') {
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          type: 'user',
-          content: message.message,
-          timestamp: new Date(),
-        }]);
-        setIsListening(false);
-      } else if (message.type === 'agent_response') {
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          type: 'assistant',
-          content: message.message,
-          timestamp: new Date(),
-        }]);
-      }
+      // Message format: { message: string, source: 'user' | 'ai' }
+      const msgType = message.source === 'user' ? 'user' : 'assistant';
+      
+      setMessages(prev => [...prev, {
+        id: `${Date.now()}-${Math.random()}`,
+        type: msgType,
+        content: message.message,
+        timestamp: new Date(),
+      }]);
     },
     onError: (error) => {
       console.error('[ElevenLabs] ✗ Error:', error);
+      const errorMessage = typeof error === 'string' ? error : 'Failed to connect to voice assistant';
       toast.error('Connection Error', {
-        description: error.message || 'Failed to connect to voice assistant',
+        description: errorMessage,
       });
     },
   });
-
-  // Monitor speaking state from conversation hook
-  useEffect(() => {
-    setIsSpeaking(conversation.isSpeaking || false);
-  }, [conversation.isSpeaking]);
 
   const startAmbientMode = async (agentId: string) => {
     try {
@@ -72,13 +60,29 @@ export const useElevenLabsAmbient = () => {
       // Request microphone access
       await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Start the conversation with the agent ID
+      // Get signed URL from our edge function
+      console.log('[ElevenLabs] Fetching signed URL...');
+      const { data, error } = await supabase.functions.invoke('elevenlabs-session', {
+        body: { agentId }
+      });
+
+      if (error) {
+        console.error('[ElevenLabs] ✗ Failed to get signed URL:', error);
+        throw new Error(error.message || 'Failed to generate session URL');
+      }
+
+      if (!data?.signed_url) {
+        throw new Error('No signed URL received from server');
+      }
+
+      console.log('[ElevenLabs] ✓ Got signed URL, starting session...');
+      
+      // Start the conversation with signed URL
       const conversationId = await conversation.startSession({ 
-        agentId 
+        signedUrl: data.signed_url 
       });
       
       console.log('[ElevenLabs] ✓ Session started:', conversationId);
-      setIsListening(true);
       
     } catch (error) {
       console.error('[ElevenLabs] ✗ Failed to start:', error);
@@ -95,7 +99,6 @@ export const useElevenLabsAmbient = () => {
       await conversation.endSession();
       setIsConnected(false);
       setIsListening(false);
-      setIsSpeaking(false);
       setCurrentAgentId(null);
       
       toast.info('Alis AI Disconnected', {
@@ -118,7 +121,7 @@ export const useElevenLabsAmbient = () => {
     // State
     isConnected,
     isListening,
-    isSpeaking,
+    isSpeaking: conversation.isSpeaking || false,
     messages,
     status: conversation.status,
     currentAgentId,
