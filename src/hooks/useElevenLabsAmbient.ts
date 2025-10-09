@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useConversation } from '@11labs/react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { useAlisAI } from '@/contexts/AlisAIContext';
 
 export interface ElevenLabsMessage {
   id: string;
@@ -15,8 +17,124 @@ export const useElevenLabsAmbient = () => {
   const [isListening, setIsListening] = useState(false);
   const [messages, setMessages] = useState<ElevenLabsMessage[]>([]);
   const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { updateContext, triggerDialog } = useAlisAI();
+  
+  // Client tools for agent to call
+  const clientTools = {
+    navigate_to_patient_chart: async ({ patientId, mrn }: { patientId?: string; mrn?: string }) => {
+      console.log('[ElevenLabs] Client tool: navigate_to_patient_chart', { patientId, mrn });
+      
+      // Add action message
+      setMessages(prev => [...prev, {
+        id: `action-${Date.now()}`,
+        type: 'system',
+        content: `🔄 Opening patient chart ${patientId ? `for patient ${patientId}` : ''}`,
+        timestamp: new Date(),
+      }]);
+      
+      if (patientId) {
+        navigate(`/patients/${patientId}`);
+        updateContext({ currentPatient: { id: patientId, mrn } });
+        toast.success('Opened patient chart', { description: `Patient ID: ${patientId}` });
+        return `Successfully opened patient chart for patient ${patientId}`;
+      }
+      
+      return 'Error: Patient ID required';
+    },
+    
+    navigate_to_page: async ({ page }: { page: string }) => {
+      console.log('[ElevenLabs] Client tool: navigate_to_page', { page });
+      
+      // Add action message
+      setMessages(prev => [...prev, {
+        id: `action-${Date.now()}`,
+        type: 'system',
+        content: `🔄 Navigating to ${page}`,
+        timestamp: new Date(),
+      }]);
+      
+      const validPages: Record<string, string> = {
+        'dashboard': '/',
+        'cpoe': '/cpoe',
+        'clinical': '/clinical',
+        'patients': '/patients',
+        'my-patients': '/my-patients',
+        'ambient': '/ambient',
+      };
+      
+      if (validPages[page.toLowerCase()]) {
+        navigate(validPages[page.toLowerCase()]);
+        toast.success('Navigated', { description: `Opened ${page} page` });
+        return `Successfully navigated to ${page}`;
+      }
+      
+      return `Error: Unknown page "${page}". Available pages: ${Object.keys(validPages).join(', ')}`;
+    },
+    
+    open_order_dialog: async ({ orderType, patientId }: { orderType: string; patientId?: string }) => {
+      console.log('[ElevenLabs] Client tool: open_order_dialog', { orderType, patientId });
+      
+      // Add action message
+      setMessages(prev => [...prev, {
+        id: `action-${Date.now()}`,
+        type: 'system',
+        content: `🔄 Opening ${orderType} order dialog`,
+        timestamp: new Date(),
+      }]);
+      
+      const validOrderTypes = ['lab', 'medication', 'imaging', 'nursing'];
+      
+      if (!validOrderTypes.includes(orderType.toLowerCase())) {
+        return `Error: Invalid order type "${orderType}". Valid types: ${validOrderTypes.join(', ')}`;
+      }
+      
+      // Navigate to CPOE if not already there
+      navigate('/cpoe');
+      
+      // Trigger the dialog through context
+      triggerDialog?.(orderType, patientId);
+      
+      toast.success('Opening order dialog', { description: `${orderType} order` });
+      return `Successfully opened ${orderType} order dialog`;
+    },
+    
+    switch_room: async ({ roomNumber }: { roomNumber: string }) => {
+      console.log('[ElevenLabs] Client tool: switch_room', { roomNumber });
+      
+      // Add action message
+      setMessages(prev => [...prev, {
+        id: `action-${Date.now()}`,
+        type: 'system',
+        content: `🔄 Switching to room ${roomNumber}`,
+        timestamp: new Date(),
+      }]);
+      
+      updateContext({ currentRoom: roomNumber });
+      toast.success('Switched room', { description: `Room ${roomNumber}` });
+      return `Successfully switched to room ${roomNumber}`;
+    },
+    
+    search_patients: async ({ query }: { query: string }) => {
+      console.log('[ElevenLabs] Client tool: search_patients', { query });
+      
+      // Add action message
+      setMessages(prev => [...prev, {
+        id: `action-${Date.now()}`,
+        type: 'system',
+        content: `🔍 Searching for patients: "${query}"`,
+        timestamp: new Date(),
+      }]);
+      
+      // Navigate to patients page with search
+      navigate(`/patients?search=${encodeURIComponent(query)}`);
+      toast.success('Searching patients', { description: query });
+      return `Searching for patients: ${query}`;
+    },
+  };
   
   const conversation = useConversation({
+    clientTools,
     onConnect: () => {
       console.log('[ElevenLabs] ✓ Connected');
       setIsConnected(true);

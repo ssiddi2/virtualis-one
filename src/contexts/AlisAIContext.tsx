@@ -10,11 +10,17 @@ interface AlisAIContextType {
     patientId?: string;
     patientName?: string;
     section?: string;
+    currentRoom?: string;
+    currentPatient?: {
+      id: string;
+      mrn?: string;
+    };
   };
   setActive: (active: boolean) => void;
   setMinimized: (minimized: boolean) => void;
   setExpanded: (expanded: boolean) => void;
   updateContext: (context: Partial<AlisAIContextType['currentContext']>) => void;
+  triggerDialog?: (orderType: string, patientId?: string) => void;
 }
 
 const AlisAIContext = createContext<AlisAIContextType | undefined>(undefined);
@@ -88,6 +94,12 @@ export const AlisAIProvider = ({ children }: AlisAIProviderProps) => {
     setCurrentContext(prev => ({ ...prev, ...context }));
   };
 
+  const triggerDialog = (orderType: string, patientId?: string) => {
+    console.log('[AlisAI] Dialog trigger requested:', orderType, patientId);
+    // This can be enhanced to actually trigger dialogs in the future
+    // For now, it's a placeholder that components can listen to
+  };
+
   return (
     <AlisAIContext.Provider
       value={{
@@ -99,6 +111,7 @@ export const AlisAIProvider = ({ children }: AlisAIProviderProps) => {
         setMinimized,
         setExpanded,
         updateContext,
+        triggerDialog,
       }}
     >
       {children}
