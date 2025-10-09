@@ -9,7 +9,7 @@ import { Mic, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Default ElevenLabs Agent ID - users can create their own in ElevenLabs dashboard
-const DEFAULT_AGENT_ID = 'your-agent-id-here';
+const DEFAULT_AGENT_ID = 'agent_0201k743sxv7fj387c7303r4xv4q';
 
 export const AlisAIActivator = () => {
   const { isActive, setActive, setMinimized } = useAlisAI();
