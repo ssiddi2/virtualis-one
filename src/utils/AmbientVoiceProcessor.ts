@@ -105,7 +105,7 @@ class AudioQueue {
 
     try {
       const wavData = this.createWavFromPCM(audioData);
-      const audioBuffer = await this.audioContext.decodeAudioData(wavData.buffer);
+      const audioBuffer = await this.audioContext.decodeAudioData(wavData.buffer.slice(0) as ArrayBuffer);
       
       console.log(`[AudioQueue] ✓ Decoded: ${audioBuffer.duration.toFixed(2)}s @ ${audioBuffer.sampleRate}Hz`);
       
@@ -207,6 +207,10 @@ export class AmbientVoiceProcessor {
   private audioQueue: AudioQueue | null = null;
   private audioContext: AudioContext | null = null;
   private isListening = false;
+  private audioChunkCount = 0;
+  private lastAudioSendTime = 0;
+  private readonly MIN_SEND_INTERVAL = 100; // Send at most every 100ms
+  private audioBuffer: Float32Array[] = [];
 
   constructor(
     private onMessage: (message: any) => void,
@@ -276,17 +280,27 @@ export class AmbientVoiceProcessor {
       
       this.audioRecorder = new AudioRecorder((audioData) => {
         if (this.ws?.readyState === WebSocket.OPEN) {
-          const encoded = encodeAudioForAPI(audioData);
+          const now = Date.now();
           
-          // Only log occasionally to avoid spam
-          if (Math.random() < 0.01) {
-            console.log('[AmbientVoice] 📤 Sending audio:', audioData.length, 'samples →', encoded.length, 'base64 chars');
+          // Calculate audio energy to filter silence
+          const energy = audioData.reduce((sum, val) => sum + Math.abs(val), 0) / audioData.length;
+          
+          // Only send if we have significant audio and enough time has passed
+          if (energy > 0.001 && (now - this.lastAudioSendTime >= this.MIN_SEND_INTERVAL)) {
+            const encoded = encodeAudioForAPI(audioData);
+            
+            // Only log occasionally to avoid spam
+            if (this.audioChunkCount++ % 10 === 0) {
+              console.log('[AmbientVoice] 📤 Sending audio:', audioData.length, 'samples →', encoded.length, 'base64 chars');
+            }
+            
+            this.ws.send(JSON.stringify({
+              type: 'input_audio_buffer.append',
+              audio: encoded
+            }));
+            
+            this.lastAudioSendTime = now;
           }
-          
-          this.ws.send(JSON.stringify({
-            type: 'input_audio_buffer.append',
-            audio: encoded
-          }));
         }
       });
 
@@ -329,6 +343,16 @@ export class AmbientVoiceProcessor {
       
       this.ws.send(JSON.stringify(event));
       this.ws.send(JSON.stringify({ type: 'response.create' }));
+    }
+  }
+
+  updateVoice(voice: string) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      console.log('[AmbientVoice] 🎤 Updating voice to:', voice);
+      this.ws.send(JSON.stringify({
+        type: 'update_voice',
+        voice
+      }));
     }
   }
 

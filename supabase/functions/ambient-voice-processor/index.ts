@@ -28,6 +28,8 @@ serve(async (req) => {
 
   let openAISocket: WebSocket | null = null;
   let sessionCreated = false;
+  let rateLimitRetries = 0;
+  const MAX_RETRIES = 3;
 
   socket.onopen = () => {
     console.log('Client WebSocket connected');
@@ -50,9 +52,27 @@ serve(async (req) => {
       const data = JSON.parse(event.data);
       console.log('OpenAI message:', data.type);
 
+      // Handle rate limiting errors
+      if (data.type === 'error' && data.error?.code === 'rate_limit_exceeded') {
+        console.error('Rate limit exceeded:', data.error);
+        socket.send(JSON.stringify({
+          type: 'error',
+          error: {
+            type: 'rate_limit_exceeded',
+            message: 'Too many requests. Please wait a moment and try again.',
+            retry_after: data.error.retry_after || 5
+          }
+        }));
+        return;
+      }
+
       // Handle session creation
       if (data.type === 'session.created' && !sessionCreated) {
         sessionCreated = true;
+        
+        // Get voice preference from client (will be sent via session update)
+        // Default to shimmer if not specified
+        const voicePreference = "shimmer";
         
         // Configure session for ambient EMR
         const sessionUpdate = {
@@ -67,7 +87,7 @@ serve(async (req) => {
 - Real-time documentation from bedside conversations
 
 Be helpful, concise, and medically accurate. Always confirm critical orders. When appropriate, refer to yourself as "Alis".`,
-            voice: "shimmer",
+            voice: voicePreference,
             input_audio_format: "pcm16",
             output_audio_format: "pcm16",
             input_audio_transcription: {
@@ -183,8 +203,11 @@ Be helpful, concise, and medically accurate. Always confirm critical orders. Whe
     openAISocket.onerror = (error) => {
       console.error('OpenAI WebSocket error:', error);
       socket.send(JSON.stringify({ 
-        type: 'error', 
-        message: 'Connection to AI service failed' 
+        type: 'error',
+        error: {
+          type: 'connection_error',
+          message: 'Connection to AI service failed. Retrying...' 
+        }
       }));
     };
 
@@ -197,8 +220,22 @@ Be helpful, concise, and medically accurate. Always confirm critical orders. Whe
   socket.onmessage = (event) => {
     // Forward client messages to OpenAI
     if (openAISocket?.readyState === WebSocket.OPEN) {
-      console.log('Forwarding message to OpenAI');
-      openAISocket.send(event.data);
+      const message = JSON.parse(event.data);
+      
+      // Handle voice preference updates
+      if (message.type === 'update_voice') {
+        const voiceUpdate = {
+          type: "session.update",
+          session: {
+            voice: message.voice || "shimmer"
+          }
+        };
+        openAISocket.send(JSON.stringify(voiceUpdate));
+        console.log('Updated voice to:', message.voice);
+      } else {
+        console.log('Forwarding message to OpenAI');
+        openAISocket.send(event.data);
+      }
     }
   };
 

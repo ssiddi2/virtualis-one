@@ -67,6 +67,27 @@ export const useAmbientEMR = (specialty?: string) => {
       });
     }
 
+    // Handle rate limit errors
+    if (data.type === 'error' && data.error?.type === 'rate_limit_exceeded') {
+      console.error('[useAmbientEMR] ✗ Rate limit exceeded');
+      toast({
+        title: "High Demand",
+        description: `Alis is experiencing high demand. Retrying in ${data.error.retry_after || 5} seconds...`,
+        variant: "destructive",
+      });
+      
+      // Auto-retry after the specified delay
+      setTimeout(() => {
+        if (processor) {
+          console.log('[useAmbientEMR] 🔄 Retrying after rate limit...');
+          toast({
+            title: "Reconnecting",
+            description: "Attempting to reconnect to Alis...",
+          });
+        }
+      }, (data.error.retry_after || 5) * 1000);
+    }
+
     // Handle voice activity detection
     if (data.type === 'input_audio_buffer.speech_started') {
       console.log('[useAmbientEMR] 🎤 Speech started');
@@ -372,6 +393,11 @@ export const useAmbientEMR = (specialty?: string) => {
     processVoiceCommand(command);
   }, [processor, processVoiceCommand]);
 
+  const updateVoice = useCallback((voice: string) => {
+    console.log('[useAmbientEMR] 🎤 Updating voice:', voice);
+    processor?.updateVoice(voice);
+  }, [processor]);
+
   const updateClinicalContext = useCallback((contextUpdate: any) => {
     if (contextManager) {
       Object.entries(contextUpdate).forEach(([key, value]) => {
@@ -423,6 +449,7 @@ export const useAmbientEMR = (specialty?: string) => {
     startWakeWordDetection,
     stopWakeWordDetection,
     sendVoiceCommand,
+    updateVoice,
     updateClinicalContext,
     getAvailableCommands,
     processor,

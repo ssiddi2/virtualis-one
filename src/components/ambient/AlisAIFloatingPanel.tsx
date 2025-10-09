@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, Minus, Maximize2, GripVertical, TestTube } from 'lucide-react';
+import { X, Minus, Maximize2, GripVertical, TestTube, Mic2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useAlisAI } from '@/contexts/AlisAIContext';
 import { useAmbientEMR } from '@/hooks/useAmbientEMR';
@@ -10,6 +12,15 @@ import { AlisAIFloatingButton } from './AlisAIFloatingButton';
 import { ConversationThread } from './ConversationThread';
 import { StatusBar } from './StatusBar';
 import { toast } from '@/hooks/use-toast';
+
+const VOICES = [
+  { id: 'alloy', name: 'Alloy', description: 'Neutral and balanced' },
+  { id: 'echo', name: 'Echo', description: 'Clear and direct' },
+  { id: 'fable', name: 'Fable', description: 'Warm and expressive' },
+  { id: 'onyx', name: 'Onyx', description: 'Deep and authoritative' },
+  { id: 'nova', name: 'Nova', description: 'Bright and energetic' },
+  { id: 'shimmer', name: 'Shimmer', description: 'Soft and gentle' },
+];
 
 export const AlisAIFloatingPanel = () => {
   const { isActive, isMinimized, isExpanded, currentContext, setActive, setMinimized, setExpanded } = useAlisAI();
@@ -21,22 +32,29 @@ export const AlisAIFloatingPanel = () => {
     currentAction,
     stopAmbientMode,
     sendVoiceCommand,
+    updateVoice,
     getAvailableCommands,
   } = useAmbientEMR();
 
   const [position, setPosition] = useState({ x: window.innerWidth - 400, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [selectedVoice, setSelectedVoice] = useState('shimmer');
 
-  // Load position from localStorage
+  // Load position and voice from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('alisAIPosition');
-    if (saved) {
+    const savedPosition = localStorage.getItem('alisAIPosition');
+    if (savedPosition) {
       try {
-        setPosition(JSON.parse(saved));
+        setPosition(JSON.parse(savedPosition));
       } catch (e) {
         console.error('Failed to load Alis AI position:', e);
       }
+    }
+
+    const savedVoice = localStorage.getItem('alisAIVoice');
+    if (savedVoice) {
+      setSelectedVoice(savedVoice);
     }
   }, []);
 
@@ -88,6 +106,16 @@ export const AlisAIFloatingPanel = () => {
     toast({
       title: "Test Command Sent",
       description: "Testing Alis AI response",
+    });
+  };
+
+  const handleVoiceChange = (voice: string) => {
+    setSelectedVoice(voice);
+    localStorage.setItem('alisAIVoice', voice);
+    updateVoice(voice);
+    toast({
+      title: "Voice Updated",
+      description: `Alis will now use the ${VOICES.find(v => v.id === voice)?.name} voice`,
     });
   };
 
@@ -144,11 +172,17 @@ export const AlisAIFloatingPanel = () => {
         width: isExpanded ? '600px' : '380px',
         maxHeight: isExpanded ? '700px' : '500px',
       }}
-      className="backdrop-blur-xl bg-background/80 shadow-2xl border border-white/20 overflow-hidden animate-scale-in"
+      className={cn(
+        "backdrop-blur-2xl bg-white/5 dark:bg-black/10 shadow-2xl overflow-hidden animate-scale-in",
+        "border border-white/20",
+        "relative",
+        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/10 before:to-transparent before:pointer-events-none",
+        isListening && "shadow-[0_0_30px_rgba(var(--primary),0.3)]"
+      )}
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between p-3 border-b border-white/10 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 backdrop-blur-sm cursor-move"
+        className="flex items-center justify-between p-3 border-b border-white/10 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 backdrop-blur-xl cursor-move relative z-10"
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center gap-2">
@@ -264,7 +298,7 @@ export const AlisAIFloatingPanel = () => {
 
         <TabsContent value="control" className="p-3">
           <div className="space-y-4">
-            <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+            <div className="bg-muted/30 p-4 rounded-lg space-y-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Connection Status</span>
                 <StatusBar status={getStatusType()} action={currentAction} />
@@ -288,13 +322,36 @@ export const AlisAIFloatingPanel = () => {
               </Button>
             </div>
 
+            <div className="space-y-3 bg-muted/30 p-4 rounded-lg backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <Mic2 className="h-4 w-4 text-primary" />
+                <Label htmlFor="voice-select" className="text-sm font-medium">Alis Voice</Label>
+              </div>
+              <Select value={selectedVoice} onValueChange={handleVoiceChange}>
+                <SelectTrigger id="voice-select" className="w-full">
+                  <SelectValue placeholder="Select voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {VOICES.map(voice => (
+                    <SelectItem key={voice.id} value={voice.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{voice.name}</span>
+                        <span className="text-xs text-muted-foreground">{voice.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground font-medium">Troubleshooting:</p>
-              <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-md space-y-1">
+              <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-md space-y-1 backdrop-blur-sm">
                 <p>• Check browser console for audio logs</p>
                 <p>• Ensure microphone permissions granted</p>
                 <p>• Try the test button in Commands tab</p>
                 <p>• Look for "Speaking" status when AI responds</p>
+                <p>• If rate limited, wait a few seconds and retry</p>
               </div>
             </div>
           </div>
