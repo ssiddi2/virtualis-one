@@ -22,9 +22,15 @@ serve(async (req) => {
   
   const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
   if (!OPENAI_API_KEY) {
-    console.error('OPENAI_API_KEY not found');
-    return new Response("Server configuration error", { status: 500 });
+    console.error('❌ OPENAI_API_KEY not found in environment variables');
+    socket.close(1011, 'OPENAI_API_KEY not configured. Please add it in Supabase Edge Function secrets.');
+    return new Response("Server configuration error: OPENAI_API_KEY not set", { 
+      status: 500,
+      headers: corsHeaders 
+    });
   }
+  
+  console.log('✓ OPENAI_API_KEY found, length:', OPENAI_API_KEY.length);
 
   let openAISocket: WebSocket | null = null;
   let sessionCreated = false;
@@ -52,17 +58,36 @@ serve(async (req) => {
       const data = JSON.parse(event.data);
       console.log('OpenAI message:', data.type);
 
-      // Handle rate limiting errors
+      // Handle rate limiting and transcription errors
       if (data.type === 'error' && data.error?.code === 'rate_limit_exceeded') {
-        console.error('Rate limit exceeded:', data.error);
+        console.error('❌ Rate limit exceeded:', data.error);
         socket.send(JSON.stringify({
           type: 'error',
           error: {
             type: 'rate_limit_exceeded',
-            message: 'Too many requests. Please wait a moment and try again.',
+            message: 'OpenAI rate limit exceeded. Please check your API key billing/quota.',
             retry_after: data.error.retry_after || 5
           }
         }));
+        return;
+      }
+
+      // Handle transcription failures - often due to API key issues
+      if (data.type === 'conversation.item.input_audio_transcription.failed') {
+        console.error('❌ Transcription failed:', data.error);
+        
+        // Check if it's a rate limit issue
+        if (data.error?.message?.includes('429')) {
+          socket.send(JSON.stringify({
+            type: 'error',
+            error: {
+              type: 'api_key_issue',
+              message: 'OpenAI API Key quota exceeded. Please check billing at platform.openai.com'
+            }
+          }));
+        }
+        // Forward the error to client
+        socket.send(event.data);
         return;
       }
 

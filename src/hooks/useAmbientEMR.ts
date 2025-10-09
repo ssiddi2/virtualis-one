@@ -80,25 +80,30 @@ export const useAmbientEMR = (specialty?: string) => {
       });
     }
 
-    // Handle rate limit errors
-    if (data.type === 'error' && data.error?.type === 'rate_limit_exceeded') {
-      console.error('[useAmbientEMR] ✗ Rate limit exceeded');
-      toast({
-        title: "High Demand",
-        description: `Alis is experiencing high demand. Retrying in ${data.error.retry_after || 5} seconds...`,
-        variant: "destructive",
-      });
+    // Handle API key and rate limit errors
+    if (data.type === 'error') {
+      if (data.error?.type === 'api_key_issue') {
+        console.error('[useAmbientEMR] ❌ API Key Issue:', data.error);
+        toast({
+          title: "OpenAI API Key Issue",
+          description: data.error.message || "Please check your OpenAI API key configuration and billing.",
+          variant: "destructive",
+          duration: 10000,
+        });
+        stopAmbientMode();
+        return;
+      }
       
-      // Auto-retry after the specified delay
-      setTimeout(() => {
-        if (processor) {
-          console.log('[useAmbientEMR] 🔄 Retrying after rate limit...');
-          toast({
-            title: "Reconnecting",
-            description: "Attempting to reconnect to Alis...",
-          });
-        }
-      }, (data.error.retry_after || 5) * 1000);
+      if (data.error?.type === 'rate_limit_exceeded') {
+        console.error('[useAmbientEMR] ✗ Rate limit exceeded');
+        toast({
+          title: "Rate Limit Exceeded",
+          description: "OpenAI API quota exceeded. Check platform.openai.com billing.",
+          variant: "destructive",
+          duration: 10000,
+        });
+        return;
+      }
     }
 
     // Handle voice activity detection
