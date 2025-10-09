@@ -1,26 +1,17 @@
 import { useState, useEffect } from 'react';
-import { X, Minus, Maximize2, GripVertical, TestTube, Mic2 } from 'lucide-react';
+import { X, Minus, Maximize2, GripVertical, TestTube, Mic2, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { useAlisAI } from '@/contexts/AlisAIContext';
-import { useAmbientEMR } from '@/hooks/useAmbientEMR';
+import { useElevenLabsAmbient } from '@/hooks/useElevenLabsAmbient';
 import { AlisAIFloatingButton } from './AlisAIFloatingButton';
 import { ConversationThread } from './ConversationThread';
 import { StatusBar } from './StatusBar';
 import { toast } from '@/hooks/use-toast';
-
-const VOICES = [
-  { id: 'alloy', name: 'Alloy', description: 'Neutral and balanced' },
-  { id: 'echo', name: 'Echo', description: 'Clear and direct' },
-  { id: 'fable', name: 'Fable', description: 'Warm and expressive' },
-  { id: 'onyx', name: 'Onyx', description: 'Deep and authoritative' },
-  { id: 'nova', name: 'Nova', description: 'Bright and energetic' },
-  { id: 'shimmer', name: 'Shimmer', description: 'Soft and gentle' },
-];
 
 export const AlisAIFloatingPanel = () => {
   const { isActive, isMinimized, isExpanded, currentContext, setActive, setMinimized, setExpanded } = useAlisAI();
@@ -29,19 +20,16 @@ export const AlisAIFloatingPanel = () => {
     isListening,
     isSpeaking,
     messages,
-    currentAction,
     stopAmbientMode,
-    sendVoiceCommand,
-    updateVoice,
-    getAvailableCommands,
-  } = useAmbientEMR();
+    setVolume: setAudioVolume,
+  } = useElevenLabsAmbient();
 
   const [position, setPosition] = useState({ x: window.innerWidth - 400, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [selectedVoice, setSelectedVoice] = useState('shimmer');
+  const [volume, setVolume] = useState(0.8);
 
-  // Load position and voice from localStorage
+  // Load position and volume from localStorage
   useEffect(() => {
     const savedPosition = localStorage.getItem('alisAIPosition');
     if (savedPosition) {
@@ -52,9 +40,9 @@ export const AlisAIFloatingPanel = () => {
       }
     }
 
-    const savedVoice = localStorage.getItem('alisAIVoice');
-    if (savedVoice) {
-      setSelectedVoice(savedVoice);
+    const savedVolume = localStorage.getItem('alisAIVolume');
+    if (savedVolume) {
+      setVolume(parseFloat(savedVolume));
     }
   }, []);
 
@@ -101,27 +89,15 @@ export const AlisAIFloatingPanel = () => {
     setActive(false);
   };
 
-  const handleTestCommand = () => {
-    sendVoiceCommand("Hello Alis, please tell me the current time and confirm you can hear me");
-    toast({
-      title: "Test Command Sent",
-      description: "Testing Alis AI response",
-    });
-  };
-
-  const handleVoiceChange = (voice: string) => {
-    setSelectedVoice(voice);
-    localStorage.setItem('alisAIVoice', voice);
-    updateVoice(voice);
-    toast({
-      title: "Voice Updated",
-      description: `Alis will now use the ${VOICES.find(v => v.id === voice)?.name} voice`,
-    });
+  const handleVolumeChange = (value: number[]) => {
+    const newVolume = value[0];
+    setVolume(newVolume);
+    localStorage.setItem('alisAIVolume', newVolume.toString());
+    setAudioVolume(newVolume);
   };
 
   const getStatusType = () => {
     if (!isConnected) return 'disconnected';
-    if (currentAction) return 'executing';
     if (isSpeaking) return 'speaking';
     if (isListening) return 'listening';
     return 'processing';
@@ -199,7 +175,7 @@ export const AlisAIFloatingPanel = () => {
         </div>
         
         <div className="flex items-center gap-1">
-          <StatusBar status={getStatusType()} action={currentAction} />
+          <StatusBar status={getStatusType()} action={null} />
           <Button
             size="icon"
             variant="ghost"
@@ -231,7 +207,6 @@ export const AlisAIFloatingPanel = () => {
       <Tabs defaultValue="activity" className="w-full">
         <TabsList className="w-full justify-start rounded-none border-b">
           <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="commands">Commands</TabsTrigger>
           <TabsTrigger value="control">Control</TabsTrigger>
         </TabsList>
 
@@ -239,73 +214,12 @@ export const AlisAIFloatingPanel = () => {
           <ConversationThread messages={messages} isExpanded={isExpanded} />
         </TabsContent>
 
-        <TabsContent value="commands" className="p-3 space-y-4">
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground font-medium">Quick Test:</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={handleTestCommand}
-              disabled={!isConnected}
-            >
-              <TestTube className="mr-2 h-3 w-3" />
-              Test Alis Response
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground font-medium">Clinical Commands:</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => sendVoiceCommand('show patient chart')}
-                disabled={!isConnected}
-              >
-                Patient Chart
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => sendVoiceCommand('create progress note')}
-                disabled={!isConnected}
-              >
-                Progress Note
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => sendVoiceCommand('order labs')}
-                disabled={!isConnected}
-              >
-                Order Labs
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => sendVoiceCommand('view medications')}
-                disabled={!isConnected}
-              >
-                Medications
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground font-medium">Available Commands:</p>
-            <div className="text-xs text-muted-foreground whitespace-pre-wrap bg-muted/30 p-3 rounded-md max-h-[200px] overflow-auto">
-              {getAvailableCommands()}
-            </div>
-          </div>
-        </TabsContent>
-
         <TabsContent value="control" className="p-3">
           <div className="space-y-4">
             <div className="bg-muted/30 p-4 rounded-lg space-y-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Connection Status</span>
-                <StatusBar status={getStatusType()} action={currentAction} />
+                <StatusBar status={getStatusType()} action={null} />
               </div>
               
               {isConnected && (
@@ -313,6 +227,7 @@ export const AlisAIFloatingPanel = () => {
                   <p>• Voice input: Active</p>
                   <p>• Audio output: {isSpeaking ? 'Speaking' : 'Ready'}</p>
                   <p>• Context: {getContextDisplay()}</p>
+                  <p>• Powered by: ElevenLabs</p>
                 </div>
               )}
 
@@ -328,34 +243,38 @@ export const AlisAIFloatingPanel = () => {
 
             <div className="space-y-3 bg-muted/30 p-4 rounded-lg backdrop-blur-sm">
               <div className="flex items-center gap-2">
-                <Mic2 className="h-4 w-4 text-primary" />
-                <Label htmlFor="voice-select" className="text-sm font-medium">Alis Voice</Label>
+                <Volume2 className="h-4 w-4 text-primary" />
+                <Label htmlFor="volume-slider" className="text-sm font-medium">Volume</Label>
+                <span className="text-xs text-muted-foreground ml-auto">{Math.round(volume * 100)}%</span>
               </div>
-              <Select value={selectedVoice} onValueChange={handleVoiceChange}>
-                <SelectTrigger id="voice-select" className="w-full">
-                  <SelectValue placeholder="Select voice" />
-                </SelectTrigger>
-                <SelectContent>
-                  {VOICES.map(voice => (
-                    <SelectItem key={voice.id} value={voice.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{voice.name}</span>
-                        <span className="text-xs text-muted-foreground">{voice.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Slider
+                id="volume-slider"
+                value={[volume]}
+                onValueChange={handleVolumeChange}
+                min={0}
+                max={1}
+                step={0.1}
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground font-medium">About ElevenLabs:</p>
+              <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-md space-y-1 backdrop-blur-sm">
+                <p>• Ultra-realistic voice quality</p>
+                <p>• Natural conversation flow</p>
+                <p>• Low latency responses</p>
+                <p>• Context-aware assistance</p>
+              </div>
             </div>
 
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground font-medium">Troubleshooting:</p>
               <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-md space-y-1 backdrop-blur-sm">
-                <p>• Check browser console for audio logs</p>
+                <p>• Check browser console for logs</p>
                 <p>• Ensure microphone permissions granted</p>
-                <p>• Try the test button in Commands tab</p>
                 <p>• Look for "Speaking" status when AI responds</p>
-                <p>• If rate limited, wait a few seconds and retry</p>
+                <p>• Adjust volume if audio is too quiet/loud</p>
               </div>
             </div>
           </div>

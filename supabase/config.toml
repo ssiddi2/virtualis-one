@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.ambient-voice-processor]
 verify_jwt = false
+
+[functions.elevenlabs-session]
+verify_jwt = false
