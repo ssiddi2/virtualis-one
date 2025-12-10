@@ -210,7 +210,7 @@ export type Database = {
           created_at: string | null
           hospital_id: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           patient_id: string | null
@@ -224,7 +224,7 @@ export type Database = {
           created_at?: string | null
           hospital_id: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           patient_id?: string | null
@@ -238,7 +238,7 @@ export type Database = {
           created_at?: string | null
           hospital_id?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           patient_id?: string | null
@@ -2202,10 +2202,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_hospital_id: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
+      get_user_hospital_id: { Args: { user_uuid: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

@@ -20,23 +20,8 @@ const PatientListEnhanced = () => {
     patient.mrn.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const handleQuickAction = (patientId: string, action: string) => {
-    switch (action) {
-      case 'chart':
-        navigate(`/patient-chart/${patientId}`);
-        break;
-      case 'note':
-        navigate(`/documentation/${patientId}`);
-        break;
-      case 'cpoe':
-        navigate(`/cpoe/${patientId}`);
-        break;
-      case 'labs':
-        navigate(`/laboratory?patient=${patientId}`);
-        break;
-      default:
-        navigate(`/patient-chart/${patientId}`);
-    }
+  const handlePatientClick = (patientId: string) => {
+    navigate(`/patient-chart/${patientId}`);
   };
 
   return (
@@ -98,7 +83,7 @@ const PatientListEnhanced = () => {
                   <TableRow 
                     key={patient.id} 
                     className="border-blue-400/20 hover:bg-blue-500/20 cursor-pointer transition-colors"
-                    onClick={() => handleQuickAction(patient.id, 'chart')}
+                    onClick={() => handlePatientClick(patient.id)}
                   >
                     <TableCell>
                       <div className="text-white font-medium">
