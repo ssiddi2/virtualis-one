@@ -206,44 +206,53 @@ export type Database = {
       }
       audit_log: {
         Row: {
+          access_reason: string | null
           action: string
           created_at: string | null
           hospital_id: string
           id: string
           ip_address: unknown
+          is_emergency_access: boolean | null
           new_values: Json | null
           old_values: Json | null
           patient_id: string | null
           resource_id: string | null
           resource_type: string
+          session_id: string | null
           user_agent: string | null
           user_id: string
         }
         Insert: {
+          access_reason?: string | null
           action: string
           created_at?: string | null
           hospital_id: string
           id?: string
           ip_address?: unknown
+          is_emergency_access?: boolean | null
           new_values?: Json | null
           old_values?: Json | null
           patient_id?: string | null
           resource_id?: string | null
           resource_type: string
+          session_id?: string | null
           user_agent?: string | null
           user_id: string
         }
         Update: {
+          access_reason?: string | null
           action?: string
           created_at?: string | null
           hospital_id?: string
           id?: string
           ip_address?: unknown
+          is_emergency_access?: boolean | null
           new_values?: Json | null
           old_values?: Json | null
           patient_id?: string | null
           resource_id?: string | null
           resource_type?: string
+          session_id?: string | null
           user_agent?: string | null
           user_id?: string
         }

@@ -20,6 +20,11 @@ export const usePatientClinicalData = (patientId?: string) => {
     queryFn: async () => {
       if (!patientId) return null;
 
+      // Log PHI access for HIPAA compliance
+      supabase.functions.invoke('log-phi-access', {
+        body: { patient_id: patientId, resource_type: 'patient_clinical_data' }
+      }).catch(console.error);
+
       console.log('Fetching comprehensive clinical data for patient:', patientId);
 
       // Fetch all patient data in parallel
