@@ -47,6 +47,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import PageTransition from "@/components/ui/page-transition";
 import { BetaOnboarding } from "@/components/onboarding/BetaOnboarding";
 import ToolsCreateUser from "@/pages/ToolsCreateUser";
+import AuditLog from "@/pages/AuditLog";
 
 const queryClient = new QueryClient();
 
@@ -511,6 +512,10 @@ const AppRoutes = () => {
       
       {/* Tools: one-off account creation (temporary/public) */}
       <Route path="/tools/create-user" element={<ToolsCreateUser />} />
+      
+      <Route path="/audit-log" element={
+        <ProtectedRoute><AICopilotProvider><AppLayout><AuditLog /></AppLayout></AICopilotProvider></ProtectedRoute>
+      } />
 
       {/* Beta Signup Route - Public */}
       <Route path="/beta-signup" element={<BetaOnboarding />} />
