@@ -1817,6 +1817,7 @@ export type Database = {
           first_name: string
           hospital_id: string | null
           id: string
+          last_activity: string | null
           last_name: string
           license_number: string | null
           phone: string | null
@@ -1830,6 +1831,7 @@ export type Database = {
           first_name: string
           hospital_id?: string | null
           id: string
+          last_activity?: string | null
           last_name: string
           license_number?: string | null
           phone?: string | null
@@ -1843,6 +1845,7 @@ export type Database = {
           first_name?: string
           hospital_id?: string | null
           id?: string
+          last_activity?: string | null
           last_name?: string
           license_number?: string | null
           phone?: string | null
