@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { EnterpriseAuthProvider, useAuth } from "@/contexts/EnterpriseAuthContext";
 import { MultiHospitalProvider } from "@/contexts/MultiHospitalContext";
 import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -108,7 +108,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
+        <EnterpriseAuthProvider>
           <MultiHospitalProvider>
             <AlisAIProvider>
               <TooltipProvider>
@@ -120,7 +120,7 @@ const App = () => (
               </TooltipProvider>
             </AlisAIProvider>
           </MultiHospitalProvider>
-        </AuthProvider>
+        </EnterpriseAuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </ErrorBoundary>
