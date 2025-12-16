@@ -55,8 +55,10 @@ serve(async (req) => {
 
     if (createError) {
       const msg = (createError.message || "").toLowerCase();
+      const code = (createError as any).code || "";
+      
       // If user already exists, treat as success so the client can sign in
-      if (msg.includes("already registered") || msg.includes("user already exists")) {
+      if (code === "email_exists" || msg.includes("already registered") || msg.includes("user already exists")) {
         return new Response(JSON.stringify({ ok: true, message: "User already exists" }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
