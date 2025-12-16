@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/EnterpriseAuthContext";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, Shield, Sparkles, AlertCircle } from "lucide-react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -67,16 +67,11 @@ const Login = ({ onLogin }: LoginProps) => {
           setLoading(false);
         }
       } else {
-        const userData = {
-          first_name: firstName,
-          last_name: lastName,
-          role: role
-        };
-        const { error } = await signUp(email, password, userData);
-        if (error) {
+        const result = await signUp(email, password, firstName, lastName, role);
+        if (!result.success) {
           toast({
             title: "Sign Up Failed",
-            description: error.message || "Unable to create account. Please try again.",
+            description: result.error || "Unable to create account. Please try again.",
             variant: "destructive",
           });
         } else {
