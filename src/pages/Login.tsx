@@ -13,7 +13,7 @@ const LoginPage = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/my-patients');
+      navigate('/hospital-selection');
     }
   }, [user, navigate]);
 
