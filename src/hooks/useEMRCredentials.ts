@@ -3,6 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export type EMRVendor = 'epic' | 'cerner' | 'meditech' | 'allscripts' | 'fhir';
+export type EMROperation = 
+  | 'health_check' | 'search_patients' | 'get_patient' | 'update_patient'
+  | 'get_lab_results' | 'get_medications' | 'get_allergies' | 'get_conditions'
+  | 'get_vitals' | 'get_encounters' | 'get_immunizations' | 'get_documents'
+  | 'get_procedures' | 'create_order' | 'cancel_order';
 
 export interface EMRCredentials {
   id?: string;
@@ -18,31 +23,37 @@ export interface EMRCredentials {
   last_health_status?: 'healthy' | 'degraded' | 'down';
 }
 
+async function invokeEMRProxy<T>(hospitalId: string, operation: EMROperation, params?: Record<string, any>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke('emr-proxy', {
+    body: { hospital_id: hospitalId, operation, params }
+  });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return data as T;
+}
+
 export function useEMRCredentials(hospitalId: string) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const getCredentials = async (): Promise<EMRCredentials | null> => {
-    const { data, error } = await supabase
-      .from('emr_credentials')
-      .select('*')
-      .eq('hospital_id', hospitalId)
-      .eq('is_active', true)
-      .maybeSingle();
-    
-    if (error) {
-      console.error('Failed to fetch EMR credentials:', error);
-      return null;
-    }
-    return data as EMRCredentials | null;
-  };
+  return {
+    loading,
 
-  const saveCredentials = async (credentials: EMRCredentials): Promise<boolean> => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
+    // Credential Management
+    async getCredentials(): Promise<EMRCredentials | null> {
+      const { data } = await supabase
         .from('emr_credentials')
-        .upsert({
+        .select('*')
+        .eq('hospital_id', hospitalId)
+        .eq('is_active', true)
+        .maybeSingle();
+      return data as EMRCredentials | null;
+    },
+
+    async saveCredentials(credentials: EMRCredentials): Promise<boolean> {
+      setLoading(true);
+      try {
+        const { error } = await supabase.from('emr_credentials').upsert({
           hospital_id: credentials.hospital_id,
           vendor: credentials.vendor,
           base_url: credentials.base_url,
@@ -53,64 +64,73 @@ export function useEMRCredentials(hospitalId: string) {
           is_active: true,
         }, { onConflict: 'hospital_id,vendor' });
 
-      if (error) throw error;
-      toast({ title: 'EMR credentials saved securely' });
-      return true;
-    } catch (error: any) {
-      toast({ title: 'Failed to save credentials', description: error.message, variant: 'destructive' });
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (error) throw error;
+        toast({ title: 'EMR credentials saved securely' });
+        return true;
+      } catch (error: any) {
+        toast({ title: 'Failed to save credentials', description: error.message, variant: 'destructive' });
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
 
-  const testConnection = async (): Promise<{ success: boolean; status?: string; latencyMs?: number }> => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('emr-proxy', {
-        body: { hospital_id: hospitalId, operation: 'health_check' }
-      });
-      
-      if (error) throw error;
-      return { success: data.status === 'healthy', status: data.status, latencyMs: data.latencyMs };
-    } catch (error: any) {
-      return { success: false, status: 'down' };
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Connection Test
+    async testConnection(): Promise<{ success: boolean; status?: string; latencyMs?: number }> {
+      setLoading(true);
+      try {
+        const result = await invokeEMRProxy<{ status: string; latencyMs: number }>(hospitalId, 'health_check');
+        return { success: result.status === 'healthy', status: result.status, latencyMs: result.latencyMs };
+      } catch {
+        return { success: false, status: 'down' };
+      } finally {
+        setLoading(false);
+      }
+    },
 
-  const searchPatients = async (query: { name?: string; mrn?: string; dob?: string }) => {
-    const { data, error } = await supabase.functions.invoke('emr-proxy', {
-      body: { hospital_id: hospitalId, operation: 'search_patients', params: query }
-    });
-    if (error) throw error;
-    return data;
-  };
+    // Patient Operations
+    searchPatients: (query: { name?: string; mrn?: string; dob?: string }) =>
+      invokeEMRProxy<any[]>(hospitalId, 'search_patients', query),
 
-  const getPatient = async (patientId: string) => {
-    const { data, error } = await supabase.functions.invoke('emr-proxy', {
-      body: { hospital_id: hospitalId, operation: 'get_patient', params: { id: patientId } }
-    });
-    if (error) throw error;
-    return data;
-  };
+    getPatient: (patientId: string) =>
+      invokeEMRProxy<any>(hospitalId, 'get_patient', { id: patientId }),
 
-  const getLabResults = async (patientId: string) => {
-    const { data, error } = await supabase.functions.invoke('emr-proxy', {
-      body: { hospital_id: hospitalId, operation: 'get_lab_results', params: { patientId } }
-    });
-    if (error) throw error;
-    return data;
-  };
+    updatePatient: (patientId: string, data: any) =>
+      invokeEMRProxy<any>(hospitalId, 'update_patient', { id: patientId, data }),
 
-  return {
-    loading,
-    getCredentials,
-    saveCredentials,
-    testConnection,
-    searchPatients,
-    getPatient,
-    getLabResults,
+    // Clinical Data Operations
+    getLabResults: (patientId: string, options?: { code?: string; date?: string }) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_lab_results', { patientId, ...options }),
+
+    getMedications: (patientId: string, status?: string) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_medications', { patientId, status }),
+
+    getAllergies: (patientId: string) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_allergies', { patientId }),
+
+    getConditions: (patientId: string, options?: { category?: string; clinicalStatus?: string }) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_conditions', { patientId, ...options }),
+
+    getVitals: (patientId: string) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_vitals', { patientId }),
+
+    getEncounters: (patientId: string, options?: { status?: string; type?: string }) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_encounters', { patientId, ...options }),
+
+    getImmunizations: (patientId: string) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_immunizations', { patientId }),
+
+    getDocuments: (patientId: string, options?: { type?: string; category?: string }) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_documents', { patientId, ...options }),
+
+    getProcedures: (patientId: string, status?: string) =>
+      invokeEMRProxy<any[]>(hospitalId, 'get_procedures', { patientId, status }),
+
+    // Order Operations
+    createOrder: (order: { patientId: string; code: string; description: string; priority?: string; indication?: string }) =>
+      invokeEMRProxy<any>(hospitalId, 'create_order', order),
+
+    cancelOrder: (orderId: string) =>
+      invokeEMRProxy<any>(hospitalId, 'cancel_order', { orderId }),
   };
 }
