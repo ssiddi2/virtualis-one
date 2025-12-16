@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/EnterpriseAuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { User, Lock, Shield, Stethoscope } from "lucide-react";
 
@@ -36,14 +36,15 @@ const AuthForm = () => {
     
     try {
       if (isLogin) {
-        await login(email, password, role || 'physician');
+        const result = await login(email, password);
+        if (!result.success) {
+          throw new Error(result.error || 'Login failed');
+        }
       } else {
-        const userData = {
-          first_name: firstName,
-          last_name: lastName,
-          role: role
-        };
-        await signUp(email, password, userData);
+        const result = await signUp(email, password, firstName, lastName, role);
+        if (!result.success) {
+          throw new Error(result.error || 'Sign up failed');
+        }
       }
     } catch (error) {
       // Error handling is done in the auth context

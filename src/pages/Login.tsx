@@ -1,5 +1,5 @@
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Login from '@/components/auth/Login';
@@ -20,7 +20,10 @@ const LoginPage = () => {
   const handleLogin = async (email: string, password: string, role: string) => {
     setIsSigningIn(true);
     try {
-      await login(email, password, role);
+      const result = await login(email, password);
+      if (!result.success) {
+        throw new Error(result.error || 'Login failed');
+      }
       // ALL users must select hospital first - no exceptions
       navigate('/hospital-selection');
     } catch (error) {
