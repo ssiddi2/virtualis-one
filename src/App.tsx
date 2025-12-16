@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { MultiHospitalProvider } from "@/contexts/MultiHospitalContext";
 import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { AlisAIProvider } from "@/contexts/AlisAIContext";
@@ -12,6 +13,7 @@ import { CommandPalette } from "@/components/ui/CommandPalette";
 import AppLayout from "@/components/layout/AppLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import NotFound from "@/pages/NotFound";
+import HospitalSwitcher from "@/components/dashboard/HospitalSwitcher";
 import { publicRoutes, protectedRoutes, protectedNoLayoutRoutes } from "@/config/routes";
 
 const queryClient = new QueryClient();
@@ -45,6 +47,13 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Hospital selection - standalone protected route */}
+      <Route path="/hospital-selection" element={
+        <ProtectedRoute>
+          <HospitalSwitcher />
+        </ProtectedRoute>
+      } />
+      
       {/* Root redirect */}
       <Route path="/" element={user ? <Navigate to="/hospital-selection" replace /> : <Navigate to="/login" replace />} />
       
@@ -100,15 +109,17 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <AlisAIProvider>
-            <TooltipProvider>
-              <AppRoutes />
-              <CommandPalette />
-              <AlisAIFloatingPanel />
-              <Toaster />
-              <Sonner />
-            </TooltipProvider>
-          </AlisAIProvider>
+          <MultiHospitalProvider>
+            <AlisAIProvider>
+              <TooltipProvider>
+                <AppRoutes />
+                <CommandPalette />
+                <AlisAIFloatingPanel />
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </AlisAIProvider>
+          </MultiHospitalProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
