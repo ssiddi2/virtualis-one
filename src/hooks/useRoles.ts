@@ -1,8 +1,12 @@
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { AppRole, CLINICAL_ROLES, BILLING_ROLES } from '@/types/roles';
 
 export const useRoles = () => {
-  const { roles, hasRole } = useAuth();
+  const { profile, hasRole } = useAuth();
+
+  // Get role from profile - default to empty string if not available
+  const userRole = (profile?.role || '') as AppRole;
+  const roles: AppRole[] = userRole ? [userRole] : [];
 
   const isAdmin = hasRole('admin');
   const isPhysician = hasRole('physician');
@@ -12,11 +16,11 @@ export const useRoles = () => {
   const isBiller = hasRole('biller');
   const isReceptionist = hasRole('receptionist');
 
-  const hasClinicalAccess = roles.some(r => CLINICAL_ROLES.includes(r));
-  const hasBillingAccess = roles.some(r => BILLING_ROLES.includes(r));
+  const hasClinicalAccess = CLINICAL_ROLES.includes(userRole);
+  const hasBillingAccess = BILLING_ROLES.includes(userRole);
 
   const hasAnyRole = (requiredRoles: AppRole[]) => 
-    roles.some(r => requiredRoles.includes(r));
+    requiredRoles.includes(userRole);
 
   return {
     roles,

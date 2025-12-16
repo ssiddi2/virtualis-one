@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Activity, Users, Calendar, FileText, AlertTriangle, TrendingUp } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { useNavigate } from 'react-router-dom';
 import ProductionStatus from '@/components/dashboard/ProductionStatus';
 
@@ -34,7 +34,7 @@ const Dashboard = () => {
               Clinical
             </Button>
             <Button 
-              onClick={logout}
+              onClick={() => logout()}
               variant="outline"
               className="border-white/30 text-white hover:bg-white/10"
             >

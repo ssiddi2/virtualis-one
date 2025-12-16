@@ -3,7 +3,7 @@ import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, S
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/EnterpriseAuthContext";
 import AmbientStatusIndicator from "@/components/ambient/AmbientStatusIndicator";
 
 const navigation = [
@@ -71,7 +71,7 @@ export function Sidebar({ className }: SidebarProps) {
               <div className="bg-blue-600/20 rounded-lg p-3 border border-blue-400/30">
                 <p className="text-white font-medium">{profile.first_name} {profile.last_name}</p>
                 <p className="text-white/70 text-sm capitalize">{profile.role}</p>
-                <p className="text-white/60 text-xs">{profile.department}</p>
+                <p className="text-white/60 text-xs">{profile.hospital_id ? 'Hospital Staff' : ''}</p>
               </div>
             </div>
           )}

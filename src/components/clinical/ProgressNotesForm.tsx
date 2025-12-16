@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { useCreateMedicalRecord } from '@/hooks/useMedicalRecords';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, Save, Mic, Eye } from 'lucide-react';

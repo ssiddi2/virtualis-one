@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { TestTube, Brain, Clock, User, Sparkles, Loader2, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateMultipleLabOrders } from '@/hooks/useCreateLabOrder';

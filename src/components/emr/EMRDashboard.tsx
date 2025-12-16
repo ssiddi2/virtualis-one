@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePatients } from '@/hooks/usePatients';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 
 interface EMRModule {
   id: string;
