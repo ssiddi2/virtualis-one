@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/EnterpriseAuthContext";
 import AuthForm from "@/components/auth/AuthForm";
 import { Navigate } from "react-router-dom";
 

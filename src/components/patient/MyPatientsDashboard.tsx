@@ -9,7 +9,7 @@ import PageTransition from '@/components/ui/page-transition';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, FileText, TestTube, Activity, AlertTriangle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { usePatients } from '@/hooks/usePatients';
 import { useMedicalRecords } from '@/hooks/useMedicalRecords';
 
