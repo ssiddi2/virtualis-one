@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.log-phi-access]
 verify_jwt = false
+
+[functions.ai-assistant]
+verify_jwt = false
+
+[functions.emr-proxy]
+verify_jwt = true
