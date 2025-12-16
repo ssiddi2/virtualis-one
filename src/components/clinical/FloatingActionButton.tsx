@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Stethoscope, Plus, X, Zap, AlertTriangle, Clock, Mic } from 'lucide-react';
+import { MessageSquare, Stethoscope, X, Zap, AlertTriangle, Clock, Mic } from 'lucide-react';
 
 interface FloatingActionButtonProps {
   onMessageClick: () => void;
@@ -15,24 +15,20 @@ const FloatingActionButton = ({ onMessageClick, onConsultClick, onAmbientClick }
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleFAB = () => {
-    console.log('FAB toggled:', !isOpen);
     setIsOpen(!isOpen);
   };
 
   const handleMessageClick = () => {
-    console.log('Message button clicked');
     onMessageClick();
     setIsOpen(false);
   };
 
   const handleConsultClick = () => {
-    console.log('Consult button clicked');
     onConsultClick();
     setIsOpen(false);
   };
 
   const handleAmbientClick = () => {
-    console.log('Ambient EMR button clicked');
     onAmbientClick?.();
     setIsOpen(false);
   };

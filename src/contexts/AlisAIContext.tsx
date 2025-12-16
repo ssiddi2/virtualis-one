@@ -62,8 +62,8 @@ export const AlisAIProvider = ({ children }: AlisAIProviderProps) => {
         const { isActive: savedActive, isMinimized: savedMinimized } = JSON.parse(saved);
         if (savedActive !== undefined) setIsActive(savedActive);
         if (savedMinimized !== undefined) setIsMinimized(savedMinimized);
-      } catch (e) {
-        console.error('Failed to load Alis AI state:', e);
+      } catch {
+        // Ignore parse errors
       }
     }
   }, []);
@@ -94,10 +94,8 @@ export const AlisAIProvider = ({ children }: AlisAIProviderProps) => {
     setCurrentContext(prev => ({ ...prev, ...context }));
   };
 
-  const triggerDialog = (orderType: string, patientId?: string) => {
-    console.log('[AlisAI] Dialog trigger requested:', orderType, patientId);
-    // This can be enhanced to actually trigger dialogs in the future
-    // For now, it's a placeholder that components can listen to
+  const triggerDialog = (_orderType: string, _patientId?: string) => {
+    // Placeholder for dialog trigger functionality
   };
 
   return (

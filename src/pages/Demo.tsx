@@ -17,9 +17,8 @@ import {
 const Demo = () => {
   const [activeView, setActiveView] = useState<'production' | 'diagrams' | 'guide'>('production');
 
-  const downloadResource = (resource: string) => {
-    // Simulate download
-    console.log(`Downloading ${resource}...`);
+  const downloadResource = (_resource: string) => {
+    // Download functionality placeholder
   };
 
   const openExternalLink = (url: string) => {

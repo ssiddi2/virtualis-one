@@ -66,7 +66,6 @@ const TeamMessaging = () => {
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
-      console.log('Sending message:', messageInput);
       setMessageInput('');
     }
   };

@@ -12,8 +12,8 @@ export const useAuditLog = () => {
       await supabase.functions.invoke('log-phi-access', {
         body: { patient_id: patientId, resource_type: resourceType, access_reason: accessReason, is_emergency: isEmergency }
       });
-    } catch (e) {
-      console.error('Audit log failed:', e);
+    } catch {
+      // Silent fail for audit logging
     }
   }, []);
 

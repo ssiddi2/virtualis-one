@@ -223,8 +223,7 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({
   useEffect(() => {
     if (autoRefresh && refreshInterval > 0) {
       const interval = setInterval(() => {
-        // Simulate data refresh
-        console.log('Auto-refreshing hospital data...');
+        // Auto-refresh hospital data
       }, refreshInterval * 1000);
 
       return () => clearInterval(interval);

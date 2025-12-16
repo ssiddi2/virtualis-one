@@ -14,7 +14,6 @@ const AITestComponent = () => {
 
   const testAI = async () => {
     try {
-      console.log('Testing AI with prompt:', testPrompt);
       const response = await callAI({
         type: 'clinical_note',
         data: { summary: testPrompt },
@@ -23,7 +22,6 @@ const AITestComponent = () => {
       setResult(response);
       toast.success('AI test successful!');
     } catch (err) {
-      console.error('AI test failed:', err);
       toast.error('AI test failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };

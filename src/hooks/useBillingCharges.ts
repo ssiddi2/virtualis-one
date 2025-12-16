@@ -25,7 +25,6 @@ export const useBillingCharges = (hospitalId?: string) => {
       const { data, error } = await query;
       
       if (error) {
-        console.error('Error fetching billing charges:', error);
         throw error;
       }
       

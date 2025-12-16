@@ -43,7 +43,6 @@ export const usePhysicians = () => {
   return useQuery({
     queryKey: ['physicians'],
     queryFn: async () => {
-      console.log('Fetching physicians...');
       const { data, error } = await supabase
         .from('physicians')
         .select(`
@@ -54,11 +53,9 @@ export const usePhysicians = () => {
         .order('last_name');
 
       if (error) {
-        console.error('Error fetching physicians:', error);
         throw error;
       }
       
-      console.log('Physicians fetched:', data);
       return data as Physician[];
     }
   });
@@ -68,18 +65,15 @@ export const useSpecialties = () => {
   return useQuery({
     queryKey: ['specialties'],
     queryFn: async () => {
-      console.log('Fetching specialties...');
       const { data, error } = await supabase
         .from('specialties')
         .select('*')
         .order('name');
 
       if (error) {
-        console.error('Error fetching specialties:', error);
         throw error;
       }
       
-      console.log('Specialties fetched:', data);
       return data as Specialty[];
     }
   });
@@ -89,7 +83,6 @@ export const useOnCallSchedules = () => {
   return useQuery({
     queryKey: ['onCallSchedules'],
     queryFn: async () => {
-      console.log('Fetching on-call schedules...');
       const now = new Date().toISOString();
       
       const { data, error } = await supabase
@@ -104,11 +97,9 @@ export const useOnCallSchedules = () => {
         .order('is_primary', { ascending: false });
 
       if (error) {
-        console.error('Error fetching on-call schedules:', error);
         throw error;
       }
       
-      console.log('On-call schedules fetched:', data);
       return data as OnCallSchedule[];
     }
   });
@@ -128,8 +119,6 @@ export const useCreateConsultationRequest = () => {
       clinical_question: string;
       ai_recommendation?: string;
     }) => {
-      console.log('Creating consultation request:', request);
-      
       const { data, error } = await supabase
         .from('consultation_requests')
         .insert([request])
@@ -137,11 +126,9 @@ export const useCreateConsultationRequest = () => {
         .single();
 
       if (error) {
-        console.error('Error creating consultation request:', error);
         throw error;
       }
 
-      console.log('Consultation request created:', data);
       return data;
     },
     onSuccess: () => {

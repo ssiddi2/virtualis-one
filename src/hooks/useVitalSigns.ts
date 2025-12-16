@@ -60,7 +60,6 @@ export const useVitalSigns = (patientId?: string) => {
           .order('recorded_at', { ascending: false });
         
         if (error) {
-          console.log('Error fetching vitals, using mock:', error);
           return generateMockVitals(patientId);
         }
         
