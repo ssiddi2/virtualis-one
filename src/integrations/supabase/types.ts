@@ -835,6 +835,62 @@ export type Database = {
           },
         ]
       }
+      emr_credentials: {
+        Row: {
+          base_url: string
+          client_id: string
+          client_secret_encrypted: string
+          created_at: string | null
+          hospital_id: string
+          id: string
+          is_active: boolean | null
+          last_health_check: string | null
+          last_health_status: string | null
+          scopes: string[] | null
+          tenant_id: string | null
+          updated_at: string | null
+          vendor: string
+        }
+        Insert: {
+          base_url: string
+          client_id: string
+          client_secret_encrypted: string
+          created_at?: string | null
+          hospital_id: string
+          id?: string
+          is_active?: boolean | null
+          last_health_check?: string | null
+          last_health_status?: string | null
+          scopes?: string[] | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          vendor: string
+        }
+        Update: {
+          base_url?: string
+          client_id?: string
+          client_secret_encrypted?: string
+          created_at?: string | null
+          hospital_id?: string
+          id?: string
+          is_active?: boolean | null
+          last_health_check?: string | null
+          last_health_status?: string | null
+          scopes?: string[] | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          vendor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emr_credentials_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospitals: {
         Row: {
           address: string
@@ -2250,6 +2306,8 @@ export type Database = {
     }
     Functions: {
       can_access_patient: { Args: { _patient_id: string }; Returns: boolean }
+      decrypt_emr_secret: { Args: { encrypted: string }; Returns: string }
+      encrypt_emr_secret: { Args: { secret: string }; Returns: string }
       get_user_hospital_id: { Args: { user_uuid: string }; Returns: string }
       get_user_roles: {
         Args: { _user_id: string }
