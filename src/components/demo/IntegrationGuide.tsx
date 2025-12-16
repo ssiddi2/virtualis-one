@@ -149,9 +149,8 @@ const IntegrationGuide = () => {
     }
   ];
 
-  const downloadSpecification = (type: string) => {
-    // Simulate downloading technical specifications
-    console.log(`Downloading ${type} specification...`);
+  const downloadSpecification = (_type: string) => {
+    // Download specification functionality
   };
 
   return (

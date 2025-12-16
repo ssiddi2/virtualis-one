@@ -18,7 +18,6 @@ export const useCMSQualityMeasures = (hospitalId?: string) => {
       const { data, error } = await query;
       
       if (error) {
-        console.error('Error fetching CMS quality measures:', error);
         throw error;
       }
       

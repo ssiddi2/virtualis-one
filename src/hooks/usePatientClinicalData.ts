@@ -23,9 +23,7 @@ export const usePatientClinicalData = (patientId?: string) => {
       // Log PHI access for HIPAA compliance
       supabase.functions.invoke('log-phi-access', {
         body: { patient_id: patientId, resource_type: 'patient_clinical_data' }
-      }).catch(console.error);
-
-      console.log('Fetching comprehensive clinical data for patient:', patientId);
+      }).catch(() => {});
 
       // Fetch all patient data in parallel
       const [
@@ -78,15 +76,6 @@ export const usePatientClinicalData = (patientId?: string) => {
         medicalRecords: medicalRecordsData.data || [],
         completeness,
       };
-
-      console.log('Clinical data loaded:', { completeness, recordCounts: {
-        vitals: clinicalData.vitalSigns.length,
-        meds: clinicalData.medications.length,
-        labs: clinicalData.labOrders.length,
-        imaging: clinicalData.radiologyOrders.length,
-        problems: clinicalData.problemList.length,
-        allergies: clinicalData.allergies.length,
-      }});
 
       return clinicalData;
     },

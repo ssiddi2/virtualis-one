@@ -56,7 +56,6 @@ const NursingDocumentation = ({ patientId, hospitalId }: NursingDocumentationPro
     
     try {
       // Here you would normally save to the database
-      console.log('Nursing documentation submitted:', formData);
       
       toast({
         title: "Nursing Documentation Saved",

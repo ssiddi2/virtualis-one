@@ -71,7 +71,6 @@ const ConsultDialog = ({ open, onClose, hospitalId }: ConsultDialogProps) => {
   }, [consultation]);
 
   const handleConsult = () => {
-    console.log('Consult initiated');
     if (!consultation.trim()) {
       toast({
         title: "Clinical Input Required",

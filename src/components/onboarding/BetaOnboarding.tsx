@@ -72,7 +72,6 @@ export const BetaOnboarding: React.FC = () => {
     
     try {
       // In production, send to your CRM/email service
-      console.log('Beta signup data:', data);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));

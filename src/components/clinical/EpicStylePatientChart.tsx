@@ -42,18 +42,12 @@ const EpicStylePatientChart = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   
-  console.log('EpicStylePatientChart - patientId:', patientId);
-  
   const { data: patients, isLoading: patientsLoading, error: patientsError } = usePatients();
   const { data: labOrders } = useLabOrders();
   const { data: medications } = useMedications();
   const { data: problemList } = useProblemList(patientId);
   const { data: allergies } = useAllergies(patientId);
   const { data: clinicalOrders } = useClinicalOrders(patientId);
-
-  console.log('EpicStylePatientChart - patients:', patients);
-  console.log('EpicStylePatientChart - patientsLoading:', patientsLoading);
-  console.log('EpicStylePatientChart - patientsError:', patientsError);
 
   if (patientsLoading) {
     return (

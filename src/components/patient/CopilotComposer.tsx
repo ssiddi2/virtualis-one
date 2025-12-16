@@ -70,7 +70,6 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
     }
 
     try {
-      console.log('Generating note with AI and EMR data...', { noteType, summary, hasEMRData: !!clinicalData, mode: inputMode });
 
       // Filter EMR data based on selection
       const filteredEMRData = clinicalData ? {
@@ -96,7 +95,6 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
           context: `Auto-generating ${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"} from EMR data only`
         });
 
-        console.log('Auto-generated note received:', result);
         setGeneratedNote(result);
         
         toast({
@@ -115,7 +113,6 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
           context: `${noteTypes.find(t => t.value === noteType)?.label || "Clinical Documentation"} for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"}`
         });
 
-        console.log('AI result received:', result);
         setGeneratedNote(result);
         
         toast({
@@ -123,8 +120,7 @@ const CopilotComposer = ({ patientId, hospitalId }: CopilotComposerProps) => {
           description: `AI-assisted note with EMR data ready for ${hospitalId ? mockHospitalNames[hospitalId as keyof typeof mockHospitalNames] : "Hospital"} EMR integration`,
         });
       }
-    } catch (error) {
-      console.error('AI generation error:', error);
+    } catch {
       toast({
         title: "Generation Error",
         description: "Unable to generate documentation. Please check your connection and try again.",

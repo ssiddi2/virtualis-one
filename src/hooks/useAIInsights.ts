@@ -25,7 +25,6 @@ export const useAIInsights = (hospitalId?: string) => {
       const { data, error } = await query;
       
       if (error) {
-        console.error('Error fetching AI insights:', error);
         throw error;
       }
       

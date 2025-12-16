@@ -187,7 +187,6 @@ export const usePatients = (hospitalId?: string) => {
         const { data, error } = await query.order('created_at', { ascending: false });
         
         if (error) {
-          console.log('Database error, using mock data:', error);
           return generateMockPatients(hospitalId);
         }
         
@@ -196,10 +195,8 @@ export const usePatients = (hospitalId?: string) => {
           return data as Patient[];
         }
         
-        console.log('No database patients, using mock data for demo');
         return generateMockPatients(hospitalId);
-      } catch (error) {
-        console.log('Query error, using mock data:', error);
+      } catch {
         return generateMockPatients(hospitalId);
       }
     },

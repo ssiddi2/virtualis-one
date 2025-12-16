@@ -210,7 +210,6 @@ PLAN:
 
   const handleSaveCustomTemplate = () => {
     // Here you would save the customized template
-    console.log('Saving custom template:', customTemplate);
     
     toast({
       title: "Template Saved",
