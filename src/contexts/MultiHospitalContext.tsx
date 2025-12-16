@@ -44,29 +44,58 @@ export function MultiHospitalProvider({ children }: { children: React.ReactNode 
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load hospitals once initially (may be unauthenticated on first mount)
     loadHospitals();
+
+    // Reload hospitals after auth state changes (e.g. user signs in)
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        loadHospitals();
+      }
+      if (event === 'SIGNED_OUT' || !session) {
+        setAuthorizedHospitals([]);
+        setActiveConnection(null);
+        setConnectionSteps([]);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    });
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         const p = JSON.parse(stored);
         setActiveConnection({ ...p, connectedAt: new Date(p.connectedAt) });
-      } catch { localStorage.removeItem(STORAGE_KEY); }
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (activeConnection) localStorage.setItem(STORAGE_KEY, JSON.stringify(activeConnection));
-    else localStorage.removeItem(STORAGE_KEY);
-  }, [activeConnection]);
-
   const loadHospitals = async () => {
-    const { data } = await supabase.from('hospitals').select('id, name, emr_type, city, state').order('name');
-    setAuthorizedHospitals((data || []).map(h => ({
-      id: h.id, 
-      name: h.name, 
-      emrType: h.emr_type || 'Unknown',
-      location: `${h.city || ''}, ${h.state || ''}`.trim() || 'Unknown',
-    })));
+    const { data, error } = await supabase
+      .from('hospitals')
+      .select('id, name, emr_type, city, state')
+      .order('name');
+
+    if (error) {
+      // Most common on first mount (unauthenticated). Just show empty list.
+      setAuthorizedHospitals([]);
+      return;
+    }
+
+    setAuthorizedHospitals(
+      (data || []).map((h) => ({
+        id: h.id,
+        name: h.name,
+        emrType: h.emr_type || 'Unknown',
+        location: `${h.city || ''}, ${h.state || ''}`.trim() || 'Unknown',
+      }))
+    );
   };
 
   const connect = useCallback(async (hospitalId: string): Promise<boolean> => {
