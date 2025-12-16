@@ -164,9 +164,9 @@ export const AlisAIFloatingPanel = () => {
         <div className="flex items-center gap-2">
           <GripVertical className="h-4 w-4 text-muted-foreground" />
           <img 
-            src="/lovable-uploads/alis-ai-logo.png" 
+            src="/lovable-uploads/alis-ai-logo-new.png" 
             alt="Alis AI" 
-            className="h-10 w-10 rounded-full shadow-lg shadow-primary/20 ring-2 ring-primary/10" 
+            className="h-8 w-auto max-w-[80px] object-contain shadow-lg shadow-primary/20" 
           />
           <div>
             <h3 className="font-semibold text-sm">Alis AI</h3>

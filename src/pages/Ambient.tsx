@@ -20,7 +20,7 @@ const Ambient = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8 text-center space-y-4">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/lovable-uploads/alis-ai-logo.png" alt="Alis AI" className="h-16 w-16" />
+            <img src="/lovable-uploads/alis-ai-logo-new.png" alt="Alis AI" className="h-14 w-auto max-w-[180px] object-contain" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Alis AI

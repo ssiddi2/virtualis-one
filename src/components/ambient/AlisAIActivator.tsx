@@ -64,7 +64,7 @@ export const AlisAIActivator = () => {
     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <img src="/lovable-uploads/alis-ai-logo.png" alt="Alis AI" className="h-12 w-12" />
+          <img src="/lovable-uploads/alis-ai-logo-new.png" alt="Alis AI" className="h-10 w-auto max-w-[120px] object-contain" />
           <div>
             <CardTitle className="flex items-center gap-2">
               Alis AI
