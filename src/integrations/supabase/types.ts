@@ -2140,6 +2140,41 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          granted_at: string | null
+          granted_by: string | null
+          hospital_id: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string | null
+          granted_by?: string | null
+          hospital_id?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string | null
+          granted_by?: string | null
+          hospital_id?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vital_signs: {
         Row: {
           blood_pressure_diastolic: number | null
@@ -2214,10 +2249,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_patient: { Args: { _patient_id: string }; Returns: boolean }
       get_user_hospital_id: { Args: { user_uuid: string }; Returns: string }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      has_any_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "admin"
+        | "physician"
+        | "nurse"
+        | "pharmacist"
+        | "technician"
+        | "biller"
+        | "receptionist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2344,6 +2405,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "admin",
+        "physician",
+        "nurse",
+        "pharmacist",
+        "technician",
+        "biller",
+        "receptionist",
+      ],
+    },
   },
 } as const

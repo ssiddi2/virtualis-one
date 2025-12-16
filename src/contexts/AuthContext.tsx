@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AppRole } from '@/types/roles';
 
 // HIPAA requires session timeout - 30 minutes default
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
@@ -24,12 +25,14 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  roles: AppRole[];
   loading: boolean;
   sessionExpiresAt: Date | null;
   login: (email: string, password: string, role: string) => Promise<void>;
   signUp: (email: string, password: string, userData: any) => Promise<{ error: any }>;
   logout: () => Promise<void>;
   extendSession: () => void;
+  hasRole: (role: AppRole) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,12 +47,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [sessionExpiresAt, setSessionExpiresAt] = useState<Date | null>(null);
   const { toast } = useToast();
   
   const lastActivityRef = useRef(Date.now());
   const warningShownRef = useRef(false);
+
+  // Fetch user roles from user_roles table
+  const fetchRoles = async (userId: string): Promise<AppRole[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      
+      if (error) {
+        console.error('Error fetching roles:', error);
+        return [];
+      }
+      return (data || []).map(r => r.role as AppRole);
+    } catch (error) {
+      console.error('Role fetch error:', error);
+      return [];
+    }
+  };
+
+  const hasRole = useCallback((role: AppRole): boolean => {
+    return roles.includes(role);
+  }, [roles]);
 
   // Track user activity
   const updateActivity = useCallback(() => {
@@ -134,14 +161,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer profile fetch to avoid deadlock
+          // Defer profile and roles fetch to avoid deadlock
           setTimeout(async () => {
-            const profileData = await fetchProfile(session.user.id);
+            const [profileData, userRoles] = await Promise.all([
+              fetchProfile(session.user.id),
+              fetchRoles(session.user.id)
+            ]);
             setProfile(profileData);
+            setRoles(userRoles);
           }, 0);
           updateActivity();
         } else {
           setProfile(null);
+          setRoles([]);
           setSessionExpiresAt(null);
         }
         
@@ -150,11 +182,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
+        const [profileData, userRoles] = await Promise.all([
+          fetchProfile(session.user.id),
+          fetchRoles(session.user.id)
+        ]);
+        setProfile(profileData);
+        setRoles(userRoles);
         updateActivity();
       }
       setLoading(false);
@@ -241,12 +278,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     profile,
+    roles,
     loading,
     sessionExpiresAt,
     login,
     signUp,
     logout,
     extendSession,
+    hasRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
