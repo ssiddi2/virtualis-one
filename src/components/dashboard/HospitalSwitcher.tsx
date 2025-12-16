@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Hospital, LogOut, Search, Wifi, CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
+import { Hospital, LogOut, Search, Wifi, AlertTriangle, CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
 import { useMultiHospital } from '@/contexts/MultiHospitalContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { cn } from '@/lib/utils';
 
 export default function HospitalSwitcher() {
@@ -169,6 +169,10 @@ export default function HospitalSwitcher() {
           </DialogHeader>
           <div className="py-4 text-slate-400">
             <p>Switch from <span className="text-white">{activeConnection?.hospitalName}</span> to <span className="text-white">{pendingHospital?.name}</span>?</p>
+            <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-300 text-sm flex gap-2">
+              <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" /> 
+              This will disconnect from current hospital.
+            </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setShowSwitch(false)}>Cancel</Button>
