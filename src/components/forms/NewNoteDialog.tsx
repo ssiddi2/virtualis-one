@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/EnterpriseAuthContext';
 import { FileText, Brain, User, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateMedicalRecord } from '@/hooks/useMedicalRecords';
+import { useAIAssistant } from '@/hooks/useAIAssistant';
 
 interface NewNoteDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
   const { profile } = useAuth();
   const { toast } = useToast();
   const createMedicalRecord = useCreateMedicalRecord();
+  const { callAI, isLoading: isAILoading } = useAIAssistant();
   
   const [noteType, setNoteType] = useState('progress');
   const [chiefComplaint, setChiefComplaint] = useState('');
@@ -39,6 +41,41 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
   const [assessment, setAssessment] = useState('');
   const [plan, setPlan] = useState('');
   const [isAISuggestionsEnabled, setIsAISuggestionsEnabled] = useState(true);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+
+  // Fetch AI suggestions when assessment changes
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!isAISuggestionsEnabled || !assessment || assessment.length < 10) {
+        setAiSuggestions([]);
+        return;
+      }
+
+      try {
+        const result = await callAI({
+          type: 'note_suggestions',
+          data: {
+            noteType: noteTypes.find(t => t.value === noteType)?.label || 'Progress Note',
+            patientName,
+            currentContent: `Chief Complaint: ${chiefComplaint}\nHPI: ${hpi}\nExam: ${physicalExam}\nAssessment: ${assessment}\nPlan: ${plan}`,
+          },
+        });
+
+        // Parse suggestions from AI response
+        const lines = result.split('\n').filter((line: string) => line.trim());
+        const suggestions = lines.slice(0, 3).map((text: string) => 
+          text.replace(/^\d+\.\s*/, '').replace(/^[-•]\s*/, '').trim()
+        );
+        setAiSuggestions(suggestions);
+      } catch (error) {
+        console.error('Error fetching AI suggestions:', error);
+        // Silent fail - don't show error for background suggestions
+      }
+    };
+
+    const debounce = setTimeout(fetchSuggestions, 1500);
+    return () => clearTimeout(debounce);
+  }, [assessment, isAISuggestionsEnabled, callAI, noteType, patientName, chiefComplaint, hpi, physicalExam, plan]);
 
   const handleSubmit = async () => {
     if (!assessment && !plan) {
@@ -85,6 +122,7 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
       setAssessment('');
       setPlan('');
       setNoteType('progress');
+      setAiSuggestions([]);
       onClose();
     } catch (error) {
       console.error('Error saving note:', error);
@@ -98,9 +136,12 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
 
   const handleAISuggestionsToggle = () => {
     setIsAISuggestionsEnabled(!isAISuggestionsEnabled);
+    if (isAISuggestionsEnabled) {
+      setAiSuggestions([]);
+    }
     toast({
       title: "AI Suggestions",
-      description: `AI Note Suggestions are now ${isAISuggestionsEnabled ? 'disabled' : 'enabled'}.`,
+      description: `AI suggestions are now ${isAISuggestionsEnabled ? 'disabled' : 'enabled'}.`,
     });
   };
 
@@ -240,17 +281,25 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
               />
             </div>
 
-            {isAISuggestionsEnabled && assessment && (
+            {isAISuggestionsEnabled && (aiSuggestions.length > 0 || isAILoading) && (
               <div className="p-3 bg-green-600/20 rounded border border-green-400/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="h-4 w-4 text-green-400" />
-                  <span className="text-green-300 font-medium">AI Suggestions</span>
+                  {isAILoading ? (
+                    <Loader2 className="h-4 w-4 text-green-400 animate-spin" />
+                  ) : (
+                    <Brain className="h-4 w-4 text-green-400" />
+                  )}
+                  <span className="text-green-300 font-medium">
+                    {isAILoading ? 'Generating AI Suggestions...' : 'AI Suggestions'}
+                  </span>
                 </div>
-                <div className="text-green-100 text-sm space-y-1">
-                  <p>• Consider documenting differential diagnoses</p>
-                  <p>• Ensure medication reconciliation is complete</p>
-                  <p>• Add follow-up timeframe to plan</p>
-                </div>
+                {aiSuggestions.length > 0 && (
+                  <div className="text-green-100 text-sm space-y-1">
+                    {aiSuggestions.map((suggestion, index) => (
+                      <p key={index}>• {suggestion}</p>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

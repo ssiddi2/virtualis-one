@@ -1,8 +1,4 @@
-
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const cohereApiKey = Deno.env.get('COHERE_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,258 +12,145 @@ serve(async (req) => {
 
   try {
     const { type, data, context } = await req.json();
-    console.log('AI Assistant request:', { type, data: { ...data, symptoms: data.symptoms?.substring(0, 50) + '...' } });
+    console.log('AI Assistant request:', { type, dataKeys: Object.keys(data || {}) });
 
-    if (!cohereApiKey) {
-      console.error('Cohere API key not found in environment');
-      throw new Error('Cohere API key not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY not configured');
+      throw new Error('AI service is not configured');
     }
-
-    console.log('Cohere API key found, length:', cohereApiKey.length);
 
     let systemPrompt = '';
     let userPrompt = '';
 
+    // Helper to format EMR data
+    const formatEMRData = (emrData: any) => {
+      if (!emrData) return '';
+      let formatted = '';
+      
+      if (emrData.vitalSigns?.length) {
+        const latest = emrData.vitalSigns[0];
+        formatted += `\nVital Signs: BP ${latest.blood_pressure_systolic}/${latest.blood_pressure_diastolic}, HR ${latest.heart_rate}, Temp ${latest.temperature}°F, SpO2 ${latest.oxygen_saturation}%`;
+      }
+      if (emrData.medications?.length) {
+        formatted += `\nMedications: ${emrData.medications.map((m: any) => `${m.medication_name} ${m.dosage}`).join(', ')}`;
+      }
+      if (emrData.allergies?.length) {
+        formatted += `\nAllergies: ${emrData.allergies.map((a: any) => `${a.allergen} (${a.severity})`).join(', ')}`;
+      }
+      if (emrData.problemList?.length) {
+        formatted += `\nProblems: ${emrData.problemList.map((p: any) => p.problem_name).join(', ')}`;
+      }
+      if (emrData.labOrders?.length) {
+        formatted += `\nRecent Labs: ${emrData.labOrders.slice(0, 3).map((l: any) => `${l.test_name}: ${l.status}`).join(', ')}`;
+      }
+      return formatted;
+    };
+
     switch (type) {
       case 'clinical_note':
-        systemPrompt = `You are an expert clinical AI assistant. Generate comprehensive, professional medical documentation following proper medical terminology and SOAP format. Always include: Chief Complaint, History of Present Illness, Physical Examination, Assessment, and Plan. Be thorough but concise and clinically accurate.`;
-        userPrompt = `Generate a detailed clinical note based on: ${data.summary}. Patient context: ${context || 'Standard adult patient visit'}. Format as proper SOAP note with clear sections.`;
+        systemPrompt = `You are an expert clinical documentation assistant. Generate professional, accurate clinical notes in SOAP format. Be concise but thorough.`;
+        userPrompt = `Generate a clinical note based on:\n${data.summary || data.prompt || JSON.stringify(data)}\n${context ? `Context: ${context}` : ''}`;
         break;
 
       case 'clinical_note_with_emr_data':
-        systemPrompt = `You are an expert clinical AI assistant with access to comprehensive EMR data. Generate professional medical documentation that intelligently integrates patient data from:
-- Recent vital signs and trends
-- Active medications and potential interactions
-- Lab results and abnormal findings
-- Imaging studies and interpretations
-- Active problem list and chronic conditions
-- Known allergies and adverse reactions
-- Recent nursing assessments
-- Previous visit documentation
-
-Synthesize this information into a cohesive SOAP note that:
-1. References relevant data points naturally within the narrative
-2. Highlights abnormal findings and clinical concerns
-3. Shows trends over time when applicable
-4. Maintains professional medical terminology
-5. Ensures clinical accuracy and completeness
-
-If the user provides voice transcript or manual summary, use that as the primary narrative and enhance it with EMR data context.`;
-        
-        const emrContext = data.emrData ? `
-EMR DATA AVAILABLE:
-${data.emrData.vitalSigns?.length > 0 ? `\nRecent Vitals (most recent first):
-${data.emrData.vitalSigns.slice(0, 3).map((v: any) => 
-  `- ${new Date(v.recorded_at).toLocaleDateString()}: BP ${v.blood_pressure_systolic}/${v.blood_pressure_diastolic}, HR ${v.heart_rate}, RR ${v.respiratory_rate}, Temp ${v.temperature}°F, SpO2 ${v.oxygen_saturation}%`
-).join('\n')}` : ''}
-
-${data.emrData.medications?.length > 0 ? `\nActive Medications:
-${data.emrData.medications.map((m: any) => 
-  `- ${m.medication_name} ${m.dosage} ${m.route} ${m.frequency} (started ${new Date(m.start_date).toLocaleDateString()})`
-).join('\n')}` : ''}
-
-${data.emrData.labOrders?.length > 0 ? `\nRecent Lab Results:
-${data.emrData.labOrders.slice(0, 5).map((l: any) => 
-  `- ${l.test_name} (${l.status}): ${l.results ? JSON.stringify(l.results) : 'Pending'}`
-).join('\n')}` : ''}
-
-${data.emrData.radiologyOrders?.length > 0 ? `\nRecent Imaging:
-${data.emrData.radiologyOrders.slice(0, 3).map((r: any) => 
-  `- ${r.study_type} of ${r.body_part} (${r.status}): ${r.findings || 'Results pending'}`
-).join('\n')}` : ''}
-
-${data.emrData.problemList?.length > 0 ? `\nActive Problems:
-${data.emrData.problemList.map((p: any) => 
-  `- ${p.problem_name} (${p.icd10_code || 'No code'}) - ${p.status}`
-).join('\n')}` : ''}
-
-${data.emrData.allergies?.length > 0 ? `\nAllergies:
-${data.emrData.allergies.map((a: any) => 
-  `- ${a.allergen}: ${a.reaction_type} (${a.severity}) - ${a.symptoms}`
-).join('\n')}` : ''}
-
-${data.emrData.patient ? `\nPatient Demographics:
-- Name: ${data.emrData.patient.first_name} ${data.emrData.patient.last_name}
-- DOB: ${data.emrData.patient.date_of_birth}
-- MRN: ${data.emrData.patient.mrn}
-- Status: ${data.emrData.patient.status}` : ''}
-` : '';
-
-        userPrompt = `Generate a comprehensive ${data.noteType || 'progress'} note incorporating the following:
-
-${data.voiceTranscript ? `VOICE TRANSCRIPT:\n${data.voiceTranscript}\n` : ''}
-${data.manualSummary ? `CLINICAL SUMMARY:\n${data.manualSummary}\n` : ''}
-
-${emrContext}
-
-Create a well-structured SOAP note that synthesizes the clinical narrative with relevant EMR data. Highlight abnormal findings, trends, and clinically significant information.`;
+        systemPrompt = `You are an expert clinical documentation assistant with EMR access. Generate professional SOAP notes incorporating patient data intelligently.`;
+        userPrompt = `Generate a clinical note with this EMR data:${formatEMRData(data.emrData)}\n\nClinician notes: ${data.summary || data.voiceTranscript || data.manualSummary || ''}`;
         break;
 
       case 'auto_generate_from_emr_only':
-        const autoEmrData = data.emrData;
-        
-        systemPrompt = `You are an expert clinical AI assistant specializing in autonomous progress note generation from comprehensive EMR data.
-
-Your task is to generate a ${data.noteType || 'progress'} note based ONLY on available EMR data and previous clinical documentation. This note should:
-
-1. Synthesize all available data into a cohesive clinical narrative
-2. Identify trends and patterns in vital signs, lab results, and clinical course
-3. Highlight concerning findings or areas requiring attention
-4. Provide a data-driven assessment based on objective findings
-5. Suggest a reasonable plan based on the clinical trajectory
-6. Follow SOAP format (Subjective, Objective, Assessment, Plan)
-7. Note data limitations - clearly indicate when information is unavailable
-
-CRITICAL: This is an AUTO-GENERATED note. You must:
-- Base all content on available EMR data
-- Clearly mark sections where data is insufficient
-- Use cautious language ("appears", "suggests", "consistent with")
-- Add disclaimer at end: "⚠️ AUTO-GENERATED from EMR data - requires physician review and attestation"
-
-Available Comprehensive EMR Data:`;
-
-        const autoContext = `
-Patient: ${autoEmrData.patient?.first_name} ${autoEmrData.patient?.last_name}
-MRN: ${autoEmrData.patient?.mrn}
-DOB: ${autoEmrData.patient?.date_of_birth}
-Admission: ${autoEmrData.patient?.admission_date ? new Date(autoEmrData.patient.admission_date).toLocaleDateString() : 'N/A'}
-Location: Room ${autoEmrData.patient?.room_number || 'N/A'}, Bed ${autoEmrData.patient?.bed_number || 'N/A'}
-
-${autoEmrData.vitalSigns?.length > 0 ? `VITAL SIGNS TREND (${autoEmrData.vitalSigns.length} recent readings):
-${autoEmrData.vitalSigns.slice(0, 5).map((v: any) => 
-  `- ${new Date(v.recorded_at).toLocaleString()}: BP ${v.blood_pressure_systolic}/${v.blood_pressure_diastolic}, HR ${v.heart_rate}, RR ${v.respiratory_rate}, Temp ${v.temperature}°F, SpO2 ${v.oxygen_saturation}%${v.pain_scale ? ', Pain ' + v.pain_scale + '/10' : ''}`
-).join('\n')}` : 'No recent vital signs available'}
-
-${autoEmrData.medications?.length > 0 ? `ACTIVE MEDICATIONS (${autoEmrData.medications.length} medications):
-${autoEmrData.medications.map((m: any) => 
-  `- ${m.medication_name} ${m.dosage} ${m.route} ${m.frequency}${m.indication ? ' for ' + m.indication : ''}`
-).join('\n')}` : 'No active medications'}
-
-${autoEmrData.labOrders?.length > 0 ? `LABORATORY RESULTS (${autoEmrData.labOrders.length} orders):
-${autoEmrData.labOrders.slice(0, 10).map((l: any) => 
-  `- ${l.test_name}: ${l.status}${l.results ? ' - ' + JSON.stringify(l.results) : ''} (ordered ${new Date(l.ordered_at).toLocaleDateString()})`
-).join('\n')}` : 'No recent lab orders'}
-
-${autoEmrData.radiologyOrders?.length > 0 ? `IMAGING STUDIES (${autoEmrData.radiologyOrders.length} studies):
-${autoEmrData.radiologyOrders.slice(0, 5).map((r: any) => 
-  `- ${r.study_type} of ${r.body_part} (${r.modality}): ${r.status}
-  ${r.findings ? 'Findings: ' + r.findings : ''}
-  ${r.impression ? 'Impression: ' + r.impression : ''}`
-).join('\n\n')}` : 'No recent imaging studies'}
-
-${autoEmrData.problemList?.length > 0 ? `ACTIVE PROBLEM LIST (${autoEmrData.problemList.length} problems):
-${autoEmrData.problemList.map((p: any) => 
-  `- ${p.problem_name} (${p.icd10_code || 'no code'}) - ${p.status}${p.severity ? ', Severity: ' + p.severity : ''}${p.onset_date ? ', Since: ' + new Date(p.onset_date).toLocaleDateString() : ''}`
-).join('\n')}` : 'No active problems documented'}
-
-${autoEmrData.allergies?.length > 0 ? `ALLERGIES & ADVERSE REACTIONS (${autoEmrData.allergies.length} allergies):
-${autoEmrData.allergies.map((a: any) => 
-  `- ${a.allergen}: ${a.reaction_type}, Severity: ${a.severity}${a.symptoms ? ', Symptoms: ' + a.symptoms : ''}`
-).join('\n')}` : 'No known allergies'}
-
-${autoEmrData.nursingAssessments?.length > 0 ? `RECENT NURSING ASSESSMENTS (${autoEmrData.nursingAssessments.length} assessments):
-${autoEmrData.nursingAssessments.slice(0, 3).map((n: any) => 
-  `[${new Date(n.created_at).toLocaleDateString()}] ${n.assessment_type}: ${JSON.stringify(n.assessment_data).substring(0, 200)}...`
-).join('\n\n')}` : 'No recent nursing assessments'}
-
-${autoEmrData.medicalRecords?.length > 0 ? `PREVIOUS CLINICAL NOTES (${autoEmrData.medicalRecords.length} notes):
-${autoEmrData.medicalRecords.slice(0, 3).map((r: any) => 
-  `[${new Date(r.visit_date).toLocaleDateString()}] ${r.encounter_type}:
-  Chief Complaint: ${r.chief_complaint || 'Not documented'}
-  Assessment: ${r.assessment || 'Not documented'}
-  Plan: ${r.plan || 'Not documented'}`
-).join('\n\n---\n\n')}` : 'No previous notes available'}
-`;
-
-        userPrompt = `${autoContext}
-
-Generate a comprehensive ${data.noteType || 'progress'} note that:
-1. Summarizes the patient's current clinical status based on all available data
-2. Identifies trends (improving, stable, declining) in vital signs and clinical parameters
-3. Notes any concerning findings, abnormal values, or red flags
-4. Provides a data-driven assessment of the clinical situation
-5. Suggests appropriate next steps in the plan based on the data
-6. Clearly indicates what critical information is missing or unavailable
-
-Structure as a proper SOAP note. Remember to add the auto-generated disclaimer at the end.`;
+        systemPrompt = `You are a clinical AI that generates progress notes from EMR data. Create structured SOAP notes based on objective findings. Add disclaimer: "⚠️ AUTO-GENERATED - requires physician review"`;
+        userPrompt = `Generate a ${data.noteType || 'progress'} note from:${formatEMRData(data.emrData)}`;
         break;
 
       case 'diagnosis_support':
-        systemPrompt = `You are a clinical decision support AI. Provide differential diagnosis suggestions based on symptoms and patient data. Include likelihood assessment and recommended next steps. Always emphasize that this is for educational/support purposes only and final diagnosis must be made by qualified healthcare professionals.`;
-        userPrompt = `Based on these symptoms and findings: ${data.symptoms}, provide differential diagnosis suggestions with clinical reasoning and recommended diagnostic workup.`;
+        systemPrompt = `You are a clinical decision support AI. Provide differential diagnoses with likelihood and recommended workup. Emphasize this is for support only - final diagnosis requires qualified professionals.`;
+        userPrompt = `Differential diagnoses for:\n${data.symptoms || data.prompt || JSON.stringify(data)}`;
         break;
 
       case 'medical_coding':
-        systemPrompt = `You are a medical coding AI assistant specializing in ICD-10 and CPT codes. Provide accurate coding suggestions based on medical documentation. Include code descriptions and rationale. Always recommend verification by certified coders.`;
-        userPrompt = `Suggest appropriate ICD-10 and CPT codes for: ${data.procedure || data.diagnosis}. Clinical context: ${data.context || ''}. Include code descriptions and justification.`;
+        systemPrompt = `You are a medical coding specialist. Suggest ICD-10 and CPT codes with descriptions. Recommend verification by certified coders.`;
+        userPrompt = `Suggest codes for:\n${data.documentation || data.procedure || data.diagnosis || JSON.stringify(data)}`;
         break;
 
       case 'medication_check':
-        systemPrompt = `You are a clinical pharmacist AI assistant. Review medications for interactions, contraindications, and dosing appropriateness. Provide safety alerts and recommendations. Always recommend consulting with clinical pharmacists for final verification.`;
-        userPrompt = `Review this medication regimen: ${data.medications}. Patient info: Age ${data.age || 'adult'}, conditions: ${data.conditions || 'none specified'}. Check for interactions, contraindications, and dosing issues.`;
+        systemPrompt = `You are a clinical pharmacist AI. Review medications for interactions, contraindications, and dosing. Flag concerns and suggest alternatives.`;
+        userPrompt = `Review medications:\n${data.medications || JSON.stringify(data)}\n${data.allergies ? `Allergies: ${data.allergies}` : ''}`;
         break;
 
       case 'care_plan':
-        systemPrompt = `You are a nursing care plan AI assistant. Generate comprehensive nursing care plans with nursing diagnoses, goals, interventions, and evaluation criteria based on NANDA guidelines. Include priority nursing diagnoses and measurable outcomes.`;
-        userPrompt = `Create a detailed nursing care plan for: ${data.condition}. Patient assessment: ${data.assessment || 'Standard assessment'}. Include NANDA nursing diagnoses, SMART goals, and specific interventions.`;
+        systemPrompt = `You are a care coordination specialist. Generate comprehensive care plans with goals, interventions, and outcomes.`;
+        userPrompt = `Care plan for:\nDiagnosis: ${data.diagnosis || data.condition || 'Not specified'}\nContext: ${data.context || data.assessment || context || ''}`;
         break;
 
       case 'claims_review':
-        systemPrompt = `You are a medical billing AI assistant. Review claims for potential issues, coding accuracy, and reimbursement optimization. Identify potential denial risks and suggest improvements. Focus on compliance and revenue optimization.`;
-        userPrompt = `Review this claim: Procedure: ${data.procedure}, Diagnosis: ${data.diagnosis}, Codes: ${data.codes || 'Not specified'}. Insurance: ${data.insurance || 'Not specified'}. Identify potential issues and optimization opportunities.`;
+        systemPrompt = `You are a healthcare claims analyst. Review for completeness, accuracy, and denial risks.`;
+        userPrompt = `Review claim:\n${JSON.stringify(data)}`;
         break;
 
       case 'triage_assessment':
-        systemPrompt = `You are an emergency department triage AI assistant. Analyze patient presentation to provide triage recommendations, acuity assessment, and immediate care priorities. Focus on identifying high-risk conditions and appropriate resource allocation. Always provide structured responses with clear acuity levels (routine/urgent/critical) and specialty recommendations.`;
-        userPrompt = `Triage assessment for: ${data.symptoms}. Patient context: ${data.patientContext || 'No specific patient context'}. Available specialties: ${data.availableSpecialties?.join(', ') || 'General Medicine'}. Provide acuity level (routine/urgent/critical), recommended specialty, and brief clinical reasoning.`;
+        systemPrompt = `You are an ED triage specialist. Assess urgency, assign acuity level (routine/urgent/critical), and recommend specialty.`;
+        userPrompt = `Triage:\n${data.symptoms || data.chiefComplaint || JSON.stringify(data)}`;
+        break;
+
+      case 'note_suggestions':
+        systemPrompt = `You are a clinical documentation assistant. Provide 3 specific, actionable suggestions to improve the clinical note. Each should be a complete sentence ready to add.`;
+        userPrompt = `Suggestions for ${data.noteType || 'progress'} note:\nPatient: ${data.patientName || 'Unknown'}\nContent: ${data.currentContent || 'Empty'}\n${context ? `Context: ${context}` : ''}`;
         break;
 
       default:
-        systemPrompt = `You are a helpful medical AI assistant. Provide accurate, professional healthcare information while emphasizing the importance of clinical judgment and professional verification.`;
-        userPrompt = data.prompt || 'Please provide assistance.';
+        systemPrompt = `You are a helpful medical AI assistant. Provide accurate, professional responses while emphasizing clinical judgment.`;
+        userPrompt = data.prompt || JSON.stringify(data);
     }
 
-    console.log('Calling Cohere API...');
-    
-    const response = await fetch('https://api.cohere.ai/v1/chat', {
+    console.log('Calling Lovable AI Gateway...');
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${cohereApiKey}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'command-r-plus',
-        message: userPrompt,
-        preamble: systemPrompt,
-        temperature: 0.3,
-        max_tokens: 1500,
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
       }),
     });
 
-    console.log('Cohere API response status:', response.status);
+    console.log('AI Gateway response status:', response.status);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Cohere API error:', errorData);
+      const errorText = await response.text();
+      console.error('AI Gateway error:', response.status, errorText);
       
-      // More specific error handling for Cohere
       if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
-      } else if (response.status === 401) {
-        throw new Error('Invalid Cohere API key. Please check your API key configuration.');
-      } else if (response.status === 402) {
-        throw new Error('Insufficient Cohere credits. Please add billing to your Cohere account.');
-      } else {
-        throw new Error(`Cohere API error: ${errorData.message || 'Unknown error'}`);
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again shortly.' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add credits.' }), {
+          status: 402,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      throw new Error(`AI service error: ${response.status}`);
     }
 
-    const aiData = await response.json();
-    console.log('Cohere response received successfully');
-    
-    const result = aiData.text;
+    const aiResponse = await response.json();
+    const result = aiResponse.choices?.[0]?.message?.content;
 
-    return new Response(JSON.stringify({ 
+    if (!result) {
+      throw new Error('No response from AI service');
+    }
+
+    console.log('AI response received successfully');
+
+    return new Response(JSON.stringify({
       result,
       type,
       timestamp: new Date().toISOString()
@@ -276,10 +159,9 @@ Structure as a proper SOAP note. Remember to add the auto-generated disclaimer a
     });
 
   } catch (error) {
-    console.error('Error in ai-assistant function:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      details: 'AI assistant encountered an error. Please check the logs.'
+    console.error('Error in ai-assistant:', error);
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : 'Unknown error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
