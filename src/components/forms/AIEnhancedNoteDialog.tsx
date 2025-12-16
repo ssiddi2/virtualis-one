@@ -6,9 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/EnterpriseAuthContext';
-import { Brain, Sparkles, FileText, Clock, User } from 'lucide-react';
+import { Brain, Sparkles, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAIAssistant } from '@/hooks/useAIAssistant';
 
 interface AIEnhancedNoteDialogProps {
   open: boolean;
@@ -25,12 +25,11 @@ interface AISuggestion {
 }
 
 const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalId }: AIEnhancedNoteDialogProps) => {
-  const { profile } = useAuth();
   const { toast } = useToast();
+  const { callAI, isLoading } = useAIAssistant();
   const [noteText, setNoteText] = useState('');
   const [selectedNoteType, setSelectedNoteType] = useState('');
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const noteTypes = [
     'Progress Note',
@@ -40,40 +39,45 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
     'Admission Note',
   ];
 
-  const mockAISuggestions: AISuggestion[] = [
-    {
-      id: '1',
-      text: 'Patient reports improved sleep quality and reduced anxiety levels.',
-      source: 'AI Analysis of Patient History',
-    },
-    {
-      id: '2',
-      text: 'Recommend continuing current medication regimen with a follow-up in 2 weeks.',
-      source: 'AI Clinical Guidelines',
-    },
-    {
-      id: '3',
-      text: 'Consider referral to physical therapy for ongoing lower back pain.',
-      source: 'AI Predictive Analysis',
-    },
-  ];
-
   const handleGenerateAISuggestions = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setAiSuggestions(mockAISuggestions);
-    toast({
-      title: 'AI Suggestions Generated',
-      description: 'AI-powered suggestions have been generated for your note.',
-    });
-    setIsLoading(false);
+    try {
+      const result = await callAI({
+        type: 'note_suggestions',
+        data: {
+          noteType: selectedNoteType || 'Progress Note',
+          patientName,
+          currentContent: noteText,
+        },
+        context: `Patient ID: ${patientId}, Hospital ID: ${hospitalId}`,
+      });
+
+      // Parse AI response into suggestions
+      const lines = result.split('\n').filter((line: string) => line.trim());
+      const suggestions: AISuggestion[] = lines.slice(0, 3).map((text: string, index: number) => ({
+        id: `suggestion-${index}`,
+        text: text.replace(/^\d+\.\s*/, '').replace(/^[-•]\s*/, '').trim(),
+        source: 'AI Clinical Analysis',
+      }));
+
+      setAiSuggestions(suggestions);
+      toast({
+        title: 'AI Suggestions Generated',
+        description: 'AI-powered suggestions are ready for your note.',
+      });
+    } catch (error) {
+      console.error('Error generating AI suggestions:', error);
+      toast({
+        title: 'AI Error',
+        description: error instanceof Error ? error.message : 'Failed to generate suggestions',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleApplySuggestion = (suggestion: AISuggestion) => {
-    setNoteText((prevText) => prevText + ' ' + suggestion.text);
+    setNoteText((prevText) => prevText + (prevText ? ' ' : '') + suggestion.text);
     toast({
-      title: 'AI Suggestion Applied',
+      title: 'Suggestion Applied',
       description: 'The AI suggestion has been added to your note.',
     });
   };
@@ -88,7 +92,6 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
       return;
     }
 
-    // Simulate API call
     toast({
       title: 'Note Saved',
       description: 'Your note has been saved successfully.',
@@ -107,7 +110,6 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {/* Note Type Selection */}
           <div>
             <Label htmlFor="noteType">Note Type</Label>
             <Select onValueChange={setSelectedNoteType}>
@@ -124,7 +126,6 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
             </Select>
           </div>
 
-          {/* Note Text Area */}
           <div>
             <Label htmlFor="noteText">Clinical Note</Label>
             <Textarea
@@ -136,11 +137,10 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
             />
           </div>
 
-          {/* AI Suggestions */}
-          <Card className="border-blue-400/50 bg-blue-500/10">
-            <CardHeader className="flex items-center justify-between">
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Brain className="h-4 w-4 text-blue-300" />
+                <Brain className="h-4 w-4 text-primary" />
                 AI-Powered Suggestions
               </CardTitle>
               <Button
@@ -151,13 +151,13 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Generating...
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4" />
-                    Generate AI Suggestions
+                    Generate Suggestions
                   </div>
                 )}
               </Button>
@@ -165,25 +165,25 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
             <CardContent className="space-y-2">
               {aiSuggestions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Click "Generate AI Suggestions" to get AI-powered suggestions for your note.
+                  Click "Generate Suggestions" to get AI-powered recommendations for your note.
                 </p>
               ) : (
                 aiSuggestions.map((suggestion) => (
                   <div
                     key={suggestion.id}
-                    className="p-3 rounded-md border border-blue-300/30 bg-blue-400/10"
+                    className="p-3 rounded-md border border-primary/20 bg-background"
                   >
                     <p className="text-sm">{suggestion.text}</p>
                     <div className="flex items-center justify-between mt-2">
                       <Badge variant="secondary" className="text-xs">
-                        Source: {suggestion.source}
+                        {suggestion.source}
                       </Badge>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleApplySuggestion(suggestion)}
                       >
-                        Apply Suggestion
+                        Apply
                       </Button>
                     </div>
                   </div>
@@ -193,8 +193,11 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
           </Card>
         </div>
 
-        <div className="flex justify-end">
-          <Button type="submit" onClick={handleSubmitNote}>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmitNote}>
             Save Note
           </Button>
         </div>
