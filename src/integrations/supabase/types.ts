@@ -2309,6 +2309,10 @@ export type Database = {
       decrypt_emr_secret: { Args: { encrypted: string }; Returns: string }
       encrypt_emr_secret: { Args: { secret: string }; Returns: string }
       get_user_hospital_id: { Args: { user_uuid: string }; Returns: string }
+      get_user_hospital_id_safe: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -2327,6 +2331,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { user_uuid: string }; Returns: boolean }
+      is_healthcare_provider: { Args: { user_uuid: string }; Returns: boolean }
     }
     Enums: {
       app_role:
