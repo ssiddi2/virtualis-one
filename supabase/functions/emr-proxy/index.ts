@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,6 +17,77 @@ interface EMRRequest {
   hospital_id: string;
   operation: EMROperation;
   params?: Record<string, any>;
+}
+
+// Generate JWT for Epic SMART Backend Services (JWT Bearer flow)
+async function generateEpicJWT(clientId: string, privateKeyPem: string, tokenUrl: string): Promise<string> {
+  // Parse the PEM private key
+  const privateKey = await jose.importPKCS8(privateKeyPem, 'RS384');
+  
+  const now = Math.floor(Date.now() / 1000);
+  const jti = crypto.randomUUID();
+  
+  const jwt = await new jose.SignJWT({})
+    .setProtectedHeader({ alg: 'RS384', typ: 'JWT' })
+    .setIssuer(clientId)
+    .setSubject(clientId)
+    .setAudience(tokenUrl)
+    .setJti(jti)
+    .setIssuedAt(now)
+    .setExpirationTime(now + 300) // 5 minutes
+    .sign(privateKey);
+  
+  return jwt;
+}
+
+// Get OAuth token - supports both client_secret and jwt_bearer methods
+async function getAccessToken(
+  credentials: any, 
+  clientSecret: string,
+  privateKey: string | null
+): Promise<string> {
+  const tokenUrl = credentials.base_url.includes('interconnect') 
+    ? credentials.base_url.replace(/\/api\/FHIR\/R4.*$/, '/oauth2/token')
+    : `${credentials.base_url}/oauth2/token`;
+
+  let body: URLSearchParams;
+
+  if (credentials.auth_method === 'jwt_bearer' && privateKey) {
+    // Epic SMART Backend Services - JWT Bearer assertion
+    console.log('Using JWT Bearer authentication for Epic');
+    const assertion = await generateEpicJWT(credentials.client_id, privateKey, tokenUrl);
+    
+    body = new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      client_assertion: assertion,
+      scope: credentials.scopes?.join(' ') || 'system/*.read',
+    });
+  } else {
+    // Standard client credentials flow
+    console.log('Using client_secret authentication');
+    body = new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: credentials.client_id,
+      client_secret: clientSecret,
+      scope: credentials.scopes?.join(' ') || 'patient/*.read user/*.read',
+    });
+  }
+
+  const tokenResponse = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text();
+    console.error('OAuth token error:', errorText);
+    throw new Error(`OAuth failed: ${errorText}`);
+  }
+
+  const { access_token } = await tokenResponse.json();
+  return access_token;
 }
 
 serve(async (req) => {
@@ -51,10 +123,10 @@ serve(async (req) => {
     }
     userId = user.id;
 
-    const body = await req.json() as EMRRequest;
-    hospitalId = body.hospital_id;
-    operation = body.operation;
-    const params = body.params || {};
+    const reqBody = await req.json() as EMRRequest;
+    hospitalId = reqBody.hospital_id;
+    operation = reqBody.operation;
+    const params = reqBody.params || {};
 
     console.log(`EMR Proxy: ${operation} for hospital ${hospitalId} by user ${userId}`);
 
@@ -73,25 +145,29 @@ serve(async (req) => {
       });
     }
 
-    // Decrypt client secret
-    const { data: decrypted, error: decryptError } = await supabase.rpc('decrypt_emr_secret', {
-      encrypted: credentials.client_secret_encrypted
-    });
-    const clientSecret = decryptError ? credentials.client_secret_encrypted : decrypted;
+    // Decrypt secrets
+    let clientSecret = '';
+    let privateKey: string | null = null;
+
+    if (credentials.client_secret_encrypted) {
+      const { data: decrypted } = await supabase.rpc('decrypt_emr_secret', {
+        encrypted: credentials.client_secret_encrypted
+      });
+      clientSecret = decrypted || credentials.client_secret_encrypted;
+    }
+
+    if (credentials.private_key_encrypted) {
+      const { data: decryptedKey } = await supabase.rpc('decrypt_emr_secret', {
+        encrypted: credentials.private_key_encrypted
+      });
+      privateKey = decryptedKey || credentials.private_key_encrypted;
+    }
 
     // Get OAuth token
-    const tokenResponse = await fetch(`${credentials.base_url}/oauth2/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: credentials.client_id,
-        client_secret: clientSecret,
-        scope: credentials.scopes?.join(' ') || 'patient/*.read user/*.read',
-      }),
-    });
-
-    if (!tokenResponse.ok) {
+    let access_token: string;
+    try {
+      access_token = await getAccessToken(credentials, clientSecret, privateKey);
+    } catch (oauthError: any) {
       await supabase.from('emr_credentials').update({
         last_health_check: new Date().toISOString(),
         last_health_status: 'down'
@@ -100,11 +176,10 @@ serve(async (req) => {
       await logEMRAccess(supabase, userId, hospitalId, operation, null, 'error', 'OAuth failed');
       return new Response(JSON.stringify({ 
         error: 'EMR authentication failed',
-        details: await tokenResponse.text()
+        details: oauthError.message
       }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
     }
 
-    const { access_token } = await tokenResponse.json();
     const fhirHeaders = {
       'Authorization': `Bearer ${access_token}`,
       'Content-Type': 'application/fhir+json',
@@ -130,7 +205,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('EMR Proxy error:', error);
     if (userId && hospitalId && operation) {
       await logEMRAccess(supabase, userId, hospitalId, operation, null, 'error', error.message);
@@ -486,13 +561,11 @@ function mapImmunization(fhir: any) {
     code: fhir.vaccineCode?.coding?.[0]?.code,
     status: fhir.status,
     occurrenceDate: fhir.occurrenceDateTime,
+    site: fhir.site?.text,
+    route: fhir.route?.text,
     lotNumber: fhir.lotNumber,
-    expirationDate: fhir.expirationDate,
-    site: fhir.site?.coding?.[0]?.display,
-    route: fhir.route?.coding?.[0]?.display,
-    doseQuantity: fhir.doseQuantity?.value,
-    performer: fhir.performer?.[0]?.actor?.display,
-    note: fhir.note?.[0]?.text
+    manufacturer: fhir.manufacturer?.display,
+    performer: fhir.performer?.[0]?.actor?.display
   };
 }
 
@@ -501,16 +574,12 @@ function mapDocument(fhir: any) {
     id: fhir.id,
     status: fhir.status,
     type: fhir.type?.text || fhir.type?.coding?.[0]?.display,
-    category: fhir.category?.[0]?.text,
-    description: fhir.description,
+    category: fhir.category?.[0]?.text || fhir.category?.[0]?.coding?.[0]?.display,
     date: fhir.date,
     author: fhir.author?.[0]?.display,
-    custodian: fhir.custodian?.display,
-    content: fhir.content?.map((c: any) => ({
-      contentType: c.attachment?.contentType,
-      url: c.attachment?.url,
-      title: c.attachment?.title
-    }))
+    description: fhir.description,
+    contentType: fhir.content?.[0]?.attachment?.contentType,
+    url: fhir.content?.[0]?.attachment?.url
   };
 }
 
@@ -520,13 +589,10 @@ function mapProcedure(fhir: any) {
     name: fhir.code?.text || fhir.code?.coding?.[0]?.display || '',
     code: fhir.code?.coding?.[0]?.code,
     status: fhir.status,
-    category: fhir.category?.coding?.[0]?.display,
     performedDate: fhir.performedDateTime || fhir.performedPeriod?.start,
     performer: fhir.performer?.[0]?.actor?.display,
     location: fhir.location?.display,
     reasonCode: fhir.reasonCode?.[0]?.text,
-    outcome: fhir.outcome?.text,
-    complication: fhir.complication?.[0]?.text,
-    note: fhir.note?.[0]?.text
+    outcome: fhir.outcome?.text
   };
 }

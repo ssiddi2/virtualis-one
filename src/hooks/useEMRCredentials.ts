@@ -21,6 +21,8 @@ export interface EMRCredentials {
   is_active?: boolean;
   last_health_check?: string;
   last_health_status?: 'healthy' | 'degraded' | 'down';
+  auth_method?: 'client_secret' | 'jwt_bearer';
+  private_key?: string;
 }
 
 async function invokeEMRProxy<T>(hospitalId: string, operation: EMROperation, params?: Record<string, any>): Promise<T> {
@@ -53,16 +55,31 @@ export function useEMRCredentials(hospitalId: string) {
     async saveCredentials(credentials: EMRCredentials): Promise<boolean> {
       setLoading(true);
       try {
-        const { error } = await supabase.from('emr_credentials').upsert({
+        // Build the upsert object
+        const upsertData: Record<string, any> = {
           hospital_id: credentials.hospital_id,
           vendor: credentials.vendor,
           base_url: credentials.base_url,
           client_id: credentials.client_id,
-          client_secret_encrypted: credentials.client_secret || '',
-          scopes: credentials.scopes || ['patient/*.read', 'user/*.read'],
+          scopes: credentials.scopes || ['patient/*.read', 'system/*.read'],
           tenant_id: credentials.tenant_id,
           is_active: true,
-        }, { onConflict: 'hospital_id,vendor' });
+          auth_method: credentials.auth_method || 'client_secret',
+        };
+
+        // Only set client_secret_encrypted if provided
+        if (credentials.client_secret) {
+          upsertData.client_secret_encrypted = credentials.client_secret;
+        }
+
+        // Only set private_key_encrypted if provided
+        if (credentials.private_key) {
+          upsertData.private_key_encrypted = credentials.private_key;
+        }
+
+        const { error } = await supabase
+          .from('emr_credentials')
+          .upsert(upsertData as any, { onConflict: 'hospital_id,vendor' });
 
         if (error) throw error;
         toast({ title: 'EMR credentials saved securely' });

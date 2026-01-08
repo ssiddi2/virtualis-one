@@ -95,6 +95,7 @@ serve(async (req) => {
       const defaultHospitalId = hospitals?.[0]?.id || null;
 
       if (userId) {
+        // Upsert the profile
         await adminClient.from("profiles").upsert(
           {
             id: userId,
@@ -106,9 +107,20 @@ serve(async (req) => {
           },
           { onConflict: "id" }
         );
+
+        // Also insert into user_roles table for proper RBAC
+        await adminClient.from("user_roles").upsert(
+          {
+            user_id: userId,
+            role: role,
+            hospital_id: defaultHospitalId,
+            granted_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,role,hospital_id" }
+        );
       }
     } catch (profileErr) {
-      console.warn("Profile upsert warning:", profileErr);
+      console.warn("Profile/role upsert warning:", profileErr);
       // Non-fatal
     }
 

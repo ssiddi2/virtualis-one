@@ -837,6 +837,7 @@ export type Database = {
       }
       emr_credentials: {
         Row: {
+          auth_method: string | null
           base_url: string
           client_id: string
           client_secret_encrypted: string
@@ -846,12 +847,14 @@ export type Database = {
           is_active: boolean | null
           last_health_check: string | null
           last_health_status: string | null
+          private_key_encrypted: string | null
           scopes: string[] | null
           tenant_id: string | null
           updated_at: string | null
           vendor: string
         }
         Insert: {
+          auth_method?: string | null
           base_url: string
           client_id: string
           client_secret_encrypted: string
@@ -861,12 +864,14 @@ export type Database = {
           is_active?: boolean | null
           last_health_check?: string | null
           last_health_status?: string | null
+          private_key_encrypted?: string | null
           scopes?: string[] | null
           tenant_id?: string | null
           updated_at?: string | null
           vendor: string
         }
         Update: {
+          auth_method?: string | null
           base_url?: string
           client_id?: string
           client_secret_encrypted?: string
@@ -876,6 +881,7 @@ export type Database = {
           is_active?: boolean | null
           last_health_check?: string | null
           last_health_status?: string | null
+          private_key_encrypted?: string | null
           scopes?: string[] | null
           tenant_id?: string | null
           updated_at?: string | null

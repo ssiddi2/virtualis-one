@@ -308,22 +308,32 @@ const Login = ({ onLogin }: LoginProps) => {
                   <div className="flex items-start gap-2 mb-3">
                     <AlertCircle className="h-4 w-4 text-virtualis-gold mt-0.5" />
                     <p className="text-white/70 text-xs tech-font">
-                      Demo Account Credentials:
+                      Test Account Credentials:
                     </p>
                   </div>
                   
-                  <div className="space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-white/50">
-                      <User className="h-3 w-3" />
-                      <span>dr.siddiqi@livemedhealth.com</span>
+                  <div className="space-y-3 text-xs">
+                    <div className="p-2 bg-white/5 rounded">
+                      <p className="text-white/70 font-semibold mb-1">Admin Account:</p>
+                      <div className="flex items-center gap-2 text-white/50">
+                        <User className="h-3 w-3" />
+                        <span>admin@test.com</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-white/50">
+                        <Lock className="h-3 w-3" />
+                        <span>Password: test123</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-white/50">
-                      <Lock className="h-3 w-3" />
-                      <span>Password: 123456</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-white/50">
-                      <Shield className="h-3 w-3" />
-                      <span>Role: Physician</span>
+                    <div className="p-2 bg-white/5 rounded">
+                      <p className="text-white/70 font-semibold mb-1">Physician Account:</p>
+                      <div className="flex items-center gap-2 text-white/50">
+                        <User className="h-3 w-3" />
+                        <span>dr.siddiqi@livemedhealth.com</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-white/50">
+                        <Lock className="h-3 w-3" />
+                        <span>Password: 123456</span>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Database, Key, TestTube, CheckCircle, XCircle, Link, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Database, Key, TestTube, CheckCircle, XCircle, Link, Loader2, Shield, AlertTriangle } from "lucide-react";
 import { useEMRCredentials, type EMRVendor } from "@/hooks/useEMRCredentials";
 
 interface Hospital {
@@ -22,14 +23,6 @@ interface EMRIntegrationPanelProps {
   onSave?: (data: any) => void;
 }
 
-const vendorMap: Record<string, EMRVendor> = {
-  'Epic': 'epic',
-  'Cerner': 'cerner', 
-  'Meditech': 'meditech',
-  'Allscripts': 'allscripts',
-  'FHIR API': 'fhir',
-};
-
 const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelProps) => {
   const { loading, getCredentials, saveCredentials, testConnection } = useEMRCredentials(hospital.id);
   const [testResult, setTestResult] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
@@ -40,6 +33,8 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
     client_id: '',
     client_secret: '',
     tenant_id: '',
+    auth_method: 'client_secret' as 'client_secret' | 'jwt_bearer',
+    private_key: '',
   });
 
   useEffect(() => {
@@ -51,6 +46,8 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
           client_id: creds.client_id,
           client_secret: '',
           tenant_id: creds.tenant_id || '',
+          auth_method: (creds as any).auth_method || 'client_secret',
+          private_key: '',
         });
         if (creds.last_health_status) {
           setTestResult(creds.last_health_status === 'healthy' ? 'success' : 'error');
@@ -67,6 +64,8 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
       client_id: formData.client_id,
       client_secret: formData.client_secret,
       tenant_id: formData.tenant_id || undefined,
+      auth_method: formData.auth_method,
+      private_key: formData.private_key || undefined,
     });
     if (success) onSave?.({ ...formData, hospital_id: hospital.id });
   };
@@ -88,6 +87,8 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
     }
   };
 
+  const showJWTBearerOption = formData.vendor === 'epic';
+
   return (
     <div className="p-6 space-y-6 min-h-screen">
       <div className="flex items-center gap-4">
@@ -102,7 +103,7 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -134,15 +135,65 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Client ID</Label>
+                <Input
+                  value={formData.client_id}
+                  onChange={(e) => setFormData(p => ({ ...p, client_id: e.target.value }))}
+                  placeholder="OAuth client identifier from Epic App Orchard"
+                />
+              </div>
+
+              {showJWTBearerOption && (
                 <div>
-                  <Label>Client ID</Label>
-                  <Input
-                    value={formData.client_id}
-                    onChange={(e) => setFormData(p => ({ ...p, client_id: e.target.value }))}
-                    placeholder="OAuth client identifier"
-                  />
+                  <Label>Authentication Method</Label>
+                  <Select 
+                    value={formData.auth_method} 
+                    onValueChange={(v) => setFormData(p => ({ ...p, auth_method: v as 'client_secret' | 'jwt_bearer' }))}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="client_secret">Client Secret (Standard OAuth)</SelectItem>
+                      <SelectItem value="jwt_bearer">JWT Bearer (SMART Backend Services)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Epic SMART Backend Services requires JWT Bearer authentication with a private key.
+                  </p>
                 </div>
+              )}
+
+              {formData.auth_method === 'jwt_bearer' ? (
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    Private Key (PEM format)
+                  </Label>
+                  <Textarea
+                    value={formData.private_key}
+                    onChange={(e) => setFormData(p => ({ ...p, private_key: e.target.value }))}
+                    placeholder="-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
+-----END PRIVATE KEY-----"
+                    className="font-mono text-xs h-32"
+                  />
+                  <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-600 text-xs space-y-1">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-semibold">Generate RSA Key Pair:</p>
+                        <code className="block mt-1 text-[10px] bg-black/20 p-1 rounded">
+                          openssl genrsa -out virtualis_private.pem 2048
+                        </code>
+                        <code className="block mt-1 text-[10px] bg-black/20 p-1 rounded">
+                          openssl rsa -in virtualis_private.pem -pubout -out virtualis_public.pem
+                        </code>
+                        <p className="mt-2">Upload the <strong>public key</strong> to Epic. Paste the <strong>private key</strong> above.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
                 <div>
                   <Label>Client Secret</Label>
                   <Input
@@ -152,7 +203,7 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
                     placeholder="••••••••"
                   />
                 </div>
-              </div>
+              )}
 
               {(formData.vendor === 'epic' || formData.vendor === 'cerner') && (
                 <div>
@@ -177,6 +228,28 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
               </div>
             </CardContent>
           </Card>
+
+          {formData.vendor === 'epic' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  Epic on FHIR Setup Guide
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-3">
+                <ol className="list-decimal list-inside space-y-2">
+                  <li>Go to <a href="https://fhir.epic.com/Developer/Create" target="_blank" rel="noopener" className="text-primary underline">Epic App Orchard</a> and create a new app</li>
+                  <li>Select <strong>Backend System</strong> as the application type</li>
+                  <li>Choose <strong>SMART Backend Services</strong> for authentication</li>
+                  <li>Generate an RSA key pair and upload the public key to Epic</li>
+                  <li>Select FHIR scopes: <code className="bg-muted px-1 rounded">patient/*.read</code>, <code className="bg-muted px-1 rounded">system/*.read</code></li>
+                  <li>Copy the Client ID and FHIR Base URL from Epic</li>
+                  <li>Paste your private key above (it will be encrypted)</li>
+                </ol>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -222,6 +295,10 @@ const EMRIntegrationPanel = ({ hospital, onBack, onSave }: EMRIntegrationPanelPr
               <div className="flex justify-between"><span className="text-muted-foreground">Lab Results</span><Badge variant="outline">Read</Badge></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Orders</span><Badge variant="outline">Read/Write</Badge></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Medications</span><Badge variant="outline">Read</Badge></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Allergies</span><Badge variant="outline">Read</Badge></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Conditions</span><Badge variant="outline">Read</Badge></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Vitals</span><Badge variant="outline">Read</Badge></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Documents</span><Badge variant="outline">Read</Badge></div>
             </CardContent>
           </Card>
         </div>
