@@ -29,6 +29,7 @@ import ERDashboard from "@/components/clinical/ERDashboard";
 import HospitalSelector from "@/components/dashboard/HospitalSelector";
 import { BetaOnboarding } from "@/components/onboarding/BetaOnboarding";
 import ToolsCreateUser from "@/pages/ToolsCreateUser";
+import EpicSandboxTest from "@/pages/EpicSandboxTest";
 
 export interface RouteConfig {
   path: string;
@@ -75,6 +76,7 @@ export const protectedRoutes: RouteConfig[] = [
   { path: '/tasks', element: () => <Tasks />, useLayout: true },
   { path: '/certification', element: () => <Certification />, useLayout: true },
   { path: '/audit-log', element: () => <AuditLog />, useLayout: true },
+  { path: '/epic-test', element: () => <EpicSandboxTest />, useLayout: true },
   
   // Patient-specific routes with layout
   { path: '/patients/:patientId', element: () => <EpicPatientWorkspace />, useLayout: true },
