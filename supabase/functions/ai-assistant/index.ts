@@ -98,6 +98,16 @@ serve(async (req) => {
         userPrompt = `Suggestions for ${data.noteType || 'progress'} note:\nPatient: ${data.patientName || 'Unknown'}\nContent: ${data.currentContent || 'Empty'}\n${context ? `Context: ${context}` : ''}`;
         break;
 
+      case 'snf_billing':
+        systemPrompt = `You are a skilled nursing facility (SNF) medical coding and billing specialist. Analyze clinical documentation and suggest appropriate ICD-10 diagnosis codes and CPT procedure codes. Focus on SNF-specific codes (99304-99310 for E/M, 97xxx for therapy). Always recommend verification by certified coders.`;
+        userPrompt = `Analyze this SNF documentation for billing codes:\nNote Type: ${data.noteType || 'SNF Daily'}\nFacility: ${data.facilityType || 'SNF'}\nDocumentation:\n${data.documentation || ''}`;
+        break;
+
+      case 'denial_prediction':
+        systemPrompt = `You are a healthcare claims analyst specializing in SNF billing. Analyze documentation for potential denial risks and suggest improvements.`;
+        userPrompt = `Assess denial risk for:\n${data.documentation || JSON.stringify(data)}`;
+        break;
+
       default:
         systemPrompt = `You are a helpful medical AI assistant. Provide accurate, professional responses while emphasizing clinical judgment.`;
         userPrompt = data.prompt || JSON.stringify(data);

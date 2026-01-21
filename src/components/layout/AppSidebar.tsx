@@ -40,6 +40,11 @@ const clinicalItems = [
 // Secondary clinical tools
 const clinicalToolsItems = [
   {
+    title: "Documentation",
+    url: "/documentation",
+    icon: FileText,
+  },
+  {
     title: "Laboratory",
     url: "/laboratory",
     icon: TestTube,

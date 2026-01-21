@@ -897,6 +897,51 @@ export type Database = {
           },
         ]
       }
+      epic_jwk_keys: {
+        Row: {
+          algorithm: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          kid: string
+          notes: string | null
+          private_key_pem_encrypted: string
+          public_key_jwk: Json
+          updated_at: string
+          use: string
+        }
+        Insert: {
+          algorithm?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          kid: string
+          notes?: string | null
+          private_key_pem_encrypted: string
+          public_key_jwk: Json
+          updated_at?: string
+          use?: string
+        }
+        Update: {
+          algorithm?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          kid?: string
+          notes?: string | null
+          private_key_pem_encrypted?: string
+          public_key_jwk?: Json
+          updated_at?: string
+          use?: string
+        }
+        Relationships: []
+      }
       hospitals: {
         Row: {
           address: string

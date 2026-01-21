@@ -16,6 +16,7 @@ import CPOESystem from "@/components/clinical/CPOESystem";
 import EnhancedCPOESystem from "@/components/clinical/EnhancedCPOESystem";
 import ClinicalDocumentation from "@/components/clinical/ClinicalDocumentation";
 import BillingDashboard from "@/components/billing/BillingDashboard";
+import NoteToBillingWorkflow from "@/components/billing/NoteToBillingWorkflow";
 import EnhancedLISDashboard from "@/components/laboratory/EnhancedLISDashboard";
 import PACSManager from "@/components/radiology/PACSManager";
 import CMSQualityDashboard from "@/components/cms/CMSQualityDashboard";
@@ -77,6 +78,7 @@ export const protectedRoutes: RouteConfig[] = [
   { path: '/certification', element: () => <Certification />, useLayout: true },
   { path: '/audit-log', element: () => <AuditLog />, useLayout: true },
   { path: '/epic-test', element: () => <EpicSandboxTest />, useLayout: true },
+  { path: '/documentation', element: () => <ClinicalDocumentation />, useLayout: true },
   
   // Patient-specific routes with layout
   { path: '/patients/:patientId', element: () => <EpicPatientWorkspace />, useLayout: true },
