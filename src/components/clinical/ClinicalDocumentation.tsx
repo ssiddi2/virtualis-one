@@ -13,6 +13,7 @@ import ClinicalTemplates from './ClinicalTemplates';
 import SNFTemplates from './SNFTemplates';
 import NoteToBillingWorkflow from '@/components/billing/NoteToBillingWorkflow';
 import SNFBillingCalculator from '@/components/billing/SNFBillingCalculator';
+import RealTimeBillingPreview from '@/components/billing/RealTimeBillingPreview';
 import { FileText, Stethoscope, Heart, ClipboardList, DollarSign, Building2, Calculator } from 'lucide-react';
 
 interface ClinicalDocumentationProps {
