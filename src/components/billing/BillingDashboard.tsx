@@ -1,7 +1,4 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   DollarSign, 
@@ -10,13 +7,16 @@ import {
   FileText,
   Calculator,
   Shield,
-  Target,
-  BarChart3
+  BarChart3,
+  Wallet,
+  XCircle
 } from 'lucide-react';
 import DenialManagement from './DenialManagement';
 import PriorAuthManager from './PriorAuthManager';
 import RevenueAnalytics from './RevenueAnalytics';
 import ROICalculator from './ROICalculator';
+import CollectionsDashboard from './CollectionsDashboard';
+import DenialWorkqueue from './DenialWorkqueue';
 import ReportGenerationCards from '../clinical/ReportGenerationCards';
 
 interface BillingDashboardProps {
@@ -104,7 +104,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="analytics" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 backdrop-blur-xl bg-blue-600/20 border border-blue-400/30 rounded-xl">
+          <TabsList className="grid w-full grid-cols-7 backdrop-blur-xl bg-blue-600/20 border border-blue-400/30 rounded-xl">
             <TabsTrigger 
               value="analytics" 
               className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70 rounded-lg"
@@ -113,11 +113,25 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
               Analytics
             </TabsTrigger>
             <TabsTrigger 
+              value="collections"
+              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70 rounded-lg"
+            >
+              <Wallet className="h-4 w-4 mr-2" />
+              Collections
+            </TabsTrigger>
+            <TabsTrigger 
+              value="denial-workqueue"
+              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70 rounded-lg"
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Denials AI
+            </TabsTrigger>
+            <TabsTrigger 
               value="denials"
               className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70 rounded-lg"
             >
               <AlertTriangle className="h-4 w-4 mr-2" />
-              Denials
+              Denial Mgmt
             </TabsTrigger>
             <TabsTrigger 
               value="prior-auth"
@@ -131,7 +145,7 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
               className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70 rounded-lg"
             >
               <Calculator className="h-4 w-4 mr-2" />
-              ROI Calculator
+              ROI
             </TabsTrigger>
             <TabsTrigger 
               value="reports"
@@ -144,6 +158,14 @@ const BillingDashboard = ({ hospitalId }: BillingDashboardProps) => {
 
           <TabsContent value="analytics" className="mt-6">
             <RevenueAnalytics hospitalId={hospitalId} />
+          </TabsContent>
+
+          <TabsContent value="collections" className="mt-6">
+            <CollectionsDashboard hospitalId={hospitalId} />
+          </TabsContent>
+
+          <TabsContent value="denial-workqueue" className="mt-6">
+            <DenialWorkqueue hospitalId={hospitalId} />
           </TabsContent>
 
           <TabsContent value="denials" className="mt-6">
