@@ -120,7 +120,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 />
                 
                 {/* Frosted glass card */}
-                <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20 shadow-2xl">
+                <div className="relative bg-white/20 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/30 shadow-2xl">
                   <img 
                     src="/lovable-uploads/virtualisone-logo.png" 
                     alt="VirtualisOne Logo" 
