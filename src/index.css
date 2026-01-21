@@ -7,65 +7,66 @@
 
 @layer base {
   :root {
-    /* Medical Dashboard Dark Theme */
-    --background: 222.2 47.4% 11.2%;
+    /* Light Navy Blue Futuristic Theme */
+    --background: 225 70% 25%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 47.4% 11.2%;
+    --card: 220 60% 35%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 47.4% 11.2%;
+    --popover: 220 60% 35%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 212 95% 68%;
+    --primary-foreground: 225 70% 25%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 215 55% 40%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 55% 40%;
+    --muted-foreground: 215 20% 85%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 212 95% 68%;
+    --accent-foreground: 225 70% 25%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 210 50% 50%;
+    --input: 215 55% 40%;
+    --ring: 212 95% 68%;
 
     --radius: 8px;
 
     /* Sidebar colors */
-    --sidebar-background: 222.2 47.4% 9%;
+    --sidebar-background: 225 70% 25%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-primary: 212 95% 68%;
+    --sidebar-primary-foreground: 225 70% 25%;
+    --sidebar-accent: 215 55% 40%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 224.3 76.3% 48%;
+    --sidebar-border: 210 50% 50%;
+    --sidebar-ring: 212 95% 68%;
 
     /* Status colors */
-    --success: 160 84% 39%;
+    --success: 142 76% 36%;
     --success-foreground: 210 40% 98%;
     --warning: 38 92% 50%;
-    --warning-foreground: 222.2 47.4% 11.2%;
+    --warning-foreground: 225 70% 25%;
     --critical: 0 84% 60%;
     --critical-foreground: 210 40% 98%;
     
     /* Lab result colors */
     --lab-high: 0 84% 60%;
-    --lab-low: 217.2 91.2% 59.8%;
-    --lab-normal: 160 84% 39%;
+    --lab-low: 212 95% 68%;
+    --lab-normal: 142 76% 36%;
     --lab-critical: 0 100% 50%;
 
-    /* VirtualisOne brand colors */
-    --virtualis-blue: 217.2 91.2% 59.8%;
-    --virtualis-purple: 262.1 83.3% 57.8%;
-    --virtualis-green: 160 84% 39%;
+    /* Virtualis brand colors */
+    --virtualis-gold: 42 85% 60%;
+    --virtualis-blue: 212 95% 68%;
+    --virtualis-purple: 260 85% 70%;
+    --virtualis-green: 142 76% 36%;
   }
 }
 
@@ -78,11 +79,13 @@
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
     min-height: 100vh;
-    @apply bg-background text-foreground;
+    background: linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%);
+    color: hsl(var(--foreground));
   }
 
   html, body, #root {
     min-height: 100vh;
+    background: linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%);
   }
 }
 
@@ -103,15 +106,15 @@
   }
 
   .virtualis-button {
-    @apply px-4 py-2 rounded-lg font-medium transition-smooth text-white;
-    background: linear-gradient(135deg, hsl(var(--virtualis-blue)) 0%, hsl(var(--virtualis-purple)) 100%);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    @apply px-4 py-2 rounded-lg font-medium transition-smooth text-background;
+    background: linear-gradient(135deg, hsl(var(--virtualis-gold)) 0%, hsl(42 80% 55%) 100%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
 
   .virtualis-button:hover {
     @apply transform -translate-y-0.5 shadow-lg;
-    background: linear-gradient(135deg, hsl(var(--virtualis-purple)) 0%, hsl(var(--virtualis-blue)) 100%);
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, hsl(42 80% 55%) 0%, hsl(var(--virtualis-gold)) 100%);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   }
 
   .virtualis-modal {
@@ -335,7 +338,7 @@
   }
 
   .hover-glow {
-    @apply transition-smooth hover:shadow-[0_0_30px_rgba(139,92,246,0.4)];
+    @apply transition-smooth hover:shadow-[0_0_30px_rgba(66,153,225,0.4)];
   }
 
   /* Loading states */
@@ -378,9 +381,9 @@
     scroll-behavior: smooth;
   }
 
-  /* Text gradients - VirtualisOne brand gradient */
+  /* Text gradients */
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent;
   }
 
   /* Page transitions */

@@ -103,7 +103,7 @@ const Login = ({ onLogin }: LoginProps) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(135deg, hsl(210, 100%, 8%) 0%, hsl(205, 100%, 15%) 25%, hsl(200, 90%, 22%) 50%, hsl(195, 85%, 30%) 75%, hsl(185, 80%, 38%) 100%)'
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
     }}>
       <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
         {/* Logo and Messaging Section */}
@@ -146,7 +146,7 @@ const Login = ({ onLogin }: LoginProps) => {
             {/* Header */}
             <div className="text-center mb-8">
               <div className="flex items-center gap-2 justify-center mb-4">
-                <Shield className="h-5 w-5 text-cyan-400" />
+                <Shield className="h-5 w-5 text-virtualis-gold" />
                 <h1 className="text-2xl font-bold text-white tech-font">
                   VirtualisOne
                 </h1>
@@ -163,7 +163,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 onClick={() => setIsLogin(true)}
                 className={`flex-1 py-2 px-4 text-sm font-medium rounded-l-lg transition-colors ${
                   isLogin 
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' 
+                    ? 'bg-virtualis-gold text-white' 
                     : 'bg-white/10 text-white/70 hover:bg-white/20'
                 }`}
               >
@@ -174,7 +174,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 onClick={() => setIsLogin(false)}
                 className={`flex-1 py-2 px-4 text-sm font-medium rounded-r-lg transition-colors ${
                   !isLogin 
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' 
+                    ? 'bg-virtualis-gold text-white' 
                     : 'bg-white/10 text-white/70 hover:bg-white/20'
                 }`}
               >
@@ -262,7 +262,7 @@ const Login = ({ onLogin }: LoginProps) => {
 
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white tech-font h-12 text-base font-semibold mt-6"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white tech-font h-12 text-base font-semibold mt-6"
                 disabled={loading || isCreatingDemo}
               >
                 {loading ? (
@@ -291,7 +291,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 <Button 
                   type="button"
                   onClick={handleDemoAccount}
-                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white tech-font h-12 text-base font-semibold mt-4 flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white tech-font h-12 text-base font-semibold mt-4 flex items-center justify-center gap-2"
                   disabled={isCreatingDemo || loading}
                 >
                   {isCreatingDemo ? (
@@ -304,9 +304,9 @@ const Login = ({ onLogin }: LoginProps) => {
                   )}
                 </Button>
 
-                <div className="mt-6 p-4 bg-white/5 rounded-lg border border-cyan-500/20">
+                <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
                   <div className="flex items-start gap-2 mb-3">
-                    <AlertCircle className="h-4 w-4 text-cyan-400 mt-0.5" />
+                    <AlertCircle className="h-4 w-4 text-virtualis-gold mt-0.5" />
                     <p className="text-white/70 text-xs tech-font">
                       Test Account Credentials:
                     </p>

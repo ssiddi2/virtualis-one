@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/EnterpriseAuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Shield } from "lucide-react";
+import { User, Lock, Shield, Stethoscope } from "lucide-react";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -54,20 +54,20 @@ const AuthForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{
+      background: 'linear-gradient(135deg, hsl(225, 70%, 25%) 0%, hsl(220, 65%, 35%) 25%, hsl(215, 60%, 45%) 50%, hsl(210, 55%, 55%) 75%, hsl(205, 50%, 65%) 100%)'
+    }}>
       <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
         {/* Logo and Messaging Section */}
         <div className="flex flex-col items-center text-center space-y-8">
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-6">
-              {/* Logo with glow effect to make it pop */}
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/30 blur-3xl rounded-full scale-150" />
-                <img 
-                  src="/lovable-uploads/virtualisone-logo.png" 
-                  alt="VirtualisOne Logo" 
-                  className="relative h-32 lg:h-40 xl:h-48 w-auto max-w-md drop-shadow-2xl"
-                />
+              <div className="flex items-center gap-3">
+                <Stethoscope className="h-16 w-16 text-yellow-400" />
+                <div>
+                  <h1 className="text-4xl font-bold text-white">VirtualisOne</h1>
+                  <p className="text-yellow-400 text-xl font-semibold">Universal EMR Platform</p>
+                </div>
               </div>
               <div className="text-center max-w-2xl">
                 <p className="text-lg lg:text-xl text-white/80 leading-relaxed">
@@ -79,16 +79,16 @@ const AuthForm = () => {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl">
-            <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 flex items-center justify-center gap-2">
-              <Shield className="h-5 w-5 text-blue-400" />
+            <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-xl p-4 flex items-center justify-center gap-2">
+              <Shield className="h-5 w-5 text-blue-300" />
               <span className="font-semibold text-white">HIPAA SECURE</span>
             </div>
-            <div className="backdrop-blur-xl bg-green-500/20 border border-green-400/30 rounded-xl p-4 flex items-center justify-center gap-2">
-              <Shield className="h-5 w-5 text-green-400" />
+            <div className="backdrop-blur-xl bg-green-500/20 border border-green-300/30 rounded-xl p-4 flex items-center justify-center gap-2">
+              <Shield className="h-5 w-5 text-green-300" />
               <span className="font-semibold text-white">AI-POWERED</span>
             </div>
-            <div className="backdrop-blur-xl bg-purple-500/20 border border-purple-400/30 rounded-xl p-4 flex items-center justify-center gap-2">
-              <Shield className="h-5 w-5 text-purple-400" />
+            <div className="backdrop-blur-xl bg-purple-500/20 border border-purple-300/30 rounded-xl p-4 flex items-center justify-center gap-2">
+              <Shield className="h-5 w-5 text-purple-300" />
               <span className="font-semibold text-white">UNIVERSAL EMR</span>
             </div>
           </div>

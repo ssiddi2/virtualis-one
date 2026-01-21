@@ -74,8 +74,9 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// VirtualisOne brand colors
+				// Virtualis brand colors
 				virtualis: {
+					gold: 'hsl(var(--virtualis-gold))',
 					blue: 'hsl(var(--virtualis-blue))',
 					purple: 'hsl(var(--virtualis-purple))',
 					green: 'hsl(var(--virtualis-green))'
@@ -124,8 +125,8 @@ export default {
 					'100%': { transform: 'scale(1)', opacity: '1' }
 				},
 				'pulse-glow': {
-					'0%, 100%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.4)' },
-					'50%': { boxShadow: '0 0 30px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.3)' }
+					'0%, 100%': { boxShadow: '0 0 20px rgba(66, 153, 225, 0.4)' },
+					'50%': { boxShadow: '0 0 30px rgba(66, 153, 225, 0.8), 0 0 60px rgba(66, 153, 225, 0.3)' }
 				},
 				'float': {
 					'0%, 100%': { transform: 'translateY(0px)' },
