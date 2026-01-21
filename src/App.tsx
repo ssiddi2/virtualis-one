@@ -8,7 +8,10 @@ import { MultiHospitalProvider } from "@/contexts/MultiHospitalContext";
 import { AICopilotProvider } from "@/components/ai/AICopilotProvider";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { AlisAIProvider } from "@/contexts/AlisAIContext";
+import { RCMProvider } from "@/contexts/RCMContext";
 import { AlisAIFloatingPanel } from "@/components/ambient/AlisAIFloatingPanel";
+import RCMFloatingWidget from "@/components/billing/RCMFloatingWidget";
+import UniversalBillingPanel from "@/components/billing/UniversalBillingPanel";
 import { CommandPalette } from "@/components/ui/CommandPalette";
 import AppLayout from "@/components/layout/AppLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -111,19 +114,23 @@ const App = () => (
         <EnterpriseAuthProvider>
           <MultiHospitalProvider>
             <AlisAIProvider>
-              <TooltipProvider>
-                <AppRoutes />
-                <CommandPalette />
-                <AlisAIFloatingPanel />
-                <Toaster />
-                <Sonner />
-              </TooltipProvider>
+              <RCMProvider>
+                <TooltipProvider>
+                  <AppRoutes />
+                  <CommandPalette />
+                  <AlisAIFloatingPanel />
+                  <RCMFloatingWidget />
+                  <UniversalBillingPanel />
+                  <Toaster />
+                  <Sonner />
+                </TooltipProvider>
+              </RCMProvider>
             </AlisAIProvider>
           </MultiHospitalProvider>
-        </EnterpriseAuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
-  </ErrorBoundary>
+          </EnterpriseAuthProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
 );
 
 export default App;
