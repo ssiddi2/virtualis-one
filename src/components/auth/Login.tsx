@@ -111,9 +111,9 @@ const Login = ({ onLogin }: LoginProps) => {
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-6">
               <img 
-                src="/lovable-uploads/d89e4887-8595-4385-add8-c92d316b043f.png" 
+                src="/lovable-uploads/virtualisone-logo.png" 
                 alt="VirtualisOne Logo" 
-                className="h-40 lg:h-56 xl:h-72 w-auto animate-float pulse-glow"
+                className="h-32 lg:h-40 xl:h-48 w-auto max-w-md animate-float"
               />
               <div className="text-center max-w-2xl">
                 <p className="text-lg lg:text-xl xl:text-2xl text-white/70 tech-font leading-relaxed">

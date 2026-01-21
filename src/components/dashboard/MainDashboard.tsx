@@ -115,9 +115,9 @@ const MainDashboard = ({ user }: MainDashboardProps) => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-6">
           <img 
-            src="/lovable-uploads/96442473-7948-4431-92d6-7697bfb571e2.png" 
+            src="/lovable-uploads/virtualisone-logo.png" 
             alt="VirtualisOne" 
-            className="h-16"
+            className="h-20 w-auto max-w-sm"
           />
         </div>
         <div>
