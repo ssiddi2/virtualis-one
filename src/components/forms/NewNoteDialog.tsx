@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,7 @@ import { FileText, Brain, User, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateMedicalRecord } from '@/hooks/useMedicalRecords';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
+import RealTimeBillingPreview from '@/components/billing/RealTimeBillingPreview';
 
 interface NewNoteDialogProps {
   open: boolean;
@@ -42,6 +43,17 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
   const [plan, setPlan] = useState('');
   const [isAISuggestionsEnabled, setIsAISuggestionsEnabled] = useState(true);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+
+  // Combine all documentation for real-time billing preview
+  const combinedDocumentation = useMemo(() => {
+    return [
+      chiefComplaint && `Chief Complaint: ${chiefComplaint}`,
+      hpi && `History: ${hpi}`,
+      physicalExam && `Exam: ${physicalExam}`,
+      assessment && `Assessment: ${assessment}`,
+      plan && `Plan: ${plan}`,
+    ].filter(Boolean).join('\n');
+  }, [chiefComplaint, hpi, physicalExam, assessment, plan]);
 
   // Fetch AI suggestions when assessment changes
   useEffect(() => {
@@ -280,6 +292,15 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
                 rows={3}
               />
             </div>
+
+            {/* Real-Time Billing Preview */}
+            <RealTimeBillingPreview
+              documentationText={combinedDocumentation}
+              noteType={noteTypes.find(t => t.value === noteType)?.label || 'Progress Note'}
+              facilityType="Hospital"
+              minCharacters={50}
+              debounceMs={1500}
+            />
 
             {isAISuggestionsEnabled && (aiSuggestions.length > 0 || isAILoading) && (
               <div className="p-3 bg-green-600/20 rounded border border-green-400/30">

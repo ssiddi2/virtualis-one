@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Sparkles, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
+import RealTimeBillingPreview from '@/components/billing/RealTimeBillingPreview';
 
 interface AIEnhancedNoteDialogProps {
   open: boolean;
@@ -136,6 +137,15 @@ const AIEnhancedNoteDialog = ({ open, onClose, patientId, patientName, hospitalI
               className="resize-none h-48 text-sm"
             />
           </div>
+
+          {/* Real-Time Billing Preview */}
+          <RealTimeBillingPreview
+            documentationText={noteText}
+            noteType={selectedNoteType || 'Progress Note'}
+            facilityType="Hospital"
+            minCharacters={50}
+            debounceMs={1500}
+          />
 
           <Card className="border-primary/30 bg-primary/5">
             <CardHeader className="flex flex-row items-center justify-between pb-2">

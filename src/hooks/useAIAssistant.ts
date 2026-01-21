@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AIRequest {
-  type: 'clinical_note' | 'clinical_note_with_emr_data' | 'auto_generate_from_emr_only' | 'diagnosis_support' | 'medical_coding' | 'medication_check' | 'care_plan' | 'claims_review' | 'triage_assessment' | 'note_suggestions' | 'snf_billing' | 'denial_prediction';
+  type: 'clinical_note' | 'clinical_note_with_emr_data' | 'auto_generate_from_emr_only' | 'diagnosis_support' | 'medical_coding' | 'medication_check' | 'care_plan' | 'claims_review' | 'triage_assessment' | 'note_suggestions' | 'snf_billing' | 'denial_prediction' | 'real_time_coding';
   data: any;
   context?: string;
 }

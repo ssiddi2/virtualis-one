@@ -108,6 +108,14 @@ serve(async (req) => {
         userPrompt = `Assess denial risk for:\n${data.documentation || JSON.stringify(data)}`;
         break;
 
+      case 'real_time_coding':
+        systemPrompt = `You are a fast medical coding assistant optimized for real-time suggestions. Return ONLY codes in this exact format:
+ICD-10: [CODE] - [Brief description]
+CPT: [CODE] - [Brief description]
+Provide 2-4 most likely codes. No explanations.`;
+        userPrompt = `Quick codes for ${data.facilityType || 'clinical'} ${data.noteType || 'note'}:\n${data.documentation?.substring(0, 500) || ''}`;
+        break;
+
       default:
         systemPrompt = `You are a helpful medical AI assistant. Provide accurate, professional responses while emphasizing clinical judgment.`;
         userPrompt = data.prompt || JSON.stringify(data);
