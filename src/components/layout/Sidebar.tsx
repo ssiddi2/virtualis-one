@@ -54,16 +54,12 @@ export function Sidebar({ className }: SidebarProps) {
     <div className={cn("pb-12 min-h-screen", className)}>
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
-          <div className="flex items-center gap-2 px-4 mb-8">
+          <div className="flex items-center justify-center px-4 mb-8">
             <img 
-              src="/lovable-uploads/9ce8bfbd-79fd-4ea8-9589-5e4a4307b294.png" 
-              alt="Virtualis Logo" 
-              className="h-10 w-10"
+              src="/lovable-uploads/virtualisone-logo.png" 
+              alt="VirtualisOne Logo" 
+              className="h-14 w-auto max-w-[180px]"
             />
-            <div>
-              <h2 className="text-xl font-bold text-white">VirtualisOne</h2>
-              <p className="text-xs text-white/60">Healthcare Intelligence</p>
-            </div>
           </div>
 
           {profile && (

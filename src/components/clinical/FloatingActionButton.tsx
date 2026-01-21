@@ -126,9 +126,9 @@ const FloatingActionButton = ({ onMessageClick, onConsultClick, onAmbientClick }
           <X className="h-6 w-6 text-white" />
         ) : (
           <img 
-            src="/lovable-uploads/1ef8d41d-9742-4ba5-89ff-e9d7b4a2a999.png" 
-            alt="Virtualis Logo" 
-            className="h-12 w-12 object-contain"
+            src="/lovable-uploads/virtualisone-logo.png" 
+            alt="VirtualisOne Logo" 
+            className="h-10 w-10 object-contain rounded-lg"
           />
         )}
       </Button>
