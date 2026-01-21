@@ -110,11 +110,15 @@ const Login = ({ onLogin }: LoginProps) => {
         <div className="flex flex-col items-center text-center space-y-8">
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-6">
-              <img 
-                src="/lovable-uploads/virtualisone-logo.png" 
-                alt="VirtualisOne Logo" 
-                className="h-32 lg:h-40 xl:h-48 w-auto max-w-md animate-float"
-              />
+              <div className="relative">
+                {/* Glow backdrop */}
+                <div className="absolute inset-0 bg-blue-400/30 blur-3xl rounded-full scale-150" />
+                <img 
+                  src="/lovable-uploads/virtualisone-logo.png" 
+                  alt="VirtualisOne Logo" 
+                  className="relative h-36 lg:h-44 xl:h-52 w-auto max-w-lg animate-float drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
+                />
+              </div>
               <div className="text-center max-w-2xl">
                 <p className="text-lg lg:text-xl xl:text-2xl text-white/70 tech-font leading-relaxed">
                   Revolutionary healthcare intelligence platform connecting hospitals, 
