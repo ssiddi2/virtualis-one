@@ -111,13 +111,22 @@ const Login = ({ onLogin }: LoginProps) => {
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-6">
               <div className="relative">
-                {/* Glow backdrop */}
-                <div className="absolute inset-0 bg-blue-400/30 blur-3xl rounded-full scale-150" />
-                <img 
-                  src="/lovable-uploads/virtualisone-logo.png" 
-                  alt="VirtualisOne Logo" 
-                  className="relative h-36 lg:h-44 xl:h-52 w-auto max-w-lg animate-float drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
+                {/* Radial spotlight backdrop */}
+                <div 
+                  className="absolute inset-0 scale-[2]"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%)'
+                  }}
                 />
+                
+                {/* Frosted glass card */}
+                <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20 shadow-2xl">
+                  <img 
+                    src="/lovable-uploads/virtualisone-logo.png" 
+                    alt="VirtualisOne Logo" 
+                    className="h-32 sm:h-36 lg:h-44 xl:h-52 w-auto animate-float drop-shadow-[0_0_35px_rgba(255,255,255,0.5)]"
+                  />
+                </div>
               </div>
               <div className="text-center max-w-2xl">
                 <p className="text-lg lg:text-xl xl:text-2xl text-white/70 tech-font leading-relaxed">
