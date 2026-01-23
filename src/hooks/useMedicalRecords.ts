@@ -33,17 +33,27 @@ export const useCreateMedicalRecord = () => {
   
   return useMutation({
     mutationFn: async (record: MedicalRecordInsert) => {
+      console.log('[Medical Records] Creating record:', record);
+      
       const { data, error } = await supabase
         .from('medical_records')
         .insert(record)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('[Medical Records] Insert error:', error);
+        throw error;
+      }
+      
+      console.log('[Medical Records] Record created:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medical_records'] });
+    },
+    onError: (error) => {
+      console.error('[Medical Records] Mutation error:', error);
     },
   });
 };
