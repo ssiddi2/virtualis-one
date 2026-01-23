@@ -90,6 +90,9 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
   }, [assessment, isAISuggestionsEnabled, callAI, noteType, patientName, chiefComplaint, hpi, physicalExam, plan]);
 
   const handleSubmit = async () => {
+    console.log('[NewNoteDialog] Submit initiated');
+    console.log('[NewNoteDialog] Auth state:', { profileId: profile?.id, hospitalId: profile?.hospital_id, role: profile?.role });
+    
     if (!assessment && !plan) {
       toast({
         title: "Required",
@@ -99,28 +102,43 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
       return;
     }
 
-    if (!profile?.id || !profile?.hospital_id) {
+    if (!profile?.id) {
+      console.error('[NewNoteDialog] No profile ID - user not authenticated');
       toast({
-        title: "Error",
-        description: "You must be logged in to create notes.",
+        title: "Authentication Required",
+        description: "You must be logged in to create notes. Please refresh and try again.",
         variant: "destructive",
       });
       return;
     }
 
-    try {
-      await createMedicalRecord.mutateAsync({
-        patient_id: patientId,
-        hospital_id: profile.hospital_id,
-        provider_id: profile.id,
-        encounter_type: noteType,
-        chief_complaint: chiefComplaint || null,
-        history_present_illness: hpi || null,
-        physical_examination: physicalExam || null,
-        assessment: assessment || null,
-        plan: plan || null,
-        visit_date: new Date().toISOString(),
+    if (!profile?.hospital_id) {
+      console.error('[NewNoteDialog] No hospital ID assigned to user');
+      toast({
+        title: "Hospital Not Selected",
+        description: "Your account is not assigned to a hospital. Please contact an administrator.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    const recordData = {
+      patient_id: patientId,
+      hospital_id: profile.hospital_id,
+      provider_id: profile.id,
+      encounter_type: noteType,
+      chief_complaint: chiefComplaint || null,
+      history_present_illness: hpi || null,
+      physical_examination: physicalExam || null,
+      assessment: assessment || null,
+      plan: plan || null,
+      visit_date: new Date().toISOString(),
+    };
+
+    console.log('[NewNoteDialog] Saving record:', recordData);
+
+    try {
+      await createMedicalRecord.mutateAsync(recordData);
 
       toast({
         title: "Note Saved",
@@ -136,11 +154,22 @@ const NewNoteDialog = ({ open, onClose, patientId, patientName }: NewNoteDialogP
       setNoteType('progress');
       setAiSuggestions([]);
       onClose();
-    } catch (error) {
-      console.error('Error saving note:', error);
+    } catch (error: any) {
+      console.error('[NewNoteDialog] Error saving note:', error);
+      
+      // Provide more specific error messages based on error type
+      let errorMessage = "Failed to save note. Please try again.";
+      if (error?.message?.includes('row-level security')) {
+        errorMessage = "Permission denied. Your account may not have the required role to create clinical notes.";
+      } else if (error?.message?.includes('violates foreign key')) {
+        errorMessage = "Invalid patient or hospital reference. Please refresh and try again.";
+      } else if (error?.code === '42501') {
+        errorMessage = "Access denied. Please ensure you have a healthcare provider role.";
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to save note. Please try again.",
+        title: "Error Saving Note",
+        description: errorMessage,
         variant: "destructive",
       });
     }
