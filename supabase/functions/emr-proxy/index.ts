@@ -313,7 +313,8 @@ async function executeOperation(
       
       if (ctx.viaGateway) {
         // Gateway (IRIS): labs are Observations with category=laboratory
-        const response = await fhirCall('GET', 'Observation', { ...query, category: 'laboratory' });
+        const { _sort: _ignored, ...obsQuery } = query; // IRIS rejects _sort=date on Observation
+        const response = await fhirCall('GET', 'Observation', { ...obsQuery, category: 'laboratory' });
         const bundle = await handleFHIRResponse(response);
         return (bundle.entry || []).map((e: any) => mapLabObservation(e.resource, params.patientId));
       }
@@ -348,9 +349,9 @@ async function executeOperation(
     }
 
     case 'get_vitals': {
-      const response = await fhirCall('GET', 'Observation', {
-        patient: params.patientId, category: 'vital-signs', _sort: '-date', _count: '100'
-      });
+      const vq: Record<string, string> = { patient: params.patientId, category: 'vital-signs', _count: '100' };
+      if (!ctx.viaGateway) vq._sort = '-date'; // IRIS rejects _sort=date
+      const response = await fhirCall('GET', 'Observation', vq);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapVitalSign(e.resource));
     }
@@ -393,6 +394,7 @@ async function executeOperation(
     }
 
     case 'get_imaging': {
+      if (!params.patientId) throw Object.assign(new Error('patientId is required'), { status: 400 });
       const response = await fhirCall('GET', 'ImagingStudy', { patient: params.patientId, _count: '100' });
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => ({
@@ -496,7 +498,7 @@ function mapFhirPatient(fhir: any) {
   const name = fhir.name?.[0] || {};
   return {
     id: fhir.id,
-    mrn: fhir.identifier?.find((i: any) => i.type?.coding?.[0]?.code === 'MR')?.value || '',
+    mrn: (fhir.identifier?.find((i: any) => i.type?.coding?.[0]?.code === 'MR') || (fhir.identifier?.length === 1 ? fhir.identifier[0] : fhir.identifier?.find((i: any) => /^urn:oid:/.test(i.system || ''))))?.value || '',
     firstName: name.given?.join(' ') || '',
     lastName: name.family || '',
     dob: fhir.birthDate || '',
