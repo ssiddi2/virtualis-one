@@ -176,13 +176,19 @@ const EpicSandboxTest = () => {
         }),
       ]);
 
+      // The proxy returns plain arrays; tolerate wrapped shapes too.
+      const list = (d: any, ...keys: string[]): any[] => {
+        if (Array.isArray(d)) return d;
+        for (const k of keys) if (Array.isArray(d?.[k])) return d[k];
+        return [];
+      };
       setClinicalData({
-        medications: medsRes.data?.medications || [],
-        allergies: allergiesRes.data?.allergies || [],
-        conditions: conditionsRes.data?.conditions || [],
-        observations: obsRes.data?.vitals || obsRes.data?.observations || [],
-        encounters: encountersRes.data?.encounters || [],
-        diagnosticReports: reportsRes.data?.results || reportsRes.data?.reports || [],
+        medications: list(medsRes.data, 'medications'),
+        allergies: list(allergiesRes.data, 'allergies'),
+        conditions: list(conditionsRes.data, 'conditions'),
+        observations: list(obsRes.data, 'vitals', 'observations'),
+        encounters: list(encountersRes.data, 'encounters'),
+        diagnosticReports: list(reportsRes.data, 'results', 'reports'),
       });
 
       toast.success('Clinical data loaded');
