@@ -130,22 +130,22 @@ const EpicSandboxTest = () => {
       // Fetch multiple resource types in parallel
       const [medsRes, allergiesRes, conditionsRes, obsRes, encountersRes, reportsRes] = await Promise.all([
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_medications', params: { patientId: patient.id } }
+          body: { operation: 'get_medications', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_allergies', params: { patientId: patient.id } }
+          body: { operation: 'get_allergies', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_conditions', params: { patientId: patient.id } }
+          body: { operation: 'get_conditions', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_vitals', params: { patientId: patient.id } }
+          body: { operation: 'get_vitals', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_encounters', params: { patientId: patient.id } }
+          body: { operation: 'get_encounters', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_lab_results', params: { patientId: patient.id } }
+          body: { operation: 'get_lab_results', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
       ]);
 
