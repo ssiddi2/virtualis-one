@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
 import { gatewayFetch } from "./gatewayFetch.ts";
+import { buildMrnIdentifier, filterByMrn } from "./mrnMatch.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -166,8 +167,14 @@ serve(async (req) => {
     if (credentials.gateway_tenant) {
       const tenant = credentials.gateway_tenant as string;
       console.log(`EMR Proxy: routing via FHIR gateway tenant ${tenant}`);
-      fhirCall = (method, fhirPath, query, body) =>
-        gatewayFetch(tenant, method, fhirPath, query, body);
+      fhirCall = async (method, fhirPath, query, body) => {
+        const res = await gatewayFetch(tenant, method, fhirPath, query, body);
+        if (res.status === 401 || res.status === 403) {
+          await res.text();
+          throw Object.assign(new Error('connection_unavailable'), { connectionUnavailable: true });
+        }
+        return res;
+      };
     } else {
       // Decrypt secrets
       let clientSecret = '';
@@ -244,6 +251,12 @@ serve(async (req) => {
     });
 
   } catch (error: any) {
+    if (error?.connectionUnavailable) {
+      console.log('EMR Proxy: gateway tenant not authorized yet (connection unavailable)');
+      return new Response(JSON.stringify({ error: 'connection_unavailable', message: 'EMR connection unavailable — the hospital connection is still being set up.' }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     console.error('EMR Proxy error:', error);
     if (userId && hospitalId && operation) {
       await logEMRAccess(supabase, userId, hospitalId, operation, null, 'error', error.message);
@@ -282,9 +295,7 @@ async function executeOperation(
       // IRIS keys identifiers by system; a bare MRN returns nothing there.
       // The system always comes from the hospital's credentials row.
       if (params.mrn) {
-        query.identifier = ctx.mrnIdentifierSystem
-          ? `${ctx.mrnIdentifierSystem}|${params.mrn}`
-          : String(params.mrn);
+        query.identifier = buildMrnIdentifier(String(params.mrn), ctx.mrnIdentifierSystem);
       }
       if (params.dob) query.birthdate = params.dob;
       if (params.family) query.family = params.family;
@@ -293,7 +304,13 @@ async function executeOperation(
       
       const response = await fhirCall('GET', 'Patient', query);
       const bundle = await handleFHIRResponse(response);
-      return (bundle.entry || []).map((e: any) => mapFhirPatient(e.resource));
+      let resources = (bundle.entry || []).map((e: any) => e.resource).filter((r: any) => r?.resourceType === 'Patient');
+      // Never show a different person: only keep patients that actually carry this MRN.
+      if (params.mrn) resources = filterByMrn(resources, String(params.mrn), ctx.mrnIdentifierSystem);
+      const mapped = resources.map(mapFhirPatient);
+      // Display the MRN the patient matched on, not some other identifier.
+      if (params.mrn) mapped.forEach((m: any) => { m.mrn = String(params.mrn); });
+      return mapped;
     }
 
     case 'get_patient': {
@@ -467,7 +484,7 @@ function parseFHIRError(error: any): { error: string; code?: string; details?: a
       status: error.status || 500
     };
   }
-  return { error: error.message, status: 500 };
+  return { error: error.message, status: error.status || 500 };
 }
 
 async function logEMRAccess(
