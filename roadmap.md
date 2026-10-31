@@ -9,3 +9,5 @@
 - [x] IRIS addendum: mrn_identifier_system column, system|mrn search, labs/vitals/imaging/$everything reads, block create_order via gateway
 - [x] Strict MRN match (never show a different person) + test
 - [x] Separate IRIS demo hospital (isc-hlthdemo); HAPI kept for plumbing only; 401 = connection unavailable
+- [x] /epic-test: retry once on dropped connection, plain-language message instead of "Failed to send a request to the Edge Function"
+- [ ] Confirm on-screen MRN search after the retry change — needs a signed-in preview session (auth is external/unmanaged, agent can't mint one)
