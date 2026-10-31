@@ -256,14 +256,13 @@ serve(async (req) => {
 async function executeOperation(
   operation: EMROperation, 
   params: Record<string, any>, 
-  baseUrl: string, 
-  headers: Record<string, string>
+  fhirCall: FhirCaller
 ): Promise<any> {
   const start = Date.now();
 
   switch (operation) {
     case 'health_check': {
-      const response = await fetch(`${baseUrl}/metadata`, { headers });
+      const response = await fhirCall('GET', 'metadata');
       return { 
         status: response.ok ? 'healthy' : 'degraded', 
         latencyMs: Date.now() - start,
@@ -272,145 +271,128 @@ async function executeOperation(
     }
 
     case 'search_patients': {
-      const searchParams = new URLSearchParams();
-      if (params.name) searchParams.set('name', params.name);
-      if (params.mrn) searchParams.set('identifier', params.mrn);
-      if (params.dob) searchParams.set('birthdate', params.dob);
-      if (params.family) searchParams.set('family', params.family);
-      if (params.given) searchParams.set('given', params.given);
-      searchParams.set('_count', params.count || '50');
+      const query: Record<string, string> = {};
+      if (params.name) query.name = params.name;
+      if (params.mrn) query.identifier = params.mrn;
+      if (params.dob) query.birthdate = params.dob;
+      if (params.family) query.family = params.family;
+      if (params.given) query.given = params.given;
+      query._count = String(params.count || '50');
       
-      const response = await fetch(`${baseUrl}/Patient?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Patient', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapFhirPatient(e.resource));
     }
 
     case 'get_patient': {
-      const response = await fetch(`${baseUrl}/Patient/${params.id}`, { headers });
+      const response = await fhirCall('GET', `Patient/${params.id}`);
       return mapFhirPatient(await handleFHIRResponse(response));
     }
 
     case 'update_patient': {
-      const response = await fetch(`${baseUrl}/Patient/${params.id}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(params.data),
-      });
+      const response = await fhirCall('PATCH', `Patient/${params.id}`, {}, JSON.stringify(params.data));
       return mapFhirPatient(await handleFHIRResponse(response));
     }
 
     case 'get_lab_results': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '100' });
-      if (params.code) searchParams.set('code', params.code);
-      if (params.date) searchParams.set('date', params.date);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '100' };
+      if (params.code) query.code = params.code;
+      if (params.date) query.date = params.date;
       
-      const response = await fetch(`${baseUrl}/DiagnosticReport?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'DiagnosticReport', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapLabResult(e.resource, params.patientId));
     }
 
     case 'get_medications': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _count: '100' });
-      if (params.status) searchParams.set('status', params.status);
+      const query: Record<string, string> = { patient: params.patientId, _count: '100' };
+      if (params.status) query.status = params.status;
       
-      const response = await fetch(`${baseUrl}/MedicationRequest?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'MedicationRequest', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapMedication(e.resource));
     }
 
     case 'get_allergies': {
-      const response = await fetch(
-        `${baseUrl}/AllergyIntolerance?patient=${params.patientId}&_count=100`, 
-        { headers }
-      );
+      const response = await fhirCall('GET', 'AllergyIntolerance', { patient: params.patientId, _count: '100' });
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapAllergy(e.resource));
     }
 
     case 'get_conditions': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _count: '100' });
-      if (params.category) searchParams.set('category', params.category);
-      if (params.clinicalStatus) searchParams.set('clinical-status', params.clinicalStatus);
+      const query: Record<string, string> = { patient: params.patientId, _count: '100' };
+      if (params.category) query.category = params.category;
+      if (params.clinicalStatus) query['clinical-status'] = params.clinicalStatus;
       
-      const response = await fetch(`${baseUrl}/Condition?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Condition', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapCondition(e.resource));
     }
 
     case 'get_vitals': {
-      const response = await fetch(
-        `${baseUrl}/Observation?patient=${params.patientId}&category=vital-signs&_sort=-date&_count=100`,
-        { headers }
-      );
+      const response = await fhirCall('GET', 'Observation', {
+        patient: params.patientId, category: 'vital-signs', _sort: '-date', _count: '100'
+      });
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapVitalSign(e.resource));
     }
 
     case 'get_encounters': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '50' });
-      if (params.status) searchParams.set('status', params.status);
-      if (params.type) searchParams.set('type', params.type);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '50' };
+      if (params.status) query.status = params.status;
+      if (params.type) query.type = params.type;
       
-      const response = await fetch(`${baseUrl}/Encounter?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Encounter', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapEncounter(e.resource));
     }
 
     case 'get_immunizations': {
-      const response = await fetch(
-        `${baseUrl}/Immunization?patient=${params.patientId}&_sort=-date&_count=100`,
-        { headers }
-      );
+      const response = await fhirCall('GET', 'Immunization', {
+        patient: params.patientId, _sort: '-date', _count: '100'
+      });
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapImmunization(e.resource));
     }
 
     case 'get_documents': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '50' });
-      if (params.type) searchParams.set('type', params.type);
-      if (params.category) searchParams.set('category', params.category);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '50' };
+      if (params.type) query.type = params.type;
+      if (params.category) query.category = params.category;
       
-      const response = await fetch(`${baseUrl}/DocumentReference?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'DocumentReference', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapDocument(e.resource));
     }
 
     case 'get_procedures': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '100' });
-      if (params.status) searchParams.set('status', params.status);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '100' };
+      if (params.status) query.status = params.status;
       
-      const response = await fetch(`${baseUrl}/Procedure?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Procedure', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapProcedure(e.resource));
     }
 
     case 'create_order': {
-      const response = await fetch(`${baseUrl}/ServiceRequest`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          resourceType: 'ServiceRequest',
-          status: 'active',
-          intent: 'order',
-          priority: params.priority || 'routine',
-          code: { coding: [{ system: params.codeSystem, code: params.code, display: params.description }] },
-          subject: { reference: `Patient/${params.patientId}` },
-          requester: params.requesterId ? { reference: `Practitioner/${params.requesterId}` } : undefined,
-          reasonCode: params.indication ? [{ text: params.indication }] : undefined,
-          note: params.notes ? [{ text: params.notes }] : undefined,
-        }),
-      });
+      const response = await fhirCall('POST', 'ServiceRequest', {}, JSON.stringify({
+        resourceType: 'ServiceRequest',
+        status: 'active',
+        intent: 'order',
+        priority: params.priority || 'routine',
+        code: { coding: [{ system: params.codeSystem, code: params.code, display: params.description }] },
+        subject: { reference: `Patient/${params.patientId}` },
+        requester: params.requesterId ? { reference: `Practitioner/${params.requesterId}` } : undefined,
+        reasonCode: params.indication ? [{ text: params.indication }] : undefined,
+        note: params.notes ? [{ text: params.notes }] : undefined,
+      }));
       return await handleFHIRResponse(response);
     }
 
     case 'cancel_order': {
-      const response = await fetch(`${baseUrl}/ServiceRequest/${params.orderId}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify([
-          { op: 'replace', path: '/status', value: 'revoked' }
-        ]),
-      });
+      const response = await fhirCall('PATCH', `ServiceRequest/${params.orderId}`, {}, JSON.stringify([
+        { op: 'replace', path: '/status', value: 'revoked' }
+      ]));
       return await handleFHIRResponse(response);
     }
 
