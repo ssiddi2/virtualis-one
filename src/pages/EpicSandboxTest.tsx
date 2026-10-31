@@ -94,7 +94,7 @@ const EpicSandboxTest = () => {
     const searchHospitalId = searchType === 'mrn' ? IRIS_DEMO_HOSPITAL_ID : HAPI_SANDBOX_HOSPITAL_ID;
     setActiveHospitalId(searchHospitalId);
     try {
-      const { data, error } = await supabase.functions.invoke('emr-proxy', {
+      const invokeSearch = () => supabase.functions.invoke('emr-proxy', {
         body: { 
           operation: 'search_patients',
           hospital_id: searchHospitalId,
@@ -103,6 +103,15 @@ const EpicSandboxTest = () => {
             : { family: searchQuery.trim() }
         }
       });
+      let { data, error } = await invokeSearch();
+      // Transient network drop (request never reached the server): retry once.
+      if (error?.name === 'FunctionsFetchError') {
+        await new Promise((r) => setTimeout(r, 800));
+        ({ data, error } = await invokeSearch());
+      }
+      if (error?.name === 'FunctionsFetchError') {
+        throw new Error('Could not reach the EMR service (network dropped). Please try again.');
+      }
 
       if (error) throw error;
       
