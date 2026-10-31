@@ -33,6 +33,11 @@ interface ClinicalData {
   diagnosticReports: any[];
 }
 
+// The "FHIR Sandbox (HAPI)" hospital — its EMR credentials route through the
+// Virtualis FHIR Gateway (tenant: sandbox-hapi). All calls on this page
+// target this hospital's configured connection.
+const SANDBOX_HOSPITAL_ID = '99999999-9999-9999-9999-999999999999';
+
 const TEST_PATIENTS = [
   { name: 'Camila Lopez', mrn: 'Z6129', description: 'Adult female patient' },
   { name: 'Derrick Lin', mrn: 'Z6141', description: 'Adult male patient' },
@@ -55,7 +60,7 @@ const EpicSandboxTest = () => {
     try {
       setConnectionStatus('unknown');
       const { data, error } = await supabase.functions.invoke('emr-proxy', {
-        body: { operation: 'health_check' }
+        body: { operation: 'health_check', hospital_id: SANDBOX_HOSPITAL_ID }
       });
 
       if (error) throw error;
@@ -82,6 +87,7 @@ const EpicSandboxTest = () => {
       const { data, error } = await supabase.functions.invoke('emr-proxy', {
         body: { 
           operation: 'search_patients',
+          hospital_id: SANDBOX_HOSPITAL_ID,
           params: searchType === 'mrn' 
             ? { identifier: searchQuery }
             : { name: searchQuery }
@@ -92,18 +98,22 @@ const EpicSandboxTest = () => {
       
       setRawResponse(data);
 
-      if (data?.patients && data.patients.length > 0) {
-        const p = data.patients[0];
+      // The proxy may return { patients: [...] } or a raw FHIR-mapped array
+      const patients: any[] = data?.patients ?? (Array.isArray(data) ? data : []);
+
+      if (patients.length > 0) {
+        const p = patients[0];
+        const name = p.name || [p.firstName, p.lastName].filter(Boolean).join(' ') || 'Unknown';
         setPatient({
           id: p.id,
-          name: p.name || 'Unknown',
-          birthDate: p.birthDate || 'Unknown',
+          name,
+          birthDate: p.birthDate || p.dob || 'Unknown',
           gender: p.gender || 'Unknown',
           mrn: p.mrn || searchQuery,
           address: p.address,
           phone: p.phone
         });
-        toast.success(`Found patient: ${p.name}`);
+        toast.success(`Found patient: ${name}`);
       } else {
         toast.warning('No patients found');
       }
@@ -124,22 +134,22 @@ const EpicSandboxTest = () => {
       // Fetch multiple resource types in parallel
       const [medsRes, allergiesRes, conditionsRes, obsRes, encountersRes, reportsRes] = await Promise.all([
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_medications', params: { patientId: patient.id } }
+          body: { operation: 'get_medications', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_allergies', params: { patientId: patient.id } }
+          body: { operation: 'get_allergies', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_conditions', params: { patientId: patient.id } }
+          body: { operation: 'get_conditions', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_vitals', params: { patientId: patient.id } }
+          body: { operation: 'get_vitals', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_encounters', params: { patientId: patient.id } }
+          body: { operation: 'get_encounters', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
         supabase.functions.invoke('emr-proxy', {
-          body: { operation: 'get_lab_results', params: { patientId: patient.id } }
+          body: { operation: 'get_lab_results', hospital_id: SANDBOX_HOSPITAL_ID, params: { patientId: patient.id } }
         }),
       ]);
 
