@@ -155,49 +155,72 @@ serve(async (req) => {
       });
     }
 
-    // Decrypt secrets
-    let clientSecret = '';
-    let privateKey: string | null = null;
+    // Build the FHIR caller. Hospitals with gateway_tenant set route through the
+    // Virtualis FHIR Gateway (fixed egress IP for hospital firewalls; the gateway
+    // holds the hospital OAuth credentials), so no token exchange happens here.
+    // All other hospitals keep the existing direct connection behavior.
+    let fhirCall: FhirCaller;
 
-    if (credentials.client_secret_encrypted) {
-      const { data: decrypted } = await supabase.rpc('decrypt_emr_secret', {
-        encrypted: credentials.client_secret_encrypted
-      });
-      clientSecret = decrypted || credentials.client_secret_encrypted;
+    if (credentials.gateway_tenant) {
+      const tenant = credentials.gateway_tenant as string;
+      console.log(`EMR Proxy: routing via FHIR gateway tenant ${tenant}`);
+      fhirCall = (method, fhirPath, query, body) =>
+        gatewayFetch(tenant, method, fhirPath, query, body);
+    } else {
+      // Decrypt secrets
+      let clientSecret = '';
+      let privateKey: string | null = null;
+
+      if (credentials.client_secret_encrypted) {
+        const { data: decrypted } = await supabase.rpc('decrypt_emr_secret', {
+          encrypted: credentials.client_secret_encrypted
+        });
+        clientSecret = decrypted || credentials.client_secret_encrypted;
+      }
+
+      if (credentials.private_key_encrypted) {
+        const { data: decryptedKey } = await supabase.rpc('decrypt_emr_secret', {
+          encrypted: credentials.private_key_encrypted
+        });
+        privateKey = decryptedKey || credentials.private_key_encrypted;
+      }
+
+      // Get OAuth token
+      let access_token: string;
+      try {
+        access_token = await getAccessToken(credentials, clientSecret, privateKey);
+      } catch (oauthError: any) {
+        await supabase.from('emr_credentials').update({
+          last_health_check: new Date().toISOString(),
+          last_health_status: 'down'
+        }).eq('id', credentials.id);
+
+        await logEMRAccess(supabase, userId, hospitalId, operation, null, 'error', 'OAuth failed');
+        return new Response(JSON.stringify({ 
+          error: 'EMR authentication failed',
+          details: oauthError.message
+        }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+      }
+
+      const fhirHeaders = {
+        'Authorization': `Bearer ${access_token}`,
+        'Content-Type': 'application/fhir+json',
+        'Accept': 'application/fhir+json',
+      };
+
+      const baseUrl = credentials.base_url;
+      fhirCall = (method, fhirPath, query, body) => {
+        const qs = query && Object.keys(query).length ? `?${new URLSearchParams(query)}` : '';
+        return fetch(`${baseUrl}/${fhirPath}${qs}`, {
+          method,
+          headers: fhirHeaders,
+          body: body || undefined,
+        });
+      };
     }
-
-    if (credentials.private_key_encrypted) {
-      const { data: decryptedKey } = await supabase.rpc('decrypt_emr_secret', {
-        encrypted: credentials.private_key_encrypted
-      });
-      privateKey = decryptedKey || credentials.private_key_encrypted;
-    }
-
-    // Get OAuth token
-    let access_token: string;
-    try {
-      access_token = await getAccessToken(credentials, clientSecret, privateKey);
-    } catch (oauthError: any) {
-      await supabase.from('emr_credentials').update({
-        last_health_check: new Date().toISOString(),
-        last_health_status: 'down'
-      }).eq('id', credentials.id);
-
-      await logEMRAccess(supabase, userId, hospitalId, operation, null, 'error', 'OAuth failed');
-      return new Response(JSON.stringify({ 
-        error: 'EMR authentication failed',
-        details: oauthError.message
-      }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
-    }
-
-    const fhirHeaders = {
-      'Authorization': `Bearer ${access_token}`,
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json',
-    };
 
     // Execute operation
-    const result = await executeOperation(operation, params, credentials.base_url, fhirHeaders);
+    const result = await executeOperation(operation, params, fhirCall);
     
     // Log successful access
     await logEMRAccess(supabase, userId, hospitalId, operation, params.patientId || params.id, 'success');
