@@ -1,5 +1,5 @@
 
-import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain, Building2, FileText, Stethoscope, ClipboardList, PlusCircle, Mic } from "lucide-react";
+import { Home, Users, Activity, MessageSquare, Settings, Calculator, TestTube, Scan, Award, Code, Brain, Building2, FileText, Stethoscope, ClipboardList, PlusCircle, Mic, Plug } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -29,6 +29,7 @@ const systemTools = [
   { name: "Quality", href: "/quality", icon: Award },
   { name: "Coding", href: "/coding", icon: Code },
   { name: "AI Dashboard", href: "/ai-dashboard", icon: Brain },
+  { name: "Epic Sandbox Test", href: "/epic-test", icon: Plug },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
