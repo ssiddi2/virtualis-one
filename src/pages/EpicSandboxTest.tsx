@@ -33,6 +33,11 @@ interface ClinicalData {
   diagnosticReports: any[];
 }
 
+// The "FHIR Sandbox (HAPI)" hospital — its EMR credentials route through the
+// Virtualis FHIR Gateway (tenant: sandbox-hapi). All calls on this page
+// target this hospital's configured connection.
+const SANDBOX_HOSPITAL_ID = '99999999-9999-9999-9999-999999999999';
+
 const TEST_PATIENTS = [
   { name: 'Camila Lopez', mrn: 'Z6129', description: 'Adult female patient' },
   { name: 'Derrick Lin', mrn: 'Z6141', description: 'Adult male patient' },
@@ -55,7 +60,7 @@ const EpicSandboxTest = () => {
     try {
       setConnectionStatus('unknown');
       const { data, error } = await supabase.functions.invoke('emr-proxy', {
-        body: { operation: 'health_check' }
+        body: { operation: 'health_check', hospital_id: SANDBOX_HOSPITAL_ID }
       });
 
       if (error) throw error;
@@ -82,6 +87,7 @@ const EpicSandboxTest = () => {
       const { data, error } = await supabase.functions.invoke('emr-proxy', {
         body: { 
           operation: 'search_patients',
+          hospital_id: SANDBOX_HOSPITAL_ID,
           params: searchType === 'mrn' 
             ? { identifier: searchQuery }
             : { name: searchQuery }
