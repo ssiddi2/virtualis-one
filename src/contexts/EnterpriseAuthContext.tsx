@@ -82,12 +82,22 @@ export function EnterpriseAuthProvider({ children }: { children: React.ReactNode
   }, [user, toast, updateActivity]);
 
   const fetchProfile = useCallback(async (userId: string) => {
+    // Guard against duplicate fetches: auth events can fire in bursts and
+    // each one used to trigger a fresh profiles request.
+    const now = Date.now();
+    if (lastProfileFetch.current?.id === userId && now - lastProfileFetch.current.at < 5000) return;
+    lastProfileFetch.current = { id: userId, at: now };
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
     setProfile(data);
   }, []);
 
+  // Run ONCE on mount. Previously this effect depended on updateActivity,
+  // which is recreated whenever `user` changes — so every auth event tore
+  // down and re-created the subscription, the new subscription immediately
+  // fired another auth event, and the loop hammered the profiles endpoint
+  // (~200 requests/sec) while the whole app re-rendered nonstop.
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sess) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
@@ -99,7 +109,7 @@ export function EnterpriseAuthProvider({ children }: { children: React.ReactNode
       }
       setLoading(false);
     });
-    
+
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
@@ -108,9 +118,10 @@ export function EnterpriseAuthProvider({ children }: { children: React.ReactNode
       }
       setLoading(false);
     });
-    
+
     return () => subscription.unsubscribe();
-  }, [fetchProfile, updateActivity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const rate = authRateLimiter.check(email);
