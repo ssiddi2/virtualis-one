@@ -98,18 +98,22 @@ const EpicSandboxTest = () => {
       
       setRawResponse(data);
 
-      if (data?.patients && data.patients.length > 0) {
-        const p = data.patients[0];
+      // The proxy may return { patients: [...] } or a raw FHIR-mapped array
+      const patients: any[] = data?.patients ?? (Array.isArray(data) ? data : []);
+
+      if (patients.length > 0) {
+        const p = patients[0];
+        const name = p.name || [p.firstName, p.lastName].filter(Boolean).join(' ') || 'Unknown';
         setPatient({
           id: p.id,
-          name: p.name || 'Unknown',
-          birthDate: p.birthDate || 'Unknown',
+          name,
+          birthDate: p.birthDate || p.dob || 'Unknown',
           gender: p.gender || 'Unknown',
           mrn: p.mrn || searchQuery,
           address: p.address,
           phone: p.phone
         });
-        toast.success(`Found patient: ${p.name}`);
+        toast.success(`Found patient: ${name}`);
       } else {
         toast.warning('No patients found');
       }
