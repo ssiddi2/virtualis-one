@@ -848,6 +848,7 @@ export type Database = {
           is_active: boolean | null
           last_health_check: string | null
           last_health_status: string | null
+          mrn_identifier_system: string | null
           private_key_encrypted: string | null
           scopes: string[] | null
           tenant_id: string | null
@@ -866,6 +867,7 @@ export type Database = {
           is_active?: boolean | null
           last_health_check?: string | null
           last_health_status?: string | null
+          mrn_identifier_system?: string | null
           private_key_encrypted?: string | null
           scopes?: string[] | null
           tenant_id?: string | null
@@ -884,6 +886,7 @@ export type Database = {
           is_active?: boolean | null
           last_health_check?: string | null
           last_health_status?: string | null
+          mrn_identifier_system?: string | null
           private_key_encrypted?: string | null
           scopes?: string[] | null
           tenant_id?: string | null

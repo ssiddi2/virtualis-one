@@ -1,0 +1,1 @@
+ALTER TABLE public.emr_credentials ADD COLUMN IF NOT EXISTS mrn_identifier_system text;
