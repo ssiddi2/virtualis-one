@@ -41,12 +41,22 @@ export function EnterpriseAuthProvider({ children }: { children: React.ReactNode
   const { toast } = useToast();
   const lastActivity = useRef(Date.now());
   const warningShown = useRef(false);
+  const userRef = useRef<User | null>(null);
+  const lastExpirySet = useRef(0);
+  const lastProfileFetch = useRef<{ id: string; at: number } | null>(null);
+
+  useEffect(() => { userRef.current = user; }, [user]);
 
   const updateActivity = useCallback(() => {
     lastActivity.current = Date.now();
     warningShown.current = false;
-    if (user) setSessionExpiresAt(new Date(Date.now() + SESSION_TIMEOUT_MS));
-  }, [user]);
+    // Throttle expiry state updates: setting state on every mouse/scroll/key
+    // event re-renders the entire app tree (visible as sidebar flicker).
+    if (userRef.current && Date.now() - lastExpirySet.current > 60000) {
+      lastExpirySet.current = Date.now();
+      setSessionExpiresAt(new Date(Date.now() + SESSION_TIMEOUT_MS));
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
