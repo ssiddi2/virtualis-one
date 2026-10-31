@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
+import { gatewayFetch } from "./gatewayFetch.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +19,15 @@ interface EMRRequest {
   operation: EMROperation;
   params?: Record<string, any>;
 }
+
+// Unified FHIR caller: routes either directly to a hospital FHIR server or
+// through the Virtualis FHIR Gateway, depending on the hospital's configuration.
+type FhirCaller = (
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH',
+  fhirPath: string,
+  query?: Record<string, string>,
+  body?: string
+) => Promise<Response>;
 
 // Generate JWT for Epic SMART Backend Services (JWT Bearer flow)
 async function generateEpicJWT(clientId: string, privateKeyPem: string, tokenUrl: string): Promise<string> {
