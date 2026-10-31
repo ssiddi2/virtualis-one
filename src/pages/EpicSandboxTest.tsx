@@ -39,10 +39,9 @@ interface ClinicalData {
 const SANDBOX_HOSPITAL_ID = '99999999-9999-9999-9999-999999999999';
 
 const TEST_PATIENTS = [
-  { name: 'Camila Lopez', mrn: 'Z6129', description: 'Adult female patient' },
-  { name: 'Derrick Lin', mrn: 'Z6141', description: 'Adult male patient' },
-  { name: 'Jason Argonaut', mrn: 'Tbt3KuCY0B5PSrJvCu2j-PlK.aiทdq4gxePfvF5', description: 'Test patient' },
-  { name: 'Baby Boy Argonaut', mrn: 'TbxPUo5rhSoiJQQ4CbIZe4A3', description: 'Pediatric patient' },
+  { name: 'IRIS demo patient', mrn: '4100206', description: 'Fabricated test patient' },
+  { name: 'IRIS demo patient', mrn: '4100212', description: 'Fabricated test patient' },
+  { name: 'IRIS demo patient', mrn: '4100216', description: 'Fabricated test patient' },
 ];
 
 const EpicSandboxTest = () => {
@@ -89,14 +88,18 @@ const EpicSandboxTest = () => {
           operation: 'search_patients',
           hospital_id: SANDBOX_HOSPITAL_ID,
           params: searchType === 'mrn' 
-            ? { identifier: searchQuery }
-            : { name: searchQuery }
+            ? { mrn: searchQuery.trim() }
+            : { family: searchQuery.trim() }
         }
       });
 
       if (error) throw error;
       
       setRawResponse(data);
+      if (data?.error === 'connection_unavailable') {
+        toast.warning('EMR connection unavailable — the hospital connection is still being set up.');
+        return;
+      }
 
       // The proxy may return { patients: [...] } or a raw FHIR-mapped array
       const patients: any[] = data?.patients ?? (Array.isArray(data) ? data : []);
@@ -109,13 +112,13 @@ const EpicSandboxTest = () => {
           name,
           birthDate: p.birthDate || p.dob || 'Unknown',
           gender: p.gender || 'Unknown',
-          mrn: p.mrn || searchQuery,
+          mrn: p.mrn,
           address: p.address,
           phone: p.phone
         });
         toast.success(`Found patient: ${name}`);
       } else {
-        toast.warning('No patients found');
+        toast.warning(searchType === 'mrn' ? 'No match for that MRN' : 'No patients found');
       }
     } catch (err: any) {
       toast.error(`Search failed: ${err.message}`);
