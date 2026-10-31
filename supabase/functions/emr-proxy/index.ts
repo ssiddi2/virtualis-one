@@ -307,7 +307,10 @@ async function executeOperation(
       let resources = (bundle.entry || []).map((e: any) => e.resource).filter((r: any) => r?.resourceType === 'Patient');
       // Never show a different person: only keep patients that actually carry this MRN.
       if (params.mrn) resources = filterByMrn(resources, String(params.mrn), ctx.mrnIdentifierSystem);
-      return resources.map(mapFhirPatient);
+      const mapped = resources.map(mapFhirPatient);
+      // Display the MRN the patient matched on, not some other identifier.
+      if (params.mrn) mapped.forEach((m: any) => { m.mrn = String(params.mrn); });
+      return mapped;
     }
 
     case 'get_patient': {
