@@ -12,7 +12,9 @@ type EMROperation =
   | 'health_check' | 'search_patients' | 'get_patient' | 'update_patient'
   | 'get_lab_results' | 'get_medications' | 'get_allergies' | 'get_conditions'
   | 'get_vitals' | 'get_encounters' | 'get_immunizations' | 'get_documents'
-  | 'get_procedures' | 'create_order' | 'cancel_order';
+  | 'get_procedures' | 'get_imaging' | 'get_everything' | 'create_order' | 'cancel_order';
+
+interface OpContext { viaGateway: boolean; mrnIdentifierSystem: string | null; }
 
 interface EMRRequest {
   hospital_id: string;
@@ -220,7 +222,10 @@ serve(async (req) => {
     }
 
     // Execute operation
-    const result = await executeOperation(operation, params, fhirCall);
+    const result = await executeOperation(operation, params, fhirCall, {
+      viaGateway: !!credentials.gateway_tenant,
+      mrnIdentifierSystem: credentials.mrn_identifier_system || null,
+    });
     
     // Log successful access
     await logEMRAccess(supabase, userId, hospitalId, operation, params.patientId || params.id, 'success');
@@ -256,7 +261,8 @@ serve(async (req) => {
 async function executeOperation(
   operation: EMROperation, 
   params: Record<string, any>, 
-  fhirCall: FhirCaller
+  fhirCall: FhirCaller,
+  ctx: OpContext
 ): Promise<any> {
   const start = Date.now();
 
@@ -273,7 +279,13 @@ async function executeOperation(
     case 'search_patients': {
       const query: Record<string, string> = {};
       if (params.name) query.name = params.name;
-      if (params.mrn) query.identifier = params.mrn;
+      // IRIS keys identifiers by system; a bare MRN returns nothing there.
+      // The system always comes from the hospital's credentials row.
+      if (params.mrn) {
+        query.identifier = ctx.mrnIdentifierSystem
+          ? `${ctx.mrnIdentifierSystem}|${params.mrn}`
+          : String(params.mrn);
+      }
       if (params.dob) query.birthdate = params.dob;
       if (params.family) query.family = params.family;
       if (params.given) query.given = params.given;
@@ -299,6 +311,13 @@ async function executeOperation(
       if (params.code) query.code = params.code;
       if (params.date) query.date = params.date;
       
+      if (ctx.viaGateway) {
+        // Gateway (IRIS): labs are Observations with category=laboratory
+        const { _sort: _ignored, ...obsQuery } = query; // IRIS rejects _sort=date on Observation
+        const response = await fhirCall('GET', 'Observation', { ...obsQuery, category: 'laboratory' });
+        const bundle = await handleFHIRResponse(response);
+        return (bundle.entry || []).map((e: any) => mapLabObservation(e.resource, params.patientId));
+      }
       const response = await fhirCall('GET', 'DiagnosticReport', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapLabResult(e.resource, params.patientId));
@@ -330,9 +349,9 @@ async function executeOperation(
     }
 
     case 'get_vitals': {
-      const response = await fhirCall('GET', 'Observation', {
-        patient: params.patientId, category: 'vital-signs', _sort: '-date', _count: '100'
-      });
+      const vq: Record<string, string> = { patient: params.patientId, category: 'vital-signs', _count: '100' };
+      if (!ctx.viaGateway) vq._sort = '-date'; // IRIS rejects _sort=date
+      const response = await fhirCall('GET', 'Observation', vq);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapVitalSign(e.resource));
     }
@@ -374,7 +393,31 @@ async function executeOperation(
       return (bundle.entry || []).map((e: any) => mapProcedure(e.resource));
     }
 
+    case 'get_imaging': {
+      if (!params.patientId) throw Object.assign(new Error('patientId is required'), { status: 400 });
+      const response = await fhirCall('GET', 'ImagingStudy', { patient: params.patientId, _count: '100' });
+      const bundle = await handleFHIRResponse(response);
+      return (bundle.entry || []).map((e: any) => ({
+        id: e.resource.id,
+        status: e.resource.status,
+        started: e.resource.started,
+        modality: e.resource.modality?.map((m: any) => m.code).join(', ') || e.resource.series?.[0]?.modality?.code,
+        description: e.resource.description || e.resource.procedureCode?.[0]?.text,
+        numberOfSeries: e.resource.numberOfSeries,
+        numberOfInstances: e.resource.numberOfInstances,
+      }));
+    }
+
+    case 'get_everything': {
+      const response = await fhirCall('GET', `Patient/${params.patientId}/$everything`);
+      return await handleFHIRResponse(response);
+    }
+
     case 'create_order': {
+      // Write path to IRIS uses a separate canonical payload still being specified.
+      if (ctx.viaGateway) {
+        throw Object.assign(new Error('create_order is not yet supported for gateway-routed hospitals'), { status: 501 });
+      }
       const response = await fhirCall('POST', 'ServiceRequest', {}, JSON.stringify({
         resourceType: 'ServiceRequest',
         status: 'active',
@@ -455,7 +498,7 @@ function mapFhirPatient(fhir: any) {
   const name = fhir.name?.[0] || {};
   return {
     id: fhir.id,
-    mrn: fhir.identifier?.find((i: any) => i.type?.coding?.[0]?.code === 'MR')?.value || '',
+    mrn: (fhir.identifier?.find((i: any) => i.type?.coding?.[0]?.code === 'MR') || (fhir.identifier?.length === 1 ? fhir.identifier[0] : fhir.identifier?.find((i: any) => /^urn:oid:/.test(i.system || ''))))?.value || '',
     firstName: name.given?.join(' ') || '',
     lastName: name.family || '',
     dob: fhir.birthDate || '',
@@ -469,6 +512,23 @@ function mapFhirPatient(fhir: any) {
       postalCode: fhir.address[0].postalCode
     } : null,
     active: fhir.active ?? true
+  };
+}
+
+function mapLabObservation(fhir: any, patientId: string) {
+  const q = fhir.valueQuantity;
+  return {
+    id: fhir.id,
+    patientId,
+    code: fhir.code?.coding?.[0]?.code || '',
+    name: fhir.code?.text || fhir.code?.coding?.[0]?.display || '',
+    value: q ? `${q.value}${q.unit ? ' ' + q.unit : ''}` : (fhir.valueString || fhir.valueCodeableConcept?.text || ''),
+    status: fhir.status,
+    effectiveDate: fhir.effectiveDateTime,
+    issuedDate: fhir.issued,
+    performer: fhir.performer?.[0]?.display,
+    category: 'laboratory',
+    interpretation: fhir.interpretation?.[0]?.coding?.[0]?.code,
   };
 }
 
