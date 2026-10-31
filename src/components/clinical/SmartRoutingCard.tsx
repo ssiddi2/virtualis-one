@@ -52,7 +52,7 @@ const SmartRoutingCard = ({ currentUser, onSendMessage, hospitalId }: SmartRouti
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAICard, setShowAICard] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [analysisTimeout, setAnalysisTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [analysisTimeout, setAnalysisTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const getOnCallPhysiciansForSpecialty = (specialtyId: string) => {
     return onCallSchedules?.filter(schedule => 
