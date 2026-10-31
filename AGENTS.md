@@ -1,0 +1,8 @@
+# VirtualisOne — Technical Decisions
+
+- All hospital FHIR traffic is routed through the Virtualis FHIR Gateway from the `emr-proxy` edge function; when an EMR credential row has a `gateway_tenant`, the function never calls the hospital's FHIR server directly. Why: hospitals whitelist one fixed egress IP instead of Supabase Edge Functions' un-published, rotating outbound IPs.
+- Gateway request signing (timestamp + method + canonical path + body hash, HMAC) lives only in `supabase/functions/emr-proxy/gatewayFetch.ts`. Why: keeps the gateway's auth contract in one place so every caller signs identically.
+- Per-hospital FHIR settings (gateway tenant, MRN identifier system) are read from the hospital's `emr_credentials` row at request time, never hard-coded. Why: each hospital's identifier system differs and changes independently of the app.
+- Edge-function tests are Deno tests at `supabase/functions/<name>/*_test.ts` and are run with the Supabase edge-function test tool, not `bun test`. Why: `bun` cannot resolve the `deno.land/std` imports those tests use.
+- Integration secrets (gateway URL/key/HMAC, EMR private keys) live in Lovable Cloud secrets; only variable names go in `.env.example`. Why: the source package is shared outside Lovable for the monorepo move.
+- Server-side fetchers of the `hospitals` table must pass a logged-in user's JWT, not just the publishable key. Why: the active select policy is restricted to `authenticated`, so an anon-key read silently returns an empty list.
