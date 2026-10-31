@@ -842,6 +842,7 @@ export type Database = {
           client_id: string
           client_secret_encrypted: string
           created_at: string | null
+          gateway_tenant: string | null
           hospital_id: string
           id: string
           is_active: boolean | null
@@ -859,6 +860,7 @@ export type Database = {
           client_id: string
           client_secret_encrypted: string
           created_at?: string | null
+          gateway_tenant?: string | null
           hospital_id: string
           id?: string
           is_active?: boolean | null
@@ -876,6 +878,7 @@ export type Database = {
           client_id?: string
           client_secret_encrypted?: string
           created_at?: string | null
+          gateway_tenant?: string | null
           hospital_id?: string
           id?: string
           is_active?: boolean | null

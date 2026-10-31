@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
+import { gatewayFetch } from "./gatewayFetch.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +19,15 @@ interface EMRRequest {
   operation: EMROperation;
   params?: Record<string, any>;
 }
+
+// Unified FHIR caller: routes either directly to a hospital FHIR server or
+// through the Virtualis FHIR Gateway, depending on the hospital's configuration.
+type FhirCaller = (
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH',
+  fhirPath: string,
+  query?: Record<string, string>,
+  body?: string
+) => Promise<Response>;
 
 // Generate JWT for Epic SMART Backend Services (JWT Bearer flow)
 async function generateEpicJWT(clientId: string, privateKeyPem: string, tokenUrl: string): Promise<string> {
@@ -145,49 +155,72 @@ serve(async (req) => {
       });
     }
 
-    // Decrypt secrets
-    let clientSecret = '';
-    let privateKey: string | null = null;
+    // Build the FHIR caller. Hospitals with gateway_tenant set route through the
+    // Virtualis FHIR Gateway (fixed egress IP for hospital firewalls; the gateway
+    // holds the hospital OAuth credentials), so no token exchange happens here.
+    // All other hospitals keep the existing direct connection behavior.
+    let fhirCall: FhirCaller;
 
-    if (credentials.client_secret_encrypted) {
-      const { data: decrypted } = await supabase.rpc('decrypt_emr_secret', {
-        encrypted: credentials.client_secret_encrypted
-      });
-      clientSecret = decrypted || credentials.client_secret_encrypted;
+    if (credentials.gateway_tenant) {
+      const tenant = credentials.gateway_tenant as string;
+      console.log(`EMR Proxy: routing via FHIR gateway tenant ${tenant}`);
+      fhirCall = (method, fhirPath, query, body) =>
+        gatewayFetch(tenant, method, fhirPath, query, body);
+    } else {
+      // Decrypt secrets
+      let clientSecret = '';
+      let privateKey: string | null = null;
+
+      if (credentials.client_secret_encrypted) {
+        const { data: decrypted } = await supabase.rpc('decrypt_emr_secret', {
+          encrypted: credentials.client_secret_encrypted
+        });
+        clientSecret = decrypted || credentials.client_secret_encrypted;
+      }
+
+      if (credentials.private_key_encrypted) {
+        const { data: decryptedKey } = await supabase.rpc('decrypt_emr_secret', {
+          encrypted: credentials.private_key_encrypted
+        });
+        privateKey = decryptedKey || credentials.private_key_encrypted;
+      }
+
+      // Get OAuth token
+      let access_token: string;
+      try {
+        access_token = await getAccessToken(credentials, clientSecret, privateKey);
+      } catch (oauthError: any) {
+        await supabase.from('emr_credentials').update({
+          last_health_check: new Date().toISOString(),
+          last_health_status: 'down'
+        }).eq('id', credentials.id);
+
+        await logEMRAccess(supabase, userId, hospitalId, operation, null, 'error', 'OAuth failed');
+        return new Response(JSON.stringify({ 
+          error: 'EMR authentication failed',
+          details: oauthError.message
+        }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+      }
+
+      const fhirHeaders = {
+        'Authorization': `Bearer ${access_token}`,
+        'Content-Type': 'application/fhir+json',
+        'Accept': 'application/fhir+json',
+      };
+
+      const baseUrl = credentials.base_url;
+      fhirCall = (method, fhirPath, query, body) => {
+        const qs = query && Object.keys(query).length ? `?${new URLSearchParams(query)}` : '';
+        return fetch(`${baseUrl}/${fhirPath}${qs}`, {
+          method,
+          headers: fhirHeaders,
+          body: body || undefined,
+        });
+      };
     }
-
-    if (credentials.private_key_encrypted) {
-      const { data: decryptedKey } = await supabase.rpc('decrypt_emr_secret', {
-        encrypted: credentials.private_key_encrypted
-      });
-      privateKey = decryptedKey || credentials.private_key_encrypted;
-    }
-
-    // Get OAuth token
-    let access_token: string;
-    try {
-      access_token = await getAccessToken(credentials, clientSecret, privateKey);
-    } catch (oauthError: any) {
-      await supabase.from('emr_credentials').update({
-        last_health_check: new Date().toISOString(),
-        last_health_status: 'down'
-      }).eq('id', credentials.id);
-
-      await logEMRAccess(supabase, userId, hospitalId, operation, null, 'error', 'OAuth failed');
-      return new Response(JSON.stringify({ 
-        error: 'EMR authentication failed',
-        details: oauthError.message
-      }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
-    }
-
-    const fhirHeaders = {
-      'Authorization': `Bearer ${access_token}`,
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json',
-    };
 
     // Execute operation
-    const result = await executeOperation(operation, params, credentials.base_url, fhirHeaders);
+    const result = await executeOperation(operation, params, fhirCall);
     
     // Log successful access
     await logEMRAccess(supabase, userId, hospitalId, operation, params.patientId || params.id, 'success');
@@ -223,14 +256,13 @@ serve(async (req) => {
 async function executeOperation(
   operation: EMROperation, 
   params: Record<string, any>, 
-  baseUrl: string, 
-  headers: Record<string, string>
+  fhirCall: FhirCaller
 ): Promise<any> {
   const start = Date.now();
 
   switch (operation) {
     case 'health_check': {
-      const response = await fetch(`${baseUrl}/metadata`, { headers });
+      const response = await fhirCall('GET', 'metadata');
       return { 
         status: response.ok ? 'healthy' : 'degraded', 
         latencyMs: Date.now() - start,
@@ -239,145 +271,128 @@ async function executeOperation(
     }
 
     case 'search_patients': {
-      const searchParams = new URLSearchParams();
-      if (params.name) searchParams.set('name', params.name);
-      if (params.mrn) searchParams.set('identifier', params.mrn);
-      if (params.dob) searchParams.set('birthdate', params.dob);
-      if (params.family) searchParams.set('family', params.family);
-      if (params.given) searchParams.set('given', params.given);
-      searchParams.set('_count', params.count || '50');
+      const query: Record<string, string> = {};
+      if (params.name) query.name = params.name;
+      if (params.mrn) query.identifier = params.mrn;
+      if (params.dob) query.birthdate = params.dob;
+      if (params.family) query.family = params.family;
+      if (params.given) query.given = params.given;
+      query._count = String(params.count || '50');
       
-      const response = await fetch(`${baseUrl}/Patient?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Patient', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapFhirPatient(e.resource));
     }
 
     case 'get_patient': {
-      const response = await fetch(`${baseUrl}/Patient/${params.id}`, { headers });
+      const response = await fhirCall('GET', `Patient/${params.id}`);
       return mapFhirPatient(await handleFHIRResponse(response));
     }
 
     case 'update_patient': {
-      const response = await fetch(`${baseUrl}/Patient/${params.id}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(params.data),
-      });
+      const response = await fhirCall('PATCH', `Patient/${params.id}`, {}, JSON.stringify(params.data));
       return mapFhirPatient(await handleFHIRResponse(response));
     }
 
     case 'get_lab_results': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '100' });
-      if (params.code) searchParams.set('code', params.code);
-      if (params.date) searchParams.set('date', params.date);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '100' };
+      if (params.code) query.code = params.code;
+      if (params.date) query.date = params.date;
       
-      const response = await fetch(`${baseUrl}/DiagnosticReport?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'DiagnosticReport', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapLabResult(e.resource, params.patientId));
     }
 
     case 'get_medications': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _count: '100' });
-      if (params.status) searchParams.set('status', params.status);
+      const query: Record<string, string> = { patient: params.patientId, _count: '100' };
+      if (params.status) query.status = params.status;
       
-      const response = await fetch(`${baseUrl}/MedicationRequest?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'MedicationRequest', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapMedication(e.resource));
     }
 
     case 'get_allergies': {
-      const response = await fetch(
-        `${baseUrl}/AllergyIntolerance?patient=${params.patientId}&_count=100`, 
-        { headers }
-      );
+      const response = await fhirCall('GET', 'AllergyIntolerance', { patient: params.patientId, _count: '100' });
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapAllergy(e.resource));
     }
 
     case 'get_conditions': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _count: '100' });
-      if (params.category) searchParams.set('category', params.category);
-      if (params.clinicalStatus) searchParams.set('clinical-status', params.clinicalStatus);
+      const query: Record<string, string> = { patient: params.patientId, _count: '100' };
+      if (params.category) query.category = params.category;
+      if (params.clinicalStatus) query['clinical-status'] = params.clinicalStatus;
       
-      const response = await fetch(`${baseUrl}/Condition?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Condition', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapCondition(e.resource));
     }
 
     case 'get_vitals': {
-      const response = await fetch(
-        `${baseUrl}/Observation?patient=${params.patientId}&category=vital-signs&_sort=-date&_count=100`,
-        { headers }
-      );
+      const response = await fhirCall('GET', 'Observation', {
+        patient: params.patientId, category: 'vital-signs', _sort: '-date', _count: '100'
+      });
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapVitalSign(e.resource));
     }
 
     case 'get_encounters': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '50' });
-      if (params.status) searchParams.set('status', params.status);
-      if (params.type) searchParams.set('type', params.type);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '50' };
+      if (params.status) query.status = params.status;
+      if (params.type) query.type = params.type;
       
-      const response = await fetch(`${baseUrl}/Encounter?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Encounter', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapEncounter(e.resource));
     }
 
     case 'get_immunizations': {
-      const response = await fetch(
-        `${baseUrl}/Immunization?patient=${params.patientId}&_sort=-date&_count=100`,
-        { headers }
-      );
+      const response = await fhirCall('GET', 'Immunization', {
+        patient: params.patientId, _sort: '-date', _count: '100'
+      });
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapImmunization(e.resource));
     }
 
     case 'get_documents': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '50' });
-      if (params.type) searchParams.set('type', params.type);
-      if (params.category) searchParams.set('category', params.category);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '50' };
+      if (params.type) query.type = params.type;
+      if (params.category) query.category = params.category;
       
-      const response = await fetch(`${baseUrl}/DocumentReference?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'DocumentReference', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapDocument(e.resource));
     }
 
     case 'get_procedures': {
-      const searchParams = new URLSearchParams({ patient: params.patientId, _sort: '-date', _count: '100' });
-      if (params.status) searchParams.set('status', params.status);
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '100' };
+      if (params.status) query.status = params.status;
       
-      const response = await fetch(`${baseUrl}/Procedure?${searchParams}`, { headers });
+      const response = await fhirCall('GET', 'Procedure', query);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapProcedure(e.resource));
     }
 
     case 'create_order': {
-      const response = await fetch(`${baseUrl}/ServiceRequest`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          resourceType: 'ServiceRequest',
-          status: 'active',
-          intent: 'order',
-          priority: params.priority || 'routine',
-          code: { coding: [{ system: params.codeSystem, code: params.code, display: params.description }] },
-          subject: { reference: `Patient/${params.patientId}` },
-          requester: params.requesterId ? { reference: `Practitioner/${params.requesterId}` } : undefined,
-          reasonCode: params.indication ? [{ text: params.indication }] : undefined,
-          note: params.notes ? [{ text: params.notes }] : undefined,
-        }),
-      });
+      const response = await fhirCall('POST', 'ServiceRequest', {}, JSON.stringify({
+        resourceType: 'ServiceRequest',
+        status: 'active',
+        intent: 'order',
+        priority: params.priority || 'routine',
+        code: { coding: [{ system: params.codeSystem, code: params.code, display: params.description }] },
+        subject: { reference: `Patient/${params.patientId}` },
+        requester: params.requesterId ? { reference: `Practitioner/${params.requesterId}` } : undefined,
+        reasonCode: params.indication ? [{ text: params.indication }] : undefined,
+        note: params.notes ? [{ text: params.notes }] : undefined,
+      }));
       return await handleFHIRResponse(response);
     }
 
     case 'cancel_order': {
-      const response = await fetch(`${baseUrl}/ServiceRequest/${params.orderId}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify([
-          { op: 'replace', path: '/status', value: 'revoked' }
-        ]),
-      });
+      const response = await fhirCall('PATCH', `ServiceRequest/${params.orderId}`, {}, JSON.stringify([
+        { op: 'replace', path: '/status', value: 'revoked' }
+      ]));
       return await handleFHIRResponse(response);
     }
 
