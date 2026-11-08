@@ -31,6 +31,7 @@ import HospitalSelector from "@/components/dashboard/HospitalSelector";
 import { BetaOnboarding } from "@/components/onboarding/BetaOnboarding";
 import ToolsCreateUser from "@/pages/ToolsCreateUser";
 import EpicSandboxTest from "@/pages/EpicSandboxTest";
+import FhirPatientChart from "@/components/patient/FhirPatientChart";
 
 export interface RouteConfig {
   path: string;
@@ -99,5 +100,6 @@ export const protectedRoutes: RouteConfig[] = [
 export const protectedNoLayoutRoutes: RouteConfig[] = [
   { path: '/hospital-selection', element: ({ navigate }) => <HospitalSelector onSelectHospital={() => navigate('/my-patients')} />, noLayout: true },
   { path: '/emr/:hospitalId', element: () => <EMRDashboard />, noLayout: true },
+  { path: '/patient-chart/fhir/:fhirId', element: () => <FhirPatientChart />, noLayout: true },
   { path: '/patient-chart/:patientId', element: () => <EpicPatientWorkflowCenter />, noLayout: true },
 ];
