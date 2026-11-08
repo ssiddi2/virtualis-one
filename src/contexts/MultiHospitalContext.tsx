@@ -128,13 +128,16 @@ export function MultiHospitalProvider({ children }: { children: React.ReactNode 
         setConnectionSteps(s => s.map((st, j) => ({ ...st, status: j <= i ? 'complete' : st.status })));
       }
 
-      setActiveConnection({
+      const conn: HospitalConnection = {
         hospitalId: hospital.id, 
         hospitalName: hospital.name, 
         emrType: hospital.emrType,
         status: 'connected', 
         connectedAt: new Date(),
-      });
+      };
+      setActiveConnection(conn);
+      // Remember the chosen hospital across page reloads (cleared on sign-out/disconnect).
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(conn));
 
       toast({ title: "Connected", description: `Connected to ${hospital.name}` });
       return true;
@@ -151,6 +154,7 @@ export function MultiHospitalProvider({ children }: { children: React.ReactNode 
     toast({ title: "Disconnected", description: `Disconnected from ${activeConnection.hospitalName}` });
     setActiveConnection(null);
     setConnectionSteps([]);
+    localStorage.removeItem(STORAGE_KEY);
   }, [activeConnection, toast]);
 
   const switchHospital = useCallback(async (hospitalId: string): Promise<boolean> => {

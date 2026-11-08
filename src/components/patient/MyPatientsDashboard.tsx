@@ -10,32 +10,38 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, FileText, TestTube, Activity, AlertTriangle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/EnterpriseAuthContext';
-import { usePatients } from '@/hooks/usePatients';
 import { useMedicalRecords } from '@/hooks/useMedicalRecords';
+import { useHospitalPatients, chartPathFor, RosterPatient } from '@/hooks/useHospitalPatients';
+import RosterSourceNotice from '@/components/patient/RosterSourceNotice';
 
 const MyPatientsDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const { data: allPatients, isLoading } = usePatients();
+  const { patients: allPatients, isLoading, source, error, hospitalName, refetch } = useHospitalPatients();
   const { data: medicalRecords } = useMedicalRecords();
 
-  // Filter patients assigned to current provider
-  const myPatients = allPatients?.filter(patient => 
-    patient.status === 'active' && 
-    (patient.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     patient.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     patient.mrn.toLowerCase().includes(searchTerm.toLowerCase()))
-  ) || [];
+  const term = searchTerm.toLowerCase();
+  // Admitted / currently-active patients only
+  const myPatients = allPatients.filter(patient =>
+    patient.status === 'active' &&
+    ((patient.first_name || '').toLowerCase().includes(term) ||
+     (patient.last_name || '').toLowerCase().includes(term) ||
+     (patient.mrn || '').toLowerCase().includes(term))
+  );
 
-  // Mock critical alerts for demo
-  const criticalAlerts = [
+  // Placeholder alerts only make sense for the local demo records
+  const criticalAlerts = source === 'local' ? [
     { patientId: 'pat-1-001', message: 'Critical lab value: Potassium 2.8', time: '10 min ago' },
     { patientId: 'pat-1-002', message: 'New chest pain complaint', time: '25 min ago' }
-  ];
+  ] : [];
 
   const handleOpenChart = (patientId: string) => {
     navigate(`/patient-chart/${patientId}`);
+  };
+
+  const handleOpenPatient = (patient: RosterPatient) => {
+    navigate(chartPathFor(patient));
   };
 
   const handleViewLabs = (patientId: string) => {
@@ -80,6 +86,10 @@ const MyPatientsDashboard = () => {
           <p className="text-lg font-medium text-white">{myPatients.length} Active Patients</p>
           <p className="text-sm text-white/70">Dr. {profile?.first_name} {profile?.last_name}</p>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <RosterSourceNotice source={source} hospitalName={hospitalName} error={error} onRetry={() => refetch()} />
       </div>
 
       {/* Critical Alerts */}
@@ -150,7 +160,7 @@ const MyPatientsDashboard = () => {
                 <tr 
                   key={patient.id} 
                   className="cursor-pointer hover:bg-white/12 transition-smooth hover-scale focus-ring"
-                  onClick={() => handleOpenChart(patient.id)}
+                  onClick={() => handleOpenPatient(patient)}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <td className="text-white">
@@ -160,7 +170,7 @@ const MyPatientsDashboard = () => {
                         <p className="font-semibold text-white hover:text-blue-300 transition-colors">
                           {patient.first_name} {patient.last_name}
                         </p>
-                        <p className="text-xs text-white/60">MRN: {patient.mrn}</p>
+                        <p className="text-xs text-white/60">MRN: {patient.mrn || '—'}</p>
                       </div>
                     </div>
                   </td>

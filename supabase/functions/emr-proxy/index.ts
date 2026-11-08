@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
 import { gatewayFetch } from "./gatewayFetch.ts";
-import { buildMrnIdentifier, filterByMrn } from "./mrnMatch.ts";
+import { buildMrnIdentifier, filterByMrn, displayMrn } from "./mrnMatch.ts";
+import { buildCensus, roomFor } from "./census.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +14,7 @@ type EMROperation =
   | 'health_check' | 'search_patients' | 'get_patient' | 'update_patient'
   | 'get_lab_results' | 'get_medications' | 'get_allergies' | 'get_conditions'
   | 'get_vitals' | 'get_encounters' | 'get_immunizations' | 'get_documents'
-  | 'get_procedures' | 'get_imaging' | 'get_everything' | 'create_order' | 'cancel_order';
+  | 'get_procedures' | 'get_imaging' | 'get_everything' | 'get_census' | 'create_order' | 'cancel_order';
 
 interface OpContext { viaGateway: boolean; mrnIdentifierSystem: string | null; }
 
@@ -307,15 +308,30 @@ async function executeOperation(
       let resources = (bundle.entry || []).map((e: any) => e.resource).filter((r: any) => r?.resourceType === 'Patient');
       // Never show a different person: only keep patients that actually carry this MRN.
       if (params.mrn) resources = filterByMrn(resources, String(params.mrn), ctx.mrnIdentifierSystem);
-      const mapped = resources.map(mapFhirPatient);
+      const mapped = resources.map((r: any) => mapFhirPatient(r, ctx.mrnIdentifierSystem));
       // Display the MRN the patient matched on, not some other identifier.
       if (params.mrn) mapped.forEach((m: any) => { m.mrn = String(params.mrn); });
       return mapped;
     }
 
+    case 'get_census': {
+      // Live patient list for the hospital. Only for connections with an MRN
+      // identifier system (real hospital tenants); plumbing sandboxes have none.
+      if (!ctx.mrnIdentifierSystem) return { error: 'census_not_supported' };
+      const [patientRes, encounterRes] = await Promise.all([
+        fhirCall('GET', 'Patient', { _count: '200' }),
+        fhirCall('GET', 'Encounter', { _count: '500' }),
+      ]);
+      const patientBundle = await handleFHIRResponse(patientRes);
+      const encounterBundle = await handleFHIRResponse(encounterRes);
+      const patients = (patientBundle.entry || []).map((e: any) => e.resource).filter((r: any) => r?.resourceType === 'Patient');
+      const encounters = (encounterBundle.entry || []).map((e: any) => e.resource).filter((r: any) => r?.resourceType === 'Encounter');
+      return { patients: buildCensus(patients, encounters, ctx.mrnIdentifierSystem) };
+    }
+
     case 'get_patient': {
       const response = await fhirCall('GET', `Patient/${params.id}`);
-      return mapFhirPatient(await handleFHIRResponse(response));
+      return mapFhirPatient(await handleFHIRResponse(response), ctx.mrnIdentifierSystem);
     }
 
     case 'update_patient': {
@@ -374,7 +390,8 @@ async function executeOperation(
     }
 
     case 'get_encounters': {
-      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '50' };
+      const query: Record<string, string> = { patient: params.patientId, _count: '50' };
+      if (!ctx.viaGateway) query._sort = '-date'; // IRIS rejects _sort=date
       if (params.status) query.status = params.status;
       if (params.type) query.type = params.type;
       
@@ -511,11 +528,11 @@ async function logEMRAccess(
 }
 
 // FHIR Resource Mappers
-function mapFhirPatient(fhir: any) {
+function mapFhirPatient(fhir: any, mrnSystem: string | null = null) {
   const name = fhir.name?.[0] || {};
   return {
     id: fhir.id,
-    mrn: (fhir.identifier?.find((i: any) => i.type?.coding?.[0]?.code === 'MR') || (fhir.identifier?.length === 1 ? fhir.identifier[0] : fhir.identifier?.find((i: any) => /^urn:oid:/.test(i.system || ''))))?.value || '',
+    mrn: displayMrn(fhir, mrnSystem),
     firstName: name.given?.join(' ') || '',
     lastName: name.family || '',
     dob: fhir.birthDate || '',
@@ -545,7 +562,10 @@ function mapLabObservation(fhir: any, patientId: string) {
     issuedDate: fhir.issued,
     performer: fhir.performer?.[0]?.display,
     category: 'laboratory',
-    interpretation: fhir.interpretation?.[0]?.coding?.[0]?.code,
+    referenceRange: fhir.referenceRange?.[0]?.text
+      || (fhir.referenceRange?.[0]?.low || fhir.referenceRange?.[0]?.high
+        ? `${fhir.referenceRange[0].low?.value ?? ''}-${fhir.referenceRange[0].high?.value ?? ''}` : undefined),
+    interpretation: fhir.interpretation?.[0]?.coding?.[0]?.code || fhir.interpretation?.[0]?.coding?.[0]?.display || fhir.interpretation?.[0]?.text,
   };
 }
 
@@ -567,11 +587,14 @@ function mapLabResult(fhir: any, patientId: string) {
 function mapMedication(fhir: any) {
   return {
     id: fhir.id,
-    name: fhir.medicationCodeableConcept?.text || fhir.medicationCodeableConcept?.coding?.[0]?.display || '',
+    name: fhir.medicationCodeableConcept?.text || fhir.medicationCodeableConcept?.coding?.[0]?.display || fhir.medicationReference?.display || '',
     code: fhir.medicationCodeableConcept?.coding?.[0]?.code,
     status: fhir.status,
     intent: fhir.intent,
-    dosage: fhir.dosageInstruction?.[0]?.text,
+    dosage: fhir.dosageInstruction?.[0]?.text || (() => {
+      const d = fhir.dosageInstruction?.[0]?.doseAndRate?.[0]?.doseQuantity;
+      return d ? `${d.value} ${d.unit || ''}`.trim() : undefined;
+    })(),
     route: fhir.dosageInstruction?.[0]?.route?.text,
     frequency: fhir.dosageInstruction?.[0]?.timing?.code?.text,
     prescriber: fhir.requester?.display,
@@ -619,8 +642,11 @@ function mapVitalSign(fhir: any) {
     id: fhir.id,
     code: fhir.code?.coding?.[0]?.code,
     name: fhir.code?.text || fhir.code?.coding?.[0]?.display || '',
-    value: fhir.valueQuantity?.value,
-    unit: fhir.valueQuantity?.unit,
+    // Blood pressure arrives as systolic/diastolic components; text values (e.g. O2 device) as valueString.
+    value: fhir.valueQuantity?.value ?? (fhir.component?.length
+      ? fhir.component.map((c: any) => c.valueQuantity?.value).filter((v: any) => v !== undefined).join('/')
+      : (fhir.valueString ?? fhir.valueCodeableConcept?.text)),
+    unit: fhir.valueQuantity?.unit ?? fhir.component?.[0]?.valueQuantity?.unit,
     effectiveDate: fhir.effectiveDateTime,
     status: fhir.status,
     interpretation: fhir.interpretation?.[0]?.coding?.[0]?.code
@@ -638,7 +664,7 @@ function mapEncounter(fhir: any) {
     startDate: fhir.period?.start,
     endDate: fhir.period?.end,
     reasonCode: fhir.reasonCode?.[0]?.text,
-    location: fhir.location?.[0]?.location?.display,
+    location: roomFor(fhir),
     participant: fhir.participant?.map((p: any) => ({
       type: p.type?.[0]?.coding?.[0]?.display,
       name: p.individual?.display

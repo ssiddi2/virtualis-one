@@ -6,3 +6,4 @@
 - Edge-function tests are Deno tests at `supabase/functions/<name>/*_test.ts` and are run with the Supabase edge-function test tool, not `bun test`. Why: `bun` cannot resolve the `deno.land/std` imports those tests use.
 - Integration secrets (gateway URL/key/HMAC, EMR private keys) live in Lovable Cloud secrets; only variable names go in `.env.example`. Why: the source package is shared outside Lovable for the monorepo move.
 - Server-side fetchers of the `hospitals` table must pass a logged-in user's JWT, not just the publishable key. Why: the active select policy is restricted to `authenticated`, so an anon-key read silently returns an empty list.
+- For hospitals with an EMR connection, patient lists and charts read live from `emr-proxy` (`get_census`, `get_*`) and never copy FHIR patients into the `patients` table; local rows are only for hospitals without a connection. Why: the hospital EMR stays the single source of truth and no PHI copies go stale.
