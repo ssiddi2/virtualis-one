@@ -13,5 +13,6 @@
 - [x] Patients + My Patients lists read live from the hospital EMR (gateway census) for gateway hospitals; local records only for others
 - [x] Live patient chart (/patient-chart/fhir/:id): problems, meds, labs, vitals, imaging, visits from IRIS
 - [x] Remember the chosen hospital across page reloads
+- [x] Map Postman "FHIR-only patient reads" collection to chart tabs: labs grouped by panel, imaging shows the radiologist's impression + full report, new Immunizations tab, 200-row limits
 - [ ] Saving notes/billing for live-EMR patients (notes table needs a local patient row) — not started
 - [x] Confirm on-screen MRN search after the retry change — user searched MRN 4100206 in the preview and got "Found patient: Gerald Thomas Whitaker"; gateway logs show search_patients completed via tenant isc-hlthdemo

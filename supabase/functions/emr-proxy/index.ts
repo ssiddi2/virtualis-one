@@ -4,6 +4,7 @@ import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
 import { gatewayFetch } from "./gatewayFetch.ts";
 import { buildMrnIdentifier, filterByMrn, displayMrn } from "./mrnMatch.ts";
 import { buildCensus, roomFor } from "./census.ts";
+import { mapDiagnosticReport } from "./reports.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,7 +15,8 @@ type EMROperation =
   | 'health_check' | 'search_patients' | 'get_patient' | 'update_patient'
   | 'get_lab_results' | 'get_medications' | 'get_allergies' | 'get_conditions'
   | 'get_vitals' | 'get_encounters' | 'get_immunizations' | 'get_documents'
-  | 'get_procedures' | 'get_imaging' | 'get_everything' | 'get_census' | 'create_order' | 'cancel_order';
+  | 'get_procedures' | 'get_imaging' | 'get_diagnostic_reports' | 'get_everything' | 'get_census'
+  | 'create_order' | 'cancel_order';
 
 interface OpContext { viaGateway: boolean; mrnIdentifierSystem: string | null; }
 
@@ -340,7 +342,7 @@ async function executeOperation(
     }
 
     case 'get_lab_results': {
-      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '100' };
+      const query: Record<string, string> = { patient: params.patientId, _sort: '-date', _count: '200' };
       if (params.code) query.code = params.code;
       if (params.date) query.date = params.date;
       
@@ -382,7 +384,7 @@ async function executeOperation(
     }
 
     case 'get_vitals': {
-      const vq: Record<string, string> = { patient: params.patientId, category: 'vital-signs', _count: '100' };
+      const vq: Record<string, string> = { patient: params.patientId, category: 'vital-signs', _count: '200' };
       if (!ctx.viaGateway) vq._sort = '-date'; // IRIS rejects _sort=date
       const response = await fhirCall('GET', 'Observation', vq);
       const bundle = await handleFHIRResponse(response);
@@ -401,11 +403,22 @@ async function executeOperation(
     }
 
     case 'get_immunizations': {
-      const response = await fhirCall('GET', 'Immunization', {
-        patient: params.patientId, _sort: '-date', _count: '100'
-      });
+      const iq: Record<string, string> = { patient: params.patientId, _count: '100' };
+      if (!ctx.viaGateway) iq._sort = '-date'; // IRIS rejects _sort=date
+      const response = await fhirCall('GET', 'Immunization', iq);
       const bundle = await handleFHIRResponse(response);
       return (bundle.entry || []).map((e: any) => mapImmunization(e.resource));
+    }
+
+    case 'get_diagnostic_reports': {
+      // Lab panels (result → Observations) and radiology reads (imagingStudy → ImagingStudy).
+      if (!params.patientId) throw Object.assign(new Error('patientId is required'), { status: 400 });
+      const response = await fhirCall('GET', 'DiagnosticReport', { patient: params.patientId, _count: '100' });
+      const bundle = await handleFHIRResponse(response);
+      return (bundle.entry || [])
+        .map((e: any) => e.resource)
+        .filter((r: any) => r?.resourceType === 'DiagnosticReport')
+        .map(mapDiagnosticReport);
     }
 
     case 'get_documents': {
