@@ -14,3 +14,15 @@ export function patientHasMrn(patient: any, mrn: string, system: string | null):
 export function filterByMrn(patients: any[], mrn: string, system: string | null): any[] {
   return patients.filter((p) => patientHasMrn(p, mrn, system));
 }
+
+// The MRN to display for a Patient. When the hospital has an identifier system,
+// only an identifier under that system counts (never an internal/EPI id).
+// Without a system, fall back to the MR-typed / single / OID identifier.
+export function displayMrn(patient: any, system: string | null): string {
+  const ids: any[] = Array.isArray(patient?.identifier) ? patient.identifier : [];
+  if (system) return String(ids.find((i) => i?.system === system)?.value ?? '');
+  const pick =
+    ids.find((i) => i?.type?.coding?.[0]?.code === 'MR') ||
+    (ids.length === 1 ? ids[0] : ids.find((i) => /^urn:oid:/.test(i?.system || '')));
+  return String(pick?.value ?? '');
+}
