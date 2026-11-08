@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, AlertTriangle, Radio, User, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Radio, User, Loader2, RefreshCw, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useMultiHospital } from '@/contexts/MultiHospitalContext';
 import { useFhirPatientChart } from '@/hooks/useFhirPatientChart';
+import { groupLabsByPanel, attachImagingReports } from '@/lib/fhirChartGrouping';
 
 const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString() : '—');
 const fmtDateTime = (d?: string | null) =>
@@ -112,6 +114,9 @@ const FhirPatientChart = () => {
   const activeMeds = (data!.medications || []).filter((m) => ['active', 'on-hold', 'draft'].includes(m.status));
   const labs = [...(data!.labs || [])].sort(byDateDesc('effectiveDate'));
   const abnormalLabs = labs.filter((l) => l.interpretation && !['N', 'normal'].includes(l.interpretation));
+  const labPanels = groupLabsByPanel(labs, data!.reports || []);
+  const imagingRows = attachImagingReports(data!.imaging || [], data!.reports || []);
+  const immunizations = [...(data!.immunizations || [])].sort(byDateDesc('occurrenceDate'));
 
   return (
     <Shell>
@@ -165,7 +170,8 @@ const FhirPatientChart = () => {
           <TabsTrigger value="medications">Medications ({data!.medications.length})</TabsTrigger>
           <TabsTrigger value="labs">Labs ({labs.length})</TabsTrigger>
           <TabsTrigger value="vitals">Vitals ({data!.vitals.length})</TabsTrigger>
-          <TabsTrigger value="imaging">Imaging ({data!.imaging.length})</TabsTrigger>
+          <TabsTrigger value="imaging">Imaging ({imagingRows.length})</TabsTrigger>
+          <TabsTrigger value="immunizations">Immunizations ({immunizations.length})</TabsTrigger>
           <TabsTrigger value="encounters">Visits ({data!.encounters.length})</TabsTrigger>
         </TabsList>
 
@@ -251,27 +257,42 @@ const FhirPatientChart = () => {
           </CardContent></Card>
         </TabsContent>
 
-        <TabsContent value="labs">
-          <Card className="clinical-card"><CardContent className="p-0">
-            <table className="epic-lab-table">
-              <thead><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th><th>Collected</th></tr></thead>
-              <tbody>
-                {labs.map((l) => {
-                  const abnormal = l.interpretation && !['N', 'normal'].includes(l.interpretation);
-                  return (
-                    <tr key={l.id || `${l.name}-${l.effectiveDate}`}>
-                      <td className="font-medium">{l.name}</td>
-                      <td className={abnormal ? 'text-critical font-semibold' : ''}>{l.value || '—'}</td>
-                      <td>{l.referenceRange || '—'}</td>
-                      <td>{l.interpretation || '—'}</td>
-                      <td>{fmtDateTime(l.effectiveDate)}</td>
-                    </tr>
-                  );
-                })}
-                {labs.length === 0 && <EmptyRow cols={5} text="No lab results" />}
-              </tbody>
-            </table>
-          </CardContent></Card>
+        <TabsContent value="labs" className="space-y-4">
+          {labPanels.map((panel) => {
+            const flagged = panel.results.filter((l) => l.interpretation && !['N', 'normal'].includes(l.interpretation)).length;
+            return (
+              <Card key={panel.id} className="clinical-card">
+                <CardHeader className="py-3 flex flex-row items-center justify-between gap-2 space-y-0">
+                  <CardTitle className="text-base">{panel.name}</CardTitle>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {flagged > 0 && <Badge variant="destructive">{flagged} abnormal</Badge>}
+                    <span>{fmtDateTime(panel.date)}</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <table className="epic-lab-table">
+                    <thead><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr></thead>
+                    <tbody>
+                      {panel.results.map((l) => {
+                        const abnormal = l.interpretation && !['N', 'normal'].includes(l.interpretation);
+                        return (
+                          <tr key={l.id || `${l.name}-${l.effectiveDate}`}>
+                            <td className="font-medium">{l.name}</td>
+                            <td className={abnormal ? 'text-critical font-semibold' : ''}>{l.value || '—'}</td>
+                            <td>{l.referenceRange || '—'}</td>
+                            <td>{l.interpretation || '—'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            );
+          })}
+          {labPanels.length === 0 && (
+            <Card className="clinical-card"><CardContent className="py-8 text-center text-muted-foreground">No lab results</CardContent></Card>
+          )}
         </TabsContent>
 
         <TabsContent value="vitals">
@@ -290,17 +311,59 @@ const FhirPatientChart = () => {
           </CardContent></Card>
         </TabsContent>
 
-        <TabsContent value="imaging">
+        <TabsContent value="imaging" className="space-y-4">
+          {imagingRows.map((s) => (
+            <Card key={s.id} className="clinical-card">
+              <CardHeader className="py-3 flex flex-row items-center justify-between gap-2 space-y-0">
+                <CardTitle className="text-base">{s.description || 'Imaging study'}</CardTitle>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {s.modality && <Badge variant="secondary">{s.modality}</Badge>}
+                  <span>{fmtDateTime(s.started)}</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {s.report?.conclusion ? (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Impression</p>
+                    <p className="font-medium">{s.report.conclusion}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{s.report ? 'Report has no impression.' : 'No report yet.'}</p>
+                )}
+                {s.report?.reportText && (
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="px-0 group">
+                        <ChevronDown className="h-4 w-4 mr-1 transition-transform group-data-[state=open]:rotate-180" />
+                        Full report
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <pre className="whitespace-pre-wrap font-sans text-sm rounded-md border border-border/40 bg-muted/30 p-3">{s.report.reportText}</pre>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+          {imagingRows.length === 0 && (
+            <Card className="clinical-card"><CardContent className="py-8 text-center text-muted-foreground">No imaging studies</CardContent></Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="immunizations">
           <Card className="clinical-card"><CardContent className="p-0">
             <table className="epic-lab-table">
-              <thead><tr><th>Study</th><th>Modality</th><th>Status</th><th>Started</th></tr></thead>
+              <thead><tr><th>Vaccine</th><th>Status</th><th>Given</th></tr></thead>
               <tbody>
-                {data!.imaging.map((s) => (
-                  <tr key={s.id}>
-                    <td className="font-medium">{s.description || '—'}</td><td>{s.modality || '—'}</td><td>{s.status || '—'}</td><td>{fmtDateTime(s.started)}</td>
+                {immunizations.map((im) => (
+                  <tr key={im.id || `${im.vaccine}-${im.occurrenceDate}`}>
+                    <td className="font-medium">{im.vaccine || '—'}</td>
+                    <td><Badge variant={im.status === 'completed' ? 'default' : 'secondary'}>{im.status || '—'}</Badge></td>
+                    <td>{fmtDate(im.occurrenceDate)}</td>
                   </tr>
                 ))}
-                {data!.imaging.length === 0 && <EmptyRow cols={4} text="No imaging studies" />}
+                {immunizations.length === 0 && <EmptyRow cols={3} text="No immunizations recorded" />}
               </tbody>
             </table>
           </CardContent></Card>
