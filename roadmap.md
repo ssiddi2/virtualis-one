@@ -10,4 +10,8 @@
 - [x] Strict MRN match (never show a different person) + test
 - [x] Separate IRIS demo hospital (isc-hlthdemo); HAPI kept for plumbing only; 401 = connection unavailable
 - [x] /epic-test: retry once on dropped connection, plain-language message instead of "Failed to send a request to the Edge Function"
+- [x] Patients + My Patients lists read live from the hospital EMR (gateway census) for gateway hospitals; local records only for others
+- [x] Live patient chart (/patient-chart/fhir/:id): problems, meds, labs, vitals, imaging, visits from IRIS
+- [x] Remember the chosen hospital across page reloads
+- [ ] Saving notes/billing for live-EMR patients (notes table needs a local patient row) — not started
 - [x] Confirm on-screen MRN search after the retry change — user searched MRN 4100206 in the preview and got "Found patient: Gerald Thomas Whitaker"; gateway logs show search_patients completed via tenant isc-hlthdemo
