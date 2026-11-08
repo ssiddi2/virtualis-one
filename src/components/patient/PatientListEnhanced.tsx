@@ -7,21 +7,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Plus, User, ArrowLeft, FileText, Stethoscope, TestTube, PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePatients } from '@/hooks/usePatients';
+import { useHospitalPatients, chartPathFor, RosterPatient } from '@/hooks/useHospitalPatients';
+import RosterSourceNotice from '@/components/patient/RosterSourceNotice';
 
 const PatientListEnhanced = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
-  const { data: patients, isLoading } = usePatients();
+  const { patients, isLoading, source, error, hospitalName, refetch } = useHospitalPatients();
 
-  const filteredPatients = patients?.filter(patient =>
-    patient.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.mrn.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const term = searchTerm.toLowerCase();
+  const filteredPatients = patients.filter(patient =>
+    (patient.first_name || '').toLowerCase().includes(term) ||
+    (patient.last_name || '').toLowerCase().includes(term) ||
+    (patient.mrn || '').toLowerCase().includes(term)
+  );
 
-  const handlePatientClick = (patientId: string) => {
-    navigate(`/patient-chart/${patientId}`);
+  const handlePatientClick = (patient: RosterPatient) => {
+    navigate(chartPathFor(patient));
   };
 
   return (
@@ -51,6 +53,8 @@ const PatientListEnhanced = () => {
           </Button>
         </div>
 
+        <RosterSourceNotice source={source} hospitalName={hospitalName} error={error} onRetry={() => refetch()} />
+
         {/* Search */}
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-3 h-4 w-4 text-white/50" />
@@ -65,7 +69,9 @@ const PatientListEnhanced = () => {
         {/* Patient List */}
         <Card className="backdrop-blur-xl bg-blue-500/10 border border-blue-300/30">
           <CardHeader>
-            <CardTitle className="text-white">Patients ({filteredPatients.length})</CardTitle>
+            <CardTitle className="text-white">
+              {isLoading ? 'Loading patients…' : `Patients (${filteredPatients.length})`}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -83,7 +89,7 @@ const PatientListEnhanced = () => {
                   <TableRow 
                     key={patient.id} 
                     className="border-blue-400/20 hover:bg-blue-500/20 cursor-pointer transition-colors"
-                    onClick={() => handlePatientClick(patient.id)}
+                    onClick={() => handlePatientClick(patient)}
                   >
                     <TableCell>
                       <div className="text-white font-medium">
@@ -93,7 +99,7 @@ const PatientListEnhanced = () => {
                         {patient.date_of_birth}
                       </div>
                     </TableCell>
-                    <TableCell className="text-white">{patient.mrn}</TableCell>
+                    <TableCell className="text-white">{patient.mrn || '—'}</TableCell>
                     <TableCell className="text-white">{patient.room_number || 'N/A'}</TableCell>
                     <TableCell>
                       <Badge className={
