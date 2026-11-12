@@ -46,3 +46,32 @@ export async function gatewayFetch(
     body: body || undefined,
   });
 }
+
+/**
+ * Write-back (orders / notes) through the gateway. Same HMAC scheme as FHIR reads;
+ * the gateway holds the hospital's write-back credentials and forwards the JSON body
+ * unchanged. Route: PUT /v1/tenants/<tenant>/writeback/<orders|notes>.
+ */
+export const WRITEBACK_ROUTE = (tenant: string, resource: 'orders' | 'notes') =>
+  `/v1/tenants/${enc(tenant)}/writeback/${resource}`;
+
+export async function gatewayWriteback(
+  tenant: string,
+  resource: 'orders' | 'notes',
+  body: string,
+): Promise<Response> {
+  const path = WRITEBACK_ROUTE(tenant, resource);
+  const ts = String(Math.floor(Date.now() / 1000));
+  const sig = await hmacHex(GATEWAY_HMAC, `${ts}\nPUT\n${path}\n${await sha256hex(body)}`);
+  return fetch(`${GATEWAY_URL.replace(/\/v1$/, '')}${path}`, {
+    method: 'PUT',
+    headers: {
+      'x-api-key': GATEWAY_KEY,
+      'x-virtualis-timestamp': ts,
+      'x-virtualis-signature': sig,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body,
+  });
+}
