@@ -27,3 +27,4 @@
 - [ ] Reference numbers will collide with the Postman samples already in IRIS (VO-ORD-000123/125/126, VO-NOTE-000457/458) — a send with one of those would update the sample instead of creating a new item; waiting on Matt to pick a fix
 - [ ] Confirm signedAt time zone (sent as UTC today) and whether more order types / note types are allowed (priorities: Matt chose routine + urgent only, even though the IRIS mapping doc also allows asap/stat)
 - [ ] Hook the app's other order and note screens to the EMR for live patients (they still save locally only)
+- [ ] Show sent orders/notes in the app (Orders + Notes tabs on the live chart, open note PDF) — offered, waiting on Matt to say yes
