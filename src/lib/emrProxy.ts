@@ -35,6 +35,7 @@ export async function callEmr<T = any>(
     throw new Error(message || 'EMR request failed');
   }
   if (data?.error === 'connection_unavailable') return { kind: 'unavailable' };
+  if (data?.error === 'writeback_unavailable') return { kind: 'unavailable' };
   if (data?.error === 'census_not_supported') return { kind: 'unsupported' };
   return { kind: 'ok', data: data as T };
 }
