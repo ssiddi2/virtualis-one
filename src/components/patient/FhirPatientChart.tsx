@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, AlertTriangle, Radio, User, Loader2, RefreshCw, ChevronDown } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Radio, User, Loader2, RefreshCw, ChevronDown, ClipboardList, FileText } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useMultiHospital } from '@/contexts/MultiHospitalContext';
 import { useFhirPatientChart } from '@/hooks/useFhirPatientChart';
 import { groupLabsByPanel, attachImagingReports } from '@/lib/fhirChartGrouping';
+import { PlaceEmrOrderDialog, WriteEmrNoteDialog } from '@/components/patient/emr/EmrWriteDialogs';
 
 const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString() : '—');
 const fmtDateTime = (d?: string | null) =>
@@ -40,6 +41,8 @@ const FhirPatientChart = () => {
   const { activeConnection } = useMultiHospital();
   const hospitalId = activeConnection?.hospitalId;
   const [tab, setTab] = useState('overview');
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const { data, isLoading, error, refetch, isFetching } = useFhirPatientChart(hospitalId, fhirId);
 
   const openStay = useMemo(
@@ -126,6 +129,12 @@ const FhirPatientChart = () => {
           <Badge className="gap-1.5 bg-success text-success-foreground hover:bg-success">
             <Radio className="h-3.5 w-3.5" /> Live from {activeConnection?.hospitalName} EMR
           </Badge>
+          <Button size="sm" onClick={() => setOrderOpen(true)}>
+            <ClipboardList className="h-4 w-4 mr-1" /> Place order
+          </Button>
+          <Button size="sm" onClick={() => setNoteOpen(true)}>
+            <FileText className="h-4 w-4 mr-1" /> Write note
+          </Button>
           <Button size="sm" variant="secondary" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={`h-4 w-4 mr-1 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
           </Button>
@@ -387,6 +396,16 @@ const FhirPatientChart = () => {
           </CardContent></Card>
         </TabsContent>
       </Tabs>
+
+      <PlaceEmrOrderDialog
+        open={orderOpen} onOpenChange={setOrderOpen}
+        hospitalId={hospitalId} hospitalName={activeConnection?.hospitalName} patient={p}
+      />
+      <WriteEmrNoteDialog
+        open={noteOpen} onOpenChange={setNoteOpen}
+        hospitalId={hospitalId} hospitalName={activeConnection?.hospitalName} patient={p}
+        location={openStay?.location}
+      />
     </Shell>
   );
 };
