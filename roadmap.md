@@ -19,6 +19,7 @@
 - [x] Write-back: "Place order" and "Write note" on the live chart send LiveMed payloads (PUT orders/notes) via the gateway; notes go as text PDFs like the samples
 
 ## Before write-back is finished
+- [ ] Gateway rejects every request with 401 bad_signature since about 21:18 UTC Nov 12 (worked earlier that day; signing code unchanged) — waiting on Matt/Virtualis: was the HMAC secret rotated? If so, enter the new keys
 - [x] Virtualis deploys the gateway write-back route — confirmed 17:38 UTC 2026-11-12 with safe requests: 401 bad_signature, 404 tenant_not_found, 404 writeback_target_not_found, 400 invalid_json
 - [x] Treat any gateway 4xx with an {error} body as a gateway refusal (404 unknown tenant, 405, 413), on reads and write-backs
 - [ ] Replace temporary orderedBy/signedBy (Virtualis One user id) with the real clinician id — waiting on Matt

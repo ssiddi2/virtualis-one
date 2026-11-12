@@ -186,7 +186,9 @@ serve(async (req) => {
         if (res.status < 400 || res.status >= 500) return res;
         const verdict = classifyGatewayReply(res.status, await res.clone().text());
         if (verdict.kind === 'not_set_up') {
-          throw Object.assign(new Error('connection_unavailable'), { connectionUnavailable: true });
+          throw Object.assign(new Error('connection_unavailable'), {
+            connectionUnavailable: true, gatewayStatus: verdict.status, gatewayError: verdict.error ?? null,
+          });
         }
         if (verdict.kind === 'refused' || verdict.kind === 'too_large') {
           throw Object.assign(new Error(`The EMR gateway refused the request (HTTP ${verdict.status}): ${verdict.error}`), { status: 502 });
@@ -280,7 +282,8 @@ serve(async (req) => {
       });
     }
     if (error?.connectionUnavailable) {
-      console.log('EMR Proxy: gateway tenant not authorized yet (connection unavailable)');
+      // Only the gateway's status and short error code are logged — never a body with patient data.
+      console.log(`EMR Proxy: gateway tenant not authorized yet (connection unavailable) status=${error.gatewayStatus ?? '?'} error=${error.gatewayError ?? 'none'}`);
       return new Response(JSON.stringify({ error: 'connection_unavailable', message: 'EMR connection unavailable — the hospital connection is still being set up.' }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
