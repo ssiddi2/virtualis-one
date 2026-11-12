@@ -10,6 +10,7 @@ import { useMultiHospital } from '@/contexts/MultiHospitalContext';
 import { useFhirPatientChart } from '@/hooks/useFhirPatientChart';
 import { groupLabsByPanel, attachImagingReports } from '@/lib/fhirChartGrouping';
 import { PlaceEmrOrderDialog, WriteEmrNoteDialog } from '@/components/patient/emr/EmrWriteDialogs';
+import { EmrNotePdfDialog } from '@/components/patient/emr/EmrNotePdfDialog';
 
 const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString() : '—');
 const fmtDateTime = (d?: string | null) =>
@@ -43,6 +44,7 @@ const FhirPatientChart = () => {
   const [tab, setTab] = useState('overview');
   const [orderOpen, setOrderOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [pdfNote, setPdfNote] = useState<any | null>(null);
   const { data, isLoading, error, refetch, isFetching } = useFhirPatientChart(hospitalId, fhirId);
 
   const openStay = useMemo(
@@ -120,6 +122,8 @@ const FhirPatientChart = () => {
   const labPanels = groupLabsByPanel(labs, data!.reports || []);
   const imagingRows = attachImagingReports(data!.imaging || [], data!.reports || []);
   const immunizations = [...(data!.immunizations || [])].sort(byDateDesc('occurrenceDate'));
+  const orders = [...(data!.orders || [])].sort(byDateDesc('authoredOn'));
+  const notes = [...(data!.notes || [])].sort(byDateDesc('date'));
 
   return (
     <Shell>
@@ -182,6 +186,8 @@ const FhirPatientChart = () => {
           <TabsTrigger value="imaging">Imaging ({imagingRows.length})</TabsTrigger>
           <TabsTrigger value="immunizations">Immunizations ({immunizations.length})</TabsTrigger>
           <TabsTrigger value="encounters">Visits ({data!.encounters.length})</TabsTrigger>
+          <TabsTrigger value="orders">Orders ({orders.length})</TabsTrigger>
+          <TabsTrigger value="notes">Notes ({notes.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -395,6 +401,60 @@ const FhirPatientChart = () => {
             </table>
           </CardContent></Card>
         </TabsContent>
+
+        <TabsContent value="orders">
+          <Card className="clinical-card"><CardContent className="p-0">
+            <table className="epic-lab-table">
+              <thead><tr><th>Order</th><th>Type</th><th>Priority</th><th>Status</th><th>Ordered</th><th>Ordered by</th><th>Reference</th></tr></thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr key={o.id}>
+                    <td>
+                      <p className="font-medium">{o.name}</p>
+                      {o.indication && <p className="text-xs text-muted-foreground">Indication: {o.indication}</p>}
+                      {o.details && <p className="text-xs text-muted-foreground whitespace-pre-wrap">{o.details}</p>}
+                    </td>
+                    <td>{o.category || '—'}</td>
+                    <td><Badge variant={o.priority && o.priority !== 'routine' ? 'destructive' : 'secondary'}>{o.priority || '—'}</Badge></td>
+                    <td><Badge variant={o.status === 'active' ? 'default' : 'secondary'}>{o.status || '—'}</Badge></td>
+                    <td>{fmtDateTime(o.authoredOn)}</td>
+                    <td className="text-sm break-all">{o.orderedBy || '—'}</td>
+                    <td>{o.sourceId ? <Badge variant="outline">{o.sourceId}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                  </tr>
+                ))}
+                {orders.length === 0 && <EmptyRow cols={7} text="No orders" />}
+              </tbody>
+            </table>
+          </CardContent></Card>
+        </TabsContent>
+
+        <TabsContent value="notes">
+          <Card className="clinical-card"><CardContent className="p-0">
+            <table className="epic-lab-table">
+              <thead><tr><th>Note</th><th>Date</th><th>Author</th><th>Status</th><th>Reference</th><th></th></tr></thead>
+              <tbody>
+                {notes.map((n) => (
+                  <tr key={n.id}>
+                    <td>
+                      <p className="font-medium">{n.type}</p>
+                      {n.description && <p className="text-xs text-muted-foreground">{n.description}</p>}
+                    </td>
+                    <td>{fmtDateTime(n.date)}</td>
+                    <td className="text-sm break-all">{n.author || '—'}</td>
+                    <td><Badge variant={n.docStatus === 'final' || n.status === 'current' ? 'default' : 'secondary'}>{n.docStatus || n.status || '—'}</Badge></td>
+                    <td>{n.sourceId ? <Badge variant="outline">{n.sourceId}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                    <td className="text-right">
+                      {n.hasPdf
+                        ? <Button size="sm" variant="secondary" onClick={() => setPdfNote(n)}><FileText className="h-4 w-4 mr-1" /> View PDF</Button>
+                        : <span className="text-xs text-muted-foreground">No PDF</span>}
+                    </td>
+                  </tr>
+                ))}
+                {notes.length === 0 && <EmptyRow cols={6} text="No notes" />}
+              </tbody>
+            </table>
+          </CardContent></Card>
+        </TabsContent>
       </Tabs>
 
       <PlaceEmrOrderDialog
@@ -405,6 +465,10 @@ const FhirPatientChart = () => {
         open={noteOpen} onOpenChange={setNoteOpen}
         hospitalId={hospitalId} hospitalName={activeConnection?.hospitalName} patient={p}
         location={openStay?.location}
+      />
+      <EmrNotePdfDialog
+        open={!!pdfNote} onOpenChange={(o) => { if (!o) setPdfNote(null); }}
+        hospitalId={hospitalId} patientId={p.id} note={pdfNote}
       />
     </Shell>
   );

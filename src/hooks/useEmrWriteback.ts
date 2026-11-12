@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { callEmr } from '@/lib/emrProxy';
 
 export const EMR_ORDER_TYPES = ['Imaging', 'Consult'] as const;
@@ -38,8 +38,17 @@ async function send(hospitalId: string, op: 'create_order' | 'create_note', para
 
 // Each dialog keeps one clientRequestId per item, so a retry re-sends the same
 // sourceOrderId/sourceNoteId instead of creating a duplicate in the EMR.
-export const useSendEmrOrder = (hospitalId?: string) =>
-  useMutation({ mutationFn: (input: EmrOrderInput) => send(hospitalId!, 'create_order', input) });
+// After a send, the open chart re-reads so the new item shows in Orders/Notes.
+const useSend = <T,>(hospitalId: string | undefined, op: 'create_order' | 'create_note') => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: T) => send(hospitalId!, op, input as object),
+    onSuccess: (r, input: any) => {
+      if (r.kind === 'sent') qc.invalidateQueries({ queryKey: ['fhir-chart', hospitalId, input.patientId] });
+    },
+  });
+};
 
-export const useSendEmrNote = (hospitalId?: string) =>
-  useMutation({ mutationFn: (input: EmrNoteInput) => send(hospitalId!, 'create_note', input) });
+export const useSendEmrOrder = (hospitalId?: string) => useSend<EmrOrderInput>(hospitalId, 'create_order');
+
+export const useSendEmrNote = (hospitalId?: string) => useSend<EmrNoteInput>(hospitalId, 'create_note');
