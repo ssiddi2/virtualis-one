@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
-import { gatewayFetch } from "./gatewayFetch.ts";
+import { gatewayFetch, gatewayWriteback } from "./gatewayFetch.ts";
+import { OrderInput, NoteInput, parseInput, buildOrderPayload, buildNotePayload, signedAtNow } from "./writeback.ts";
 import { buildMrnIdentifier, filterByMrn, displayMrn } from "./mrnMatch.ts";
 import { buildCensus, roomFor } from "./census.ts";
 import { mapDiagnosticReport } from "./reports.ts";
@@ -16,9 +17,16 @@ type EMROperation =
   | 'get_lab_results' | 'get_medications' | 'get_allergies' | 'get_conditions'
   | 'get_vitals' | 'get_encounters' | 'get_immunizations' | 'get_documents'
   | 'get_procedures' | 'get_imaging' | 'get_diagnostic_reports' | 'get_everything' | 'get_census'
-  | 'create_order' | 'cancel_order';
+  | 'create_order' | 'create_note' | 'cancel_order';
 
-interface OpContext { viaGateway: boolean; mrnIdentifierSystem: string | null; }
+interface OpContext {
+  viaGateway: boolean;
+  mrnIdentifierSystem: string | null;
+  tenant: string | null;
+  userId: string;
+  hospitalId: string;
+  supabase: any;
+}
 
 interface EMRRequest {
   hospital_id: string;
@@ -235,6 +243,10 @@ serve(async (req) => {
     const result = await executeOperation(operation, params, fhirCall, {
       viaGateway: !!credentials.gateway_tenant,
       mrnIdentifierSystem: credentials.mrn_identifier_system || null,
+      tenant: credentials.gateway_tenant || null,
+      userId: userId!,
+      hospitalId: hospitalId!,
+      supabase,
     });
     
     // Log successful access
@@ -254,6 +266,12 @@ serve(async (req) => {
     });
 
   } catch (error: any) {
+    if (error?.writebackUnavailable) {
+      console.log('EMR Proxy: gateway write-back route not available yet');
+      return new Response(JSON.stringify({ error: 'writeback_unavailable', sourceId: error.sourceId, message: 'Sending to the EMR is not switched on yet — the hospital connection is still being set up.' }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     if (error?.connectionUnavailable) {
       console.log('EMR Proxy: gateway tenant not authorized yet (connection unavailable)');
       return new Response(JSON.stringify({ error: 'connection_unavailable', message: 'EMR connection unavailable — the hospital connection is still being set up.' }), {
@@ -461,9 +479,11 @@ async function executeOperation(
     }
 
     case 'create_order': {
-      // Write path to IRIS uses a separate canonical payload still being specified.
+      // Gateway hospitals: LiveMed write-back payload (PUT /orders) through the gateway.
       if (ctx.viaGateway) {
-        throw Object.assign(new Error('create_order is not yet supported for gateway-routed hospitals'), { status: 501 });
+        const input = parseInput(OrderInput, params);
+        return await runWriteback('order', input.clientRequestId, input.patientId, fhirCall, ctx,
+          (sign) => buildOrderPayload(input, sign));
       }
       const response = await fhirCall('POST', 'ServiceRequest', {}, JSON.stringify({
         resourceType: 'ServiceRequest',
@@ -479,6 +499,16 @@ async function executeOperation(
       return await handleFHIRResponse(response);
     }
 
+    case 'create_note': {
+      // Signed note as a PDF (PUT /notes) through the gateway. Gateway hospitals only.
+      if (!ctx.viaGateway) {
+        throw Object.assign(new Error('create_note is only available for gateway-connected hospitals'), { status: 501 });
+      }
+      const input = parseInput(NoteInput, params);
+      return await runWriteback('note', input.clientRequestId, input.patientId, fhirCall, ctx,
+        (sign) => buildNotePayload(input, sign));
+    }
+
     case 'cancel_order': {
       const response = await fhirCall('PATCH', `ServiceRequest/${params.orderId}`, {}, JSON.stringify([
         { op: 'replace', path: '/status', value: 'revoked' }
@@ -489,6 +519,62 @@ async function executeOperation(
     default:
       throw new Error(`Unknown operation: ${operation}`);
   }
+}
+
+// Sends one order/note to the hospital via the gateway write-back route.
+// The MRN is read from the hospital's own Patient record (never trusted from the client),
+// and each send gets a stable source id from emr_writebacks so a retried request
+// re-sends the same sourceOrderId/sourceNoteId instead of creating a duplicate.
+async function runWriteback(
+  kind: 'order' | 'note',
+  clientRequestId: string,
+  patientId: string,
+  fhirCall: FhirCaller,
+  ctx: OpContext,
+  build: (sign: { mrn: string; userId: string; sourceId: string; signedAt: string }) => Record<string, unknown>,
+): Promise<any> {
+  if (!ctx.tenant) throw Object.assign(new Error('Hospital is not connected through the gateway'), { status: 501 });
+
+  const patient = await handleFHIRResponse(await fhirCall('GET', `Patient/${encodeURIComponent(patientId)}`));
+  const mrn = displayMrn(patient, ctx.mrnIdentifierSystem);
+  if (!mrn) throw Object.assign(new Error("This patient has no MRN under the hospital's identifier system"), { status: 422 });
+
+  const sb = ctx.supabase;
+  const lookup = () => sb.from('emr_writebacks').select('*')
+    .eq('user_id', ctx.userId).eq('client_request_id', clientRequestId).maybeSingle();
+  let { data: row } = await lookup();
+  if (!row) {
+    const ins = await sb.from('emr_writebacks')
+      .insert({ hospital_id: ctx.hospitalId, user_id: ctx.userId, kind, client_request_id: clientRequestId })
+      .select('*').single();
+    row = ins.data ?? (await lookup()).data;
+    if (!row) throw new Error('Could not record the write-back');
+  }
+  if (row.kind !== kind) throw Object.assign(new Error('Request id already used for a different item'), { status: 409 });
+  if (row.status === 'sent') return { status: 'sent', sourceId: row.source_id, duplicate: true };
+
+  const body = JSON.stringify(build({ mrn, userId: ctx.userId, sourceId: row.source_id, signedAt: signedAtNow() }));
+  if (body.length > 1024 * 1024) throw Object.assign(new Error('Too large to send (1 MB limit)'), { status: 413 });
+
+  const res = await gatewayWriteback(ctx.tenant, kind === 'order' ? 'orders' : 'notes', body);
+  const text = await res.text();
+  const mark = (status: string, extra: Record<string, unknown> = {}) =>
+    sb.from('emr_writebacks').update({ status, response_status: res.status, ...extra }).eq('id', row.id);
+
+  if (res.status === 401 || res.status === 403) {
+    await mark('unavailable');
+    throw Object.assign(new Error('writeback_unavailable'), { writebackUnavailable: true, sourceId: row.source_id });
+  }
+  if (!res.ok) {
+    await mark('failed', { error: `HTTP ${res.status}` });
+    const detail = (() => { try { const j = JSON.parse(text); return j.error || j.message || ''; } catch { return text.slice(0, 200); } })();
+    throw Object.assign(new Error(`The EMR did not accept the ${kind} (HTTP ${res.status})${detail ? `: ${detail}` : ''}`),
+      { status: res.status >= 500 ? 502 : 422 });
+  }
+  await mark('sent', { error: null });
+  let emr: unknown = null;
+  try { emr = text ? JSON.parse(text) : null; } catch { /* non-JSON acknowledgement */ }
+  return { status: 'sent', sourceId: row.source_id, emr };
 }
 
 async function handleFHIRResponse(response: Response): Promise<any> {

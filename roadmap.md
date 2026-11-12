@@ -16,3 +16,11 @@
 - [x] Map Postman "FHIR-only patient reads" collection to chart tabs: labs grouped by panel, imaging shows the radiologist's impression + full report, new Immunizations tab, 200-row limits
 - [ ] Saving notes/billing for live-EMR patients (notes table needs a local patient row) — not started
 - [x] Confirm on-screen MRN search after the retry change — user searched MRN 4100206 in the preview and got "Found patient: Gerald Thomas Whitaker"; gateway logs show search_patients completed via tenant isc-hlthdemo
+- [x] Write-back: "Place order" and "Write note" on the live chart send LiveMed payloads (PUT orders/notes) via the gateway; notes go as text PDFs like the samples
+
+## Before write-back is finished
+- [ ] Virtualis adds the gateway write-back route (PUT /v1/tenants/<tenant>/writeback/orders|notes) holding the IRIS credentials — the gateway has no such route yet (blocked on Virtualis)
+- [ ] Replace temporary orderedBy/signedBy (Virtualis One user id) with the real clinician id — waiting on Matt
+- [ ] First real end-to-end send to IRIS once the route exists; confirm what IRIS returns on success
+- [ ] Confirm signedAt time zone (sent as UTC today) and whether more order types / priorities / note types are allowed
+- [ ] Hook the app's other order and note screens to the EMR for live patients (they still save locally only)
