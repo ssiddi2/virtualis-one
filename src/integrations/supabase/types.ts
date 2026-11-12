@@ -903,6 +903,48 @@ export type Database = {
           },
         ]
       }
+      emr_writebacks: {
+        Row: {
+          client_request_id: string
+          created_at: string
+          error: string | null
+          hospital_id: string
+          id: string
+          kind: string
+          response_status: number | null
+          source_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_request_id: string
+          created_at?: string
+          error?: string | null
+          hospital_id: string
+          id?: string
+          kind: string
+          response_status?: number | null
+          source_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_request_id?: string
+          created_at?: string
+          error?: string | null
+          hospital_id?: string
+          id?: string
+          kind?: string
+          response_status?: number | null
+          source_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       epic_jwk_keys: {
         Row: {
           algorithm: string
