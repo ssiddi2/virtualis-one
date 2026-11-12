@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
 import { gatewayFetch, gatewayWriteback } from "./gatewayFetch.ts";
+import { classifyGatewayReply } from "./gatewayRefusal.ts";
 import { OrderInput, NoteInput, parseInput, buildOrderPayload, buildNotePayload, signedAtNow } from "./writeback.ts";
 import { buildMrnIdentifier, filterByMrn, displayMrn } from "./mrnMatch.ts";
 import { buildCensus, roomFor } from "./census.ts";
@@ -180,9 +181,13 @@ serve(async (req) => {
       console.log(`EMR Proxy: routing via FHIR gateway tenant ${tenant}`);
       fhirCall = async (method, fhirPath, query, body) => {
         const res = await gatewayFetch(tenant, method, fhirPath, query, body);
-        if (res.status === 401 || res.status === 403) {
-          await res.text();
+        if (res.status < 400 || res.status >= 500) return res;
+        const verdict = classifyGatewayReply(res.status, await res.clone().text());
+        if (verdict.kind === 'not_set_up') {
           throw Object.assign(new Error('connection_unavailable'), { connectionUnavailable: true });
+        }
+        if (verdict.kind === 'refused' || verdict.kind === 'too_large') {
+          throw Object.assign(new Error(`The EMR gateway refused the request (HTTP ${verdict.status}): ${verdict.error}`), { status: 502 });
         }
         return res;
       };
@@ -561,9 +566,22 @@ async function runWriteback(
   const mark = (status: string, extra: Record<string, unknown> = {}) =>
     sb.from('emr_writebacks').update({ status, response_status: res.status, ...extra }).eq('id', row.id);
 
-  if (res.status === 401 || res.status === 403) {
-    await mark('unavailable');
+  const verdict = classifyGatewayReply(res.status, text);
+  if (verdict.kind === 'not_set_up') {
+    await mark('unavailable', { error: verdict.error ? `gateway: ${verdict.error}` : null });
     throw Object.assign(new Error('writeback_unavailable'), { writebackUnavailable: true, sourceId: row.source_id });
+  }
+  // Gateway refusals never reach the hospital, so nothing was created and a retry
+  // with the same source id is safe.
+  if (verdict.kind === 'too_large') {
+    await mark('failed', { error: `gateway: ${verdict.error}` });
+    throw Object.assign(new Error(`The ${kind} is too large to send — nothing was sent to the EMR.`), { status: 413 });
+  }
+  if (verdict.kind === 'refused') {
+    await mark('failed', { error: `gateway: ${verdict.error}` });
+    throw Object.assign(
+      new Error(`The EMR gateway turned down the ${kind} (HTTP ${verdict.status}: ${verdict.error}) — nothing was sent to the EMR.`),
+      { status: 502 });
   }
   if (!res.ok) {
     await mark('failed', { error: `HTTP ${res.status}` });
