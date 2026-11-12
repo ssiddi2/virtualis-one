@@ -22,7 +22,8 @@
 - [x] Virtualis deploys the gateway write-back route — confirmed 17:38 UTC 2026-11-12 with safe requests: 401 bad_signature, 404 tenant_not_found, 404 writeback_target_not_found, 400 invalid_json
 - [x] Treat any gateway 4xx with an {error} body as a gateway refusal (404 unknown tenant, 405, 413), on reads and write-backs
 - [ ] Replace temporary orderedBy/signedBy (Virtualis One user id) with the real clinician id — waiting on Matt
+- [ ] Encounter on orders: send an encounterId, or let IRIS use the patient's active inpatient encounter (today none is sent) — waiting on Matt
 - [x] First real end-to-end send to IRIS (Matt said go, 17:47 UTC 2026-11-12): order VO-ORD-000003 → ServiceRequest/eNKmfA1rz6Sqb3Di8ek85JK3, note VO-NOTE-000004 → DocumentReference/e9lNE40aLnhqLvRaflTvKev3, both outcome created and read back from IRIS for MRN 4100206
 - [ ] Reference numbers will collide with the Postman samples already in IRIS (VO-ORD-000123/125/126, VO-NOTE-000457/458) — a send with one of those would update the sample instead of creating a new item; waiting on Matt to pick a fix
-- [ ] Confirm signedAt time zone (sent as UTC today) and whether more order types / priorities / note types are allowed
+- [ ] Confirm signedAt time zone (sent as UTC today) and whether more order types / note types are allowed (priorities: Matt chose routine + urgent only, even though the IRIS mapping doc also allows asap/stat)
 - [ ] Hook the app's other order and note screens to the EMR for live patients (they still save locally only)
