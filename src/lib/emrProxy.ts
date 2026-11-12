@@ -4,8 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 export type EmrResult<T> =
   | { kind: 'ok'; data: T }
   | { kind: 'not_configured' }   // hospital has no EMR connection: use local records
-  | { kind: 'unavailable' }      // gateway tenant not authorized yet (401/403 upstream)
+  | { kind: 'unavailable' }      // gateway tenant not set up yet (401/403, or 404 unknown tenant)
   | { kind: 'unsupported' };     // connection exists but cannot list patients (plumbing sandbox)
+
+const NOT_CONFIGURED = 'EMR not configured for this hospital';
 
 export async function callEmr<T = any>(
   hospitalId: string,
@@ -26,12 +28,15 @@ export async function callEmr<T = any>(
   }
   if (error) {
     const status = (error as any)?.context?.status;
-    if (status === 404) return { kind: 'not_configured' };
     let message = error.message;
+    let body: any = null;
     try {
-      const body = await (error as any)?.context?.json?.();
+      body = await (error as any)?.context?.json?.();
       if (body?.error) message = body.error;
     } catch { /* body already read or not JSON */ }
+    // Only the proxy's own "no connection" reply means local records; a 404 from the
+    // hospital (e.g. a missing record) is a real error, not a missing connection.
+    if (status === 404 && body?.error === NOT_CONFIGURED) return { kind: 'not_configured' };
     throw new Error(message || 'EMR request failed');
   }
   if (data?.error === 'connection_unavailable') return { kind: 'unavailable' };
