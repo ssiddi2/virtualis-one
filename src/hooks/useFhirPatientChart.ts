@@ -14,6 +14,8 @@ export interface FhirChart {
   imaging: any[];
   reports: ChartReport[];
   immunizations: any[];
+  orders: any[];
+  notes: any[];
   failed: string[]; // sections that could not be loaded
 }
 
@@ -27,6 +29,8 @@ const SECTIONS = [
   ['imaging', 'get_imaging'],
   ['reports', 'get_diagnostic_reports'],
   ['immunizations', 'get_immunizations'],
+  ['orders', 'get_orders'],
+  ['notes', 'get_notes'],
 ] as const;
 
 // Reads one patient's chart live from the hospital EMR through the gateway.
@@ -40,7 +44,7 @@ export function useFhirPatientChart(hospitalId?: string, fhirId?: string) {
       const patientRes = await callEmr(hospitalId!, 'get_patient', { id: fhirId });
       const empty: FhirChart = {
         unavailable: false, patient: null, medications: [], allergies: [], conditions: [],
-        vitals: [], labs: [], encounters: [], imaging: [], reports: [], immunizations: [], failed: [],
+        vitals: [], labs: [], encounters: [], imaging: [], reports: [], immunizations: [], orders: [], notes: [], failed: [],
       };
       if (patientRes.kind === 'unavailable') return { ...empty, unavailable: true };
       if (patientRes.kind !== 'ok') return empty;

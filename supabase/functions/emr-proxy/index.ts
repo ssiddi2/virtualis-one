@@ -7,6 +7,7 @@ import { OrderInput, NoteInput, parseInput, buildOrderPayload, buildNotePayload,
 import { buildMrnIdentifier, filterByMrn, displayMrn } from "./mrnMatch.ts";
 import { buildCensus, roomFor } from "./census.ts";
 import { mapDiagnosticReport } from "./reports.ts";
+import { mapOrder, mapNote, notePdfSource } from "./ordersNotes.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +19,7 @@ type EMROperation =
   | 'get_lab_results' | 'get_medications' | 'get_allergies' | 'get_conditions'
   | 'get_vitals' | 'get_encounters' | 'get_immunizations' | 'get_documents'
   | 'get_procedures' | 'get_imaging' | 'get_diagnostic_reports' | 'get_everything' | 'get_census'
+  | 'get_orders' | 'get_notes' | 'get_note_pdf'
   | 'create_order' | 'create_note' | 'cancel_order';
 
 interface OpContext {
@@ -476,6 +478,38 @@ async function executeOperation(
         numberOfSeries: e.resource.numberOfSeries,
         numberOfInstances: e.resource.numberOfInstances,
       }));
+    }
+
+    case 'get_orders': {
+      // Orders (ServiceRequest) for the live chart, including ones sent from Virtualis One.
+      if (!params.patientId) throw Object.assign(new Error('patientId is required'), { status: 400 });
+      const response = await fhirCall('GET', 'ServiceRequest', { patient: params.patientId, _count: '100' });
+      const bundle = await handleFHIRResponse(response);
+      return (bundle.entry || []).map((e: any) => e.resource)
+        .filter((r: any) => r?.resourceType === 'ServiceRequest').map(mapOrder);
+    }
+
+    case 'get_notes': {
+      // Clinical notes (DocumentReference) for the live chart; PDFs are left out of the list.
+      if (!params.patientId) throw Object.assign(new Error('patientId is required'), { status: 400 });
+      const response = await fhirCall('GET', 'DocumentReference', { patient: params.patientId, _count: '100' });
+      const bundle = await handleFHIRResponse(response);
+      return (bundle.entry || []).map((e: any) => e.resource)
+        .filter((r: any) => r?.resourceType === 'DocumentReference').map(mapNote);
+    }
+
+    case 'get_note_pdf': {
+      // One note's PDF, only if the note belongs to the patient whose chart is open.
+      if (!params.patientId || !params.noteId) throw Object.assign(new Error('patientId and noteId are required'), { status: 400 });
+      const doc = await handleFHIRResponse(await fhirCall('GET', `DocumentReference/${encodeURIComponent(params.noteId)}`));
+      if (doc?.subject?.reference !== `Patient/${params.patientId}`) {
+        throw Object.assign(new Error('This note does not belong to this patient'), { status: 404 });
+      }
+      const src = notePdfSource(doc);
+      if (!src) return { error: 'no_pdf' };
+      if ('data' in src) return { contentType: 'application/pdf', data: src.data };
+      const bin = await handleFHIRResponse(await fhirCall('GET', `Binary/${encodeURIComponent(src.binaryId)}`));
+      return bin?.data ? { contentType: 'application/pdf', data: bin.data } : { error: 'no_pdf' };
     }
 
     case 'get_everything': {
