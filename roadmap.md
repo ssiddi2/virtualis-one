@@ -19,9 +19,9 @@
 - [x] Write-back: "Place order" and "Write note" on the live chart send LiveMed payloads (PUT orders/notes) via the gateway; notes go as text PDFs like the samples
 
 ## Before write-back is finished
-- [ ] Virtualis deploys the gateway write-back route — spec accepted 2026-11-12; Virtualis says it is live, but at 17:21 UTC every PUT to /writeback/* on the app's gateway (stage v1) still gets AWS "Missing Authentication Token" — likely not deployed to the stage (blocked on Virtualis)
+- [x] Virtualis deploys the gateway write-back route — confirmed 17:38 UTC 2026-11-12 with safe requests: 401 bad_signature, 404 tenant_not_found, 404 writeback_target_not_found, 400 invalid_json
 - [x] Treat any gateway 4xx with an {error} body as a gateway refusal (404 unknown tenant, 405, 413), on reads and write-backs
 - [ ] Replace temporary orderedBy/signedBy (Virtualis One user id) with the real clinician id — waiting on Matt
-- [ ] First real end-to-end send to IRIS once the route exists; confirm what IRIS returns on success
+- [ ] First real end-to-end send to IRIS — HOLD until Matthew says go (Virtualis request). Expected success: {"status":"ok","mrn","patient","sourceId","resource","version":"1","outcome":"created"}
 - [ ] Confirm signedAt time zone (sent as UTC today) and whether more order types / priorities / note types are allowed
 - [ ] Hook the app's other order and note screens to the EMR for live patients (they still save locally only)
